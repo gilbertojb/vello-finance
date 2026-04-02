@@ -1,0 +1,7 @@
+{
+  "extends": "@vello/typescript-config/library.json",
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}
