@@ -16,6 +16,10 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "db:types": {
+      "cache": false,
+      "outputs": ["packages/database/src/types.ts"]
     }
   }
 }

@@ -123,3 +123,9 @@ supabase/migrations/
 ├── 20260401100000_create_financial_partners.sql
 └── 20260401110000_create_products.sql
 ```
+## Restrições de implementação
+
+- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
+- `_components/product-table.tsx` é Client Component — recebe `products` via props, sem acesso ao banco
+- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
+- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components

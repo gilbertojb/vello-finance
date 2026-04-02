@@ -1,7 +1,7 @@
 packages:
   - apps/*
   - packages/*
-  - config/*
+  - packages/config/*
 
 onlyBuiltDependencies:
   - '@prisma/engines'

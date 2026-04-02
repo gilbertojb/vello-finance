@@ -1,0 +1,12 @@
+{
+  "name": "@vello/config",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./tailwind": "./tailwind.base.ts"
+  },
+  "devDependencies": {
+    "@vello/typescript-config": "workspace:*",
+    "tailwindcss": "^4.0.0"
+  }
+}

@@ -18,9 +18,9 @@ Consultores e white-labels operam suas próprias lojas com comissões automatiza
 ```
 vello-finance/
 ├── apps/
-│   ├── admin/              ← Vello Admin — backoffice interno (Next.js 15)
-│   ├── console/            ← Vello Console — painel do tenant (Next.js 15)
-│   ├── store/              ← Vello Store — loja pública e white-label (Next.js 15)
+│   ├── admin/src/          ← Vello Admin — backoffice interno (Next.js, usa src/)
+│   ├── console/src/        ← Vello Console — painel do tenant (Next.js, usa src/)
+│   ├── store/src/          ← Vello Store — loja pública e white-label (Next.js, usa src/)
 │   └── api/                ← Serviços Python — CNAB, integrações bancárias (FastAPI)
 ├── packages/
 │   ├── auth/               ← RBAC: roles e permissões (já existe — expandido)
@@ -144,3 +144,79 @@ Tailwind base compartilhado. Cada app estende e adiciona tokens próprios.
 - **Nunca expor `SUPABASE_SERVICE_ROLE_KEY` no cliente** — apenas Server Actions e Edge Functions
 - **Regenerar types** após toda nova migration: `pnpm db:types`
 - **Commits:** `feat(admin): descrição` | `fix(console): descrição` | `chore(packages/auth): descrição`
+
+## Arquitetura: Fat Server, Thin Client
+
+### Regra central
+O browser NUNCA fala diretamente com o Supabase.
+Toda chamada ao banco é feita no servidor (Server Components, Server Actions, Route Handlers).
+
+### O que isso significa na prática
+
+**✅ CORRETO — dados buscados no servidor:**
+```tsx
+// app/(app)/plans/page.tsx — Server Component
+import { createClient } from '@/lib/supabase/server'
+
+export default async function PlansPage() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('plans').select('*')
+  return <PlanTable plans={data} />
+}
+```
+
+**❌ ERRADO — dados buscados no cliente:**
+```tsx
+'use client'
+import { createClient } from '@/lib/supabase/client' // NUNCA em páginas de dados
+
+export default function PlansPage() {
+  const [plans, setPlans] = useState([])
+  useEffect(() => {
+    createClient().from('plans').select('*').then(...) // PROIBIDO
+  }, [])
+}
+```
+
+**✅ CORRETO — mutação via Server Action:**
+```tsx
+// app/(app)/plans/actions.ts
+'use server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function createPlan(formData: FormData) {
+  const supabase = await createClient() // server client — não exposto
+  await supabase.from('plans').insert(...)
+}
+```
+
+**❌ ERRADO — mutação via fetch do cliente:**
+```tsx
+'use client'
+// NUNCA chamar supabase.from() direto no client component para mutações
+```
+
+### Quando `supabase/client.ts` pode ser usado
+
+Apenas para estes casos específicos, sem acesso ao banco:
+- `supabase.auth.getUser()` — verificar sessão ativa no cliente
+- `supabase.auth.signOut()` — logout
+- Subscriptions de Realtime (quando notificações em tempo real forem necessárias — documentar explicitamente)
+
+### Fluxo de dados obrigatório
+```
+Browser                    Servidor (Next.js)           Supabase
+  │                               │                         │
+  │── clica em "Salvar" ─────────▶│                         │
+  │                        Server Action                    │
+  │                               │── INSERT/SELECT ───────▶│
+  │                               │◀── resultado ───────────│
+  │◀── redirect ou toast ─────────│                         │
+```
+
+### Verificação antes de criar qualquer arquivo
+
+Antes de escrever código que acessa dados, pergunte:
+1. Este arquivo tem `'use client'`? → NÃO pode importar `supabase/server` nem fazer queries
+2. Este arquivo é Server Component ou tem `'use server'`? → PODE fazer queries
+3. Preciso de dado no cliente? → receba via props do Server Component pai

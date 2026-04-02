@@ -4,6 +4,12 @@
   "private": true,
   "main": "index.ts",
   "types": "index.ts",
+  "exports": {
+    "./admin": "./src/admin.ts",
+    "./console": "./src/console.ts",
+    "./store": "./src/store.ts",
+    "./shared": "./src/shared.ts"
+  },
   "devDependencies": {
     "@types/node": "^25.3.5",
     "@vello/biome-config": "workspace:*",

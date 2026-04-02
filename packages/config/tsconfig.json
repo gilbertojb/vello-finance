@@ -1,0 +1,8 @@
+{
+  "extends": "@vello/typescript-config/library",
+  "compilerOptions": {
+    "lib": ["ES2015"]
+  },
+  "include": ["tailwind.base.ts"],
+  "exclude": ["node_modules"]
+}

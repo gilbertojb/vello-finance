@@ -95,3 +95,10 @@ apps/admin/app/(app)/plans/
 supabase/migrations/
 └── 20260401120000_create_plans.sql
 ```
+
+## Restrições de implementação
+
+- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
+- `_components/plans-table.tsx` é Client Component — recebe `plans` via props, sem acesso ao banco
+- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
+- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components

@@ -13,6 +13,7 @@ import { userSubject } from './subjects/user'
 
 export * from './models/user'
 export * from './roles'
+export * from './vello-roles'
 
 const appAbilitiesSchema = z.union([
   userSubject,

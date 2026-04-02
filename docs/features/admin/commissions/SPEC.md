@@ -149,3 +149,10 @@ supabase/migrations/
 ├── 20260401150000_create_commission_snapshots.sql
 └── 20260401160000_create_commission_trigger.sql
 ```
+
+## Restrições de implementação
+
+- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
+- `_components/CommissionSnapshotPanel.tsx` é Client Component — recebe `snapshot` via props, sem acesso ao banco
+- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
+- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components
