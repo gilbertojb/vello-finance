@@ -156,7 +156,7 @@ CREATE TABLE plans (
 -- updated_at automático
 CREATE TRIGGER set_updated_at_plans
   BEFORE UPDATE ON plans
-  FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- RLS
 ALTER TABLE plans ENABLE ROW LEVEL SECURITY;
@@ -187,8 +187,8 @@ export const env = createEnv()
 Variáveis obrigatórias em todos os apps:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=   # nunca expor no cliente
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=   # nunca expor no cliente
 ```
 
 ## Tratamento de Erros
@@ -489,3 +489,94 @@ export function Providers({ children }) {
   )
 }
 ```
+
+## Padrão de RLS (Row Level Security)
+
+Toda tabela nova deve ter RLS habilitada. Há três categorias:
+
+### Categoria A — Tabelas do backoffice (sem acesso de tenant)
+
+Usada em: `backoffice_users`, `plans`, `products`, `financial_partners`
+
+```sql
+ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "backoffice_full_access" ON [tabela]
+  FOR ALL USING (
+    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+  );
+```
+
+> Variação: quando apenas `super_admin` deve escrever, usar duas policies separadas:
+> - `backoffice_full_read` — FOR SELECT para todos os 4 roles
+> - `super_admin_write` — FOR ALL USING (...) WITH CHECK (...) apenas para `super_admin`
+>
+> Ver: `supabase/migrations/20260401140000_fix_backoffice_users_rls.sql`
+
+### Categoria B — Tabelas isoladas por tenant
+
+Usada em: `tenant_products`, `tenant_branding`, `proposals`, `clients`
+
+```sql
+ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "backoffice_full_access" ON [tabela]
+  FOR ALL USING (
+    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+  );
+
+CREATE POLICY "tenant_isolation" ON [tabela]
+  FOR ALL USING (
+    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+  );
+```
+
+> Toda tabela Categoria B deve ter `tenant_id UUID NOT NULL REFERENCES tenants(id)`.
+
+### Categoria C — Tabelas globais lidas por tenants
+
+Usada em: `plans`, `products` (quando tenants precisam ler registros ativos)
+
+```sql
+ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "backoffice_full_access" ON [tabela]
+  FOR ALL USING (
+    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+  );
+
+CREATE POLICY "tenant_read_active" ON [tabela]
+  FOR SELECT USING (
+    is_active = true
+    AND (auth.jwt() ->> 'tenant_id') IS NOT NULL
+  );
+```
+
+### Checklist ao criar uma nova tabela
+
+- [ ] Determinar categoria (A, B ou C)
+- [ ] `ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY`
+- [ ] Aplicar as policies da categoria correspondente
+- [ ] Se Categoria B: garantir `tenant_id UUID NOT NULL REFERENCES tenants(id)`
+
+### Naming de triggers
+
+- `set_updated_at_<tabela>` — triggers de updated_at (sem prefixo)
+- `trg_<descricao>` — triggers de negócio (com prefixo `trg_`)
+
+## Padrão de Roles (DB ENUM ↔ `@vello/auth`)
+
+O PostgreSQL ENUM é a **fonte de verdade**. O pacote `@vello/auth` espelha os valores exatos.
+
+| PostgreSQL ENUM | Valores | TypeScript (`@vello/auth`) |
+|---|---|---|
+| `backoffice_role` | `super_admin`, `admin`, `financial`, `support` | `BackofficeRole` |
+| `tenant_role` *(F3)* | `tenant_admin`, `tenant_operator` | `TenantRole` |
+| `tenant_type` | `whitelabel`, `subscription` | *(apenas DB)* |
+| `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(apenas DB)* |
+
+**Regra:** ao adicionar um role novo:
+1. `ALTER TYPE [enum_name] ADD VALUE 'novo_role'` na migration
+2. Atualizar `z.union([...z.literal('novo_role')])` em `packages/auth/src/vello-roles.ts`
+3. Regenerar types: `pnpm db:types`
+4. Atualizar policies RLS que usam `ANY(ARRAY[...])` se necessário
