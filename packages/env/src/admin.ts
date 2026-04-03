@@ -1,18 +1,22 @@
 import { createEnv } from '@t3-oss/env-nextjs'
 import { z } from 'zod'
-import { sharedClient, sharedRuntimeEnv, sharedServer } from './shared'
 
 export const env = createEnv({
   server: {
-    ...sharedServer,
+    SUPABASE_SECRET_KEY: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
+    NODE_ENV: z.enum(['development', 'test', 'production']),
   },
   client: {
-    ...sharedClient,
+    NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    ...sharedRuntimeEnv,
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
+    NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   },
   emptyStringAsUndefined: true,
 })

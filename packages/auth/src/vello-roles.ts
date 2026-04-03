@@ -47,3 +47,28 @@ export function hasBackofficeAccess(role: SystemRole): boolean {
 export function hasTenantAccess(role: SystemRole): boolean {
   return isTenantRole(role)
 }
+
+// Extrai claims do usuário autenticado a partir do app_metadata (server-side)
+export function getJwtClaims(
+  user: { app_metadata?: Record<string, unknown> } | null,
+): JwtClaims | null {
+  if (!user?.app_metadata) return null
+  const parsed = jwtClaimsSchema.safeParse(user.app_metadata)
+  if (!parsed.success) return null
+  return parsed.data
+}
+
+// Verifica se o usuário é do backoffice (qualquer role interno)
+export function isBackoffice(claims: JwtClaims | null): boolean {
+  if (!claims) return false
+  return isBackofficeRole(claims.role)
+}
+
+// Verifica se o usuário possui um dos roles especificados
+export function hasRole(
+  claims: JwtClaims | null,
+  roles: SystemRole[],
+): boolean {
+  if (!claims) return false
+  return roles.includes(claims.role)
+}

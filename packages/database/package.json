@@ -2,6 +2,9 @@
   "name": "@vello/database",
   "version": "0.0.0",
   "private": true,
+  "scripts": {
+    "db:types": "supabase gen types typescript --linked > src/types.ts"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./helpers": "./src/helpers/index.ts"
