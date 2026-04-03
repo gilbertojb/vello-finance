@@ -1,6 +1,5 @@
-import { createServerClient } from '@supabase/ssr'
-import { env } from '@vello/env/admin'
 import { type NextRequest, NextResponse } from 'next/server'
+import { updateSession } from '@/lib/supabase/proxy'
 
 /**
  * Rotas públicas e como se comportam quando o usuário já está autenticado:
@@ -24,36 +23,7 @@ function getIsPublicUrl(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet, headers) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          )
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          )
-          Object.entries(headers).forEach(([key, value]) =>
-            supabaseResponse.headers.set(key, value),
-          )
-        },
-      },
-    },
-  )
-
-  // CRÍTICO: não adicionar código entre createServerClient e getClaims().
-  // Qualquer instrução aqui pode causar logout inesperado dos usuários.
-  const { data } = await supabase.auth.getClaims()
-  const isAuthenticated = !!data?.claims
+  const { response, isAuthenticated } = await updateSession(request)
 
   const { pathname } = request.nextUrl
   const { isPublicUrl, whenAuthenticated } = getIsPublicUrl(pathname)
@@ -70,7 +40,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  return supabaseResponse
+  return response
 }
 
 export const config = {

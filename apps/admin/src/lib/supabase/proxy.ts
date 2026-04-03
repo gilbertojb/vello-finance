@@ -2,7 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { env } from '@vello/env/admin'
 import { type NextRequest, NextResponse } from 'next/server'
 
-export async function updateSession(request: NextRequest) {
+export async function updateSession(
+  request: NextRequest,
+): Promise<{ response: NextResponse; isAuthenticated: boolean }> {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -39,7 +41,7 @@ export async function updateSession(request: NextRequest) {
 
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
-  await supabase.auth.getClaims()
+  const { data } = await supabase.auth.getClaims()
 
-  return supabaseResponse
+  return { response: supabaseResponse, isAuthenticated: !!data?.claims }
 }

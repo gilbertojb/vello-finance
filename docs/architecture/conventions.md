@@ -32,8 +32,7 @@ apps/[admin|console|store]/src/
 │   │   ├── service.ts          ← Service client (secret key) — bypassa RLS
 │   │   └── proxy.ts            ← updateSession helper para o middleware
 │   └── utils.ts                ← cn()
-├── middleware.ts               ← Re-exporta proxy e config de proxy.ts
-└── proxy.ts                    ← Lógica de proteção de rotas com getClaims()
+└── proxy.ts                    ← Entry point Next.js 16 (era middleware.ts) — redirect logic
 ```
 
 ### Route Groups: `(public)` e `(private)`

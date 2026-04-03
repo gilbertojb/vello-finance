@@ -18,11 +18,13 @@ Servidor (Server Component / Action)
   └── lib/supabase/server.ts       ← createServerClient — todas as queries de dados
   └── lib/supabase/service.ts      ← createClient com secret key — bypassa RLS
 
-Middleware (Edge)
-  └── middleware.ts                ← re-exporta de proxy.ts
-  └── proxy.ts                     ← lógica de proteção de rotas com getClaims()
-  └── lib/supabase/proxy.ts        ← updateSession helper (refresh de cookies)
+Proxy (Edge) — Next.js 16 renomeou Middleware para Proxy
+  └── proxy.ts                     ← lógica de rotas (redirects) — entry point do Next.js
+  └── lib/supabase/proxy.ts        ← updateSession: sessão Supabase + isAuthenticated
 ```
+
+> **Next.js 16:** O arquivo de middleware passou a se chamar `proxy.ts` (era `middleware.ts`).
+> A função exportada deve ser `proxy` (ou default export). O `middleware.ts` não é mais usado.
 
 **Regra central (Fat Server):** queries de banco NUNCA no browser client.
 O browser client existe exclusivamente para `auth.signOut()`.
@@ -214,25 +216,31 @@ export function createServiceClient() {
 
 ---
 
-## Fase 4 — Middleware
+## Fase 4 — Proxy (Middleware no Next.js 16)
 
-A lógica de proteção de rotas está em `proxy.ts`. O `middleware.ts` apenas re-exporta:
+No Next.js 16, o arquivo de middleware se chama `proxy.ts`. A lógica de sessão Supabase
+fica isolada em `lib/supabase/proxy.ts`; o `proxy.ts` raiz contém apenas as regras de redirect.
 
-### `apps/admin/middleware.ts`
+### `apps/admin/src/lib/supabase/proxy.ts`
+
+Cria o cliente Supabase, atualiza cookies e retorna `isAuthenticated`:
 
 ```typescript
-export { proxy as middleware, config } from './proxy'
+export async function updateSession(
+  request: NextRequest,
+): Promise<{ response: NextResponse; isAuthenticated: boolean }> {
+  // createServerClient + getClaims() — não adicionar código entre os dois
+  const { data } = await supabase.auth.getClaims()
+  return { response: supabaseResponse, isAuthenticated: !!data?.claims }
+}
 ```
 
 ### `apps/admin/proxy.ts`
 
-Usa `getClaims()` (leitura local do JWT, sem network call) para verificar autenticação.
-Suporta comportamento diferenciado por rota pública via `whenAuthenticated`.
+Entry point do Next.js 16. Delega a sessão para `updateSession` e aplica redirects:
 
 ```typescript
-import { createServerClient } from '@supabase/ssr'
-import { env } from '@vello/env/admin'
-import { type NextRequest, NextResponse } from 'next/server'
+import { updateSession } from '@/lib/supabase/proxy'
 
 const publicRoutesPatterns = [
   { path: '/sign-in', whenAuthenticated: 'redirect' as const },
@@ -241,32 +249,17 @@ const publicRoutesPatterns = [
 ]
 
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const { response, isAuthenticated } = await updateSession(request)
 
-  const supabase = createServerClient(
-    env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    { cookies: { getAll() { ... }, setAll(cookiesToSet, headers) { ... } } },
-  )
-
-  // CRÍTICO: não adicionar código entre createServerClient e getClaims()
-  const { data } = await supabase.auth.getClaims()
-  const isAuthenticated = !!data?.claims
-
-  // Redireciona não-autenticados para /sign-in e autenticados para fora do /sign-in
-  // ...
-  return supabaseResponse
+  // Não autenticado em rota protegida → /sign-in
+  // Autenticado em rota com whenAuthenticated: 'redirect' → /
+  return response
 }
 
 export const config = {
   matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
 ```
-
-### `apps/admin/src/lib/supabase/proxy.ts`
-
-Helper `updateSession` para quando apenas o refresh de cookies é necessário
-(sem decisão de redirect). Usa a mesma lógica de `setAll` com headers.
 
 ---
 
