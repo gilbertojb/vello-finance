@@ -18,7 +18,7 @@ CREATE TABLE plans (
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER trg_set_updated_at_plans
+CREATE TRIGGER set_updated_at_plans
   BEFORE UPDATE ON plans
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
