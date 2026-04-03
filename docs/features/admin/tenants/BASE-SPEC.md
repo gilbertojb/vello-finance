@@ -172,10 +172,16 @@ CREATE POLICY "backoffice_full_read" ON backoffice_users
 
 -- Apenas super_admin pode criar, editar e remover membros
 CREATE POLICY "super_admin_write" ON backoffice_users
-  FOR ALL USING (
+  FOR ALL
+  USING (
+    (auth.jwt() ->> 'role') = 'super_admin'
+  )
+  WITH CHECK (
     (auth.jwt() ->> 'role') = 'super_admin'
   );
 ```
+
+> **Nota:** A policy `backoffice_users_self_read` (que permitia leitura pelo `auth.uid()`) foi removida intencionalmente. Usuários do backoffice são criados pelo `super_admin` via service client — nunca se auto-registram. Ao fazer login, o Auth Hook já injeta o `role` no JWT, portanto `backoffice_full_read` cobre todos os casos de leitura legítima.
 
 ---
 
