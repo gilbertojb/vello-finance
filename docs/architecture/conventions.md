@@ -31,7 +31,7 @@ apps/[admin|console|store]/src/
 │   │   ├── client.ts           ← Browser client — apenas auth.signOut()
 │   │   ├── server.ts           ← Server client (RSC + Actions) — respeita RLS
 │   │   ├── service.ts          ← Service client (secret key) — bypassa RLS
-│   │   └── proxy.ts            ← updateSession helper para o middleware
+│   │   └── proxy.ts            ← updateSession helper para o proxy
 │   └── utils.ts                ← cn()
 └── proxy.ts                    ← Entry point Next.js 16 (era middleware.ts) — redirect logic
 ```

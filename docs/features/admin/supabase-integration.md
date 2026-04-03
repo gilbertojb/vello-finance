@@ -219,7 +219,7 @@ export function createServiceClient() {
 ## Fase 4 — Proxy (Middleware no Next.js 16)
 
 No Next.js 16, o arquivo de middleware se chama `proxy.ts`. A lógica de sessão Supabase
-fica isolada em `lib/supabase/proxy.ts`; o `proxy.ts` raiz contém apenas as regras de redirect.
+fica isolada em `lib/supabase/proxy.ts`; o `src/proxy.ts` contém apenas as regras de redirect.
 
 ### `apps/admin/src/lib/supabase/proxy.ts`
 
@@ -229,13 +229,13 @@ Cria o cliente Supabase, atualiza cookies e retorna `isAuthenticated`:
 export async function updateSession(
   request: NextRequest,
 ): Promise<{ response: NextResponse; isAuthenticated: boolean }> {
-  // createServerClient + getClaims() — não adicionar código entre os dois
-  const { data } = await supabase.auth.getClaims()
-  return { response: supabaseResponse, isAuthenticated: !!data?.claims }
+  // createServerClient + getUser() — não adicionar código entre os dois
+  const { data } = await supabase.auth.getUser()
+  return { response: supabaseResponse, isAuthenticated: !!data?.user }
 }
 ```
 
-### `apps/admin/proxy.ts`
+### `apps/admin/src/proxy.ts`
 
 Entry point do Next.js 16. Delega a sessão para `updateSession` e aplica redirects:
 
