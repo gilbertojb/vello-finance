@@ -1,0 +1,113 @@
+'use client'
+
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { ProductTypeBadge } from './product-type-badge'
+
+type ProductRow = {
+  id: string
+  name: string
+  type: string
+  financial_partner?: { name: string } | null
+  bank_commission_pct: number
+  vello_commission_pct: number
+  is_active: boolean
+}
+
+export function ProductTable({
+  products,
+}: {
+  products: ReadonlyArray<ProductRow>
+}) {
+  if (!products || products.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-card">
+        <p>Nenhum produto cadastrado.</p>
+        <Button variant="link" asChild className="mt-2">
+          <Link href="/products/new">Cadastrar o primeiro produto</Link>
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative w-full overflow-auto rounded-md border bg-card">
+      <table className="w-full caption-bottom text-sm">
+        <thead className="[&_tr]:border-b">
+          <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+              Nome
+            </th>
+            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+              Tipo
+            </th>
+            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+              Parceiro
+            </th>
+            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+              Comissão Banco
+            </th>
+            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+              Retenção Vello
+            </th>
+            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+              Disponível Tenant
+            </th>
+            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+              Status
+            </th>
+            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
+              Ações
+            </th>
+          </tr>
+        </thead>
+        <tbody className="[&_tr:last-child]:border-0">
+          {products.map((product) => {
+            const tenantAvailable =
+              product.bank_commission_pct - product.vello_commission_pct
+
+            return (
+              <tr
+                key={product.id}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+              >
+                <td className="p-4 align-middle font-medium">{product.name}</td>
+                <td className="p-4 align-middle">
+                  <ProductTypeBadge type={product.type} />
+                </td>
+                <td className="p-4 align-middle">
+                  {product.financial_partner?.name || '-'}
+                </td>
+                <td className="p-4 align-middle text-right">
+                  {product.bank_commission_pct.toFixed(2)}%
+                </td>
+                <td className="p-4 align-middle text-right">
+                  {product.vello_commission_pct.toFixed(2)}%
+                </td>
+                <td className="p-4 align-middle text-right font-medium text-green-600">
+                  {tenantAvailable.toFixed(2)}%
+                </td>
+                <td className="p-4 align-middle">
+                  {product.is_active ? (
+                    <span className="text-2xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                      Ativo
+                    </span>
+                  ) : (
+                    <span className="text-2xs bg-red-100 text-red-800 px-2 py-0.5 rounded">
+                      Inativo
+                    </span>
+                  )}
+                </td>
+                <td className="p-4 align-middle text-right">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/products/${product.id}`}>Exibir</Link>
+                  </Button>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}

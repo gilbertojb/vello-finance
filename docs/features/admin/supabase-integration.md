@@ -276,15 +276,15 @@ Login do usuário
       ↓
 Supabase Auth valida credenciais
       ↓
-Hook: custom_access_token (Edge Function)
+Hook: custom_access_token (PostgreSQL Function)
       ↓
 Busca role e tenant_id na tabela backoffice_users
       ↓
-Injeta no JWT: { role: 'super_admin', tenant_id: null }
+Injeta no JWT: { user_role: 'super_admin', tenant_id: null }
       ↓
 JWT retornado ao cliente com claims customizados
       ↓
-RLS policies leem (auth.jwt() ->> 'role') e (auth.jwt() ->> 'tenant_id')
+RLS policies leem (auth.jwt() ->> 'user_role') e (auth.jwt() ->> 'tenant_id')
 ```
 
 ### 5.1 Migration — Tabela `backoffice_users`
@@ -320,73 +320,61 @@ CREATE POLICY "backoffice_users_self_read" ON backoffice_users
 
 CREATE POLICY "backoffice_users_super_admin" ON backoffice_users
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = 'super_admin'
+    (auth.jwt() ->> 'user_role') = 'super_admin'
   );
 ```
 
-### 5.2 Edge Function — Custom Access Token Hook
+### 5.2 PostgreSQL Function — Custom Access Token Hook
 
-```bash
-# Criar a Edge Function
-supabase functions new custom-access-token
-```
+Em vez de Edge Function, utilizamos uma PostgreSQL function para manter o isolamento e maior segurança (por não expor tráfego HTTP para manipulação de token).
 
-```typescript
-// supabase/functions/custom-access-token/index.ts
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+Ela é definida via SQL e recebe privilégios restritos:
 
-interface WebhookPayload {
-  user_id: string
-  claims: Record<string, unknown>
-}
+```sql
+-- migration que cria a função
+CREATE OR REPLACE FUNCTION public.custom_access_token_hook(event jsonb)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+STABLE
+AS $$
+  DECLARE
+    claims jsonb;
+    backoffice_user record;
+    tenant_user record;
+  BEGIN
+    claims := event->'claims';
 
-Deno.serve(async (req) => {
-  const payload: WebhookPayload = await req.json()
-  const { user_id, claims } = payload
+    -- Tenta buscar como usuário do backoffice
+    SELECT role, is_active INTO backoffice_user
+    FROM public.backoffice_users
+    WHERE id = (event->>'user_id')::uuid;
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  )
+    IF backoffice_user.is_active = true THEN
+      claims := jsonb_set(claims, '{user_role}', to_jsonb(backoffice_user.role));
+      claims := jsonb_set(claims, '{tenant_id}', 'null'::jsonb);
+    ELSE
+      -- Tenta buscar como usuário de tenant
+      SELECT role, tenant_id, is_active INTO tenant_user
+      FROM public.tenant_users
+      WHERE id = (event->>'user_id')::uuid;
 
-  // Tenta buscar como usuário do backoffice
-  const { data: backofficeUser } = await supabase
-    .from('backoffice_users')
-    .select('role, is_active')
-    .eq('id', user_id)
-    .single()
+      IF tenant_user.is_active = true THEN
+        claims := jsonb_set(claims, '{user_role}', to_jsonb(tenant_user.role));
+        claims := jsonb_set(claims, '{tenant_id}', to_jsonb(tenant_user.tenant_id));
+      END IF;
+    END IF;
 
-  if (backofficeUser && backofficeUser.is_active) {
-    return Response.json({
-      ...claims,
-      role: backofficeUser.role,
-      tenant_id: null,
-    })
-  }
+    -- Atualiza o objeto claims no evento original
+    event := jsonb_set(event, '{claims}', claims);
+    
+    RETURN event;
+  END;
+$$;
 
-  // Tenta buscar como usuário de tenant
-  const { data: tenantUser } = await supabase
-    .from('tenant_users')
-    .select('role, tenant_id, is_active')
-    .eq('id', user_id)
-    .single()
-
-  if (tenantUser && tenantUser.is_active) {
-    return Response.json({
-      ...claims,
-      role: tenantUser.role,
-      tenant_id: tenantUser.tenant_id,
-    })
-  }
-
-  // Usuário sem perfil — retorna claims sem role (será bloqueado pelo RLS)
-  return Response.json(claims)
-})
-```
-
-```bash
-# Deploy da Edge Function
-supabase functions deploy custom-access-token --no-verify-jwt
+-- Revoga acesso público e garante ao auth admin
+REVOKE ALL PRIVILEGES ON FUNCTION public.custom_access_token_hook(jsonb) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.custom_access_token_hook(jsonb) TO supabase_auth_admin;
 ```
 
 ### 5.3 Configurar o Hook no Dashboard
@@ -396,7 +384,9 @@ Supabase Dashboard
   → Authentication
   → Hooks
   → Add hook: "Custom Access Token"
-  → Function: custom-access-token
+  → Tipo: PostgreSQL
+  → Schema: public
+  → Function: custom_access_token_hook
   → Salvar
 ```
 
@@ -412,7 +402,7 @@ export type TenantRole = 'tenant_admin' | 'tenant_operator'
 export type SystemRole = BackofficeRole | TenantRole
 
 export interface JwtClaims {
-  role: SystemRole
+  user_role: SystemRole
   tenant_id: string | null
 }
 
@@ -421,20 +411,20 @@ export function getJwtClaims(
   user: { app_metadata?: Record<string, unknown> } | null,
 ): JwtClaims | null {
   if (!user?.app_metadata) return null
-  const role = user.app_metadata.role as SystemRole | undefined
+  const user_role = user.app_metadata.user_role as SystemRole | undefined
   const tenant_id = user.app_metadata.tenant_id as string | null | undefined
-  if (!role) return null
-  return { role, tenant_id: tenant_id ?? null }
+  if (!user_role) return null
+  return { user_role, tenant_id: tenant_id ?? null }
 }
 
 // Helpers de verificação de permissão
 export function isBackoffice(claims: JwtClaims | null): boolean {
   if (!claims) return false
-  return ['super_admin', 'admin', 'financial', 'support'].includes(claims.role)
+  return ['super_admin', 'admin', 'financial', 'support'].includes(claims.user_role)
 }
 
 export function isSuperAdmin(claims: JwtClaims | null): boolean {
-  return claims?.role === 'super_admin'
+  return claims?.user_role === 'super_admin'
 }
 
 export function hasRole(
@@ -442,7 +432,7 @@ export function hasRole(
   roles: SystemRole[],
 ): boolean {
   if (!claims) return false
-  return roles.includes(claims.role)
+  return roles.includes(claims.user_role)
 }
 ```
 
@@ -743,7 +733,7 @@ Fase 1  → supabase link
 Fase 2  → .env.local + packages/env/src/admin.ts
 Fase 3  → src/lib/supabase/client.ts + server.ts + service.ts
 Fase 4  → src/middleware.ts (rota: /sign-in, redirect: /)
-Fase 5  → migration backoffice_users + Edge Function + configurar hook no dashboard
+Fase 5  → migration backoffice_users + hook PostgreSQL + configurar hook no dashboard
 Fase 6  → seed (manual no dashboard)
 Fase 7  → packages/database placeholder + pnpm db:types
 Fase 8  → actions.ts de sign-in (substituir ky por Supabase) + sign-out-button.tsx
@@ -759,10 +749,10 @@ Fase 8  → actions.ts de sign-in (substituir ky por Supabase) + sign-out-button
 - [x] `.env.local` preenchido, `.env.example` commitado
 - [x] `packages/env/src/admin.ts` validando as variáveis (publishable/secret key)
 - [x] `src/lib/supabase/client.ts`, `server.ts` e `service.ts` criados
-- [x] `proxy.ts` redirecionando para `/sign-in` sem auth, para `/` com auth
-- [x] `middleware.ts` re-exporta `proxy` e `config`
+- [x] proxy.ts redirecionando para `/sign-in` sem auth, para `/` com auth
+- [x] middleware.ts re-exporta proxy e config
 - [x] Migration `backoffice_users` aplicada: `supabase db push`
-- [x] Edge Function `custom-access-token` deployada
+- [x] PostgreSQL Function `custom_access_token_hook` deployada via migrations
 - [ ] Hook "Custom Access Token" configurado no Dashboard (Authentication → Hooks)
 - [ ] Usuário super_admin criado via dashboard + INSERT em `backoffice_users`
 - [ ] Login funciona: `success: true` → `router.push('/')` via `useFormState`

@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
 const signInSchema = z.object({
-  email: z.string().email({ message: 'Por favor, informe um e-mail válido.' }),
+  email: z.email({ message: 'Por favor, informe um e-mail válido.' }),
   password: z.string().min(1, { message: 'Por favor, informe sua senha.' }),
 })
 
@@ -19,7 +19,6 @@ export async function signInWithEmailAndPassword(data: FormData) {
   const { email, password } = result.data
 
   const supabase = await createClient()
-
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {

@@ -17,12 +17,15 @@ export const tenantRoleSchema = z.union([
 export type TenantRole = z.infer<typeof tenantRoleSchema>
 
 // União de todos os roles do sistema
-export const systemRoleSchema = z.union([backofficeRoleSchema, tenantRoleSchema])
+export const systemRoleSchema = z.union([
+  backofficeRoleSchema,
+  tenantRoleSchema,
+])
 export type SystemRole = z.infer<typeof systemRoleSchema>
 
 // Claims JWT injetados pelo Supabase Auth Hook
 export const jwtClaimsSchema = z.object({
-  role: systemRoleSchema,
+  user_role: systemRoleSchema,
   tenant_id: z.string().uuid().nullable(), // null = usuário do backoffice
 })
 export type JwtClaims = z.infer<typeof jwtClaimsSchema>
@@ -61,7 +64,7 @@ export function getJwtClaims(
 // Verifica se o usuário é do backoffice (qualquer role interno)
 export function isBackoffice(claims: JwtClaims | null): boolean {
   if (!claims) return false
-  return isBackofficeRole(claims.role)
+  return isBackofficeRole(claims.user_role)
 }
 
 // Verifica se o usuário possui um dos roles especificados
@@ -70,5 +73,5 @@ export function hasRole(
   roles: SystemRole[],
 ): boolean {
   if (!claims) return false
-  return roles.includes(claims.role)
+  return roles.includes(claims.user_role)
 }
