@@ -2,7 +2,7 @@
 -- Tabela de planos comerciais da plataforma Vello Finance.
 -- Define os planos disponíveis para contratação por tenants (signature ou white_label),
 -- com controle de comissão, mensalidade, setup fee e features habilitadas.
--- RLS Categoria A: acesso total ao backoffice; tenants podem apenas ler planos ativos.
+-- RLS: Categoria C — backoffice gerencia tudo; tenants leem apenas planos ativos
 
 CREATE TABLE plans (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
