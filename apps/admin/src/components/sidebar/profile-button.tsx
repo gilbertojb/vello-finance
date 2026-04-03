@@ -1,7 +1,7 @@
 'use client'
 
-import { useTransition } from 'react'
 import { EllipsisVertical, LogOut } from 'lucide-react'
+import { useTransition } from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -14,24 +14,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 
-import type { BackofficeRole } from '@vello/auth'
 import { signOut } from '@/http/sign-out'
 
-const roleLabels: Record<BackofficeRole, string> = {
-  super_admin: 'Super Admin',
-  admin: 'Admin',
-  financial: 'Financeiro',
-  support: 'Suporte',
-}
-
 interface ProfileButtonProps {
-  name: string
-  email: string
-  initials: string
-  role: BackofficeRole
+  user: {
+    name: string
+    email: string
+  }
 }
 
-export function ProfileButton({ name, email, initials, role }: ProfileButtonProps) {
+function initials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part: string) => part[0].toUpperCase())
+    .join('')
+}
+
+export function ProfileButton({ user }: ProfileButtonProps) {
   const { isMobile } = useSidebar()
   const [isPending, startTransition] = useTransition()
 
@@ -47,11 +47,15 @@ export function ProfileButton({ name, email, initials, role }: ProfileButtonProp
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <Avatar className="h-8 w-8 rounded-lg grayscale">
-            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+            <AvatarFallback className="rounded-lg">
+              {initials(user.name)}
+            </AvatarFallback>
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">{name}</span>
-            <span className="text-muted-foreground truncate text-xs">{email}</span>
+            <span className="truncate font-medium">{user.name}</span>
+            <span className="text-muted-foreground truncate text-xs">
+              {user.email}
+            </span>
           </div>
           <EllipsisVertical className="ml-auto size-4" />
         </SidebarMenuButton>
@@ -66,15 +70,16 @@ export function ProfileButton({ name, email, initials, role }: ProfileButtonProp
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+              <AvatarFallback className="rounded-lg">
+                {initials(user.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{name}</span>
-              <span className="text-muted-foreground truncate text-xs">{email}</span>
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="text-muted-foreground truncate text-xs">
+                {user.email}
+              </span>
             </div>
-            <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs">
-              {roleLabels[role]}
-            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

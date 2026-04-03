@@ -7,13 +7,13 @@
 
 ---
 
-## Situação Atual
+## Situação Anterior
 
-`profile-button.tsx` exibe nome, email e iniciais **hardcoded**.
-O botão "Sair" não executa nenhuma ação.
+`profile-button.tsx` exibia nome, email e iniciais **hardcoded**.
+O botão "Sair" não executava nenhuma ação.
 
 ```tsx
-// ❌ Estado atual — dados fixos, sem sign-out
+// ❌ Estado anterior — dados fixos, sem sign-out
 <AvatarFallback>GB</AvatarFallback>
 <span>Gilberto Bueno</span>
 <span>gilberto@vellofinance.com.br</span>
@@ -24,7 +24,7 @@ O botão "Sair" não executa nenhuma ação.
 
 ## Objetivo
 
-1. Exibir nome completo, e-mail e role do usuário autenticado
+1. Exibir nome completo e e-mail do usuário autenticado
 2. Exibir iniciais geradas a partir do nome no `Avatar`
 3. Sign-out funcional via Server Action
 
@@ -36,12 +36,13 @@ O botão "Sair" não executa nenhuma ação.
 nav-user.tsx (Server Component)
   └── createClient()              ← @/lib/supabase/server
   └── supabase.auth.getUser()     ← obtém auth.users
-  └── supabase.from('backoffice_users').select('full_name, role')
-  └── passa { name, email, initials, role } como props
+  └── supabase.from('backoffice_users').select('full_name')
+  └── passa { name, email } via prop user
         ↓
   ProfileButton (Client Component)
-  └── recebe props — sem acesso ao banco
-  └── renderiza Avatar + nome + email + badge de role
+  └── recebe user: { name, email } — sem acesso ao banco
+  └── calcula iniciais localmente com função initials()
+  └── renderiza Avatar + nome + email
   └── chama signOut() (Server Action) ao clicar em "Sair"
 ```
 
@@ -55,17 +56,7 @@ nav-user.tsx (Server Component)
 |---|---|---|
 | Nome completo | `backoffice_users.full_name` | Trigger + dropdown header |
 | E-mail | `auth.users.email` | Abaixo do nome |
-| Iniciais | 2 primeiras letras do nome (split por espaço) | `AvatarFallback` |
-| Role | `backoffice_users.role` | Badge no dropdown (ver abaixo) |
-
-**Badge de role:**
-
-| Role | Label | Estilo |
-|---|---|---|
-| `super_admin` | Super Admin | `bg-primary/10 text-primary` |
-| `admin` | Admin | `bg-primary/10 text-primary` |
-| `financial` | Financeiro | `bg-primary/10 text-primary` |
-| `support` | Suporte | `bg-muted text-muted-foreground` |
+| Iniciais | função local `initials()` — 2 primeiras palavras do nome | `AvatarFallback` |
 
 ---
 
@@ -75,38 +66,31 @@ nav-user.tsx (Server Component)
 
 ```tsx
 // src/components/sidebar/nav-user.tsx
-import { createClient } from '@/lib/supabase/server'
 import { SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar'
+import { createClient } from '@/lib/supabase/server'
+
 import { ProfileButton } from './profile-button'
 
 export async function NavUser() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const { data: profile } = await supabase
     .from('backoffice_users')
-    .select('full_name, role')
-    .eq('id', user!.id)
+    .select('full_name')
+    .eq('id', user?.id)
     .single()
 
-  const name = profile?.full_name ?? user?.email ?? 'Usuário'
+  const name = profile?.full_name ?? 'Usuário'
   const email = user?.email ?? ''
-  const initials = name
-    .split(' ')
-    .slice(0, 2)
-    .map((part) => part[0].toUpperCase())
-    .join('')
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <ProfileButton
-          name={name}
-          email={email}
-          initials={initials}
-          role={profile?.role ?? 'support'}
-        />
+        <ProfileButton user={{ name, email }} />
       </SidebarMenuItem>
     </SidebarMenu>
   )
@@ -142,8 +126,8 @@ export async function signOut() {
 // src/components/sidebar/profile-button.tsx
 'use client'
 
-import { useTransition } from 'react'
 import { EllipsisVertical, LogOut } from 'lucide-react'
+import { useTransition } from 'react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
@@ -156,24 +140,24 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 
-import type { BackofficeRole } from '@vello/auth'
 import { signOut } from '@/http/sign-out'
 
-const roleLabels: Record<BackofficeRole, string> = {
-  super_admin: 'Super Admin',
-  admin: 'Admin',
-  financial: 'Financeiro',
-  support: 'Suporte',
-}
-
 interface ProfileButtonProps {
-  name: string
-  email: string
-  initials: string
-  role: BackofficeRole
+  user: {
+    name: string
+    email: string
+  }
 }
 
-export function ProfileButton({ name, email, initials, role }: ProfileButtonProps) {
+function initials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part: string) => part[0].toUpperCase())
+    .join('')
+}
+
+export function ProfileButton({ user }: ProfileButtonProps) {
   const { isMobile } = useSidebar()
   const [isPending, startTransition] = useTransition()
 
@@ -189,11 +173,15 @@ export function ProfileButton({ name, email, initials, role }: ProfileButtonProp
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
           <Avatar className="h-8 w-8 rounded-lg grayscale">
-            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+            <AvatarFallback className="rounded-lg">
+              {initials(user.name)}
+            </AvatarFallback>
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
-            <span className="truncate font-medium">{name}</span>
-            <span className="text-muted-foreground truncate text-xs">{email}</span>
+            <span className="truncate font-medium">{user.name}</span>
+            <span className="text-muted-foreground truncate text-xs">
+              {user.email}
+            </span>
           </div>
           <EllipsisVertical className="ml-auto size-4" />
         </SidebarMenuButton>
@@ -208,15 +196,14 @@ export function ProfileButton({ name, email, initials, role }: ProfileButtonProp
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+              <AvatarFallback className="rounded-lg">
+                {initials(user.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{name}</span>
-              <span className="text-muted-foreground truncate text-xs">{email}</span>
+              <span className="truncate font-medium">{user.name}</span>
+              <span className="text-muted-foreground truncate text-xs">{user.email}</span>
             </div>
-            <span className="bg-primary/10 text-primary rounded-full px-2 py-0.5 text-xs">
-              {roleLabels[role]}
-            </span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -232,19 +219,16 @@ export function ProfileButton({ name, email, initials, role }: ProfileButtonProp
 
 ---
 
-## Arquivos a Modificar / Criar
+## Arquivos Modificados / Criados
 
 ```
 apps/admin/src/
-├── app/
-│   └── (private)/
-│       └── actions.ts              ← CRIAR — Server Action signOut()
+├── http/
+│   └── sign-out.ts                 ← CRIADO — Server Action signOut()
 └── components/
     └── sidebar/
-        ├── nav-user.tsx            ← MODIFICAR — busca dados, passa props
-        └── profile-button.tsx      ← MODIFICAR — recebe props, sign-out funcional
-└── http/
-    └── sign-out.ts                 ← CRIAR — Server Action signOut()
+        ├── nav-user.tsx            ← MODIFICADO — busca dados, passa user prop
+        └── profile-button.tsx      ← MODIFICADO — recebe user prop, sign-out funcional
 ```
 
 ---
@@ -252,17 +236,17 @@ apps/admin/src/
 ## Critérios de Aceite
 
 - [x] Nome e e-mail do usuário autenticado exibidos (não hardcoded)
-- [x] Iniciais geradas dinamicamente a partir do `full_name`
-- [x] Badge de role exibido no header do dropdown
+- [x] Iniciais geradas dinamicamente via função local `initials()` a partir do `full_name`
 - [x] Clicar em "Sair" chama `signOut()` e redireciona para `/sign-in`
 - [x] Botão "Sair" exibe "Saindo..." e fica desabilitado durante a transição
-- [x] Se `full_name` for nulo, fallback para o e-mail
+- [x] Se `full_name` for nulo, fallback para `'Usuário'`
 - [x] Sem acesso ao Supabase em `profile-button.tsx` — apenas props
 
 ---
 
 ## Fora do Escopo
 
+- Badge de role no dropdown
 - Edição de perfil do usuário
 - Upload de avatar (foto de perfil)
 - Troca de senha pelo sidebar

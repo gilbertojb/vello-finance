@@ -44,6 +44,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.101.1
         version: 2.101.1
+      '@vello/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@vello/env':
         specifier: workspace:*
         version: link:../../packages/env
