@@ -25,6 +25,7 @@ apps/[admin|console|store]/src/
 │   ├── header.tsx              ← Header compartilhado (server component)
 │   └── sidebar/                ← Componentes da sidebar (ver padrão abaixo)
 ├── hooks/                      ← Custom hooks reutilizáveis
+├── http/                       ← Server Actions que NÃO são de formulário (ex: sign-out)
 ├── lib/
 │   ├── supabase/
 │   │   ├── client.ts           ← Browser client — apenas auth.signOut()
@@ -81,10 +82,19 @@ src/app/(private)/plans/
 **Escopos válidos nos commits:**
 `admin` · `console` · `store` · `api` · `packages/auth` · `packages/database` · `packages/env` · `packages/transactional` · `packages/config` · `supabase`
 
-## Padrão de Server Action
+## `actions.ts` vs `src/http/`
+
+| | `actions.ts` | `src/http/` |
+|---|---|---|
+| **Uso** | Server Actions de **formulários** | Server Actions **sem formulário** |
+| **Localização** | Co-localizado com o módulo (`plans/actions.ts`) | `src/http/<nome>.ts` (global no app) |
+| **Exemplos** | `createPlan`, `updateTenant`, `deletePlan` | `sign-out.ts`, `activate-tenant.ts` |
+| **Importado por** | `sign-in-form.tsx`, `plan-form.tsx` (via `useFormState`) | Componentes que disparam ações sem form |
+
+## Padrão de Server Action (formulários)
 
 ```typescript
-// app/(app)/plans/actions.ts
+// app/(private)/plans/actions.ts
 'use server'
 
 import { createClient } from '@/lib/supabase/server'

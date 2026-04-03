@@ -115,12 +115,13 @@ export async function NavUser() {
 
 ---
 
-### `actions.ts` — Server Action de sign-out
+### `sign-out.ts` — Server Action de sign-out
 
-Criado em `src/app/(private)/actions.ts` — co-localizado com o layout privado.
+`actions.ts` é reservado para Server Actions de formulários.
+Operações de sessão ficam em `src/http/`:
 
 ```typescript
-// src/app/(private)/actions.ts
+// src/http/sign-out.ts
 'use server'
 
 import { redirect } from 'next/navigation'
@@ -156,7 +157,7 @@ import {
 import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 
 import type { BackofficeRole } from '@vello/auth'
-import { signOut } from '@/app/(private)/actions'
+import { signOut } from '@/http/sign-out'
 
 const roleLabels: Record<BackofficeRole, string> = {
   super_admin: 'Super Admin',
@@ -242,6 +243,8 @@ apps/admin/src/
     └── sidebar/
         ├── nav-user.tsx            ← MODIFICAR — busca dados, passa props
         └── profile-button.tsx      ← MODIFICAR — recebe props, sign-out funcional
+└── http/
+    └── sign-out.ts                 ← CRIAR — Server Action signOut()
 ```
 
 ---
