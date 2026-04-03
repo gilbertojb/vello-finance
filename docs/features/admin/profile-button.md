@@ -2,7 +2,7 @@
 
 **App:** `apps/admin` — Vello Admin
 **Componente:** `src/components/sidebar/profile-button.tsx`
-**Status:** `ready-for-dev`
+**Status:** `implementado`
 **Prioridade:** Alta — dados hardcoded em produção
 
 ---
@@ -251,13 +251,13 @@ apps/admin/src/
 
 ## Critérios de Aceite
 
-- [ ] Nome e e-mail do usuário autenticado exibidos (não hardcoded)
-- [ ] Iniciais geradas dinamicamente a partir do `full_name`
-- [ ] Badge de role exibido no header do dropdown
-- [ ] Clicar em "Sair" chama `signOut()` e redireciona para `/sign-in`
-- [ ] Botão "Sair" exibe "Saindo..." e fica desabilitado durante a transição
-- [ ] Se `full_name` for nulo, fallback para o e-mail
-- [ ] Sem acesso ao Supabase em `profile-button.tsx` — apenas props
+- [x] Nome e e-mail do usuário autenticado exibidos (não hardcoded)
+- [x] Iniciais geradas dinamicamente a partir do `full_name`
+- [x] Badge de role exibido no header do dropdown
+- [x] Clicar em "Sair" chama `signOut()` e redireciona para `/sign-in`
+- [x] Botão "Sair" exibe "Saindo..." e fica desabilitado durante a transição
+- [x] Se `full_name` for nulo, fallback para o e-mail
+- [x] Sem acesso ao Supabase em `profile-button.tsx` — apenas props
 
 ---
 
