@@ -1,28 +1,31 @@
 # Spec — Integração com Supabase
 
 **App:** `apps/admin` (padrão replicado depois para `console` e `store`)
-**Status:** `ready-for-dev`
+**Status:** `implementado`
 **Prioridade:** Bloqueante — todos os módulos dependem desta integração
 
 ---
 
 ## Visão Geral
 
-A integração segue o padrão oficial `@supabase/ssr` com três camadas:
+A integração segue o padrão oficial `@supabase/ssr` com quatro camadas:
 
 ```
 Browser (Client Component)
-  └── supabase/client.ts       ← createBrowserClient — apenas auth.getUser(), signOut()
+  └── lib/supabase/client.ts       ← createBrowserClient — apenas auth.signOut()
 
 Servidor (Server Component / Action)
-  └── supabase/server.ts       ← createServerClient — todas as queries de dados
+  └── lib/supabase/server.ts       ← createServerClient — todas as queries de dados
+  └── lib/supabase/service.ts      ← createClient com secret key — bypassa RLS
 
 Middleware (Edge)
-  └── middleware.ts            ← refresh de sessão + proteção de rotas
+  └── middleware.ts                ← re-exporta de proxy.ts
+  └── proxy.ts                     ← lógica de proteção de rotas com getClaims()
+  └── lib/supabase/proxy.ts        ← updateSession helper (refresh de cookies)
 ```
 
 **Regra central (Fat Server):** queries de banco NUNCA no browser client.
-O browser client existe exclusivamente para `auth.getUser()` e `auth.signOut()`.
+O browser client existe exclusivamente para `auth.signOut()`.
 
 ---
 
@@ -71,9 +74,11 @@ Deve retornar o projeto linkado com `API URL` e `anon key`.
 
 ```bash
 # .env.local
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_REF].supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...           # anon/public key
-SUPABASE_SERVICE_ROLE_KEY=eyJ...               # service role — NUNCA expor no cliente
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...   # publishable key
+SUPABASE_SECRET_KEY=sb_secret_...                         # secret key — NUNCA expor no cliente
+RESEND_API_KEY=re_...
 ```
 
 > As keys estão em: Supabase Dashboard → Project Settings → API
@@ -82,9 +87,10 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...               # service role — NUNCA expor no
 
 ```bash
 # .env.example
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
 ```
 
 ### 2.3 Garantir que `.env.local` está no `.gitignore`
@@ -104,19 +110,22 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
-    SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+    SUPABASE_SECRET_KEY: z.string().min(1),
     NODE_ENV: z.enum(['development', 'test', 'production']),
   },
   client: {
+    NEXT_PUBLIC_APP_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
     NODE_ENV: process.env.NODE_ENV,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   },
+  emptyStringAsUndefined: true,
 })
 ```
 
@@ -207,66 +216,57 @@ export function createServiceClient() {
 
 ## Fase 4 — Middleware
 
+A lógica de proteção de rotas está em `proxy.ts`. O `middleware.ts` apenas re-exporta:
+
 ### `apps/admin/middleware.ts`
 
 ```typescript
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
-import { env } from '@vello/env/admin'
+export { proxy as middleware, config } from './proxy'
+```
 
-export async function middleware(request: NextRequest) {
+### `apps/admin/proxy.ts`
+
+Usa `getClaims()` (leitura local do JWT, sem network call) para verificar autenticação.
+Suporta comportamento diferenciado por rota pública via `whenAuthenticated`.
+
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { env } from '@vello/env/admin'
+import { type NextRequest, NextResponse } from 'next/server'
+
+const publicRoutesPatterns = [
+  { path: '/sign-in', whenAuthenticated: 'redirect' as const },
+  { path: '/forgot-password', whenAuthenticated: 'redirect' as const },
+  { path: '/reset-password', whenAuthenticated: 'next' as const },
+]
+
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          )
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          )
-        },
-      },
-    },
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    { cookies: { getAll() { ... }, setAll(cookiesToSet, headers) { ... } } },
   )
 
-  // Refresh de sessão — CRÍTICO: não remover
-  const { data: { user } } = await supabase.auth.getUser()
+  // CRÍTICO: não adicionar código entre createServerClient e getClaims()
+  const { data } = await supabase.auth.getClaims()
+  const isAuthenticated = !!data?.claims
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/sign-in')
-  const isProtectedRoute = !isAuthRoute
-
-  // Redireciona para login se não autenticado em rota protegida
-  if (!user && isProtectedRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/sign-in'
-    return NextResponse.redirect(url)
-  }
-
-  // Redireciona para dashboard se já autenticado tentando acessar login
-  if (user && isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/'
-    return NextResponse.redirect(url)
-  }
-
+  // Redireciona não-autenticados para /sign-in e autenticados para fora do /sign-in
+  // ...
   return supabaseResponse
 }
 
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }
 ```
+
+### `apps/admin/src/lib/supabase/proxy.ts`
+
+Helper `updateSession` para quando apenas o refresh de cookies é necessário
+(sem decisão de redirect). Usa a mesma lógica de `setAll` com headers.
 
 ---
 
@@ -762,16 +762,18 @@ Fase 8  → actions.ts de sign-in (substituir ky por Supabase) + sign-out-button
 
 ## Critérios de Conclusão
 
-- [ ] `supabase status` retorna projeto linkado
-- [ ] `.env.local` preenchido, `.env.example` commitado
-- [ ] `packages/env/src/admin.ts` validando as variáveis
-- [ ] `src/lib/supabase/client.ts`, `server.ts` e `service.ts` criados
-- [ ] `src/proxy.ts` redirecionando para `/sign-in` sem auth, para `/` com auth
-- [ ] Migration `backoffice_users` aplicada: `supabase db push --linked`
-- [ ] Edge Function `custom-access-token` deployada e hook configurado no dashboard
+- [x] `supabase status` retorna projeto linkado
+- [x] `.env.local` preenchido, `.env.example` commitado
+- [x] `packages/env/src/admin.ts` validando as variáveis (publishable/secret key)
+- [x] `src/lib/supabase/client.ts`, `server.ts` e `service.ts` criados
+- [x] `proxy.ts` redirecionando para `/sign-in` sem auth, para `/` com auth
+- [x] `middleware.ts` re-exporta `proxy` e `config`
+- [x] Migration `backoffice_users` aplicada: `supabase db push`
+- [x] Edge Function `custom-access-token` deployada
+- [ ] Hook "Custom Access Token" configurado no Dashboard (Authentication → Hooks)
 - [ ] Usuário super_admin criado via dashboard + INSERT em `backoffice_users`
 - [ ] Login funciona: `success: true` → `router.push('/')` via `useFormState`
 - [ ] JWT do usuário contém `role: 'super_admin'` e `tenant_id: null`
-- [ ] `pnpm db:types` gera os types em `packages/database/src/types.ts`
+- [x] `pnpm db:types` gera os types em `packages/database/src/types.ts`
 - [ ] Acesso direto a `/` sem login redireciona para `/sign-in`
-- [ ] Erros de auth retornam `{ success: false, message, errors: null }` — sem detalhes técnicos
+- [x] Erros de auth retornam `{ success: false, message, errors: null }` — sem detalhes técnicos

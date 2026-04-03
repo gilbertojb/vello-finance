@@ -12,7 +12,7 @@ export async function signInWithEmailAndPassword(data: FormData) {
   const result = signInSchema.safeParse(Object.fromEntries(data))
 
   if (!result.success) {
-    const errors = result.error.flatten().fieldErrors
+    const errors = z.flattenError(result.error).fieldErrors
     return { success: false, message: null, errors }
   }
 

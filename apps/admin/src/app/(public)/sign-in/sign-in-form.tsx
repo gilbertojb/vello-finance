@@ -1,12 +1,34 @@
 'use client'
 
+import { AlertCircleIcon, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 
+import { useFormState } from '@/hooks/use-form-state'
+
+import { signInWithEmailAndPassword } from './actions'
+
 export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
+  const router = useRouter()
+
+  const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
+    signInWithEmailAndPassword,
+    () => {
+      router.push('/')
+    },
+  )
+
   return (
-    <form {...props}>
+    <form onSubmit={handleSubmit} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Acesse sua conta</h1>
@@ -15,12 +37,26 @@ export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
           </p>
         </div>
 
-        <Field>
+        {success === false && message && (
+          <Alert variant="destructive" className="border-red-200 bg-red-50">
+            <AlertCircleIcon />
+            <AlertTitle>Houve um erro ao entrar na sua conta!</AlertTitle>
+            <AlertDescription className="text-xs">{message}</AlertDescription>
+          </Alert>
+        )}
+
+        <Field data-invalid={!!errors?.email}>
           <FieldLabel htmlFor="email">Informe seu e-mail</FieldLabel>
-          <Input id="email" type="email" name="email" />
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            aria-invalid={!!errors?.email}
+          />
+          <FieldError errors={errors?.email} />
         </Field>
 
-        <Field>
+        <Field data-invalid={!!errors?.password}>
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Informe sua senha</FieldLabel>
             <a
@@ -30,18 +66,20 @@ export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
               Esqueceu sua senha?
             </a>
           </div>
-          <Input id="password" type="password" name="password" />
-        </Field>
-        <Field>
-          <Button type="submit">Continuar</Button>
+          <Input
+            id="password"
+            type="password"
+            name="password"
+            aria-invalid={!!errors?.password}
+          />
+          <FieldError errors={errors?.password} />
         </Field>
 
-        <div className="text-center text-sm">
-          Ainda não tem uma conta?{' '}
-          <a href="/sign-up" className="text-primary hover:text-primary/80">
-            Crie sua conta agora
-          </a>
-        </div>
+        <Field>
+          <Button type="submit" disabled={isPending}>
+            {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Entrar'}
+          </Button>
+        </Field>
       </FieldGroup>
     </form>
   )

@@ -27,10 +27,13 @@ apps/[admin|console|store]/src/
 ├── hooks/                      ← Custom hooks reutilizáveis
 ├── lib/
 │   ├── supabase/
-│   │   ├── client.ts           ← Supabase browser client (auth display apenas)
-│   │   └── server.ts           ← Supabase server client (RSC + Actions)
+│   │   ├── client.ts           ← Browser client — apenas auth.signOut()
+│   │   ├── server.ts           ← Server client (RSC + Actions) — respeita RLS
+│   │   ├── service.ts          ← Service client (secret key) — bypassa RLS
+│   │   └── proxy.ts            ← updateSession helper para o middleware
 │   └── utils.ts                ← cn()
-└── middleware.ts               ← Auth + resolução de tenant
+├── middleware.ts               ← Re-exporta proxy e config de proxy.ts
+└── proxy.ts                    ← Lógica de proteção de rotas com getClaims()
 ```
 
 ### Route Groups: `(public)` e `(private)`
