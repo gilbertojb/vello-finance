@@ -15,6 +15,10 @@ CREATE POLICY "backoffice_full_read" ON backoffice_users
 
 -- Apenas super_admin pode criar, editar e remover membros
 CREATE POLICY "super_admin_write" ON backoffice_users
-  FOR ALL USING (
+  FOR ALL
+  USING (
+    (auth.jwt() ->> 'role') = 'super_admin'
+  )
+  WITH CHECK (
     (auth.jwt() ->> 'role') = 'super_admin'
   );
