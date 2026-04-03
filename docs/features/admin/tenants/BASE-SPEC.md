@@ -51,7 +51,7 @@ CREATE TABLE tenants (
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER trg_set_updated_at_tenants
+CREATE TRIGGER set_updated_at_tenants
   BEFORE UPDATE ON tenants
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
@@ -98,7 +98,7 @@ CREATE TRIGGER trg_create_default_branding
   AFTER INSERT ON tenants
   FOR EACH ROW EXECUTE FUNCTION create_default_branding();
 
-CREATE TRIGGER trg_set_updated_at_tenant_branding
+CREATE TRIGGER set_updated_at_tenant_branding
   BEFORE UPDATE ON tenant_branding
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
@@ -134,7 +134,7 @@ CREATE TABLE tenant_products (
   UNIQUE(tenant_id, product_id)
 );
 
-CREATE TRIGGER trg_set_updated_at_tenant_products
+CREATE TRIGGER set_updated_at_tenant_products
   BEFORE UPDATE ON tenant_products
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
