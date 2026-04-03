@@ -66,6 +66,324 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_partners: {
+        Row: {
+          api_base_url: string | null
+          api_key_enc: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          type: string
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          api_base_url?: string | null
+          api_key_enc?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          type: string
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          api_base_url?: string | null
+          api_key_enc?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          commission_pct: number
+          created_at: string
+          features: Json
+          id: string
+          is_active: boolean
+          max_products: number | null
+          monthly_fee: number | null
+          name: string
+          setup_fee: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          commission_pct: number
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_products?: number | null
+          monthly_fee?: number | null
+          name: string
+          setup_fee?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          commission_pct?: number
+          created_at?: string
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_products?: number | null
+          monthly_fee?: number | null
+          name?: string
+          setup_fee?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          bank_commission_pct: number
+          created_at: string
+          description: string | null
+          financial_partner_id: string | null
+          id: string
+          is_active: boolean
+          max_amount: number | null
+          max_rate_monthly: number | null
+          max_term_months: number | null
+          min_amount: number | null
+          min_rate_monthly: number | null
+          min_term_months: number | null
+          name: string
+          type: string
+          updated_at: string
+          vello_commission_pct: number
+        }
+        Insert: {
+          bank_commission_pct: number
+          created_at?: string
+          description?: string | null
+          financial_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          max_rate_monthly?: number | null
+          max_term_months?: number | null
+          min_amount?: number | null
+          min_rate_monthly?: number | null
+          min_term_months?: number | null
+          name: string
+          type: string
+          updated_at?: string
+          vello_commission_pct: number
+        }
+        Update: {
+          bank_commission_pct?: number
+          created_at?: string
+          description?: string | null
+          financial_partner_id?: string | null
+          id?: string
+          is_active?: boolean
+          max_amount?: number | null
+          max_rate_monthly?: number | null
+          max_term_months?: number | null
+          min_amount?: number | null
+          min_rate_monthly?: number | null
+          min_term_months?: number | null
+          name?: string
+          type?: string
+          updated_at?: string
+          vello_commission_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_financial_partner_id_fkey"
+            columns: ["financial_partner_id"]
+            isOneToOne: false
+            referencedRelation: "financial_partners"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_branding: {
+        Row: {
+          auth_bg_color: string
+          auth_bg_image_url: string | null
+          auth_theme: string
+          company_display_name: string | null
+          created_at: string
+          favicon_url: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string
+          secondary_color: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          auth_bg_color?: string
+          auth_bg_image_url?: string | null
+          auth_theme?: string
+          company_display_name?: string | null
+          created_at?: string
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          auth_bg_color?: string
+          auth_bg_image_url?: string | null
+          auth_theme?: string
+          company_display_name?: string | null
+          created_at?: string
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string
+          secondary_color?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_branding_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_products: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          tenant_commission_pct: number
+          tenant_id: string
+          updated_at: string
+          vello_spread_pct: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          tenant_commission_pct: number
+          tenant_id: string
+          updated_at?: string
+          vello_spread_pct: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          tenant_commission_pct?: number
+          tenant_id?: string
+          updated_at?: string
+          vello_spread_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_products_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          activated_at: string | null
+          bank_account: string | null
+          bank_agency: string | null
+          bank_name: string | null
+          bank_pix_key: string | null
+          cnpj: string
+          company_name: string
+          created_at: string
+          custom_domain: string | null
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          plan_id: string
+          slug: string
+          status: Database["public"]["Enums"]["tenant_status"]
+          suspended_at: string | null
+          type: Database["public"]["Enums"]["tenant_type"]
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          bank_account?: string | null
+          bank_agency?: string | null
+          bank_name?: string | null
+          bank_pix_key?: string | null
+          cnpj: string
+          company_name: string
+          created_at?: string
+          custom_domain?: string | null
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          plan_id: string
+          slug: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          suspended_at?: string | null
+          type: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          bank_account?: string | null
+          bank_agency?: string | null
+          bank_name?: string | null
+          bank_pix_key?: string | null
+          cnpj?: string
+          company_name?: string
+          created_at?: string
+          custom_domain?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          plan_id?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["tenant_status"]
+          suspended_at?: string | null
+          type?: Database["public"]["Enums"]["tenant_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -75,6 +393,8 @@ export type Database = {
     }
     Enums: {
       backoffice_role: "super_admin" | "admin" | "financial" | "support"
+      tenant_status: "pending" | "active" | "suspended" | "cancelled"
+      tenant_type: "whitelabel" | "subscription"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -206,6 +526,8 @@ export const Constants = {
   public: {
     Enums: {
       backoffice_role: ["super_admin", "admin", "financial", "support"],
+      tenant_status: ["pending", "active", "suspended", "cancelled"],
+      tenant_type: ["whitelabel", "subscription"],
     },
   },
 } as const
