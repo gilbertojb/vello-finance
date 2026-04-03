@@ -142,8 +142,8 @@ CREATE POLICY "snapshots_immutable_no_delete" ON commission_snapshots
 ## Arquivos a Criar
 
 ```
-apps/admin/components/commissions/
-└── CommissionSnapshotPanel.tsx   ← reutilizado em admin e console
+apps/admin/src/components/commissions/
+└── commission-snapshot-panel.tsx   ← reutilizado em admin e console
 
 supabase/migrations/
 ├── 20260401150000_create_commission_snapshots.sql
@@ -153,6 +153,6 @@ supabase/migrations/
 ## Restrições de implementação
 
 - `page.tsx` é Server Component — busca dados diretamente no Supabase server client
-- `_components/CommissionSnapshotPanel.tsx` é Client Component — recebe `snapshot` via props, sem acesso ao banco
+- `_components/commission-snapshot-panel.tsx` é Client Component — recebe `snapshot` via props, sem acesso ao banco
 - `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
 - `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components

@@ -84,7 +84,7 @@ Disponível ao Tenant:      5,0000%
 Reutilizado em: formulário de produto · detalhes do produto · gerenciador de produtos do tenant.
 
 ```tsx
-// apps/admin/components/commissions/CommissionCascade.tsx
+// apps/admin/src/components/commissions/commission-cascade.tsx
 type Props = {
   bankPct: number
   velloPct: number
@@ -98,7 +98,7 @@ type Props = {
 ## Arquivos a Criar
 
 ```
-apps/admin/app/(app)/
+apps/admin/src/app/(private)/
 ├── financial-partners/
 │   ├── page.tsx
 │   ├── new/page.tsx
@@ -114,10 +114,10 @@ apps/admin/app/(app)/
     ├── actions.ts
     ├── queries.ts
     └── _components/
-        ├── ProductTable.tsx
-        ├── ProductForm.tsx
-        ├── ProductTypeBadge.tsx
-        └── CommissionCascade.tsx
+        ├── product-table.tsx
+        ├── product-form.tsx
+        ├── product-type-badge.tsx
+        └── commission-cascade.tsx
 
 supabase/migrations/
 ├── 20260401100000_create_financial_partners.sql

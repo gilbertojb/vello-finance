@@ -79,7 +79,7 @@ Tipos de plano:
 ## Arquivos a Criar
 
 ```
-apps/admin/app/(app)/plans/
+apps/admin/src/app/(private)/plans/
 ├── page.tsx
 ├── new/page.tsx
 ├── [id]/
@@ -88,9 +88,9 @@ apps/admin/app/(app)/plans/
 ├── actions.ts
 ├── queries.ts
 └── _components/
-    ├── PlanTable.tsx
-    ├── PlanForm.tsx
-    └── PlanStatusBadge.tsx
+    ├── plan-table.tsx
+    ├── plan-form.tsx
+    └── plan-status-badge.tsx
 
 supabase/migrations/
 └── 20260401120000_create_plans.sql
