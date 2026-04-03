@@ -166,9 +166,14 @@ CREATE POLICY "backoffice_full_access" ON plans
     (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
-CREATE POLICY "tenants_read_active" ON plans
-  FOR SELECT USING (is_active = true);
+CREATE POLICY "tenant_read_active" ON plans
+  FOR SELECT USING (
+    is_active = true
+    AND (auth.jwt() ->> 'tenant_id') IS NOT NULL
+  );
 ```
+
+> **Premissa:** autenticação anônima desabilitada no projeto. A condição `tenant_id IS NOT NULL` assume que qualquer JWT presente pertence a um usuário autenticado. Se autenticação anônima for habilitada, adicionar: `AND (auth.jwt() ->> 'role') = ANY(ARRAY['tenant_admin','tenant_operator'])`.
 
 ## Variáveis de Ambiente por App
 
