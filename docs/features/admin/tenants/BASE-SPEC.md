@@ -246,7 +246,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" disableTransitionOnChange>
+      <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
         <TooltipProvider>
           {children}
         </TooltipProvider>
