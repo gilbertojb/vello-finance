@@ -48,7 +48,7 @@ export async function NavMain() {
               <NavLink
                 href="/financial-partners"
                 icon={<Landmark />}
-                label="Parceiros Bancários"
+                label="Instituições Financeiras"
               />
             </SidebarMenuItem>
           </SidebarMenu>
