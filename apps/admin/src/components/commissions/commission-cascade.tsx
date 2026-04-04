@@ -1,5 +1,5 @@
 type Props = {
-  bankPct: number
+  ifPct: number
   velloPct: number
   tenantPct?: number
   velloSpreadPct?: number
@@ -7,13 +7,13 @@ type Props = {
 }
 
 export function CommissionCascade({
-  bankPct,
+  ifPct,
   velloPct,
   tenantPct,
   velloSpreadPct,
   baseValue = 500_000,
 }: Props) {
-  const tenantAvailable = bankPct - velloPct
+  const tenantAvailable = ifPct - velloPct
 
   const formatCurrency = (value: number) =>
     Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -38,7 +38,7 @@ export function CommissionCascade({
           Simulação de Repasse
         </div>
         <div className="text-[32px] leading-tight font-extrabold mb-1.5">
-          {formatCurrency(bankPct)}
+          {formatCurrency(ifPct)}
         </div>
         <div className="text-xs text-white/70">
           Estimativa baseada em ticket médio de {formatCompact(baseValue)}
@@ -49,7 +49,7 @@ export function CommissionCascade({
       <div className="px-6 py-6 flex flex-col space-y-5">
         <div className="flex justify-between items-center">
           <span className="text-[15px] text-muted-foreground">
-            Comissão Vello ({(velloPct || 0).toFixed(1)}%)
+            Comissão Vello ({(velloPct || 0).toFixed(3)}%)
           </span>
           <span className="text-[15px] font-bold text-foreground">
             {formatCurrency(velloPct || 0)}
@@ -58,7 +58,7 @@ export function CommissionCascade({
 
         <div className="flex justify-between items-center">
           <span className="text-[15px] text-muted-foreground">
-            Comissão Parceiro ({tenantAvailable.toFixed(1)}%)
+            Comissão Parceiro ({tenantAvailable.toFixed(3)}%)
           </span>
           <span className="text-[15px] font-bold text-foreground">
             {formatCurrency(tenantAvailable)}
@@ -68,7 +68,7 @@ export function CommissionCascade({
         {tenantPct !== undefined && (
           <div className="flex justify-between items-center">
             <span className="text-[15px] text-muted-foreground">
-              Comissão do Parceiro ({tenantPct.toFixed(1)}%)
+              Comissão do Parceiro ({tenantPct.toFixed(3)}%)
             </span>
             <span className="text-[15px] font-bold text-foreground">
               {formatCurrency(tenantPct)}
@@ -79,7 +79,7 @@ export function CommissionCascade({
         {velloSpreadPct !== undefined && (
           <div className="flex justify-between items-center">
             <span className="text-[15px] text-muted-foreground">
-              Vello Spread Extra ({velloSpreadPct.toFixed(1)}%)
+              Vello Spread Extra ({velloSpreadPct.toFixed(3)}%)
             </span>
             <span className="text-[15px] font-bold text-foreground">
               {formatCurrency(velloSpreadPct)}

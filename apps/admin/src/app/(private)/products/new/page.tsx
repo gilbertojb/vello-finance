@@ -16,8 +16,8 @@ export default async function NewProductPage() {
             Cadastrar Produto
           </h2>
           <p className="text-muted-foreground mt-2">
-            Adicione um novo produto de crédito definindo suas taxas,
-            comissionamento e parceiro associado.
+            Adicione um novo produto de crédito definindo suas taxas e as
+            instituições financeiras que o operam.
           </p>
         </div>
       </div>
