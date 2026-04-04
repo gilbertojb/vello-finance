@@ -11,11 +11,14 @@
 Percentuais mudam ao longo do tempo. O snapshot captura os valores vigentes no momento
 exato da criação de cada proposta. É **append-only** — nunca atualizar ou deletar.
 
+A comissão da IF é definida por par **produto + instituição financeira** (`product_financial_partners`).
+Uma proposta deve referenciar a IF específica utilizada para que o trigger capture os percentuais corretos.
+
 ### Exemplo com empréstimo de R$ 10.000
 
 | Parte | % | Valor |
 |---|---|---|
-| Banco paga à Vello | 10,0000% | R$ 1.000,00 |
+| IF paga à Vello | 10,0000% | R$ 1.000,00 |
 | Vello retém | 5,0000% | R$ 500,00 |
 | Tenant recebe | 3,5000% | R$ 350,00 |
 | Vello spread | 1,5000% | R$ 150,00 |
@@ -33,10 +36,18 @@ exato da criação de cada proposta. É **append-only** — nunca atualizar ou d
 CREATE OR REPLACE FUNCTION capture_commission_snapshot()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_product        products%ROWTYPE;
-  v_tenant_product tenant_products%ROWTYPE;
+  v_product_partner    product_financial_partners%ROWTYPE;
+  v_tenant_product     tenant_products%ROWTYPE;
 BEGIN
-  SELECT * INTO v_product FROM products WHERE id = NEW.product_id;
+  -- Busca comissão da IF para este produto específico
+  SELECT * INTO v_product_partner FROM product_financial_partners
+  WHERE product_id = NEW.product_id
+    AND financial_partner_id = NEW.financial_partner_id
+    AND is_active = true;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Instituição financeira não vinculada a este produto';
+  END IF;
 
   SELECT * INTO v_tenant_product FROM tenant_products
   WHERE tenant_id = NEW.tenant_id
@@ -48,13 +59,13 @@ BEGIN
   END IF;
 
   INSERT INTO commission_snapshots (
-    proposal_id, product_id, tenant_id,
-    bank_commission_pct, vello_commission_pct,
+    proposal_id, product_id, tenant_id, financial_partner_id,
+    if_commission_pct, vello_commission_pct,
     tenant_commission_pct, vello_spread_pct
   ) VALUES (
-    NEW.id, NEW.product_id, NEW.tenant_id,
-    v_product.bank_commission_pct,
-    v_product.vello_commission_pct,
+    NEW.id, NEW.product_id, NEW.tenant_id, NEW.financial_partner_id,
+    v_product_partner.if_commission_pct,
+    v_product_partner.vello_commission_pct,
     v_tenant_product.tenant_commission_pct,
     v_tenant_product.vello_spread_pct
   );
@@ -70,8 +81,9 @@ CREATE TRIGGER trg_capture_commission_snapshot
 
 **Aceite:**
 - [ ] Snapshot criado para toda nova proposta
+- [ ] Proposta rejeitada se IF não estiver vinculada ao produto
 - [ ] Proposta rejeitada se produto não habilitado para o tenant
-- [ ] Snapshot preservado após alterações futuras em products ou tenant_products
+- [ ] Snapshot preservado após alterações futuras em `product_financial_partners` ou `tenant_products`
 
 ---
 
@@ -86,7 +98,7 @@ const amount = proposal.approved_amount
 
 await updateSnapshot(snap.id, {
   loan_amount: amount,
-  bank_commission_amount:   amount * snap.bank_commission_pct,
+  if_commission_amount:     amount * snap.if_commission_pct,
   vello_commission_amount:  amount * snap.vello_commission_pct,
   tenant_commission_amount: amount * snap.tenant_commission_pct,
 })
@@ -108,7 +120,7 @@ Comissões desta Proposta
 
 Valor do Empréstimo:          R$ 10.000,00
 
-Banco paga à Vello:  10,0000%   R$  1.000,00
+IF paga à Vello:     10,0000%   R$  1.000,00
 Vello retém:          5,0000%   R$    500,00
 ─────────────────────────────────────────────
 Tenant recebe:        3,5000%   R$    350,00
@@ -120,7 +132,7 @@ Total Vello Finance:  6,5000%   R$    650,00
 Nota de rodapé: *"Percentuais fixados em [data]. Alterações posteriores não afetam esta proposta."*
 
 **Aceite:**
-- [ ] Sempre exibe percentuais do snapshot (nunca os valores atuais do produto)
+- [ ] Sempre exibe percentuais do snapshot (nunca os valores atuais)
 - [ ] Valores em R$ exibidos apenas se proposta aprovada
 
 ---
@@ -146,11 +158,11 @@ apps/admin/src/components/commissions/
 └── commission-snapshot-panel.tsx   ← reutilizado em admin e console
 
 supabase/migrations/
-├── 20260401150000_create_commission_snapshots.sql
-└── 20260401160000_create_commission_trigger.sql
+├── YYYYMMDDHHMMSS_create_commission_snapshots.sql
+└── YYYYMMDDHHMMSS_create_commission_trigger.sql
 ```
 
-## Restrições de implementação
+## Restrições de Implementação
 
 - `page.tsx` é Server Component — busca dados diretamente no Supabase server client
 - `_components/commission-snapshot-panel.tsx` é Client Component — recebe `snapshot` via props, sem acesso ao banco
