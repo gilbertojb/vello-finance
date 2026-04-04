@@ -1,0 +1,208 @@
+'use client'
+
+import { KeyRound, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
+import { useFormState } from '@/hooks/use-form-state'
+
+import { createFinancialPartner, updateFinancialPartner } from '../actions'
+
+type FinancialPartner = {
+  id: string
+  name: string
+  type: string
+  api_base_url: string | null
+  api_key_enc: string | null
+  webhook_secret: string | null
+  is_active: boolean
+}
+
+type Props = {
+  partner?: FinancialPartner
+  isSuperAdmin: boolean
+}
+
+const TYPE_OPTIONS = [
+  { value: 'qi_tech', label: 'QI Tech' },
+  { value: 'bancly', label: 'Bancly' },
+  { value: 'zip', label: 'Zip' },
+  { value: 'other', label: 'Outro' },
+]
+
+export function FinancialPartnerForm({ partner, isSuperAdmin }: Props) {
+  const router = useRouter()
+  const isEdit = !!partner
+
+  const action = isEdit ? updateFinancialPartner : createFinancialPartner
+
+  const [formState, handleSubmit, isPending] = useFormState(
+    action,
+    () => {
+      toast.success(
+        isEdit
+          ? 'Instituição atualizada com sucesso!'
+          : 'Instituição cadastrada com sucesso!',
+      )
+      router.push('/financial-partners')
+    },
+    (msg: string) => {
+      toast.error(msg)
+    },
+  )
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-8 w-full">
+      {isEdit && <input type="hidden" name="id" value={partner.id} />}
+
+      {/* Card 1 — Identificação */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>Identificação</CardTitle>
+          <CardDescription>
+            Dados principais da instituição financeira.
+          </CardDescription>
+          <CardAction className="my-auto">
+            <div className="flex items-center space-x-2">
+              <FieldLabel htmlFor="is_active" className="cursor-pointer">
+                Ativo
+              </FieldLabel>
+              <Switch
+                id="is_active"
+                name="is_active"
+                defaultChecked={partner?.is_active ?? true}
+              />
+            </div>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field>
+              <FieldLabel htmlFor="name">Nome *</FieldLabel>
+              <Input
+                id="name"
+                name="name"
+                required
+                placeholder="Ex: QI Tech"
+                defaultValue={partner?.name ?? ''}
+              />
+              <FieldError errors={formState.errors?.name} />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="type">Tipo *</FieldLabel>
+              <select
+                id="type"
+                name="type"
+                required
+                defaultValue={partner?.type ?? ''}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Selecione...</option>
+                {TYPE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <FieldError errors={formState.errors?.type} />
+            </Field>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      {/* Card 2 — Integração */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle>Integração</CardTitle>
+          <CardDescription>
+            Configurações de conexão com a API da instituição.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup>
+            <Field>
+              <FieldLabel htmlFor="api_base_url">URL da API</FieldLabel>
+              <Input
+                id="api_base_url"
+                name="api_base_url"
+                type="url"
+                placeholder="https://api.exemplo.com"
+                defaultValue={partner?.api_base_url ?? ''}
+              />
+              <FieldError errors={formState.errors?.api_base_url} />
+            </Field>
+          </FieldGroup>
+        </CardContent>
+      </Card>
+
+      {/* Card 3 — Segurança (apenas super_admin) */}
+      {isSuperAdmin && (
+        <Card>
+          <CardHeader className="border-b">
+            <CardTitle className="flex items-center gap-2">
+              <KeyRound className="size-4" />
+              Segurança
+            </CardTitle>
+            <CardDescription>
+              Credenciais sensíveis — visíveis apenas para super_admin.
+              {isEdit && ' Deixe em branco para manter os valores atuais.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field>
+                <FieldLabel htmlFor="api_key_enc">Chave de API</FieldLabel>
+                <Input
+                  id="api_key_enc"
+                  name="api_key_enc"
+                  type="password"
+                  placeholder={isEdit ? '••••••••' : 'Chave de acesso à API'}
+                  autoComplete="off"
+                />
+                <FieldError errors={formState.errors?.api_key_enc} />
+              </Field>
+
+              <Field>
+                <FieldLabel htmlFor="webhook_secret">Webhook Secret</FieldLabel>
+                <Input
+                  id="webhook_secret"
+                  name="webhook_secret"
+                  type="password"
+                  placeholder={isEdit ? '••••••••' : 'Secret para validar webhooks'}
+                  autoComplete="off"
+                />
+                <FieldError errors={formState.errors?.webhook_secret} />
+              </Field>
+            </FieldGroup>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="flex justify-end space-x-4">
+        <Button
+          variant="outline"
+          type="button"
+          onClick={() => router.push('/financial-partners')}
+        >
+          Cancelar
+        </Button>
+        <Button type="submit" disabled={isPending}>
+          {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Salvar'}
+        </Button>
+      </div>
+    </form>
+  )
+}
