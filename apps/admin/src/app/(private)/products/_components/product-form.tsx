@@ -1,19 +1,21 @@
 'use client'
 
 import { Banknote, Calendar, Info, Loader2, TrendingUp } from 'lucide-react'
-
 import { useRouter } from 'next/navigation'
-
 import { useState } from 'react'
-
 import { toast } from 'sonner'
 
-import { CommissionCascade } from '@/components/commissions/commission-cascade'
 import { Button } from '@/components/ui/button'
-
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -26,26 +28,15 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
-
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createProduct } from '../actions'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 
 type Partner = { id: string; name: string }
 
 export function ProductForm({ partners }: { partners: Partner[] }) {
   const router = useRouter()
-
-  const [bankPct, setBankPct] = useState<number>(0)
-  const [velloPct, setVelloPct] = useState<number>(0)
+  const [selectedPartners, setSelectedPartners] = useState<Set<string>>(new Set())
 
   const [formState, handleSubmit, isPending] = useFormState(
     createProduct,
@@ -58,8 +49,21 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
     },
   )
 
+  function togglePartner(id: string) {
+    setSelectedPartners((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 w-full">
+      {/* Card 1 — Identificação */}
       <Card>
         <CardHeader className="border-b">
           <CardTitle>Identificação</CardTitle>
@@ -108,25 +112,6 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
               <FieldError errors={formState.errors?.type} />
             </Field>
 
-            <Field className="col-span-full">
-              <FieldLabel htmlFor="financial_partner_id">
-                Parceiro Bancário
-              </FieldLabel>
-              <select
-                id="financial_partner_id"
-                name="financial_partner_id"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Nenhum (Produto Próprio / Outro)</option>
-                {partners.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-              <FieldError errors={formState.errors?.financial_partner_id} />
-            </Field>
-
             <Field className="col-span-full md:col-span-2 mt-4">
               <div className="flex flex-col">
                 <FieldLabel htmlFor="description">
@@ -141,7 +126,6 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   </Tooltip>
                 </FieldLabel>
               </div>
-
               <WysiwygEditor
                 id="description"
                 name="description"
@@ -167,7 +151,6 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   </Tooltip>
                 </FieldLabel>
               </div>
-
               <WysiwygEditor
                 id="internal_description"
                 name="internal_description"
@@ -179,6 +162,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
         </CardContent>
       </Card>
 
+      {/* Card 2 — Parâmetros de Crédito */}
       <Card>
         <CardHeader className="border-b">
           <CardTitle>Parâmetros de Crédito</CardTitle>
@@ -193,7 +177,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 <Banknote className="size-4" />
                 Limites de Valores
               </h2>
-              <Field className="col-span-2">
+              <Field>
                 <FieldLabel htmlFor="min_amount">Valor Mínimo (R$)</FieldLabel>
                 <Input
                   id="min_amount"
@@ -222,7 +206,6 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 <Calendar className="size-4" />
                 Prazos em Meses
               </h2>
-
               <Field>
                 <FieldLabel htmlFor="min_term_months">
                   Prazo Mínimo (meses)
@@ -256,7 +239,6 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 <TrendingUp className="size-4" />
                 Taxas de Juros (% A.M.)
               </h2>
-
               <Field>
                 <FieldLabel htmlFor="min_rate_monthly">
                   Taxa Mínima (%)
@@ -265,8 +247,8 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   id="min_rate_monthly"
                   name="min_rate_monthly"
                   type="number"
-                  step="0.01"
-                  placeholder="1.00"
+                  step="0.001"
+                  placeholder="1.000"
                 />
                 <FieldError errors={formState.errors?.min_rate_monthly} />
               </Field>
@@ -278,8 +260,8 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   id="max_rate_monthly"
                   name="max_rate_monthly"
                   type="number"
-                  step="0.01"
-                  placeholder="5.00"
+                  step="0.001"
+                  placeholder="5.000"
                 />
                 <FieldError errors={formState.errors?.max_rate_monthly} />
               </Field>
@@ -288,78 +270,77 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
         </CardContent>
       </Card>
 
+      {/* Card 3 — Instituições Financeiras */}
       <Card>
         <CardHeader className="border-b">
-          <CardTitle>Comissionamento & Rentabilidade</CardTitle>
+          <CardTitle>Instituições Financeiras</CardTitle>
           <CardDescription>
-            Defina as regras de repasse para parceiros e a rentabilidade do
-            produto.
+            Selecione as IFs que operam este produto e informe os percentuais
+            de comissão negociados.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="bank_commission_pct">
-                Comissão da Instituição Financeira (%) *
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="size-3 stroke-accent" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Percentual total de comissão pago pelo banco à Vello</p>
-                  </TooltipContent>
-                </Tooltip>
-              </FieldLabel>
-              <Input
-                id="bank_commission_pct"
-                name="bank_commission_pct"
-                type="number"
-                step="0.01"
-                min="0.01"
-                max="100"
-                required
-                placeholder="Ex: 10.00"
-                value={bankPct || ''}
-                onChange={(e) => {
-                  const val = parseFloat(e.target.value) || 0
-                  setBankPct(val)
-                  setVelloPct(val / 2)
-                }}
-              />
-              <FieldError errors={formState.errors?.bank_commission_pct} />
-            </Field>
+          {partners.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4">
+              Nenhuma instituição financeira cadastrada.
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {partners.map((partner) => {
+                const isSelected = selectedPartners.has(partner.id)
+                return (
+                  <div key={partner.id} className="space-y-2">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="partner_ids"
+                        value={partner.id}
+                        checked={isSelected}
+                        onChange={() => togglePartner(partner.id)}
+                        className="h-4 w-4"
+                      />
+                      <span className="text-sm font-medium">{partner.name}</span>
+                    </label>
 
-            <Field>
-              <FieldLabel htmlFor="vello_commission_pct">
-                Retenção Vello (%) *
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="size-3 stroke-accent" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Parte da comissão que a Vello retém como receita</p>
-                  </TooltipContent>
-                </Tooltip>
-              </FieldLabel>
-              <Input
-                id="vello_commission_pct"
-                name="vello_commission_pct"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                required
-                placeholder="Ex: 5.00"
-                value={velloPct || ''}
-                onChange={(e) => setVelloPct(parseFloat(e.target.value) || 0)}
-                readOnly
-                className="bg-muted cursor-not-allowed"
-              />
-              <FieldError errors={formState.errors?.vello_commission_pct} />
-            </Field>
-          </FieldGroup>
-
-          <CommissionCascade bankPct={bankPct} velloPct={velloPct} />
+                    {isSelected && (
+                      <div className="ml-6 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <Field>
+                          <FieldLabel htmlFor={`if_commission_${partner.id}`}>
+                            IF paga à Vello (%)
+                          </FieldLabel>
+                          <Input
+                            id={`if_commission_${partner.id}`}
+                            name={`if_commission_${partner.id}`}
+                            type="number"
+                            step="0.001"
+                            min="0.001"
+                            max="100"
+                            required
+                            placeholder="Ex: 10.000"
+                          />
+                        </Field>
+                        <Field>
+                          <FieldLabel htmlFor={`vello_commission_${partner.id}`}>
+                            Retenção Vello (%)
+                          </FieldLabel>
+                          <Input
+                            id={`vello_commission_${partner.id}`}
+                            name={`vello_commission_${partner.id}`}
+                            type="number"
+                            step="0.001"
+                            min="0"
+                            max="100"
+                            required
+                            placeholder="Ex: 5.000"
+                          />
+                        </Field>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
 
