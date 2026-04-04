@@ -5,35 +5,38 @@ import { z } from 'zod'
 
 import { createClient } from '@/lib/supabase/server'
 
-const productSchema = z
+const productSchema = z.object({
+  name: z.string().min(3).max(100),
+  type: z.enum([
+    'fgts',
+    'consignado_publico',
+    'consignado_privado',
+    'home_equity',
+    'auto_equity',
+    'outros',
+  ]),
+  description: z.string().optional().nullable(),
+  internal_description: z.string().optional().nullable(),
+  min_amount: z.coerce.number().optional().nullable(),
+  max_amount: z.coerce.number().optional().nullable(),
+  min_term_months: z.coerce.number().int().optional().nullable(),
+  max_term_months: z.coerce.number().int().optional().nullable(),
+  min_rate_monthly: z.coerce.number().optional().nullable(),
+  max_rate_monthly: z.coerce.number().optional().nullable(),
+  is_active: z.boolean().default(true),
+})
+
+const partnerCommissionSchema = z
   .object({
-    name: z.string().min(3).max(100),
-    type: z.enum([
-      'fgts',
-      'consignado_publico',
-      'consignado_privado',
-      'home_equity',
-      'auto_equity',
-      'outros',
-    ]),
-    description: z.string().optional().nullable(),
-    internal_description: z.string().optional().nullable(),
-    financial_partner_id: z.string().uuid().optional().nullable(),
-    min_amount: z.coerce.number().optional().nullable(),
-    max_amount: z.coerce.number().optional().nullable(),
-    min_term_months: z.coerce.number().int().optional().nullable(),
-    max_term_months: z.coerce.number().int().optional().nullable(),
-    min_rate_monthly: z.coerce.number().optional().nullable(),
-    max_rate_monthly: z.coerce.number().optional().nullable(),
-    bank_commission_pct: z.coerce.number().min(0.01).max(100),
+    financial_partner_id: z.string().uuid(),
+    if_commission_pct: z.coerce.number().min(0.001).max(100),
     vello_commission_pct: z.coerce.number().min(0).max(100),
-    is_active: z.boolean().default(true),
   })
   .superRefine((data, ctx) => {
-    if (data.vello_commission_pct > data.bank_commission_pct) {
+    if (data.vello_commission_pct > data.if_commission_pct) {
       ctx.addIssue({
         code: 'custom',
-        message: 'Retenção Vello não pode ser maior que a Comissão do Banco',
+        message: 'Retenção Vello não pode ser maior que a Comissão da IF',
         path: ['vello_commission_pct'],
       })
     }
@@ -48,23 +51,63 @@ export async function createProduct(data: FormData) {
     if (value === '') obj[key] = null
   }
 
-  const result = productSchema.safeParse(obj)
+  const productResult = productSchema.safeParse(obj)
 
-  if (!result.success) {
-    const errors = z.flattenError(result.error).fieldErrors
-
+  if (!productResult.success) {
     return {
       success: false,
       message: 'Verifique os erros no formulário.',
-      errors,
+      errors: z.flattenError(productResult.error).fieldErrors,
+    }
+  }
+
+  // Parsear parceiros selecionados
+  const partnerIds = data.getAll('partner_ids') as string[]
+  const partnersData = partnerIds.map((id) => ({
+    financial_partner_id: id,
+    if_commission_pct: data.get(`if_commission_${id}`),
+    vello_commission_pct: data.get(`vello_commission_${id}`),
+  }))
+
+  const partnersResult = z.array(partnerCommissionSchema).safeParse(partnersData)
+
+  if (!partnersResult.success) {
+    return {
+      success: false,
+      message: 'Verifique as comissões das instituições financeiras.',
+      errors: null,
     }
   }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('products').insert(result.data)
 
-  if (error) {
-    return { success: false, message: error.message, errors: null }
+  // Inserir produto e obter id gerado
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .insert(productResult.data)
+    .select('id')
+    .single()
+
+  if (productError) {
+    return { success: false, message: productError.message, errors: null }
+  }
+
+  // Inserir vínculos com IFs (se houver)
+  if (partnersResult.data.length > 0) {
+    const rows = partnersResult.data.map((p) => ({
+      product_id: product.id,
+      financial_partner_id: p.financial_partner_id,
+      if_commission_pct: p.if_commission_pct,
+      vello_commission_pct: p.vello_commission_pct,
+    }))
+
+    const { error: partnersError } = await supabase
+      .from('product_financial_partners')
+      .insert(rows)
+
+    if (partnersError) {
+      return { success: false, message: partnersError.message, errors: null }
+    }
   }
 
   revalidatePath('/products')
