@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { FinancialPartnerForm } from '../../_components/financial-partner-form'
-import { getCurrentUserRole, getFinancialPartner } from '../../queries'
+import { getFinancialPartner } from '../../queries'
 
 export const metadata = {
   title: 'Editar Instituição Financeira',
@@ -12,15 +12,9 @@ export default async function EditFinancialPartnerPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-
-  const [partner, role] = await Promise.all([
-    getFinancialPartner(id).catch(() => null),
-    getCurrentUserRole(),
-  ])
+  const partner = await getFinancialPartner(id).catch(() => null)
 
   if (!partner) notFound()
-
-  const isSuperAdmin = role === 'super_admin'
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
@@ -33,7 +27,7 @@ export default async function EditFinancialPartnerPage({
         </div>
       </div>
       <div className="pt-4">
-        <FinancialPartnerForm partner={partner} isSuperAdmin={isSuperAdmin} />
+        <FinancialPartnerForm partner={partner} />
       </div>
     </div>
   )

@@ -4,11 +4,9 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { createClient } from '@/lib/supabase/server'
-import { getCurrentUserRole } from './queries'
 
 const baseSchema = z.object({
   name: z.string().min(2).max(100),
-  type: z.enum(['qi_tech', 'bancly', 'zip', 'other']),
   api_base_url: z.string().url().optional().nullable(),
   is_active: z.boolean().default(true),
 })
@@ -34,15 +32,12 @@ export async function createFinancialPartner(data: FormData) {
     }
   }
 
-  const role = await getCurrentUserRole()
+  // TODO: usar @vello/auth para restringir escrita de campos sensíveis por role (super_admin).
+  const sensitiveResult = sensitiveSchema.safeParse(obj)
   const payload: Record<string, unknown> = { ...baseResult.data }
-
-  if (role === 'super_admin') {
-    const sensitiveResult = sensitiveSchema.safeParse(obj)
-    if (sensitiveResult.success) {
-      if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
-      if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
-    }
+  if (sensitiveResult.success) {
+    if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
+    if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
   }
 
   const supabase = await createClient()
@@ -73,15 +68,13 @@ export async function updateFinancialPartner(data: FormData) {
     }
   }
 
-  const role = await getCurrentUserRole()
+  // TODO: usar @vello/auth para restringir escrita de campos sensíveis por role (super_admin).
+  // Só atualiza se o usuário digitou um novo valor (não deixou o placeholder vazio).
+  const sensitiveResult = sensitiveSchema.safeParse(obj)
   const payload: Record<string, unknown> = { ...baseResult.data }
-
-  if (role === 'super_admin') {
-    const sensitiveResult = sensitiveSchema.safeParse(obj)
-    if (sensitiveResult.success) {
-      if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
-      if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
-    }
+  if (sensitiveResult.success) {
+    if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
+    if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
   }
 
   const supabase = await createClient()

@@ -1,14 +1,10 @@
 import { FinancialPartnerForm } from '../_components/financial-partner-form'
-import { getCurrentUserRole } from '../queries'
 
 export const metadata = {
   title: 'Cadastrar Instituição Financeira',
 }
 
 export default async function NewFinancialPartnerPage() {
-  const role = await getCurrentUserRole()
-  const isSuperAdmin = role === 'super_admin'
-
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -22,7 +18,7 @@ export default async function NewFinancialPartnerPage() {
         </div>
       </div>
       <div className="pt-4">
-        <FinancialPartnerForm isSuperAdmin={isSuperAdmin} />
+        <FinancialPartnerForm />
       </div>
     </div>
   )

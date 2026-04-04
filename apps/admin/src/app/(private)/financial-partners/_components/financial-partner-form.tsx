@@ -23,7 +23,6 @@ import { createFinancialPartner, updateFinancialPartner } from '../actions'
 type FinancialPartner = {
   id: string
   name: string
-  type: string
   api_base_url: string | null
   api_key_enc: string | null
   webhook_secret: string | null
@@ -32,17 +31,9 @@ type FinancialPartner = {
 
 type Props = {
   partner?: FinancialPartner
-  isSuperAdmin: boolean
 }
 
-const TYPE_OPTIONS = [
-  { value: 'qi_tech', label: 'QI Tech' },
-  { value: 'bancly', label: 'Bancly' },
-  { value: 'zip', label: 'Zip' },
-  { value: 'other', label: 'Outro' },
-]
-
-export function FinancialPartnerForm({ partner, isSuperAdmin }: Props) {
+export function FinancialPartnerForm({ partner }: Props) {
   const router = useRouter()
   const isEdit = !!partner
 
@@ -88,7 +79,7 @@ export function FinancialPartnerForm({ partner, isSuperAdmin }: Props) {
           </CardAction>
         </CardHeader>
         <CardContent>
-          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FieldGroup>
             <Field>
               <FieldLabel htmlFor="name">Nome *</FieldLabel>
               <Input
@@ -99,25 +90,6 @@ export function FinancialPartnerForm({ partner, isSuperAdmin }: Props) {
                 defaultValue={partner?.name ?? ''}
               />
               <FieldError errors={formState.errors?.name} />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="type">Tipo *</FieldLabel>
-              <select
-                id="type"
-                name="type"
-                required
-                defaultValue={partner?.type ?? ''}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="">Selecione...</option>
-                {TYPE_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-              <FieldError errors={formState.errors?.type} />
             </Field>
           </FieldGroup>
         </CardContent>
@@ -148,48 +120,50 @@ export function FinancialPartnerForm({ partner, isSuperAdmin }: Props) {
         </CardContent>
       </Card>
 
-      {/* Card 3 — Segurança (apenas super_admin) */}
-      {isSuperAdmin && (
-        <Card>
-          <CardHeader className="border-b">
-            <CardTitle className="flex items-center gap-2">
-              <KeyRound className="size-4" />
-              Segurança
-            </CardTitle>
-            <CardDescription>
-              Credenciais sensíveis — visíveis apenas para super_admin.
-              {isEdit && ' Deixe em branco para manter os valores atuais.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field>
-                <FieldLabel htmlFor="api_key_enc">Chave de API</FieldLabel>
-                <Input
-                  id="api_key_enc"
-                  name="api_key_enc"
-                  type="password"
-                  placeholder={isEdit ? '••••••••' : 'Chave de acesso à API'}
-                  autoComplete="off"
-                />
-                <FieldError errors={formState.errors?.api_key_enc} />
-              </Field>
+      {/*
+        Card 3 — Segurança
+        TODO: usar @vello/auth para controle de visibilidade por role (super_admin).
+        Por hora, campos visíveis para todos os usuários do backoffice.
+      */}
+      <Card>
+        <CardHeader className="border-b">
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="size-4" />
+            Segurança
+          </CardTitle>
+          <CardDescription>
+            Credenciais de integração.
+            {isEdit && ' Deixe em branco para manter os valores atuais.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field>
+              <FieldLabel htmlFor="api_key_enc">Chave de API</FieldLabel>
+              <Input
+                id="api_key_enc"
+                name="api_key_enc"
+                type="password"
+                placeholder={isEdit ? '••••••••' : 'Chave de acesso à API'}
+                autoComplete="off"
+              />
+              <FieldError errors={formState.errors?.api_key_enc} />
+            </Field>
 
-              <Field>
-                <FieldLabel htmlFor="webhook_secret">Webhook Secret</FieldLabel>
-                <Input
-                  id="webhook_secret"
-                  name="webhook_secret"
-                  type="password"
-                  placeholder={isEdit ? '••••••••' : 'Secret para validar webhooks'}
-                  autoComplete="off"
-                />
-                <FieldError errors={formState.errors?.webhook_secret} />
-              </Field>
-            </FieldGroup>
-          </CardContent>
-        </Card>
-      )}
+            <Field>
+              <FieldLabel htmlFor="webhook_secret">Webhook Secret</FieldLabel>
+              <Input
+                id="webhook_secret"
+                name="webhook_secret"
+                type="password"
+                placeholder={isEdit ? '••••••••' : 'Secret para validar webhooks'}
+                autoComplete="off"
+              />
+              <FieldError errors={formState.errors?.webhook_secret} />
+            </Field>
+          </FieldGroup>
+        </CardContent>
+      </Card>
 
       <div className="flex justify-end space-x-4">
         <Button

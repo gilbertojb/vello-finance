@@ -3,17 +3,9 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-const TYPE_LABELS: Record<string, string> = {
-  qi_tech: 'QI Tech',
-  bancly: 'Bancly',
-  zip: 'Zip',
-  other: 'Outro',
-}
-
 type PartnerRow = {
   id: string
   name: string
-  type: string
   api_base_url: string | null
   is_active: boolean
 }
@@ -43,9 +35,6 @@ export function FinancialPartnerTable({
               Nome
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-              Tipo
-            </th>
-            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
               URL da API
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
@@ -63,9 +52,6 @@ export function FinancialPartnerTable({
               className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
             >
               <td className="p-4 align-middle font-medium">{partner.name}</td>
-              <td className="p-4 align-middle">
-                {TYPE_LABELS[partner.type] ?? partner.type}
-              </td>
               <td className="p-4 align-middle text-muted-foreground text-xs">
                 {partner.api_base_url ?? '-'}
               </td>
