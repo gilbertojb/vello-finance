@@ -1,6 +1,6 @@
 'use client'
 
-import { KeyRound, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -13,7 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
@@ -104,8 +109,8 @@ export function FinancialPartnerForm({ partner }: Props) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FieldGroup>
-            <Field>
+          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field className="col-span-full md:col-span-2">
               <FieldLabel htmlFor="api_base_url">URL da API</FieldLabel>
               <Input
                 id="api_base_url"
@@ -116,28 +121,11 @@ export function FinancialPartnerForm({ partner }: Props) {
               />
               <FieldError errors={formState.errors?.api_base_url} />
             </Field>
-          </FieldGroup>
-        </CardContent>
-      </Card>
 
-      {/*
-        Card 3 — Segurança
-        TODO: usar @vello/auth para controle de visibilidade por role (super_admin).
-        Por hora, campos visíveis para todos os usuários do backoffice.
-      */}
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle className="flex items-center gap-2">
-            <KeyRound className="size-4" />
-            Segurança
-          </CardTitle>
-          <CardDescription>
-            Credenciais de integração.
-            {isEdit && ' Deixe em branco para manter os valores atuais.'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/*
+              TODO: usar @vello/auth para controle de visibilidade por role (super_admin).
+              Por hora, campos visíveis para todos os usuários do backoffice.
+            */}
             <Field>
               <FieldLabel htmlFor="api_key_enc">Chave de API</FieldLabel>
               <Input
@@ -147,6 +135,9 @@ export function FinancialPartnerForm({ partner }: Props) {
                 placeholder={isEdit ? '••••••••' : 'Chave de acesso à API'}
                 autoComplete="off"
               />
+              <small className="text-muted-foreground">
+                {isEdit && ' Deixe em branco para manter os valores atuais.'}
+              </small>
               <FieldError errors={formState.errors?.api_key_enc} />
             </Field>
 
@@ -156,9 +147,14 @@ export function FinancialPartnerForm({ partner }: Props) {
                 id="webhook_secret"
                 name="webhook_secret"
                 type="password"
-                placeholder={isEdit ? '••••••••' : 'Secret para validar webhooks'}
+                placeholder={
+                  isEdit ? '••••••••' : 'Secret para validar webhooks'
+                }
                 autoComplete="off"
               />
+              <small className="text-muted-foreground">
+                {isEdit && ' Deixe em branco para manter os valores atuais.'}
+              </small>
               <FieldError errors={formState.errors?.webhook_secret} />
             </Field>
           </FieldGroup>

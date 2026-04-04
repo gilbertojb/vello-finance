@@ -36,7 +36,9 @@ type Partner = { id: string; name: string }
 
 export function ProductForm({ partners }: { partners: Partner[] }) {
   const router = useRouter()
-  const [selectedPartners, setSelectedPartners] = useState<Set<string>>(new Set())
+  const [selectedPartners, setSelectedPartners] = useState<Set<string>>(
+    new Set(),
+  )
 
   const [formState, handleSubmit, isPending] = useFormState(
     createProduct,
@@ -275,8 +277,8 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
         <CardHeader className="border-b">
           <CardTitle>Instituições Financeiras</CardTitle>
           <CardDescription>
-            Selecione as IFs que operam este produto e informe os percentuais
-            de comissão negociados.
+            Selecione as IFs que operam este produto e informe os percentuais de
+            comissão negociados.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -299,7 +301,9 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                         onChange={() => togglePartner(partner.id)}
                         className="h-4 w-4"
                       />
-                      <span className="text-sm font-medium">{partner.name}</span>
+                      <span className="text-sm font-medium">
+                        {partner.name}
+                      </span>
                     </label>
 
                     {isSelected && (
@@ -320,7 +324,9 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                           />
                         </Field>
                         <Field>
-                          <FieldLabel htmlFor={`vello_commission_${partner.id}`}>
+                          <FieldLabel
+                            htmlFor={`vello_commission_${partner.id}`}
+                          >
                             Retenção Vello (%)
                           </FieldLabel>
                           <Input

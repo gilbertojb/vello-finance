@@ -1,5 +1,7 @@
 'use client'
 
+import { Pencil } from 'lucide-react'
+
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
@@ -69,7 +71,7 @@ export function FinancialPartnerTable({
               <td className="p-4 align-middle text-right">
                 <Button variant="ghost" size="sm" asChild>
                   <Link href={`/financial-partners/${partner.id}/edit`}>
-                    Editar
+                    <Pencil className="size-4" />
                   </Link>
                 </Button>
               </td>
