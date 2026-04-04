@@ -26,8 +26,8 @@ CREATE TABLE product_financial_partners (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id           UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   financial_partner_id UUID NOT NULL REFERENCES financial_partners(id),
-  if_commission_pct    NUMERIC(6,2) NOT NULL,  -- % que a IF paga à Vello
-  vello_commission_pct NUMERIC(6,2) NOT NULL,  -- % que a Vello retém
+  if_commission_pct    NUMERIC(6,3) NOT NULL,  -- % que a IF paga à Vello (ex: 3.755)
+  vello_commission_pct NUMERIC(6,3) NOT NULL,  -- % que a Vello retém
   is_active            BOOLEAN NOT NULL DEFAULT true,
   created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),

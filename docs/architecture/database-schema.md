@@ -97,8 +97,8 @@ CREATE TABLE product_financial_partners (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id           UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   financial_partner_id UUID NOT NULL REFERENCES financial_partners(id),
-  if_commission_pct    NUMERIC(6,2) NOT NULL,  -- % que a IF paga à Vello
-  vello_commission_pct NUMERIC(6,2) NOT NULL,  -- % que a Vello retém
+  if_commission_pct    NUMERIC(6,3) NOT NULL,  -- % que a IF paga à Vello (ex: 3.755)
+  vello_commission_pct NUMERIC(6,3) NOT NULL,  -- % que a Vello retém
   -- Disponível ao tenant = if_commission_pct - vello_commission_pct
   is_active            BOOLEAN NOT NULL DEFAULT true,
   created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -115,8 +115,8 @@ CREATE TABLE tenant_products (
   id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id             UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   product_id            UUID NOT NULL REFERENCES products(id),
-  tenant_commission_pct NUMERIC(5,4) NOT NULL,      -- % que o tenant recebe
-  vello_spread_pct      NUMERIC(5,4) NOT NULL,      -- % adicional que a Vello retém
+  tenant_commission_pct NUMERIC(6,3) NOT NULL,      -- % que o tenant recebe (ex: 3.755)
+  vello_spread_pct      NUMERIC(6,3) NOT NULL,      -- % adicional que a Vello retém
   -- tenant_commission_pct + vello_spread_pct = disponível ao tenant
   is_active             BOOLEAN NOT NULL DEFAULT true,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -136,10 +136,10 @@ CREATE TABLE commission_snapshots (
   tenant_id                 UUID NOT NULL REFERENCES tenants(id),
   financial_partner_id      UUID NOT NULL REFERENCES financial_partners(id),
   -- Percentuais vigentes no momento da proposta (fonte: product_financial_partners + tenant_products)
-  if_commission_pct         NUMERIC(6,2) NOT NULL,   -- renomeado de bank_commission_pct
-  vello_commission_pct      NUMERIC(6,2) NOT NULL,
-  tenant_commission_pct     NUMERIC(6,2) NOT NULL,
-  vello_spread_pct          NUMERIC(6,2) NOT NULL,
+  if_commission_pct         NUMERIC(6,3) NOT NULL,   -- renomeado de bank_commission_pct
+  vello_commission_pct      NUMERIC(6,3) NOT NULL,
+  tenant_commission_pct     NUMERIC(6,3) NOT NULL,
+  vello_spread_pct          NUMERIC(6,3) NOT NULL,
   -- Valores em R$ — preenchidos quando proposta for aprovada
   loan_amount               NUMERIC(12,2),
   if_commission_amount      NUMERIC(10,2),           -- renomeado de bank_commission_amount

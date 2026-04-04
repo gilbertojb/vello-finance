@@ -45,8 +45,8 @@ Lista de checkboxes com todas as IFs ativas. Para cada IF marcada, dois campos i
 
 | Campo | Obrigatório | Validação |
 |---|---|---|
-| IF paga à Vello (%) | Sim (se IF marcada) | 0,01–100 |
-| Retenção Vello (%) | Sim (se IF marcada) | ≤ IF paga à Vello |
+| IF paga à Vello (%) | Sim (se IF marcada) | 0,001–100, até 3 casas decimais |
+| Retenção Vello (%) | Sim (se IF marcada) | ≤ IF paga à Vello, até 3 casas decimais |
 
 > A comissão disponível ao tenant = IF paga à Vello − Retenção Vello, e varia por IF.
 
