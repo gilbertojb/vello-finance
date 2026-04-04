@@ -4,14 +4,16 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ProductTypeBadge } from './product-type-badge'
 
+type PartnerRow = {
+  financial_partner: { name: string } | null
+}
+
 type ProductRow = {
   id: string
   name: string
   type: string
-  financial_partner?: { name: string } | null
-  bank_commission_pct: number
-  vello_commission_pct: number
   is_active: boolean
+  product_financial_partners: PartnerRow[]
 }
 
 export function ProductTable({
@@ -42,16 +44,7 @@ export function ProductTable({
               Tipo
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-              Parceiro
-            </th>
-            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
-              Comissão Banco
-            </th>
-            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
-              Retenção Vello
-            </th>
-            <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">
-              Disponível Tenant
+              Instituições Financeiras
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
               Status
@@ -63,8 +56,10 @@ export function ProductTable({
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
           {products.map((product) => {
-            const tenantAvailable =
-              product.bank_commission_pct - product.vello_commission_pct
+            const ifNames = product.product_financial_partners
+              .map((pfp) => pfp.financial_partner?.name)
+              .filter(Boolean)
+              .join(', ')
 
             return (
               <tr
@@ -75,17 +70,8 @@ export function ProductTable({
                 <td className="p-4 align-middle">
                   <ProductTypeBadge type={product.type} />
                 </td>
-                <td className="p-4 align-middle">
-                  {product.financial_partner?.name || '-'}
-                </td>
-                <td className="p-4 align-middle text-right">
-                  {product.bank_commission_pct.toFixed(2)}%
-                </td>
-                <td className="p-4 align-middle text-right">
-                  {product.vello_commission_pct.toFixed(2)}%
-                </td>
-                <td className="p-4 align-middle text-right font-medium text-green-600">
-                  {tenantAvailable.toFixed(2)}%
+                <td className="p-4 align-middle text-muted-foreground">
+                  {ifNames || '-'}
                 </td>
                 <td className="p-4 align-middle">
                   {product.is_active ? (
