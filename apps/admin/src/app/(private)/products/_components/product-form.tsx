@@ -31,6 +31,7 @@ import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createProduct } from '../actions'
+import { PartnerItem } from './partner-item'
 
 type Partner = { id: string; name: string }
 
@@ -287,62 +288,16 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
               Nenhuma instituição financeira cadastrada.
             </p>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {partners.map((partner) => {
                 const isSelected = selectedPartners.has(partner.id)
                 return (
-                  <div key={partner.id} className="space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        name="partner_ids"
-                        value={partner.id}
-                        checked={isSelected}
-                        onChange={() => togglePartner(partner.id)}
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm font-medium">
-                        {partner.name}
-                      </span>
-                    </label>
-
-                    {isSelected && (
-                      <div className="ml-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <Field>
-                          <FieldLabel htmlFor={`if_commission_${partner.id}`}>
-                            IF paga à Vello (%)
-                          </FieldLabel>
-                          <Input
-                            id={`if_commission_${partner.id}`}
-                            name={`if_commission_${partner.id}`}
-                            type="number"
-                            step="0.001"
-                            min="0.001"
-                            max="100"
-                            required
-                            placeholder="Ex: 10.000"
-                          />
-                        </Field>
-                        <Field>
-                          <FieldLabel
-                            htmlFor={`vello_commission_${partner.id}`}
-                          >
-                            Retenção Vello (%)
-                          </FieldLabel>
-                          <Input
-                            id={`vello_commission_${partner.id}`}
-                            name={`vello_commission_${partner.id}`}
-                            type="number"
-                            step="0.001"
-                            min="0"
-                            max="100"
-                            required
-                            placeholder="Ex: 5.000"
-                          />
-                        </Field>
-                      </div>
-                    )}
-                  </div>
+                  <PartnerItem
+                    key={partner.id}
+                    partner={partner}
+                    isSelected={isSelected}
+                    onToggle={togglePartner}
+                  />
                 )
               })}
             </div>
