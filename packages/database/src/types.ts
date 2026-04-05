@@ -348,15 +348,15 @@ export type Database = {
           bank_agency: string | null
           bank_name: string | null
           bank_pix_key: string | null
-          cnpj: string
-          company_name: string
+          cnpj: string | null
+          company_name: string | null
           created_at: string
           custom_domain: string | null
           email: string
           id: string
           name: string
           phone: string | null
-          plan_id: string
+          plan_id: string | null
           slug: string
           status: Database["public"]["Enums"]["tenant_status"]
           suspended_at: string | null
@@ -369,15 +369,15 @@ export type Database = {
           bank_agency?: string | null
           bank_name?: string | null
           bank_pix_key?: string | null
-          cnpj: string
-          company_name: string
+          cnpj?: string | null
+          company_name?: string | null
           created_at?: string
           custom_domain?: string | null
           email: string
           id?: string
           name: string
           phone?: string | null
-          plan_id: string
+          plan_id?: string | null
           slug: string
           status?: Database["public"]["Enums"]["tenant_status"]
           suspended_at?: string | null
@@ -390,15 +390,15 @@ export type Database = {
           bank_agency?: string | null
           bank_name?: string | null
           bank_pix_key?: string | null
-          cnpj?: string
-          company_name?: string
+          cnpj?: string | null
+          company_name?: string | null
           created_at?: string
           custom_domain?: string | null
           email?: string
           id?: string
           name?: string
           phone?: string | null
-          plan_id?: string
+          plan_id?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["tenant_status"]
           suspended_at?: string | null

@@ -2,8 +2,29 @@
 
 **App:** `apps/admin` — Vello Admin
 **Módulo:** Admin / Tenants
-**Status:** `ready-for-dev`
+**Terminologia UI:** "Parceiros" (banco de dados permanece `tenants`)
+**Status:** `in-progress`
 **Prioridade:** Alta
+
+## Status de Implementação
+
+| Feature | Status | Notas |
+|---|---|---|
+| F1 — Listagem | ✅ Implementado | — |
+| F2 — Cadastro | ✅ Implementado | Form em cards; sem plan_id; tipo fixo em whitelabel; sem upload de arquivos |
+| F3 — Ativar | ⏳ Pendente | — |
+| F4 — Editar | ⏳ Pendente | — |
+| F5 — Produtos | ⏳ Pendente | — |
+| F6 — Suspender/Cancelar | ⏳ Pendente | — |
+| F7 — Detalhes | ⏳ Pendente | — |
+
+## Decisões Técnicas (MVP)
+
+- `type` fixo em `whitelabel` no cadastro — sem campo no formulário por ora
+- `plan_id` tornado nullable via migration — associação de plano adiada para módulo de assinaturas
+- Formulário de cadastro em **cards** (não wizard 5 steps como planejado originalmente)
+- Upload de logo/favicon/imagem para Supabase Storage adiado — campos de URL texto por ora
+- `custom_domain` sempre visível no form (todos são white-label)
 
 ---
 
