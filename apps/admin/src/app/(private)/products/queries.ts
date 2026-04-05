@@ -36,6 +36,7 @@ export async function getProduct(id: string) {
       *,
       product_financial_partners(
         id,
+        financial_partner_id,
         if_commission_pct,
         vello_commission_pct,
         is_active,

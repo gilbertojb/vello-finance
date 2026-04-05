@@ -9,9 +9,6 @@ const baseSchema = z.object({
   name: z.string().min(2).max(100),
   api_base_url: z.string().url().optional().nullable(),
   is_active: z.boolean().default(true),
-})
-
-const sensitiveSchema = z.object({
   api_key_enc: z.string().optional().nullable(),
   webhook_secret: z.string().optional().nullable(),
 })
@@ -23,30 +20,38 @@ export async function createFinancialPartner(data: FormData) {
     if (value === '') obj[key] = null
   }
 
-  const baseResult = baseSchema.safeParse(obj)
-  if (!baseResult.success) {
+  const result = baseSchema.safeParse(obj)
+  if (!result.success) {
     return {
       success: false,
       message: 'Verifique os erros no formulário.',
-      errors: z.flattenError(baseResult.error).fieldErrors,
+      errors: z.flattenError(result.error).fieldErrors,
     }
   }
 
   // TODO: usar @vello/auth para restringir escrita de campos sensíveis por role (super_admin).
-  const sensitiveResult = sensitiveSchema.safeParse(obj)
-  const payload: Record<string, unknown> = { ...baseResult.data }
-  if (sensitiveResult.success) {
-    if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
-    if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
-  }
+  // const sensitiveResult = sensitiveSchema.safeParse(obj)
+  // const payload: Record<string, unknown> = { ...baseResult.data }
+  // if (sensitiveResult.success) {
+  //   if (sensitiveResult.data.api_key_enc)
+  //     payload.api_key_enc = sensitiveResult.data.api_key_enc
+  //   if (sensitiveResult.data.webhook_secret)
+  //     payload.webhook_secret = sensitiveResult.data.webhook_secret
+  // }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('financial_partners').insert(payload)
+  const { error } = await supabase
+    .from('financial_partners')
+    .insert(result.data)
 
   if (error) return { success: false, message: error.message, errors: null }
 
   revalidatePath('/financial-partners')
-  return { success: true, message: 'Instituição financeira cadastrada com sucesso!', errors: null }
+  return {
+    success: true,
+    message: 'Instituição financeira cadastrada com sucesso!',
+    errors: null,
+  }
 }
 
 export async function updateFinancialPartner(data: FormData) {
@@ -59,32 +64,38 @@ export async function updateFinancialPartner(data: FormData) {
     if (value === '') obj[key] = null
   }
 
-  const baseResult = baseSchema.safeParse(obj)
-  if (!baseResult.success) {
+  const result = baseSchema.safeParse(obj)
+  if (!result.success) {
     return {
       success: false,
       message: 'Verifique os erros no formulário.',
-      errors: z.flattenError(baseResult.error).fieldErrors,
+      errors: z.flattenError(result.error).fieldErrors,
     }
   }
 
   // TODO: usar @vello/auth para restringir escrita de campos sensíveis por role (super_admin).
   // Só atualiza se o usuário digitou um novo valor (não deixou o placeholder vazio).
-  const sensitiveResult = sensitiveSchema.safeParse(obj)
-  const payload: Record<string, unknown> = { ...baseResult.data }
-  if (sensitiveResult.success) {
-    if (sensitiveResult.data.api_key_enc) payload.api_key_enc = sensitiveResult.data.api_key_enc
-    if (sensitiveResult.data.webhook_secret) payload.webhook_secret = sensitiveResult.data.webhook_secret
-  }
+  // const sensitiveResult = sensitiveSchema.safeParse(obj)
+  // const payload: Record<string, unknown> = { ...baseResult.data }
+  // if (sensitiveResult.success) {
+  //   if (sensitiveResult.data.api_key_enc)
+  //     payload.api_key_enc = sensitiveResult.data.api_key_enc
+  //   if (sensitiveResult.data.webhook_secret)
+  //     payload.webhook_secret = sensitiveResult.data.webhook_secret
+  // }
 
   const supabase = await createClient()
   const { error } = await supabase
     .from('financial_partners')
-    .update(payload)
+    .update(result.data)
     .eq('id', id)
 
   if (error) return { success: false, message: error.message, errors: null }
 
   revalidatePath('/financial-partners')
-  return { success: true, message: 'Instituição financeira atualizada com sucesso!', errors: null }
+  return {
+    success: true,
+    message: 'Instituição financeira atualizada com sucesso!',
+    errors: null,
+  }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { Pencil } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ProductTypeBadge } from './product-type-badge'
@@ -86,7 +87,9 @@ export function ProductTable({
                 </td>
                 <td className="p-4 align-middle text-right">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/products/${product.id}`}>Exibir</Link>
+                    <Link href={`/products/${product.id}/edit`}>
+                      <Pencil className="size-4" />
+                    </Link>
                   </Button>
                 </td>
               </tr>

@@ -74,7 +74,6 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
-          type: string
           updated_at: string
           webhook_secret: string | null
         }
@@ -85,7 +84,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
-          type: string
           updated_at?: string
           webhook_secret?: string | null
         }
@@ -96,7 +94,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
-          type?: string
           updated_at?: string
           webhook_secret?: string | null
         }
@@ -144,13 +141,60 @@ export type Database = {
         }
         Relationships: []
       }
+      product_financial_partners: {
+        Row: {
+          created_at: string
+          financial_partner_id: string
+          id: string
+          if_commission_pct: number
+          is_active: boolean
+          product_id: string
+          updated_at: string
+          vello_commission_pct: number
+        }
+        Insert: {
+          created_at?: string
+          financial_partner_id: string
+          id?: string
+          if_commission_pct: number
+          is_active?: boolean
+          product_id: string
+          updated_at?: string
+          vello_commission_pct: number
+        }
+        Update: {
+          created_at?: string
+          financial_partner_id?: string
+          id?: string
+          if_commission_pct?: number
+          is_active?: boolean
+          product_id?: string
+          updated_at?: string
+          vello_commission_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_financial_partners_financial_partner_id_fkey"
+            columns: ["financial_partner_id"]
+            isOneToOne: false
+            referencedRelation: "financial_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_financial_partners_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
-          bank_commission_pct: number
           created_at: string
           description: string | null
-          financial_partner_id: string | null
           id: string
+          internal_description: string | null
           is_active: boolean
           max_amount: number | null
           max_rate_monthly: number | null
@@ -161,14 +205,12 @@ export type Database = {
           name: string
           type: string
           updated_at: string
-          vello_commission_pct: number
         }
         Insert: {
-          bank_commission_pct: number
           created_at?: string
           description?: string | null
-          financial_partner_id?: string | null
           id?: string
+          internal_description?: string | null
           is_active?: boolean
           max_amount?: number | null
           max_rate_monthly?: number | null
@@ -179,14 +221,12 @@ export type Database = {
           name: string
           type: string
           updated_at?: string
-          vello_commission_pct: number
         }
         Update: {
-          bank_commission_pct?: number
           created_at?: string
           description?: string | null
-          financial_partner_id?: string | null
           id?: string
+          internal_description?: string | null
           is_active?: boolean
           max_amount?: number | null
           max_rate_monthly?: number | null
@@ -197,17 +237,8 @@ export type Database = {
           name?: string
           type?: string
           updated_at?: string
-          vello_commission_pct?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "products_financial_partner_id_fkey"
-            columns: ["financial_partner_id"]
-            isOneToOne: false
-            referencedRelation: "financial_partners"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tenant_branding: {
         Row: {
@@ -389,7 +420,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      custom_access_token_hook: { Args: { event: Json }; Returns: Json }
     }
     Enums: {
       backoffice_role: "super_admin" | "admin" | "financial" | "support"

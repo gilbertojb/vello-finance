@@ -10,14 +10,19 @@ export async function NavUser() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: profile } = await supabase
-    .from('backoffice_users')
-    .select('full_name,')
-    .eq('id', user?.id)
-    .single()
+  let name = 'Usuário'
+  let email = ''
 
-  const name = profile?.full_name ?? 'Usuário'
-  const email = user?.email ?? ''
+  if (user) {
+    const { data: profile } = await supabase
+      .from('backoffice_users')
+      .select('full_name')
+      .eq('id', user.id)
+      .single()
+
+    name = profile?.full_name ?? 'Usuário'
+    email = user.email ?? ''
+  }
 
   return (
     <SidebarMenu>

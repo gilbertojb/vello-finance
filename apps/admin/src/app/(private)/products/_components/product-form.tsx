@@ -1,6 +1,6 @@
 'use client'
 
-import { Banknote, Calendar, Info, Loader2, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Banknote, Calendar, Info, Loader2, TrendingUp } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -30,21 +30,54 @@ import {
 import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
 import { useFormState } from '@/hooks/use-form-state'
 
-import { createProduct } from '../actions'
+import { createProduct, updateProduct } from '../actions'
 import { PartnerItem } from './partner-item'
 
 type Partner = { id: string; name: string }
 
-export function ProductForm({ partners }: { partners: Partner[] }) {
+export type ProductWithPartners = {
+  id: string
+  name: string
+  type: string
+  description: string | null
+  internal_description: string | null
+  min_amount: number | null
+  max_amount: number | null
+  min_term_months: number | null
+  max_term_months: number | null
+  min_rate_monthly: number | null
+  max_rate_monthly: number | null
+  is_active: boolean
+  product_financial_partners: Array<{
+    financial_partner_id: string
+    if_commission_pct: number
+    vello_commission_pct: number
+  }>
+}
+
+type Props = {
+  partners: Partner[]
+  product?: ProductWithPartners
+}
+
+export function ProductForm({ partners, product }: Props) {
   const router = useRouter()
-  const [selectedPartners, setSelectedPartners] = useState<Set<string>>(
-    new Set(),
+  const isEdit = !!product
+
+  const linkedPartnerIds = new Set(
+    product?.product_financial_partners.map((p) => p.financial_partner_id) ?? [],
   )
 
+  const [selectedPartners, setSelectedPartners] = useState<Set<string>>(
+    linkedPartnerIds,
+  )
+
+  const action = isEdit ? updateProduct : createProduct
+
   const [formState, handleSubmit, isPending] = useFormState(
-    createProduct,
+    action,
     () => {
-      toast.success('Produto criado com sucesso!')
+      toast.success(isEdit ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!')
       router.push('/products')
     },
     (msg: string) => {
@@ -66,6 +99,18 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 w-full">
+      {isEdit && <input type="hidden" name="id" value={product.id} />}
+
+      {isEdit && (
+        <div className="flex items-start gap-3 rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <span>
+            Alterações nos percentuais não afetam propostas já criadas
+            (snapshots imutáveis).
+          </span>
+        </div>
+      )}
+
       {/* Card 1 — Identificação */}
       <Card>
         <CardHeader className="border-b">
@@ -79,7 +124,11 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
               <FieldLabel htmlFor="is_active" className="cursor-pointer">
                 Produto Ativo
               </FieldLabel>
-              <Switch id="is_active" name="is_active" defaultChecked />
+              <Switch
+                id="is_active"
+                name="is_active"
+                defaultChecked={product?.is_active ?? true}
+              />
             </div>
           </CardAction>
         </CardHeader>
@@ -92,6 +141,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 name="name"
                 required
                 placeholder="Ex: Consignado INSS"
+                defaultValue={product?.name ?? ''}
               />
               <FieldError errors={formState.errors?.name} />
             </Field>
@@ -102,7 +152,9 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 id="type"
                 name="type"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required
+                required={!isEdit}
+                disabled={isEdit}
+                defaultValue={product?.type ?? ''}
               >
                 <option value="">Selecione...</option>
                 <option value="fgts">FGTS</option>
@@ -133,6 +185,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 id="description"
                 name="description"
                 placeholder="Ex: Antecipação do saque-aniversário"
+                defaultValue={product?.description ?? ''}
               />
               <FieldError errors={formState.errors?.description} />
             </Field>
@@ -158,6 +211,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                 id="internal_description"
                 name="internal_description"
                 placeholder="Ex: Lembre-se de validar a taxa balcão 2x antes de fechar."
+                defaultValue={product?.internal_description ?? ''}
               />
               <FieldError errors={formState.errors?.internal_description} />
             </Field>
@@ -188,6 +242,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="0.01"
                   placeholder="0.00"
+                  defaultValue={product?.min_amount ?? ''}
                 />
                 <FieldError errors={formState.errors?.min_amount} />
               </Field>
@@ -199,6 +254,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="0.01"
                   placeholder="0.00"
+                  defaultValue={product?.max_amount ?? ''}
                 />
                 <FieldError errors={formState.errors?.max_amount} />
               </Field>
@@ -219,6 +275,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="1"
                   placeholder="1"
+                  defaultValue={product?.min_term_months ?? ''}
                 />
                 <FieldError errors={formState.errors?.min_term_months} />
               </Field>
@@ -232,6 +289,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="1"
                   placeholder="120"
+                  defaultValue={product?.max_term_months ?? ''}
                 />
                 <FieldError errors={formState.errors?.max_term_months} />
               </Field>
@@ -252,6 +310,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="0.001"
                   placeholder="1.000"
+                  defaultValue={product?.min_rate_monthly ?? ''}
                 />
                 <FieldError errors={formState.errors?.min_rate_monthly} />
               </Field>
@@ -265,6 +324,7 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
                   type="number"
                   step="0.001"
                   placeholder="5.000"
+                  defaultValue={product?.max_rate_monthly ?? ''}
                 />
                 <FieldError errors={formState.errors?.max_rate_monthly} />
               </Field>
@@ -291,12 +351,17 @@ export function ProductForm({ partners }: { partners: Partner[] }) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {partners.map((partner) => {
                 const isSelected = selectedPartners.has(partner.id)
+                const linked = product?.product_financial_partners.find(
+                  (p) => p.financial_partner_id === partner.id,
+                )
                 return (
                   <PartnerItem
                     key={partner.id}
                     partner={partner}
                     isSelected={isSelected}
                     onToggle={togglePartner}
+                    defaultIfCommission={linked?.if_commission_pct}
+                    defaultVelloCommission={linked?.vello_commission_pct}
                   />
                 )
               })}

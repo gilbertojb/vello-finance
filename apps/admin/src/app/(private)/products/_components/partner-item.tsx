@@ -14,12 +14,16 @@ interface PartnerItemProps {
   partner: { id: string; name: string }
   isSelected: boolean
   onToggle: (id: string) => void
+  defaultIfCommission?: number
+  defaultVelloCommission?: number
 }
 
 export function PartnerItem({
   partner,
   isSelected,
   onToggle,
+  defaultIfCommission,
+  defaultVelloCommission,
 }: PartnerItemProps) {
   return (
     <FieldGroup className="w-full">
@@ -71,6 +75,7 @@ export function PartnerItem({
                   required={isSelected}
                   disabled={!isSelected}
                   placeholder="0.00"
+                  defaultValue={defaultIfCommission ?? ''}
                   className="bg-white"
                   onChange={(e) => {
                     const val = parseFloat(e.target.value)
@@ -105,6 +110,7 @@ export function PartnerItem({
                   required={isSelected}
                   disabled={!isSelected}
                   placeholder="0.00"
+                  defaultValue={defaultVelloCommission ?? ''}
                   className="bg-white"
                 />
               </div>
