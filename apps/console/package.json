@@ -24,6 +24,7 @@
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vello/typescript-config": "workspace:*",
     "tailwindcss": "^4.2.2",
     "typescript": "^5"
   }
