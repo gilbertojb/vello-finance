@@ -245,43 +245,55 @@ export type Database = {
           auth_bg_color: string
           auth_bg_image_url: string | null
           auth_theme: string
+          base_color: string | null
           company_display_name: string | null
           created_at: string
+          custom_css: string | null
           favicon_url: string | null
           id: string
           logo_url: string | null
           primary_color: string
           secondary_color: string
           tenant_id: string
+          theme_color: string | null
           updated_at: string
+          use_custom_theme: boolean
         }
         Insert: {
           auth_bg_color?: string
           auth_bg_image_url?: string | null
           auth_theme?: string
+          base_color?: string | null
           company_display_name?: string | null
           created_at?: string
+          custom_css?: string | null
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
           secondary_color?: string
           tenant_id: string
+          theme_color?: string | null
           updated_at?: string
+          use_custom_theme?: boolean
         }
         Update: {
           auth_bg_color?: string
           auth_bg_image_url?: string | null
           auth_theme?: string
+          base_color?: string | null
           company_display_name?: string | null
           created_at?: string
+          custom_css?: string | null
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
           primary_color?: string
           secondary_color?: string
           tenant_id?: string
+          theme_color?: string | null
           updated_at?: string
+          use_custom_theme?: boolean
         }
         Relationships: [
           {
@@ -336,6 +348,140 @@ export type Database = {
             foreignKeyName: "tenant_products_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_theme_tokens: {
+        Row: {
+          accent: string | null
+          accent_foreground: string | null
+          background: string | null
+          border_token: string | null
+          card: string | null
+          card_foreground: string | null
+          chart_1: string | null
+          chart_2: string | null
+          chart_3: string | null
+          chart_4: string | null
+          chart_5: string | null
+          created_at: string
+          destructive: string | null
+          destructive_foreground: string | null
+          font_heading: string | null
+          font_sans: string | null
+          foreground: string | null
+          id: string
+          input_token: string | null
+          muted: string | null
+          muted_foreground: string | null
+          popover: string | null
+          popover_foreground: string | null
+          primary_foreground: string | null
+          primary_token: string | null
+          radius_token: string | null
+          ring_token: string | null
+          secondary_foreground: string | null
+          secondary_token: string | null
+          sidebar_accent: string | null
+          sidebar_accent_foreground: string | null
+          sidebar_background: string | null
+          sidebar_border: string | null
+          sidebar_foreground: string | null
+          sidebar_primary: string | null
+          sidebar_primary_foreground: string | null
+          sidebar_ring: string | null
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          accent?: string | null
+          accent_foreground?: string | null
+          background?: string | null
+          border_token?: string | null
+          card?: string | null
+          card_foreground?: string | null
+          chart_1?: string | null
+          chart_2?: string | null
+          chart_3?: string | null
+          chart_4?: string | null
+          chart_5?: string | null
+          created_at?: string
+          destructive?: string | null
+          destructive_foreground?: string | null
+          font_heading?: string | null
+          font_sans?: string | null
+          foreground?: string | null
+          id?: string
+          input_token?: string | null
+          muted?: string | null
+          muted_foreground?: string | null
+          popover?: string | null
+          popover_foreground?: string | null
+          primary_foreground?: string | null
+          primary_token?: string | null
+          radius_token?: string | null
+          ring_token?: string | null
+          secondary_foreground?: string | null
+          secondary_token?: string | null
+          sidebar_accent?: string | null
+          sidebar_accent_foreground?: string | null
+          sidebar_background?: string | null
+          sidebar_border?: string | null
+          sidebar_foreground?: string | null
+          sidebar_primary?: string | null
+          sidebar_primary_foreground?: string | null
+          sidebar_ring?: string | null
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          accent?: string | null
+          accent_foreground?: string | null
+          background?: string | null
+          border_token?: string | null
+          card?: string | null
+          card_foreground?: string | null
+          chart_1?: string | null
+          chart_2?: string | null
+          chart_3?: string | null
+          chart_4?: string | null
+          chart_5?: string | null
+          created_at?: string
+          destructive?: string | null
+          destructive_foreground?: string | null
+          font_heading?: string | null
+          font_sans?: string | null
+          foreground?: string | null
+          id?: string
+          input_token?: string | null
+          muted?: string | null
+          muted_foreground?: string | null
+          popover?: string | null
+          popover_foreground?: string | null
+          primary_foreground?: string | null
+          primary_token?: string | null
+          radius_token?: string | null
+          ring_token?: string | null
+          secondary_foreground?: string | null
+          secondary_token?: string | null
+          sidebar_accent?: string | null
+          sidebar_accent_foreground?: string | null
+          sidebar_background?: string | null
+          sidebar_border?: string | null
+          sidebar_foreground?: string | null
+          sidebar_primary?: string | null
+          sidebar_primary_foreground?: string | null
+          sidebar_ring?: string | null
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_theme_tokens_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: true
             referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
