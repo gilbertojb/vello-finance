@@ -20,6 +20,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createTenant } from '../actions'
@@ -226,6 +227,89 @@ export function TenantForm() {
             <Field>
               <FieldLabel>Cor de Fundo Auth</FieldLabel>
               <ColorPicker name="auth_bg_color" defaultValue="#18181b" label="Cor de fundo auth" />
+            </Field>
+
+            {/* Toggle: Habilitar tema customizado */}
+            <Field className="md:col-span-2">
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <FieldLabel htmlFor="use_custom_theme" className="text-base">
+                    Tema White-Label
+                  </FieldLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Ativa personalização avançada de tokens CSS por tenant.
+                  </p>
+                </div>
+                <Switch
+                  id="use_custom_theme"
+                  name="use_custom_theme"
+                  defaultChecked={false}
+                />
+              </div>
+            </Field>
+
+            {/* Base Color */}
+            <Field>
+              <FieldLabel htmlFor="base_color">Base Color</FieldLabel>
+              <select
+                id="base_color"
+                name="base_color"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Padrão do sistema</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Stone">Stone</option>
+                <option value="Zinc">Zinc</option>
+                <option value="Mauve">Mauve</option>
+                <option value="Olive">Olive</option>
+                <option value="Mist">Mist</option>
+                <option value="Taupe">Taupe</option>
+              </select>
+            </Field>
+
+            {/* Theme Color */}
+            <Field>
+              <FieldLabel htmlFor="theme_color">Theme Color</FieldLabel>
+              <select
+                id="theme_color"
+                name="theme_color"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Padrão do sistema</option>
+                <option value="red">Red</option>
+                <option value="orange">Orange</option>
+                <option value="amber">Amber</option>
+                <option value="yellow">Yellow</option>
+                <option value="lime">Lime</option>
+                <option value="green">Green</option>
+                <option value="emerald">Emerald</option>
+                <option value="teal">Teal</option>
+                <option value="cyan">Cyan</option>
+                <option value="sky">Sky</option>
+                <option value="blue">Blue</option>
+                <option value="indigo">Indigo</option>
+                <option value="violet">Violet</option>
+                <option value="purple">Purple</option>
+                <option value="fuchsia">Fuchsia</option>
+                <option value="pink">Pink</option>
+                <option value="rose">Rose</option>
+              </select>
+            </Field>
+
+            {/* Custom CSS — ocupa largura total */}
+            <Field className="md:col-span-2">
+              <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
+              <textarea
+                id="custom_css"
+                name="custom_css"
+                rows={8}
+                placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
+                <code className="font-mono">[data-tenant-theme=&quot;slug&quot;]</code> para escopo.
+              </p>
             </Field>
 
             <Field>
