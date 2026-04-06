@@ -26,6 +26,13 @@ const brandingSchema = z.object({
   secondary_color: z.string().optional().nullable(),
   auth_bg_color: z.string().optional().nullable(),
   auth_theme: z.enum(['dark', 'light']).default('dark'),
+  use_custom_theme: z.preprocess(
+    (v) => v === 'on' || v === true,
+    z.boolean().default(false),
+  ),
+  base_color: z.string().optional().nullable(),
+  theme_color: z.string().optional().nullable(),
+  custom_css: z.string().optional().nullable(),
 })
 
 export async function createTenant(data: FormData) {
