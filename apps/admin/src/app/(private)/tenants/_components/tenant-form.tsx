@@ -37,11 +37,73 @@ function slugify(value: string): string {
     .replace(/^-|-$/g, '')
 }
 
+function maskCnpj(value: string): string {
+  const d = value.replace(/\D/g, '').slice(0, 14)
+  return d
+    .replace(/(\d{2})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1/$2')
+    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
+}
+
+function validateCnpj(raw: string): boolean {
+  const n = raw.replace(/\D/g, '')
+  if (n.length !== 14 || /^(\d)\1{13}$/.test(n)) return false
+  const w1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const w2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+  const dig = (digits: string, w: number[]) => {
+    const r = w.reduce((s, v, i) => s + Number(digits[i]) * v, 0) % 11
+    return r < 2 ? 0 : 11 - r
+  }
+  return dig(n, w1) === Number(n[12]) && dig(n, w2) === Number(n[13])
+}
+
+function formatPhone(raw: string): string {
+  const d = raw.replace(/\D/g, '')
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d[2]} ${d.slice(3, 7)}-${d.slice(7)}`
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
+  return raw
+}
+
+interface CnpjData {
+  name: string
+  companyName: string
+  email: string
+  phone: string
+}
+
+async function fetchCnpjData(cnpj: string): Promise<CnpjData> {
+  const digits = cnpj.replace(/\D/g, '')
+  const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`)
+  if (!res.ok) throw new Error('CNPJ não encontrado na Receita Federal.')
+  const data = await res.json() as {
+    razao_social?: string
+    nome_fantasia?: string
+    email?: string
+    ddd_telefone_1?: string
+  }
+  return {
+    name: data.nome_fantasia?.trim() || data.razao_social?.trim() || '',
+    companyName: data.razao_social?.trim() || '',
+    email: data.email?.trim().toLowerCase() || '',
+    phone: formatPhone(data.ddd_telefone_1 ?? ''),
+  }
+}
+
 export function TenantForm() {
   const router = useRouter()
   const [slug, setSlug] = useState('')
   const slugManuallyEdited = useRef(false)
   const [isWhiteLabel, setIsWhiteLabel] = useState(false)
+
+  // Campos auto-preenchidos via CNPJ
+  const [cnpj, setCnpj] = useState('')
+  const [name, setName] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [isFetchingCnpj, setIsFetchingCnpj] = useState(false)
+  const [cnpjLookupError, setCnpjLookupError] = useState<string | null>(null)
 
   const [formState, handleSubmit, isPending] = useFormState(
     createTenant,
@@ -54,7 +116,31 @@ export function TenantForm() {
     },
   )
 
+  function handleCnpjChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setCnpj(maskCnpj(e.target.value))
+    setCnpjLookupError(null)
+  }
+
+  async function handleCnpjBlur() {
+    if (!validateCnpj(cnpj)) return
+    setIsFetchingCnpj(true)
+    setCnpjLookupError(null)
+    try {
+      const data = await fetchCnpjData(cnpj)
+      if (data.name && !slugManuallyEdited.current) setSlug(slugify(data.name))
+      setName(data.name)
+      setCompanyName(data.companyName)
+      setEmail(data.email)
+      setPhone(data.phone)
+    } catch {
+      setCnpjLookupError('CNPJ não encontrado na Receita Federal.')
+    } finally {
+      setIsFetchingCnpj(false)
+    }
+  }
+
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setName(e.target.value)
     if (!slugManuallyEdited.current) {
       setSlug(slugify(e.target.value))
     }
@@ -80,6 +166,28 @@ export function TenantForm() {
         </CardHeader>
         <CardContent>
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Field className="md:col-span-2">
+              <FieldLabel htmlFor="cnpj">CNPJ</FieldLabel>
+              <div className="relative">
+                <Input
+                  id="cnpj"
+                  name="cnpj"
+                  placeholder="00.000.000/0000-00"
+                  value={cnpj}
+                  onChange={handleCnpjChange}
+                  onBlur={handleCnpjBlur}
+                  disabled={isFetchingCnpj}
+                />
+                {isFetchingCnpj && (
+                  <Loader2 className="absolute right-2.5 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                )}
+              </div>
+              {cnpjLookupError && (
+                <p className="text-xs text-destructive mt-1">{cnpjLookupError}</p>
+              )}
+              <FieldError errors={formState.errors?.cnpj} />
+            </Field>
+
             <Field>
               <FieldLabel htmlFor="name">Nome Fantasia *</FieldLabel>
               <Input
@@ -87,6 +195,7 @@ export function TenantForm() {
                 name="name"
                 required
                 placeholder="Ex: Crédito Fácil"
+                value={name}
                 onChange={handleNameChange}
               />
               <FieldError errors={formState.errors?.name} />
@@ -98,18 +207,10 @@ export function TenantForm() {
                 id="company_name"
                 name="company_name"
                 placeholder="Ex: Crédito Fácil Ltda"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
               />
               <FieldError errors={formState.errors?.company_name} />
-            </Field>
-
-            <Field>
-              <FieldLabel htmlFor="cnpj">CNPJ</FieldLabel>
-              <Input
-                id="cnpj"
-                name="cnpj"
-                placeholder="00.000.000/0000-00"
-              />
-              <FieldError errors={formState.errors?.cnpj} />
             </Field>
 
             <Field>
@@ -120,6 +221,8 @@ export function TenantForm() {
                 type="email"
                 required
                 placeholder="contato@empresa.com.br"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <FieldError errors={formState.errors?.email} />
             </Field>
@@ -130,6 +233,8 @@ export function TenantForm() {
                 id="phone"
                 name="phone"
                 placeholder="(11) 99999-9999"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
               />
               <FieldError errors={formState.errors?.phone} />
             </Field>
