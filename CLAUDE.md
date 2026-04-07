@@ -77,7 +77,7 @@ export type SystemRole = BackofficeRole | TenantRole
 
 // Claims JWT injetados pelo Supabase Auth Hook
 export type JwtClaims = {
-  role: SystemRole
+  user_role: SystemRole
   tenant_id: string | null  // null = usuário do backoffice
 }
 ```
@@ -100,7 +100,7 @@ Templates React Email para Resend. Emails disparados pela plataforma:
 - `ProposalStatusEmail` — atualização de status da proposta (Console → cliente)
 - `CommissionPaidEmail` — notificação de repasse ao tenant (Admin → tenant)
 
-### `packages/database` (novo)
+### `packages/database` (já existe — expandir)
 Types gerados pelo Supabase CLI + helpers reutilizáveis entre apps.
 
 ```
@@ -113,7 +113,7 @@ packages/database/src/
 
 Regenerar após migrations: `pnpm db:types` (definido no turbo.json)
 
-### `packages/config` (novo)
+### `packages/config` (já existe — expandir)
 Tailwind base compartilhado. Cada app estende e adiciona tokens próprios.
 
 ```javascript
@@ -127,7 +127,7 @@ Tailwind base compartilhado. Cada app estende e adiciona tokens próprios.
 
 | Camada | Tecnologia |
 |---|---|
-| Frontend (3 apps) | Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
+| Frontend (3 apps) | Next.js 15/16 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
 | Backend / BaaS | Supabase (PostgreSQL + Auth + Storage + Edge Functions + Realtime) |
 | Automações | N8N self-hosted (Railway) |
 | Serviços auxiliares | Python 3.12 + FastAPI (Railway) |

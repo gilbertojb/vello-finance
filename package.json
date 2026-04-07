@@ -1,5 +1,5 @@
 {
-  "name": "vello-crm",
+  "name": "vello-finance",
   "private": true,
   "scripts": {
     "build": "turbo run build",

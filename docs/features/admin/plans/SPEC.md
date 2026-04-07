@@ -37,7 +37,7 @@ Tipos de plano:
 | Campo | Tipo | Obrigatório | Validação |
 |---|---|---|---|
 | Nome | Text | Sim | 3–100 chars, único |
-| Tipo | Select | Sim | `saas` / `whitelabel` |
+| Tipo | Select | Sim | `signature` / `white_label` |
 | Mensalidade (R$) | Number | Se SaaS | > 0 |
 | Taxa de Setup (R$) | Number | Não | >= 0, default 0 |
 | Comissão do Tenant (%) | Number | Sim | 0,0001–100, 4 decimais |

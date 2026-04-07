@@ -151,7 +151,7 @@ import { env } from '@vello/env/admin'
 export function createClient() {
   return createBrowserClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   )
 }
 ```
@@ -172,7 +172,7 @@ export async function createClient() {
 
   return createServerClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll() {
@@ -206,7 +206,7 @@ import { env } from '@vello/env/admin'
 export function createServiceClient() {
   return createSupabaseClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
-    env.SUPABASE_SERVICE_ROLE_KEY,
+    env.SUPABASE_SECRET_KEY,
   )
 }
 ```
@@ -732,7 +732,7 @@ if (user && isAuthRoute) {
 Fase 1  → supabase link
 Fase 2  → .env.local + packages/env/src/admin.ts
 Fase 3  → src/lib/supabase/client.ts + server.ts + service.ts
-Fase 4  → src/middleware.ts (rota: /sign-in, redirect: /)
+Fase 4  → src/proxy.ts (rota: /sign-in, redirect: /)
 Fase 5  → migration backoffice_users + hook PostgreSQL + configurar hook no dashboard
 Fase 6  → seed (manual no dashboard)
 Fase 7  → packages/database placeholder + pnpm db:types
@@ -756,7 +756,7 @@ Fase 8  → actions.ts de sign-in (substituir ky por Supabase) + sign-out-button
 - [ ] Hook "Custom Access Token" configurado no Dashboard (Authentication → Hooks)
 - [ ] Usuário super_admin criado via dashboard + INSERT em `backoffice_users`
 - [ ] Login funciona: `success: true` → `router.push('/')` via `useFormState`
-- [ ] JWT do usuário contém `role: 'super_admin'` e `tenant_id: null`
+- [ ] JWT do usuário contém `user_role: 'super_admin'` e `tenant_id: null`
 - [x] `pnpm db:types` gera os types em `packages/database/src/types.ts`
 - [ ] Acesso direto a `/` sem login redireciona para `/sign-in`
 - [x] Erros de auth retornam `{ success: false, message, errors: null }` — sem detalhes técnicos

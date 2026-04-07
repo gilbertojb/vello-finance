@@ -103,7 +103,7 @@ import { z } from 'zod'
 
 const planSchema = z.object({
   name: z.string().min(3).max(100),
-  type: z.enum(['saas', 'whitelabel']),
+  type: z.enum(['signature', 'white_label']),
   monthly_fee: z.number().positive().optional(),
   commission_pct: z.number().min(0.0001).max(100),
 })
@@ -163,7 +163,7 @@ ALTER TABLE plans ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON plans
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
 CREATE POLICY "tenant_read_active" ON plans
@@ -508,7 +508,7 @@ ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON [tabela]
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 ```
 
@@ -527,7 +527,7 @@ ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON [tabela]
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
 CREATE POLICY "tenant_isolation" ON [tabela]
@@ -547,7 +547,7 @@ ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON [tabela]
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
 CREATE POLICY "tenant_read_active" ON [tabela]

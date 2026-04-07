@@ -1,15 +1,18 @@
 -- Migration: create_product_financial_partners
 -- Relação N:N entre produtos e instituições financeiras.
--- Comissão negociada por par produto+IF (a mesma IF pode ter % diferentes por produto).
--- RLS: Categoria C — backoffice gerencia, tenants leem apenas registros ativos.
+-- Cada par produto+IF tem sua própria comissão negociada.
+-- Cascata de comissões:
+--   IF paga à Vello:    if_commission_pct      ex: 10,000%
+--   Vello retém:        vello_commission_pct   ex:  5,000%
+--   Disponível ao tenant = if_commission_pct - vello_commission_pct
+-- RLS: Categoria C — backoffice gerencia; tenants leem apenas registros ativos.
 
 CREATE TABLE product_financial_partners (
   id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id           UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   financial_partner_id UUID NOT NULL REFERENCES financial_partners(id) ON DELETE RESTRICT,
   if_commission_pct    NUMERIC(6,3) NOT NULL,  -- % que a IF paga à Vello (ex: 3.755)
-  vello_commission_pct NUMERIC(6,3) NOT NULL,  -- % que a Vello retém
-  -- Disponível ao tenant = if_commission_pct - vello_commission_pct
+  vello_commission_pct NUMERIC(6,3) NOT NULL,  -- % que a Vello retém (ex: 1.500)
   is_active            BOOLEAN NOT NULL DEFAULT true,
   created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -24,15 +27,15 @@ CREATE TRIGGER set_updated_at_product_financial_partners
   BEFORE UPDATE ON product_financial_partners
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- RLS
 ALTER TABLE product_financial_partners ENABLE ROW LEVEL SECURITY;
 
--- Backoffice gerencia tudo
 CREATE POLICY "backoffice_full_access" ON product_financial_partners
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin', 'admin', 'financial', 'support'])
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin', 'admin', 'financial', 'support'])
   );
 
--- Tenants leem apenas registros ativos cujo produto também esteja ativo
+-- Tenants leem apenas pares ativos cujo produto também esteja ativo
 CREATE POLICY "tenant_read_active" ON product_financial_partners
   FOR SELECT USING (
     is_active = true

@@ -26,10 +26,10 @@ CREATE TABLE plans (
 ```sql
 CREATE TABLE tenants (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  plan_id         UUID NOT NULL REFERENCES plans(id),
+  plan_id         UUID REFERENCES plans(id),        -- Nullable: pode ser atribuído depois
   name            TEXT NOT NULL,                    -- Nome fantasia
-  company_name    TEXT NOT NULL,                    -- Razão social
-  cnpj            TEXT NOT NULL UNIQUE,
+  company_name    TEXT,                             -- Razão social (nullable até ativação)
+  cnpj            TEXT UNIQUE,                      -- Nullable até ativação
   email           TEXT NOT NULL,
   phone           TEXT,
   slug            TEXT NOT NULL UNIQUE,             -- [slug].vellofinance.com.br
@@ -55,7 +55,6 @@ CREATE TABLE tenants (
 CREATE TABLE financial_partners (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name            TEXT NOT NULL,
-  type            TEXT NOT NULL CHECK (type IN ('qi_tech','bancly','zip','other')),
   api_base_url    TEXT,
   api_key_enc     TEXT,           -- Criptografado — nunca expor
   webhook_secret  TEXT,           -- Para validar webhooks recebidos

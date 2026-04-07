@@ -52,7 +52,7 @@ CREATE POLICY "tenant_isolation" ON [tabela]
 -- Backoffice acessa tudo
 CREATE POLICY "backoffice_full_access" ON [tabela]
   FOR ALL USING (
-    (auth.jwt() ->> 'role') = ANY(ARRAY[
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY[
       'super_admin', 'admin', 'financial', 'support'
     ])
   );
@@ -64,7 +64,7 @@ Injetados via `packages/auth` e validados nas policies RLS:
 
 ```json
 {
-  "role": "tenant_admin",
+  "user_role": "tenant_admin",
   "tenant_id": "uuid-do-tenant"
 }
 ```
