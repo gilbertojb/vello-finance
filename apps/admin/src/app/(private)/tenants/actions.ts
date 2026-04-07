@@ -139,3 +139,137 @@ export async function createTenant(data: FormData) {
     errors: null,
   }
 }
+
+// ---------------------------------------------------------------------------
+// updateTenant
+// ---------------------------------------------------------------------------
+
+export async function updateTenant(data: FormData) {
+  const id = data.get('id') as string
+  if (!id) return { success: false, message: 'ID não informado.', errors: null }
+
+  const obj = Object.fromEntries(data) as Record<string, unknown>
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === '') obj[key] = null
+  }
+
+  const tenantResult = tenantSchema.safeParse(obj)
+  if (!tenantResult.success) {
+    return {
+      success: false,
+      message: 'Verifique os erros no formulário.',
+      errors: z.flattenError(tenantResult.error).fieldErrors,
+    }
+  }
+
+  const brandingResult = brandingSchema.safeParse(obj)
+  if (!brandingResult.success) {
+    return {
+      success: false,
+      message: 'Verifique os campos de identidade visual.',
+      errors: null,
+    }
+  }
+
+  const supabase = await createClient()
+
+  const { error: tenantError } = await supabase
+    .from('tenants')
+    .update(tenantResult.data)
+    .eq('id', id)
+
+  if (tenantError) {
+    return { success: false, message: tenantError.message, errors: null }
+  }
+
+  // Upload de arquivos — apenas se um novo arquivo foi selecionado
+  const serviceClient = createServiceClient()
+  const brandingUpdate: Record<string, string> = {}
+
+  const uploads: Array<{ field: string; path: string; maxSize: number }> = [
+    { field: 'logo', path: `${id}/logo`, maxSize: 2 * 1024 * 1024 },
+    { field: 'favicon', path: `${id}/favicon`, maxSize: 512 * 1024 },
+    { field: 'auth_bg', path: `${id}/auth-bg`, maxSize: 5 * 1024 * 1024 },
+  ]
+
+  const urlFields: Record<string, string> = {
+    logo: 'logo_url',
+    favicon: 'favicon_url',
+    auth_bg: 'auth_bg_image_url',
+  }
+
+  for (const { field, path, maxSize } of uploads) {
+    const file = data.get(field) as File | null
+    if (!file || file.size === 0) continue
+    if (file.size > maxSize) continue
+
+    const buffer = await file.arrayBuffer()
+    const { error: uploadError } = await serviceClient.storage
+      .from('tenant-assets')
+      .upload(path, buffer, { contentType: file.type, upsert: true })
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = serviceClient.storage
+        .from('tenant-assets')
+        .getPublicUrl(path)
+      brandingUpdate[urlFields[field]] = publicUrl
+    }
+  }
+
+  // custom_css: só atualiza se rawCss foi enviado; preserva tokens existentes caso vazio
+  const rawCss = obj.custom_css as string | null | undefined
+  const customCssJson = rawCss ? { rawCss } : null
+
+  const brandingScalarPayload = Object.fromEntries(
+    Object.entries({ ...brandingResult.data, ...brandingUpdate }).filter(
+      ([, v]) => v !== null && v !== undefined,
+    ),
+  )
+
+  const { error: brandingError } = await supabase
+    .from('tenant_branding')
+    .update({
+      ...brandingScalarPayload,
+      ...(customCssJson !== null ? { custom_css: customCssJson } : {}),
+    })
+    .eq('tenant_id', id)
+
+  if (brandingError) {
+    return { success: false, message: brandingError.message, errors: null }
+  }
+
+  revalidatePath('/tenants')
+  revalidatePath(`/tenants/${id}/edit`)
+
+  return {
+    success: true,
+    message: 'Parceiro atualizado com sucesso!',
+    errors: null,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// setTenantStatus
+// ---------------------------------------------------------------------------
+
+export async function setTenantStatus(
+  id: string,
+  status: 'active' | 'suspended' | 'cancelled',
+) {
+  const supabase = await createClient()
+
+  const extra: Record<string, string> = {}
+  if (status === 'active') extra.activated_at = new Date().toISOString()
+  if (status === 'suspended') extra.suspended_at = new Date().toISOString()
+
+  const { error } = await supabase
+    .from('tenants')
+    .update({ status, ...extra })
+    .eq('id', id)
+
+  if (error) return { success: false, message: error.message }
+
+  revalidatePath('/tenants')
+  return { success: true, message: '' }
+}

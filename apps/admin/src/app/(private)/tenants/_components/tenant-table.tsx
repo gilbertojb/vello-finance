@@ -1,9 +1,19 @@
 'use client'
 
-import { Pencil } from 'lucide-react'
+import { MoreHorizontal, Pencil, PowerOff, RefreshCw, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { useTransition } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { setTenantStatus } from '../actions'
 import { TenantStatusBadge } from './tenant-status-badge'
 
 type TenantRow = {
@@ -12,6 +22,51 @@ type TenantRow = {
   slug: string
   status: string
   created_at: string
+}
+
+function StatusAction({ tenant }: { tenant: TenantRow }) {
+  const [isPending, startTransition] = useTransition()
+
+  function changeStatus(newStatus: 'active' | 'suspended' | 'cancelled') {
+    startTransition(async () => {
+      const result = await setTenantStatus(tenant.id, newStatus)
+      if (result.success) {
+        toast.success('Status atualizado com sucesso.')
+      } else {
+        toast.error(result.message || 'Erro ao atualizar status.')
+      }
+    })
+  }
+
+  if (tenant.status === 'cancelled') return null
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      {tenant.status === 'active' && (
+        <DropdownMenuItem
+          className="text-destructive focus:text-destructive"
+          disabled={isPending}
+          onClick={() => changeStatus('suspended')}
+        >
+          <PowerOff className="size-4" />
+          Inativar
+        </DropdownMenuItem>
+      )}
+      {tenant.status === 'pending' && (
+        <DropdownMenuItem disabled={isPending} onClick={() => changeStatus('active')}>
+          <Zap className="size-4" />
+          Ativar
+        </DropdownMenuItem>
+      )}
+      {tenant.status === 'suspended' && (
+        <DropdownMenuItem disabled={isPending} onClick={() => changeStatus('active')}>
+          <RefreshCw className="size-4" />
+          Reativar
+        </DropdownMenuItem>
+      )}
+    </>
+  )
 }
 
 export function TenantTable({ tenants }: { tenants: ReadonlyArray<TenantRow> }) {
@@ -50,10 +105,7 @@ export function TenantTable({ tenants }: { tenants: ReadonlyArray<TenantRow> }) 
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
           {tenants.map((tenant) => (
-            <tr
-              key={tenant.id}
-              className="border-b transition-colors hover:bg-muted/50"
-            >
+            <tr key={tenant.id} className="border-b transition-colors hover:bg-muted/50">
               <td className="p-4 align-middle font-medium">{tenant.name}</td>
               <td className="p-4 align-middle text-muted-foreground text-xs">
                 {tenant.slug}.vellofinance.com.br
@@ -65,11 +117,23 @@ export function TenantTable({ tenants }: { tenants: ReadonlyArray<TenantRow> }) 
                 {new Date(tenant.created_at).toLocaleDateString('pt-BR')}
               </td>
               <td className="p-4 align-middle text-right">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/tenants/${tenant.id}/edit`}>
-                    <Pencil className="size-4" />
-                  </Link>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="size-4" />
+                      <span className="sr-only">Ações</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href={`/tenants/${tenant.id}/edit`}>
+                        <Pencil className="size-4" />
+                        Editar
+                      </Link>
+                    </DropdownMenuItem>
+                    <StatusAction tenant={tenant} />
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </td>
             </tr>
           ))}

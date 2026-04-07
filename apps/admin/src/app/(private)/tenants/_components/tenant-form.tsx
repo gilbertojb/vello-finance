@@ -2,7 +2,7 @@
 
 import { Building2, CreditCard, Loader2, Palette, Store } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,47 @@ import { PhoneInput } from '@/components/ui/masked-input'
 import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
-import { createTenant } from '../actions'
+import { createTenant, updateTenant } from '../actions'
+
+// ---------------------------------------------------------------------------
+// Tipo do tenant no modo de edição (retornado por getTenant)
+// ---------------------------------------------------------------------------
+
+type BrandingData = {
+  company_display_name: string | null
+  use_custom_theme: boolean
+  base_color: string | null
+  theme_color: string | null
+  // custom_css é JSONB — pode ser qualquer forma JSON válida
+  custom_css: unknown
+  logo_url: string | null
+  favicon_url: string | null
+  auth_bg_image_url: string | null
+}
+
+export type TenantForEdit = {
+  id: string
+  name: string
+  company_name: string | null
+  cnpj: string | null
+  email: string
+  phone: string | null
+  slug: string
+  custom_domain: string | null
+  bank_name: string | null
+  bank_agency: string | null
+  bank_account: string | null
+  bank_pix_key: string | null
+  tenant_branding: BrandingData[] | BrandingData | null
+}
+
+type Props = {
+  tenant?: TenantForEdit
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function slugify(value: string): string {
   return value
@@ -91,25 +131,48 @@ async function fetchCnpjData(cnpj: string): Promise<CnpjData> {
   }
 }
 
-export function TenantForm() {
-  const router = useRouter()
-  const [slug, setSlug] = useState('')
-  const slugManuallyEdited = useRef(false)
-  const [isWhiteLabel, setIsWhiteLabel] = useState(false)
+function normalizeBranding(raw: TenantForEdit['tenant_branding']): BrandingData | null {
+  if (!raw) return null
+  return Array.isArray(raw) ? (raw[0] ?? null) : raw
+}
 
-  // Campos auto-preenchidos via CNPJ
-  const [cnpj, setCnpj] = useState('')
-  const [name, setName] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+const SELECT_CLASS =
+  'flex h-9 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50'
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+export function TenantForm({ tenant }: Props) {
+  const router = useRouter()
+  const isEdit = !!tenant
+  const branding = normalizeBranding(tenant?.tenant_branding ?? null)
+
+  // Slug: em edição, considera já editado manualmente para não ser sobrescrito
+  const slugManuallyEdited = useRef(isEdit)
+  const [slug, setSlug] = useState(tenant?.slug ?? '')
+
+  // CNPJ: só dispara auto-fill se o usuário editou o campo (cnpjDirty)
+  const cnpjDirty = useRef(false)
+  const [cnpj, setCnpj] = useState(maskCnpj(tenant?.cnpj ?? ''))
   const [isFetchingCnpj, setIsFetchingCnpj] = useState(false)
   const [cnpjLookupError, setCnpjLookupError] = useState<string | null>(null)
 
+  // Campos auto-preenchíveis
+  const [name, setName] = useState(tenant?.name ?? '')
+  const [companyName, setCompanyName] = useState(tenant?.company_name ?? '')
+  const [email, setEmail] = useState(tenant?.email ?? '')
+  const [phone, setPhone] = useState(formatPhone(tenant?.phone ?? ''))
+
+  // Identidade visual
+  const [isWhiteLabel, setIsWhiteLabel] = useState(branding?.use_custom_theme ?? false)
+
+  const action = isEdit ? updateTenant : createTenant
+
   const [formState, handleSubmit, isPending] = useFormState(
-    createTenant,
+    action,
     () => {
-      toast.success('Parceiro cadastrado com sucesso!')
+      toast.success(isEdit ? 'Parceiro atualizado com sucesso!' : 'Parceiro cadastrado com sucesso!')
       router.push('/tenants')
     },
     (msg: string) => {
@@ -118,12 +181,13 @@ export function TenantForm() {
   )
 
   function handleCnpjChange(e: React.ChangeEvent<HTMLInputElement>) {
+    cnpjDirty.current = true
     setCnpj(maskCnpj(e.target.value))
     setCnpjLookupError(null)
   }
 
   async function handleCnpjBlur() {
-    if (!validateCnpj(cnpj)) return
+    if (!cnpjDirty.current || !validateCnpj(cnpj)) return
     setIsFetchingCnpj(true)
     setCnpjLookupError(null)
     try {
@@ -142,9 +206,7 @@ export function TenantForm() {
 
   function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
     setName(e.target.value)
-    if (!slugManuallyEdited.current) {
-      setSlug(slugify(e.target.value))
-    }
+    if (!slugManuallyEdited.current) setSlug(slugify(e.target.value))
   }
 
   function handleSlugChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -152,8 +214,13 @@ export function TenantForm() {
     setSlug(e.target.value)
   }
 
+  const rawCssDefault =
+    (branding?.custom_css as Record<string, string> | null)?.rawCss ?? ''
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 w-full">
+      {isEdit && <input type="hidden" name="id" value={tenant.id} />}
+
       {/* Card 1 — Dados da Empresa */}
       <Card>
         <CardHeader className="border-b">
@@ -161,9 +228,7 @@ export function TenantForm() {
             <Building2 className="size-5 text-muted-foreground" />
             <CardTitle>Dados da Empresa</CardTitle>
           </div>
-          <CardDescription>
-            Informações principais do parceiro.
-          </CardDescription>
+          <CardDescription>Informações principais do parceiro.</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,9 +314,7 @@ export function TenantForm() {
             <Store className="size-5 text-muted-foreground" />
             <CardTitle>Configurações da Loja</CardTitle>
           </div>
-          <CardDescription>
-            URL de acesso à loja e domínio personalizado.
-          </CardDescription>
+          <CardDescription>URL de acesso à loja e domínio personalizado.</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -279,6 +342,7 @@ export function TenantForm() {
                 id="custom_domain"
                 name="custom_domain"
                 placeholder="creditos.empresa.com.br"
+                defaultValue={tenant?.custom_domain ?? ''}
               />
               <FieldError errors={formState.errors?.custom_domain} />
             </Field>
@@ -305,16 +369,17 @@ export function TenantForm() {
                 id="company_display_name"
                 name="company_display_name"
                 placeholder="Nome exibido nas telas públicas"
+                defaultValue={branding?.company_display_name ?? ''}
               />
             </Field>
 
-            {/* Base Color */}
             <Field>
               <FieldLabel htmlFor="base_color">Base Color</FieldLabel>
               <select
                 id="base_color"
                 name="base_color"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                defaultValue={branding?.base_color ?? ''}
+                className={SELECT_CLASS}
               >
                 <option value="">Padrão do sistema</option>
                 <option value="Neutral">Neutral</option>
@@ -327,13 +392,13 @@ export function TenantForm() {
               </select>
             </Field>
 
-            {/* Theme Color */}
             <Field>
               <FieldLabel htmlFor="theme_color">Theme Color</FieldLabel>
               <select
                 id="theme_color"
                 name="theme_color"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                defaultValue={branding?.theme_color ?? ''}
+                className={SELECT_CLASS}
               >
                 <option value="">Padrão do sistema</option>
                 <option value="red">Red</option>
@@ -356,7 +421,6 @@ export function TenantForm() {
               </select>
             </Field>
 
-            {/* Toggle: CSS customizado white-label */}
             <Field className="md:col-span-2">
               <div className="flex items-center justify-between rounded-lg border p-4">
                 <div>
@@ -376,7 +440,6 @@ export function TenantForm() {
               </div>
             </Field>
 
-            {/* Custom CSS — visível apenas para tenants white-label */}
             {isWhiteLabel && (
               <Field className="md:col-span-2">
                 <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
@@ -384,6 +447,7 @@ export function TenantForm() {
                   id="custom_css"
                   name="custom_css"
                   rows={8}
+                  defaultValue={rawCssDefault}
                   placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
                 />
@@ -402,6 +466,7 @@ export function TenantForm() {
                 maxSize={2 * 1024 * 1024}
                 variant="square"
                 hint="PNG, SVG ou WebP. Máx 2MB."
+                currentUrl={branding?.logo_url}
               />
             </Field>
 
@@ -413,6 +478,7 @@ export function TenantForm() {
                 maxSize={512 * 1024}
                 variant="square"
                 hint="PNG ou ICO. Máx 512KB."
+                currentUrl={branding?.favicon_url}
               />
             </Field>
 
@@ -424,6 +490,7 @@ export function TenantForm() {
                 maxSize={5 * 1024 * 1024}
                 variant="landscape"
                 hint="JPG, PNG ou WebP. Máx 5MB."
+                currentUrl={branding?.auth_bg_image_url}
               />
             </Field>
           </FieldGroup>
@@ -445,22 +512,42 @@ export function TenantForm() {
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Field>
               <FieldLabel htmlFor="bank_name">Banco</FieldLabel>
-              <Input id="bank_name" name="bank_name" placeholder="Ex: Itaú" />
+              <Input
+                id="bank_name"
+                name="bank_name"
+                placeholder="Ex: Itaú"
+                defaultValue={tenant?.bank_name ?? ''}
+              />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="bank_pix_key">Chave PIX</FieldLabel>
-              <Input id="bank_pix_key" name="bank_pix_key" placeholder="CPF, CNPJ, e-mail ou chave aleatória" />
+              <Input
+                id="bank_pix_key"
+                name="bank_pix_key"
+                placeholder="CPF, CNPJ, e-mail ou chave aleatória"
+                defaultValue={tenant?.bank_pix_key ?? ''}
+              />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="bank_agency">Agência</FieldLabel>
-              <Input id="bank_agency" name="bank_agency" placeholder="0001" />
+              <Input
+                id="bank_agency"
+                name="bank_agency"
+                placeholder="0001"
+                defaultValue={tenant?.bank_agency ?? ''}
+              />
             </Field>
 
             <Field>
               <FieldLabel htmlFor="bank_account">Conta</FieldLabel>
-              <Input id="bank_account" name="bank_account" placeholder="00000-0" />
+              <Input
+                id="bank_account"
+                name="bank_account"
+                placeholder="00000-0"
+                defaultValue={tenant?.bank_account ?? ''}
+              />
             </Field>
           </FieldGroup>
         </CardContent>
@@ -475,7 +562,13 @@ export function TenantForm() {
           Cancelar
         </Button>
         <Button type="submit" disabled={isPending}>
-          {isPending ? <Loader2 className="size-4 animate-spin" /> : 'Cadastrar Parceiro'}
+          {isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : isEdit ? (
+            'Salvar Alterações'
+          ) : (
+            'Cadastrar Parceiro'
+          )}
         </Button>
       </div>
     </form>
