@@ -10,7 +10,9 @@ interface TenantThemeLoaderProps {
 export function TenantThemeLoader({ tenantSlug }: TenantThemeLoaderProps) {
   useEffect(() => {
     if (!tenantSlug || tenantSlug === 'default') return
-    loadTenantTheme(tenantSlug)
+    loadTenantTheme(tenantSlug).catch((err: unknown) => {
+      console.error('[TenantThemeLoader] Failed to load theme for', tenantSlug, err)
+    })
   }, [tenantSlug])
 
   return null
