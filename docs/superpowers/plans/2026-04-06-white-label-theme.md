@@ -4,17 +4,30 @@
 
 **Goal:** Implementar um sistema de tema dinâmico por tenant no console, com base em `base_color`, `theme_color`, tokens CSS e `custom_css` armazenados no banco.
 
-**Architecture:** Três camadas de CSS: `globals.css` (base global) → `tenant-theme.css` gerado dinamicamente via `/api/tenant-theme` → `custom_css` injetado por último. O console é um novo Next.js 15 app no monorepo. Os campos de tema são gerenciados no admin e consumidos pelo console.
+**Architecture:** Três camadas de CSS: `globals.css` (base global) → tokens JSONB de `tenant_branding.custom_css` injetados via `/api/tenant-theme` → `rawCss` injetado por último. O console é um novo Next.js 15 app no monorepo. Os campos de tema são gerenciados no admin e consumidos pelo console. Tokens CSS e rawCss são consolidados em uma única coluna JSONB em `tenant_branding.custom_css` — sem tabela separada.
 
 **Tech Stack:** Next.js 15 (App Router), Tailwind CSS 4, shadcn/ui, Supabase (PostgreSQL + RLS), `@supabase/ssr`, `@vello/database`, `@vello/env`.
 
 ---
 
+> **Status:** ✅ Implementado — commits `3f4a98f` (form simplification) e `d4ee750` (JSONB consolidation).
+
+## Alterações em relação ao plano original
+
+- **`tenant_theme_tokens`** foi removida (migration `20260406100400`). Os tokens são armazenados em `tenant_branding.custom_css` como JSONB.
+- **`custom_css`** convertido de `TEXT` para `JSONB`. Estrutura: `{ "token-name": "valor", ..., "rawCss": "css livre" }`.
+- Campos legados removidos de `tenant_branding`: `primary_color`, `secondary_color`, `auth_theme`, `auth_bg_color`.
+- `base_color` e `theme_color` são exibidos para todos os tenants (não apenas white-label).
+- O textarea de CSS customizado só aparece quando o toggle `use_custom_theme` está ativo.
+- A API `/api/tenant-theme` usa `createServiceClient()` — sem policies públicas de leitura.
+
 ## Mapeamento de arquivos
 
 ### Criados
 - `supabase/migrations/20260406100000_alter_tenant_branding_add_theme_fields.sql`
-- `supabase/migrations/20260406100100_create_tenant_theme_tokens.sql`
+- `supabase/migrations/20260406100200_add_public_read_policies_tenant_theme.sql` ← revertida por 100300
+- `supabase/migrations/20260406100300_drop_public_read_policies_tenant_theme.sql`
+- `supabase/migrations/20260406100400_simplify_tenant_branding.sql` ← remove colunas legadas, converte JSONB, remove tenant_theme_tokens
 - `apps/console/package.json`
 - `apps/console/next.config.ts`
 - `apps/console/tsconfig.json`
@@ -23,13 +36,14 @@
 - `apps/console/src/app/layout.tsx`
 - `apps/console/src/app/api/tenant-theme/route.ts`
 - `apps/console/src/lib/supabase/server.ts`
+- `apps/console/src/lib/supabase/service.ts`
 - `apps/console/src/lib/theme/load-tenant-theme.ts`
 - `apps/console/src/components/tenant-theme-loader.tsx`
 
 ### Modificados
 - `packages/database/src/types.ts` ← regenerado via `pnpm db:types`
-- `apps/admin/src/app/(private)/tenants/actions.ts` ← schema + action update
-- `apps/admin/src/app/(private)/tenants/_components/tenant-form.tsx` ← novos campos de tema
+- `apps/admin/src/app/(private)/tenants/actions.ts` ← schema + JSONB wrapping do custom_css
+- `apps/admin/src/app/(private)/tenants/_components/tenant-form.tsx` ← toggle white-label, base_color/theme_color sempre visíveis
 
 ---
 
