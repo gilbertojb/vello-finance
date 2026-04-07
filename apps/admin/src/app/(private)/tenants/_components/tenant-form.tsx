@@ -19,6 +19,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/field'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
@@ -289,39 +290,36 @@ export function TenantForm() {
             )}
 
             <Field>
-              <FieldLabel htmlFor="logo">Logo</FieldLabel>
-              <Input
-                id="logo"
+              <FieldLabel>Logo</FieldLabel>
+              <ImageUpload
                 name="logo"
-                type="file"
                 accept="image/png,image/svg+xml,image/webp"
-                className="cursor-pointer"
+                maxSize={2 * 1024 * 1024}
+                variant="square"
+                hint="PNG, SVG ou WebP. Máx 2MB."
               />
-              <p className="text-xs text-muted-foreground mt-1">PNG, SVG ou WebP. Máx 2MB.</p>
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="favicon">Favicon</FieldLabel>
-              <Input
-                id="favicon"
+              <FieldLabel>Favicon</FieldLabel>
+              <ImageUpload
                 name="favicon"
-                type="file"
                 accept="image/png,image/x-icon"
-                className="cursor-pointer"
+                maxSize={512 * 1024}
+                variant="square"
+                hint="PNG ou ICO. Máx 512KB."
               />
-              <p className="text-xs text-muted-foreground mt-1">PNG ou ICO. Máx 512KB.</p>
             </Field>
 
-            <Field>
-              <FieldLabel htmlFor="auth_bg">Imagem de Fundo Auth</FieldLabel>
-              <Input
-                id="auth_bg"
+            <Field className="md:col-span-2">
+              <FieldLabel>Imagem de Fundo Auth</FieldLabel>
+              <ImageUpload
                 name="auth_bg"
-                type="file"
                 accept="image/jpeg,image/png,image/webp"
-                className="cursor-pointer"
+                maxSize={5 * 1024 * 1024}
+                variant="landscape"
+                hint="JPG, PNG ou WebP. Máx 5MB."
               />
-              <p className="text-xs text-muted-foreground mt-1">JPG, PNG ou WebP. Máx 5MB.</p>
             </Field>
           </FieldGroup>
         </CardContent>
