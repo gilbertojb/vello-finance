@@ -24,7 +24,6 @@ import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createTenant } from '../actions'
-import { ColorPicker } from './color-picker'
 
 function slugify(value: string): string {
   return value
@@ -41,6 +40,7 @@ export function TenantForm() {
   const router = useRouter()
   const [slug, setSlug] = useState('')
   const slugManuallyEdited = useRef(false)
+  const [isWhiteLabel, setIsWhiteLabel] = useState(false)
 
   const [formState, handleSubmit, isPending] = useFormState(
     createTenant,
@@ -202,52 +202,6 @@ export function TenantForm() {
               />
             </Field>
 
-            <Field>
-              <FieldLabel>Tema Auth</FieldLabel>
-              <select
-                name="auth_theme"
-                defaultValue="dark"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="dark">Dark</option>
-                <option value="light">Light</option>
-              </select>
-            </Field>
-
-            <Field>
-              <FieldLabel>Cor Primária</FieldLabel>
-              <ColorPicker name="primary_color" defaultValue="#3B5BBE" label="Cor primária" />
-            </Field>
-
-            <Field>
-              <FieldLabel>Cor Secundária</FieldLabel>
-              <ColorPicker name="secondary_color" defaultValue="#1E3A5F" label="Cor secundária" />
-            </Field>
-
-            <Field>
-              <FieldLabel>Cor de Fundo Auth</FieldLabel>
-              <ColorPicker name="auth_bg_color" defaultValue="#18181b" label="Cor de fundo auth" />
-            </Field>
-
-            {/* Toggle: Habilitar tema customizado */}
-            <Field className="md:col-span-2">
-              <div className="flex items-center justify-between rounded-lg border p-4">
-                <div>
-                  <FieldLabel htmlFor="use_custom_theme" className="text-base">
-                    Tema White-Label
-                  </FieldLabel>
-                  <p className="text-sm text-muted-foreground">
-                    Ativa personalização avançada de tokens CSS por tenant.
-                  </p>
-                </div>
-                <Switch
-                  id="use_custom_theme"
-                  name="use_custom_theme"
-                  defaultChecked={false}
-                />
-              </div>
-            </Field>
-
             {/* Base Color */}
             <Field>
               <FieldLabel htmlFor="base_color">Base Color</FieldLabel>
@@ -296,21 +250,43 @@ export function TenantForm() {
               </select>
             </Field>
 
-            {/* Custom CSS — ocupa largura total */}
+            {/* Toggle: CSS customizado white-label */}
             <Field className="md:col-span-2">
-              <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
-              <textarea
-                id="custom_css"
-                name="custom_css"
-                rows={8}
-                placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
-                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
-                <code className="font-mono">[data-tenant-theme=&quot;slug&quot;]</code> para escopo.
-              </p>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <FieldLabel htmlFor="use_custom_theme" className="text-base">
+                    Tema White-Label
+                  </FieldLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Ativa personalização avançada de tokens CSS por tenant.
+                  </p>
+                </div>
+                <Switch
+                  id="use_custom_theme"
+                  name="use_custom_theme"
+                  checked={isWhiteLabel}
+                  onCheckedChange={setIsWhiteLabel}
+                />
+              </div>
             </Field>
+
+            {/* Custom CSS — visível apenas para tenants white-label */}
+            {isWhiteLabel && (
+              <Field className="md:col-span-2">
+                <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
+                <textarea
+                  id="custom_css"
+                  name="custom_css"
+                  rows={8}
+                  placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
+                  <code className="font-mono">[data-tenant-theme=&quot;slug&quot;]</code> para escopo.
+                </p>
+              </Field>
+            )}
 
             <Field>
               <FieldLabel htmlFor="logo">Logo</FieldLabel>

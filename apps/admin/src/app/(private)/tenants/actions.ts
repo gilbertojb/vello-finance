@@ -22,10 +22,6 @@ const tenantSchema = z.object({
 
 const brandingSchema = z.object({
   company_display_name: z.string().optional().nullable(),
-  primary_color: z.string().optional().nullable(),
-  secondary_color: z.string().optional().nullable(),
-  auth_bg_color: z.string().optional().nullable(),
-  auth_theme: z.enum(['dark', 'light']).default('dark'),
   use_custom_theme: z.preprocess(
     (v) => v === 'on' || v === true,
     z.boolean().default(false),
