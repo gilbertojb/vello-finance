@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -8,9 +8,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'slug is required' }, { status: 400 })
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
-  // Buscar tenant pelo slug
+  // Buscar tenant pelo slug (service role — bypass RLS)
   const { data: tenant, error: tenantError } = await supabase
     .from('tenants')
     .select('id, slug')
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
   }
 
-  // Buscar branding e tokens em paralelo
+  // Buscar branding e tokens em paralelo (service role)
   const [brandingResult, tokensResult] = await Promise.all([
     supabase
       .from('tenant_branding')
@@ -40,16 +40,23 @@ export async function GET(request: NextRequest) {
 
   // Se o tenant não usa tema customizado, retornar payload vazio
   if (!branding?.use_custom_theme) {
-    return NextResponse.json({
-      selector: null,
-      baseColor: branding?.base_color ?? null,
-      themeColor: branding?.theme_color ?? null,
-      variables: {},
-      customCss: null,
-    })
+    return NextResponse.json(
+      {
+        selector: null,
+        baseColor: branding?.base_color ?? null,
+        themeColor: branding?.theme_color ?? null,
+        variables: {},
+        customCss: null,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        },
+      },
+    )
   }
 
-  const selector = `[data-tenant-theme="${slug}"]`
+  const selector = `[data-tenant-theme="${tenant.slug}"]`
 
   // Mapear colunas do banco para nomes de CSS variables
   const variables: Record<string, string> = {}
@@ -88,17 +95,26 @@ export async function GET(request: NextRequest) {
     'sidebar-accent-foreground':  tokens?.sidebar_accent_foreground,
     'sidebar-border':         tokens?.sidebar_border,
     'sidebar-ring':           tokens?.sidebar_ring,
+    'font-sans':              tokens?.font_sans,
+    'font-heading':           tokens?.font_heading,
   }
 
   for (const [cssVar, value] of Object.entries(tokenMap)) {
     if (value) variables[cssVar] = value
   }
 
-  return NextResponse.json({
-    selector,
-    baseColor: branding.base_color ?? null,
-    themeColor: branding.theme_color ?? null,
-    variables,
-    customCss: branding.custom_css ?? null,
-  })
+  return NextResponse.json(
+    {
+      selector,
+      baseColor: branding.base_color ?? null,
+      themeColor: branding.theme_color ?? null,
+      variables,
+      customCss: branding.custom_css ?? null,
+    },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    },
+  )
 }
