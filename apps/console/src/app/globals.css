@@ -38,6 +38,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Tipografia — sobrescrita por tenant */
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-heading);
 }
 
 /* ─── Tema padrão (sem tenant white-label) ─── */
@@ -69,6 +73,8 @@
   --ring:               oklch(0.478 0.152 260.5);
 
   --radius: 0.5rem;
+  --font-sans: sans-serif;
+  --font-heading: inherit;
 
   --sidebar:                    oklch(1 0 0);
   --sidebar-foreground:         oklch(0.193 0.055 264.0);

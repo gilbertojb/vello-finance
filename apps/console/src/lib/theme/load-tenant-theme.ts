@@ -10,7 +10,7 @@ const STYLE_ID_TOKENS = 'tenant-theme-tokens'
 const STYLE_ID_CUSTOM = 'tenant-theme-custom'
 
 export async function loadTenantTheme(tenantSlug: string): Promise<void> {
-  const response = await fetch(`/api/tenant-theme?slug=${tenantSlug}`)
+  const response = await fetch(`/api/tenant-theme?slug=${encodeURIComponent(tenantSlug)}`)
 
   if (!response.ok) return
 
