@@ -28,7 +28,6 @@ const brandingSchema = z.object({
   ),
   base_color: z.string().optional().nullable(),
   theme_color: z.string().optional().nullable(),
-  custom_css: z.string().optional().nullable(),
 })
 
 export async function createTenant(data: FormData) {
@@ -108,8 +107,13 @@ export async function createTenant(data: FormData) {
     }
   }
 
+  // custom_css é JSONB: { rawCss: "..." } + quaisquer tokens CSS adicionados futuramente
+  // O textarea do formulário envia texto plano; aqui embrulhamos como JSONB.
+  const rawCss = obj.custom_css as string | null | undefined
+  const customCssJson = rawCss ? { rawCss } : null
+
   // Atualizar tenant_branding — remover nulls (colunas NOT NULL têm defaults)
-  const brandingPayload = Object.fromEntries(
+  const brandingScalarPayload = Object.fromEntries(
     Object.entries({ ...brandingResult.data, ...brandingUpdate }).filter(
       ([, v]) => v !== null && v !== undefined,
     ),
@@ -117,7 +121,10 @@ export async function createTenant(data: FormData) {
 
   const { error: brandingError } = await supabase
     .from('tenant_branding')
-    .update(brandingPayload)
+    .update({
+      ...brandingScalarPayload,
+      ...(customCssJson !== null ? { custom_css: customCssJson } : {}),
+    })
     .eq('tenant_id', tenant.id)
 
   if (brandingError) {
