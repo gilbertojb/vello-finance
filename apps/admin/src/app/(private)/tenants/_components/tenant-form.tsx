@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/field'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
+import { PhoneInput } from '@/components/ui/masked-input'
 import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
@@ -229,12 +230,11 @@ export function TenantForm() {
 
             <Field>
               <FieldLabel htmlFor="phone">Telefone</FieldLabel>
-              <Input
+              <PhoneInput
                 id="phone"
                 name="phone"
-                placeholder="(11) 99999-9999"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
               />
               <FieldError errors={formState.errors?.phone} />
             </Field>
