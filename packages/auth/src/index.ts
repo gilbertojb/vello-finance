@@ -6,20 +6,19 @@ import { z } from 'zod'
 import type { User } from './models/user'
 import { permissions } from './permissions'
 
-import { planSubject } from './subjects/plan'
+import { financialPartnerSubject } from './subjects/financial-partner'
 import { productSubject } from './subjects/product'
-import { subscriptionSubject } from './subjects/subscription'
+import { tenantSubject } from './subjects/tenant'
 import { userSubject } from './subjects/user'
 
 export * from './models/user'
 export * from './roles'
-export * from './vello-roles'
 
 const appAbilitiesSchema = z.union([
   userSubject,
-  planSubject,
+  tenantSubject,
   productSubject,
-  subscriptionSubject,
+  financialPartnerSubject,
   z.tuple([z.literal('manage'), z.literal('all')]),
 ])
 
@@ -33,11 +32,11 @@ export const createAppAbility = createMongoAbility as CreateAbility<AppAbility>
 export function defineAbilityFor(user: User) {
   const builder = new AbilityBuilder(createAppAbility)
 
-  if (typeof permissions[user.role] !== 'function') {
-    throw new Error(`Permissions for role ${user.role} not found.`)
+  if (typeof permissions[user.user_role] !== 'function') {
+    throw new Error(`Permissions for role ${user.user_role} not found.`)
   }
 
-  permissions[user.role](user, builder)
+  permissions[user.user_role](user, builder)
 
   const ability = builder.build({
     detectSubjectType(subject) {

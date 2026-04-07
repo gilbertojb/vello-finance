@@ -5,6 +5,16 @@ import { z } from 'zod'
 
 import { createClient } from '@/lib/supabase/server'
 
+// Converte strings no formato brasileiro ("1.234,56" ou "10,50") para número.
+// Necessário porque MoneyInput e PercentInput submetem valores formatados.
+function parseBrNumber(val: unknown): unknown {
+  if (typeof val !== 'string' || val === '') return val
+  const n = val.includes(',')
+    ? parseFloat(val.replace(/\./g, '').replace(',', '.'))
+    : parseFloat(val)
+  return isNaN(n) ? val : n
+}
+
 const productSchema = z.object({
   name: z.string().min(3).max(100),
   type: z.enum([
@@ -17,20 +27,20 @@ const productSchema = z.object({
   ]),
   description: z.string().optional().nullable(),
   internal_description: z.string().optional().nullable(),
-  min_amount: z.coerce.number().optional().nullable(),
-  max_amount: z.coerce.number().optional().nullable(),
+  min_amount: z.preprocess(parseBrNumber, z.number().optional().nullable()),
+  max_amount: z.preprocess(parseBrNumber, z.number().optional().nullable()),
   min_term_months: z.coerce.number().int().optional().nullable(),
   max_term_months: z.coerce.number().int().optional().nullable(),
-  min_rate_monthly: z.coerce.number().optional().nullable(),
-  max_rate_monthly: z.coerce.number().optional().nullable(),
+  min_rate_monthly: z.preprocess(parseBrNumber, z.number().optional().nullable()),
+  max_rate_monthly: z.preprocess(parseBrNumber, z.number().optional().nullable()),
   is_active: z.boolean().default(true),
 })
 
 const partnerCommissionSchema = z
   .object({
     financial_partner_id: z.string().uuid(),
-    if_commission_pct: z.coerce.number().min(0.001).max(100),
-    vello_commission_pct: z.coerce.number().min(0).max(100),
+    if_commission_pct: z.preprocess(parseBrNumber, z.number().min(0.001).max(100)),
+    vello_commission_pct: z.preprocess(parseBrNumber, z.number().min(0).max(100)),
   })
   .superRefine((data, ctx) => {
     if (data.vello_commission_pct > data.if_commission_pct) {

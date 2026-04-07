@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const planSubject = z.tuple([
+export const tenantSubject = z.tuple([
   z.union([
     z.literal('manage'),
     z.literal('get'),
@@ -8,7 +8,7 @@ export const planSubject = z.tuple([
     z.literal('update'),
     z.literal('delete'),
   ]),
-  z.literal('Plan'),
+  z.literal('Tenant'),
 ])
 
-export type PlanSubject = z.infer<typeof planSubject>
+export type TenantSubject = z.infer<typeof tenantSubject>

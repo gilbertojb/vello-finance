@@ -11,21 +11,36 @@ type PermissionsByRole = (
 ) => void
 
 export const permissions: Record<Role, PermissionsByRole> = {
-  ADMIN(_user, { can }) {
+  super_admin(_user, { can }) {
     can('manage', 'all')
   },
-  CONSULTANT(_user, { cannot, can }) {
-    cannot('manage', 'Plan')
-
-    can('get', 'Plan')
-    can('get', 'Product')
-
-    can(['create', 'get'], 'Subscription')
-
-    // can(['create', 'get'], 'Project')
-    // can(['update', 'delete'], 'Project', { ownerId: { $eq: user.id } })
+  admin(_user, { can }) {
+    can('manage', 'Tenant')
+    can('manage', 'Product')
+    can('manage', 'FinancialPartner')
+    can('get', 'User')
   },
-  SELLER(_user, { cannot }) {
-    cannot('manage', 'Plan')
+  financial(_user, { can }) {
+    can('manage', 'Tenant')
+    can('manage', 'Product')
+    can('manage', 'FinancialPartner')
+    can('get', 'User')
+  },
+  support(_user, { can }) {
+    can('manage', 'Tenant')
+    can('manage', 'Product')
+    can('manage', 'FinancialPartner')
+    can('get', 'User')
+  },
+  tenant_admin(_user, { can }) {
+    // Acesso aos recursos do próprio tenant será controlado por condições (ex: where tenant_id = jwt.tenant_id) mais a frente
+    can('get', 'Product')
+    can('get', 'FinancialPartner')
+    can('get', 'Tenant')
+  },
+  tenant_operator(_user, { can }) {
+    can('get', 'Product')
+    can('get', 'FinancialPartner')
+    can('get', 'Tenant')
   },
 }

@@ -1,4 +1,7 @@
+'use client'
+
 import { Building2 } from 'lucide-react'
+import { useState } from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -8,7 +11,7 @@ import {
   FieldLabel,
   FieldTitle,
 } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
+import { PercentInput } from '@/components/ui/masked-input'
 
 interface PartnerItemProps {
   partner: { id: string; name: string }
@@ -18,6 +21,11 @@ interface PartnerItemProps {
   defaultVelloCommission?: number
 }
 
+function toPercentStr(val?: number): string {
+  if (val == null) return ''
+  return val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+}
+
 export function PartnerItem({
   partner,
   isSelected,
@@ -25,6 +33,17 @@ export function PartnerItem({
   defaultIfCommission,
   defaultVelloCommission,
 }: PartnerItemProps) {
+  const [velloCommission, setVelloCommission] = useState(() =>
+    toPercentStr(defaultVelloCommission),
+  )
+
+  function handleIfCommissionChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = parseFloat(e.target.value.replace(',', '.'))
+    if (!isNaN(raw) && raw > 0) {
+      setVelloCommission(toPercentStr(raw / 2))
+    }
+  }
+
   return (
     <FieldGroup className="w-full">
       <FieldLabel
@@ -65,31 +84,14 @@ export function PartnerItem({
                 >
                   Comissão (%)
                 </label>
-                <Input
+                <PercentInput
                   id={`if_commission_${partner.id}`}
                   name={`if_commission_${partner.id}`}
-                  type="number"
-                  step="0.001"
-                  min="0.001"
-                  max="100"
                   required={isSelected}
                   disabled={!isSelected}
-                  placeholder="0.00"
-                  defaultValue={defaultIfCommission ?? ''}
+                  defaultValue={toPercentStr(defaultIfCommission)}
+                  onChange={handleIfCommissionChange}
                   className="bg-white"
-                  onChange={(e) => {
-                    const val = parseFloat(e.target.value)
-                    const velloInput = document.getElementById(
-                      `vello_commission_${partner.id}`,
-                    ) as HTMLInputElement
-                    if (velloInput) {
-                      if (!Number.isNaN(val)) {
-                        velloInput.value = String(val / 2)
-                      } else {
-                        velloInput.value = ''
-                      }
-                    }
-                  }}
                 />
               </div>
 
@@ -100,17 +102,13 @@ export function PartnerItem({
                 >
                   Retenção Vello (%)
                 </label>
-                <Input
+                <PercentInput
                   id={`vello_commission_${partner.id}`}
                   name={`vello_commission_${partner.id}`}
-                  type="number"
-                  step="0.001"
-                  min="0"
-                  max="100"
                   required={isSelected}
                   disabled={!isSelected}
-                  placeholder="0.00"
-                  defaultValue={defaultVelloCommission ?? ''}
+                  value={velloCommission}
+                  onChange={(e) => setVelloCommission(e.target.value)}
                   className="bg-white"
                 />
               </div>

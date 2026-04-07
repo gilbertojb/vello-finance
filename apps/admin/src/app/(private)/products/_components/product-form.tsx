@@ -21,6 +21,7 @@ import {
   FieldLabel,
 } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
+import { MoneyInput, PercentInput } from '@/components/ui/masked-input'
 import { Switch } from '@/components/ui/switch'
 import {
   Tooltip,
@@ -235,25 +236,19 @@ export function ProductForm({ partners, product }: Props) {
                 Limites de Valores
               </h2>
               <Field>
-                <FieldLabel htmlFor="min_amount">Valor Mínimo (R$)</FieldLabel>
-                <Input
+                <FieldLabel htmlFor="min_amount">Valor Mínimo</FieldLabel>
+                <MoneyInput
                   id="min_amount"
                   name="min_amount"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
                   defaultValue={product?.min_amount ?? ''}
                 />
                 <FieldError errors={formState.errors?.min_amount} />
               </Field>
               <Field>
-                <FieldLabel htmlFor="max_amount">Valor Máximo (R$)</FieldLabel>
-                <Input
+                <FieldLabel htmlFor="max_amount">Valor Máximo</FieldLabel>
+                <MoneyInput
                   id="max_amount"
                   name="max_amount"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
                   defaultValue={product?.max_amount ?? ''}
                 />
                 <FieldError errors={formState.errors?.max_amount} />
@@ -302,28 +297,22 @@ export function ProductForm({ partners, product }: Props) {
               </h2>
               <Field>
                 <FieldLabel htmlFor="min_rate_monthly">
-                  Taxa Mínima (%)
+                  Taxa Mínima (% a.m.)
                 </FieldLabel>
-                <Input
+                <PercentInput
                   id="min_rate_monthly"
                   name="min_rate_monthly"
-                  type="number"
-                  step="0.001"
-                  placeholder="1.000"
                   defaultValue={product?.min_rate_monthly ?? ''}
                 />
                 <FieldError errors={formState.errors?.min_rate_monthly} />
               </Field>
               <Field>
                 <FieldLabel htmlFor="max_rate_monthly">
-                  Taxa Máxima (%)
+                  Taxa Máxima (% a.m.)
                 </FieldLabel>
-                <Input
+                <PercentInput
                   id="max_rate_monthly"
                   name="max_rate_monthly"
-                  type="number"
-                  step="0.001"
-                  placeholder="5.000"
                   defaultValue={product?.max_rate_monthly ?? ''}
                 />
                 <FieldError errors={formState.errors?.max_rate_monthly} />
