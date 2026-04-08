@@ -189,6 +189,82 @@ export type Database = {
           },
         ]
       }
+      proposal_stages: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          order_num: number
+          product_type_id: string
+          timeout_unit: string | null
+          timeout_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          order_num: number
+          product_type_id: string
+          timeout_unit?: string | null
+          timeout_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          order_num?: number
+          product_type_id?: string
+          timeout_unit?: string | null
+          timeout_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_stages_product_type_id_fkey"
+            columns: ["product_type_id"]
+            isOneToOne: false
+            referencedRelation: "product_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stage_triggers: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload_template: Json | null
+          stage_id: string
+          webhook_url: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload_template?: Json | null
+          stage_id: string
+          webhook_url: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload_template?: Json | null
+          stage_id?: string
+          webhook_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stage_triggers_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_types: {
         Row: {
           created_at: string
