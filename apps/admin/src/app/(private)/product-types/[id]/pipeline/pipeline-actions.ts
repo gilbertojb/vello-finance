@@ -222,7 +222,8 @@ export async function createTrigger(data: FormData) {
     stage_id: parsed.data.stage_id,
     event_type: parsed.data.event_type,
     webhook_url: parsed.data.webhook_url,
-    payload_template: payloadJson,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload_template: payloadJson as any,
   })
 
   if (error) return { success: false, message: error.message, errors: null }

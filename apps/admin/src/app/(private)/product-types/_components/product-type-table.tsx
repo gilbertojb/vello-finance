@@ -1,6 +1,6 @@
 'use client'
 
-import { Pencil } from 'lucide-react'
+import { GitBranch, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
@@ -74,11 +74,18 @@ export function ProductTypeTable({
                 )}
               </td>
               <td className="p-4 align-middle text-right">
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/product-types/${pt.id}/edit`}>
-                    <Pencil className="size-4" />
-                  </Link>
-                </Button>
+                <div className="flex items-center justify-end gap-1">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/product-types/${pt.id}/pipeline`}>
+                      <GitBranch className="size-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/product-types/${pt.id}/edit`}>
+                      <Pencil className="size-4" />
+                    </Link>
+                  </Button>
+                </div>
               </td>
             </tr>
           ))}

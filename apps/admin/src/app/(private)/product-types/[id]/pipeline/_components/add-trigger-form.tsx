@@ -34,7 +34,7 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
       setOpen(false)
       router.refresh()
     },
-    (msg) => toast.error(msg),
+    (msg) => { toast.error(msg) },
   )
 
   if (!open) {

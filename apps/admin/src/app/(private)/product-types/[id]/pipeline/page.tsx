@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 
-import { getProductType, listProductTypes } from '../../../queries'
+import { getProductType, listProductTypes } from '../../queries'
 import { getProductTypePipeline } from './pipeline-queries'
 import { PipelineEditor } from './_components/pipeline-editor'
 
@@ -32,7 +32,7 @@ export default async function PipelinePage({
 
   if (!productType) notFound()
 
-  const otherProductTypes = allProductTypes.filter((pt) => pt.id !== id)
+  const otherProductTypes = allProductTypes.filter((pt: { id: string; name: string; slug: string }) => pt.id !== id)
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">

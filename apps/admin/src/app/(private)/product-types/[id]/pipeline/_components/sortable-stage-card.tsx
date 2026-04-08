@@ -46,7 +46,7 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
   const [, handleUpdateSubmit, isUpdating] = useFormState(
     updateStage,
     () => router.refresh(),
-    (msg) => toast.error(msg),
+    (msg) => { toast.error(msg) },
   )
 
   function handleDelete() {

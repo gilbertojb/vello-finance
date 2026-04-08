@@ -27,7 +27,7 @@ export function AddStageForm({ productTypeId }: Props) {
       setOpen(false)
       router.refresh()
     },
-    (msg) => toast.error(msg),
+    (msg) => { toast.error(msg) },
   )
 
   if (!open) {
