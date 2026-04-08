@@ -17,14 +17,7 @@ function parseBrNumber(val: unknown): unknown {
 
 const productSchema = z.object({
   name: z.string().min(3).max(100),
-  type: z.enum([
-    'fgts',
-    'consignado_publico',
-    'consignado_privado',
-    'home_equity',
-    'auto_equity',
-    'outros',
-  ]),
+  product_type_id: z.string().uuid('Tipo de produto inválido.'),
   description: z.string().optional().nullable(),
   internal_description: z.string().optional().nullable(),
   min_amount: z.preprocess(parseBrNumber, z.number().optional().nullable()),
@@ -129,7 +122,7 @@ export async function createProduct(data: FormData) {
   }
 }
 
-const productUpdateSchema = productSchema.omit({ type: true })
+const productUpdateSchema = productSchema.omit({ product_type_id: true })
 
 export async function updateProduct(data: FormData) {
   const productId = data.get('id') as string

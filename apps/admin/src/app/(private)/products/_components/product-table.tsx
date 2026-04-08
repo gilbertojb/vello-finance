@@ -12,8 +12,8 @@ type PartnerRow = {
 type ProductRow = {
   id: string
   name: string
-  type: string
   is_active: boolean
+  product_type: { id: string; name: string; slug: string } | null
   product_financial_partners: PartnerRow[]
 }
 
@@ -69,7 +69,7 @@ export function ProductTable({
               >
                 <td className="p-4 align-middle font-medium">{product.name}</td>
                 <td className="p-4 align-middle">
-                  <ProductTypeBadge type={product.type} />
+                  <ProductTypeBadge name={product.product_type?.name ?? '-'} />
                 </td>
                 <td className="p-4 align-middle text-muted-foreground">
                   {ifNames || '-'}

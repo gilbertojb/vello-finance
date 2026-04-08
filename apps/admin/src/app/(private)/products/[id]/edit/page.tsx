@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 
 import { ProductForm } from '../../_components/product-form'
-import { getProduct, listFinancialPartners } from '../../queries'
+import { getProduct, listFinancialPartners, listProductTypes } from '../../queries'
 
 export const metadata = {
   title: 'Editar Produto',
@@ -14,9 +14,10 @@ export default async function EditProductPage({
 }) {
   const { id } = await params
 
-  const [product, partners] = await Promise.all([
+  const [product, partners, productTypes] = await Promise.all([
     getProduct(id).catch(() => null),
     listFinancialPartners(),
+    listProductTypes(),
   ])
 
   if (!product) notFound()
@@ -31,7 +32,7 @@ export default async function EditProductPage({
       </div>
 
       <div className="pt-4">
-        <ProductForm product={product} partners={partners} />
+        <ProductForm product={product} partners={partners} productTypes={productTypes} />
       </div>
     </div>
   )

@@ -7,8 +7,8 @@ export async function listProducts(onlyActive = false) {
     .select(`
       id,
       name,
-      type,
       is_active,
+      product_type:product_types(id, name, slug),
       product_financial_partners(
         id,
         if_commission_pct,
@@ -34,6 +34,7 @@ export async function getProduct(id: string) {
     .from('products')
     .select(`
       *,
+      product_type:product_types(id, name, slug),
       product_financial_partners(
         id,
         financial_partner_id,
@@ -54,6 +55,22 @@ export async function listFinancialPartners(onlyActive = true) {
   let query = supabase
     .from('financial_partners')
     .select('id, name')
+    .order('name')
+
+  if (onlyActive) {
+    query = query.eq('is_active', true)
+  }
+
+  const { data, error } = await query
+  if (error) throw error
+  return data
+}
+
+export async function listProductTypes(onlyActive = true) {
+  const supabase = await createClient()
+  let query = supabase
+    .from('product_types')
+    .select('id, name, slug')
     .order('name')
 
   if (onlyActive) {

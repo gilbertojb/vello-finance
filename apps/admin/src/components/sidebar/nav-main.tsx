@@ -7,6 +7,7 @@ import {
   Landmark,
   LayoutDashboard,
   Receipt,
+  Tag,
 } from 'lucide-react'
 
 import {
@@ -42,6 +43,10 @@ export async function NavMain() {
 
             <SidebarMenuItem key="products">
               <NavLink href="/products" icon={<Receipt />} label="Produtos" />
+            </SidebarMenuItem>
+
+            <SidebarMenuItem key="product-types">
+              <NavLink href="/product-types" icon={<Tag />} label="Tipos de Produto" />
             </SidebarMenuItem>
 
             <SidebarMenuItem key="financial-partners">

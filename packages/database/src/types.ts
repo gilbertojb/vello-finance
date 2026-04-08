@@ -189,6 +189,36 @@ export type Database = {
           },
         ]
       }
+      product_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           created_at: string
@@ -203,7 +233,7 @@ export type Database = {
           min_rate_monthly: number | null
           min_term_months: number | null
           name: string
-          type: string
+          product_type_id: string
           updated_at: string
         }
         Insert: {
@@ -219,7 +249,7 @@ export type Database = {
           min_rate_monthly?: number | null
           min_term_months?: number | null
           name: string
-          type: string
+          product_type_id: string
           updated_at?: string
         }
         Update: {
@@ -235,10 +265,18 @@ export type Database = {
           min_rate_monthly?: number | null
           min_term_months?: number | null
           name?: string
-          type?: string
+          product_type_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "products_product_type_id_fkey"
+            columns: ["product_type_id"]
+            isOneToOne: false
+            referencedRelation: "product_types"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tenant_branding: {
         Row: {
@@ -425,7 +463,7 @@ export type Database = {
     Enums: {
       backoffice_role: "super_admin" | "admin" | "financial" | "support"
       tenant_status: "pending" | "active" | "suspended" | "cancelled"
-      tenant_type: "whitelabel" | "subscription"
+      tenant_type: "subscription" | "whitelabel"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -558,7 +596,7 @@ export const Constants = {
     Enums: {
       backoffice_role: ["super_admin", "admin", "financial", "support"],
       tenant_status: ["pending", "active", "suspended", "cancelled"],
-      tenant_type: ["whitelabel", "subscription"],
+      tenant_type: ["subscription", "whitelabel"],
     },
   },
 } as const

@@ -35,11 +35,13 @@ import { createProduct, updateProduct } from '../actions'
 import { PartnerItem } from './partner-item'
 
 type Partner = { id: string; name: string }
+type ProductType = { id: string; name: string; slug: string }
 
 export type ProductWithPartners = {
   id: string
   name: string
-  type: string
+  product_type_id: string
+  product_type: { id: string; name: string; slug: string } | null
   description: string | null
   internal_description: string | null
   min_amount: number | null
@@ -59,9 +61,10 @@ export type ProductWithPartners = {
 type Props = {
   partners: Partner[]
   product?: ProductWithPartners
+  productTypes: ProductType[]
 }
 
-export function ProductForm({ partners, product }: Props) {
+export function ProductForm({ partners, product, productTypes }: Props) {
   const router = useRouter()
   const isEdit = !!product
 
@@ -148,24 +151,26 @@ export function ProductForm({ partners, product }: Props) {
             </Field>
 
             <Field className="col-span-full md:col-span-2">
-              <FieldLabel htmlFor="type">Tipo *</FieldLabel>
+              <FieldLabel htmlFor="product_type_id">Tipo *</FieldLabel>
+              {isEdit && (
+                <input type="hidden" name="product_type_id" value={product.product_type_id} />
+              )}
               <select
-                id="type"
-                name="type"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                id="product_type_id"
+                name={isEdit ? undefined : 'product_type_id'}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required={!isEdit}
                 disabled={isEdit}
-                defaultValue={product?.type ?? ''}
+                defaultValue={product?.product_type_id ?? ''}
               >
                 <option value="">Selecione...</option>
-                <option value="fgts">FGTS</option>
-                <option value="consignado_publico">Consignado Público</option>
-                <option value="consignado_privado">Consignado Privado</option>
-                <option value="home_equity">Home Equity</option>
-                <option value="auto_equity">Auto Equity</option>
-                <option value="outros">Outros</option>
+                {productTypes.map((pt) => (
+                  <option key={pt.id} value={pt.id}>
+                    {pt.name}
+                  </option>
+                ))}
               </select>
-              <FieldError errors={formState.errors?.type} />
+              <FieldError errors={formState.errors?.product_type_id} />
             </Field>
 
             <Field className="col-span-full md:col-span-2 mt-4">
