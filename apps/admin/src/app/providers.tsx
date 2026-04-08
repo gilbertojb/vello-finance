@@ -3,6 +3,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
+import { Analytics } from '@vercel/analytics/next'
+
 import { ThemeProvider } from 'next-themes'
 
 import type { ReactNode } from 'react'
@@ -31,6 +33,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <TooltipProvider>{children}</TooltipProvider>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
+      <Analytics />
     </QueryClientProvider>
   )
 }
