@@ -6,7 +6,12 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useFormState } from '@/hooks/use-form-state'
 
@@ -27,7 +32,9 @@ export function AddStageForm({ productTypeId }: Props) {
       setOpen(false)
       router.refresh()
     },
-    (msg) => { toast.error(msg) },
+    (msg) => {
+      toast.error(msg)
+    },
   )
 
   if (!open) {
@@ -44,7 +51,10 @@ export function AddStageForm({ productTypeId }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-dashed rounded-lg p-4 space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="border border-dashed rounded-lg p-4 space-y-4"
+    >
       <input type="hidden" name="product_type_id" value={productTypeId} />
 
       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -58,28 +68,6 @@ export function AddStageForm({ productTypeId }: Props) {
             placeholder="Ex: Aguardando Documentos"
           />
           <FieldError errors={formState.errors?.name} />
-        </Field>
-
-        <Field>
-          <FieldLabel>Timeout (opcional)</FieldLabel>
-          <div className="flex gap-2">
-            <Input
-              name="timeout_value"
-              type="number"
-              min="1"
-              placeholder="Ex: 3"
-              className="w-24"
-            />
-            <select
-              name="timeout_unit"
-              className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="null">Sem timeout</option>
-              <option value="minutes">Minutos</option>
-              <option value="hours">Horas</option>
-              <option value="days">Dias</option>
-            </select>
-          </div>
         </Field>
       </FieldGroup>
 

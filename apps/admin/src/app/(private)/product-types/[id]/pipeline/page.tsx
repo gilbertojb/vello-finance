@@ -4,8 +4,9 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 import { getProductType, listProductTypes } from '../../queries'
-import { getProductTypePipeline } from './pipeline-queries'
+
 import { PipelineEditor } from './_components/pipeline-editor'
+import { getProductTypePipeline } from './pipeline-queries'
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,9 @@ export default async function PipelinePage({
 
   if (!productType) notFound()
 
-  const otherProductTypes = allProductTypes.filter((pt: { id: string; name: string; slug: string }) => pt.id !== id)
+  const otherProductTypes = allProductTypes.filter(
+    (pt: { id: string; name: string; slug: string }) => pt.id !== id,
+  )
 
   return (
     <div className="flex-1 space-y-6 p-8 pt-6">
@@ -45,7 +48,9 @@ export default async function PipelinePage({
             <span>/</span>
             <span>{productType.name}</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight">Etapas da Esteira</h2>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Etapas da Esteira
+          </h2>
           <p className="text-muted-foreground mt-1">
             Configure as etapas do pipeline de propostas para{' '}
             <strong>{productType.name}</strong>.

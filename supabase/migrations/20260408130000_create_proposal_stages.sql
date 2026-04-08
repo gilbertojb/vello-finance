@@ -7,8 +7,6 @@ CREATE TABLE proposal_stages (
   product_type_id UUID NOT NULL REFERENCES product_types(id) ON DELETE CASCADE,
   name            VARCHAR(100) NOT NULL,
   order_num       INTEGER NOT NULL,
-  timeout_unit    VARCHAR(10) CHECK (timeout_unit IN ('minutes', 'hours', 'days')),
-  timeout_value   INTEGER CHECK (timeout_value IS NULL OR timeout_value > 0),
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (product_type_id, order_num)

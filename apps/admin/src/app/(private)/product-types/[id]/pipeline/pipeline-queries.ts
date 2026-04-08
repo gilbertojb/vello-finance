@@ -5,18 +5,20 @@ export type StageTrigger = {
   event_type: string
   webhook_url: string
   payload_template: unknown | null
+  timeout_unit: string | null
+  timeout_value: number | null
 }
 
 export type PipelineStage = {
   id: string
   name: string
   order_num: number
-  timeout_unit: string | null
-  timeout_value: number | null
   stage_triggers: StageTrigger[]
 }
 
-export async function getProductTypePipeline(productTypeId: string): Promise<PipelineStage[]> {
+export async function getProductTypePipeline(
+  productTypeId: string,
+): Promise<PipelineStage[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('proposal_stages')
@@ -24,13 +26,12 @@ export async function getProductTypePipeline(productTypeId: string): Promise<Pip
       id,
       name,
       order_num,
-      timeout_unit,
-      timeout_value,
-      stage_triggers(id, event_type, webhook_url, payload_template)
+      stage_triggers(id, event_type, webhook_url, payload_template, timeout_unit, timeout_value)
     `)
     .eq('product_type_id', productTypeId)
     .order('order_num')
 
   if (error) throw error
+
   return data as PipelineStage[]
 }

@@ -8,6 +8,8 @@ CREATE TABLE stage_triggers (
   event_type       VARCHAR(20) NOT NULL CHECK (event_type IN ('on_enter', 'on_exit', 'on_timeout')),
   webhook_url      TEXT NOT NULL,
   payload_template JSONB,
+  timeout_unit     VARCHAR(10) CHECK (timeout_unit IN ('minutes', 'hours', 'days')),
+  timeout_value    INTEGER CHECK (timeout_value IS NULL OR timeout_value > 0),
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

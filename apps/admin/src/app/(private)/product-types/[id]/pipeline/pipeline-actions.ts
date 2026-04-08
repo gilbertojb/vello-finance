@@ -10,8 +10,6 @@ import { createClient } from '@/lib/supabase/server'
 const stageSchema = z.object({
   product_type_id: z.string().uuid(),
   name: z.string().min(1).max(100),
-  timeout_unit: z.enum(['minutes', 'hours', 'days']).nullable().optional(),
-  timeout_value: z.coerce.number().int().positive().nullable().optional(),
 })
 
 export async function createStage(data: FormData) {
@@ -39,7 +37,8 @@ export async function createStage(data: FormData) {
     .limit(1)
     .maybeSingle()
 
-  if (countError) return { success: false, message: countError.message, errors: null }
+  if (countError)
+    return { success: false, message: countError.message, errors: null }
 
   const nextOrder = (last?.order_num ?? 0) + 1
 
@@ -49,10 +48,8 @@ export async function createStage(data: FormData) {
       product_type_id: parsed.data.product_type_id,
       name: parsed.data.name,
       order_num: nextOrder,
-      timeout_unit: parsed.data.timeout_unit ?? null,
-      timeout_value: parsed.data.timeout_value ?? null,
     })
-    .select('id, name, order_num, timeout_unit, timeout_value')
+    .select('id, name, order_num')
     .single()
 
   if (error) return { success: false, message: error.message, errors: null }
@@ -70,8 +67,6 @@ const stageUpdateSchema = z.object({
   stage_id: z.string().uuid(),
   product_type_id: z.string().uuid(),
   name: z.string().min(1).max(100),
-  timeout_unit: z.enum(['minutes', 'hours', 'days']).nullable().optional(),
-  timeout_value: z.coerce.number().int().positive().nullable().optional(),
 })
 
 export async function updateStage(data: FormData) {
@@ -94,8 +89,6 @@ export async function updateStage(data: FormData) {
     .from('proposal_stages')
     .update({
       name: parsed.data.name,
-      timeout_unit: parsed.data.timeout_unit ?? null,
-      timeout_value: parsed.data.timeout_value ?? null,
     })
     .eq('id', parsed.data.stage_id)
 
@@ -118,7 +111,10 @@ export async function deleteStage(stageId: string, productTypeId: string) {
   return { success: true, message: '' }
 }
 
-export async function reorderStages(productTypeId: string, orderedIds: string[]) {
+export async function reorderStages(
+  productTypeId: string,
+  orderedIds: string[],
+) {
   const supabase = await createClient()
 
   const updates = orderedIds.map((id, index) =>
@@ -131,7 +127,8 @@ export async function reorderStages(productTypeId: string, orderedIds: string[])
   const results = await Promise.all(updates)
   const firstError = results.find((r) => r.error)
 
-  if (firstError?.error) return { success: false, message: firstError.error.message }
+  if (firstError?.error)
+    return { success: false, message: firstError.error.message }
 
   revalidatePath(`/product-types/${productTypeId}/pipeline`)
   return { success: true, message: '' }
@@ -145,7 +142,7 @@ export async function duplicateStagesFrom(
 
   const { data: sourceStages, error: fetchError } = await supabase
     .from('proposal_stages')
-    .select('name, order_num, timeout_unit, timeout_value')
+    .select('name, order_num')
     .eq('product_type_id', sourceProductTypeId)
     .order('order_num')
 
@@ -168,15 +165,18 @@ export async function duplicateStagesFrom(
     product_type_id: targetProductTypeId,
     name: s.name,
     order_num: s.order_num + offset,
-    timeout_unit: s.timeout_unit,
-    timeout_value: s.timeout_value,
   }))
 
-  const { error: insertError } = await supabase.from('proposal_stages').insert(rows)
+  const { error: insertError } = await supabase
+    .from('proposal_stages')
+    .insert(rows)
   if (insertError) return { success: false, message: insertError.message }
 
   revalidatePath(`/product-types/${targetProductTypeId}/pipeline`)
-  return { success: true, message: `${rows.length} etapas duplicadas com sucesso.` }
+  return {
+    success: true,
+    message: `${rows.length} etapas duplicadas com sucesso.`,
+  }
 }
 
 // ─── Trigger Actions ────────────────────────────────────────────────────────
@@ -187,6 +187,8 @@ const triggerSchema = z.object({
   event_type: z.enum(['on_enter', 'on_exit', 'on_timeout']),
   webhook_url: z.string().url('URL de webhook inválida.'),
   payload_template: z.string().optional().nullable(),
+  timeout_unit: z.enum(['minutes', 'hours', 'days']).nullable().optional(),
+  timeout_value: z.coerce.number().int().positive().nullable().optional(),
 })
 
 export async function createTrigger(data: FormData) {
@@ -222,7 +224,9 @@ export async function createTrigger(data: FormData) {
     stage_id: parsed.data.stage_id,
     event_type: parsed.data.event_type,
     webhook_url: parsed.data.webhook_url,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    timeout_unit: parsed.data.timeout_unit ?? null,
+    timeout_value: parsed.data.timeout_value ?? null,
+    // biome-ignore lint/suspicious/noExplicitAny: payloadJson is a json object
     payload_template: payloadJson as any,
   })
 

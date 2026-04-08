@@ -6,7 +6,12 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field'
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useFormState } from '@/hooks/use-form-state'
 
@@ -26,6 +31,7 @@ type Props = {
 export function AddTriggerForm({ stageId, productTypeId }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [eventType, setEventType] = useState('')
 
   const [formState, handleSubmit, isPending] = useFormState(
     createTrigger,
@@ -34,7 +40,9 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
       setOpen(false)
       router.refresh()
     },
-    (msg) => { toast.error(msg) },
+    (msg) => {
+      toast.error(msg)
+    },
   )
 
   if (!open) {
@@ -46,17 +54,20 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
         onClick={() => setOpen(true)}
       >
         <Plus className="size-3" />
-        Novo trigger
+        Novo evento
       </Button>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border border-dashed rounded-md p-3 space-y-3 mt-2">
+    <form
+      onSubmit={handleSubmit}
+      className="border border-dashed rounded-md p-3 space-y-3 mt-2"
+    >
       <input type="hidden" name="stage_id" value={stageId} />
       <input type="hidden" name="product_type_id" value={productTypeId} />
 
-      <FieldGroup className="grid grid-cols-1 gap-2">
+      <FieldGroup className="grid grid-cols-3 gap-6">
         <Field>
           <FieldLabel htmlFor={`event_type_${stageId}`} className="text-xs">
             Evento *
@@ -65,6 +76,8 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
             id={`event_type_${stageId}`}
             name="event_type"
             required
+            value={eventType}
+            onChange={(e) => setEventType(e.target.value)}
             className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="">Selecione...</option>
@@ -77,7 +90,33 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
           <FieldError errors={formState.errors?.event_type} />
         </Field>
 
-        <Field>
+        {eventType === 'on_timeout' && (
+          <Field>
+            <FieldLabel className="text-xs">Timeout *</FieldLabel>
+            <div className="flex gap-2">
+              <Input
+                name="timeout_value"
+                type="number"
+                min="1"
+                required
+                placeholder="Ex: 3"
+                className="w-24 h-8 text-xs"
+              />
+              <select
+                name="timeout_unit"
+                required
+                className="flex h-8 flex-1 rounded-md border border-input bg-background px-2 py-1 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <option value="minutes">Minutos</option>
+                <option value="hours">Horas</option>
+                <option value="days">Dias</option>
+              </select>
+            </div>
+            <FieldError errors={formState.errors?.timeout_value} />
+          </Field>
+        )}
+
+        <Field className="col-span-3">
           <FieldLabel htmlFor={`webhook_url_${stageId}`} className="text-xs">
             URL do Webhook *
           </FieldLabel>
@@ -91,8 +130,11 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
           <FieldError errors={formState.errors?.webhook_url} />
         </Field>
 
-        <Field>
-          <FieldLabel htmlFor={`payload_template_${stageId}`} className="text-xs">
+        <Field className="col-span-3">
+          <FieldLabel
+            htmlFor={`payload_template_${stageId}`}
+            className="text-xs"
+          >
             Payload Template (JSON opcional)
           </FieldLabel>
           <textarea
@@ -117,7 +159,12 @@ export function AddTriggerForm({ stageId, productTypeId }: Props) {
           <X className="size-3" />
           Cancelar
         </Button>
-        <Button type="submit" size="sm" className="h-7 text-xs" disabled={isPending}>
+        <Button
+          type="submit"
+          size="sm"
+          className="h-7 text-xs"
+          disabled={isPending}
+        >
           Salvar
         </Button>
       </div>

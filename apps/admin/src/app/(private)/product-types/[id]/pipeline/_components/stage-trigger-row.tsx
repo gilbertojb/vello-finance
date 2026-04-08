@@ -20,6 +20,8 @@ type Props = {
     id: string
     event_type: string
     webhook_url: string
+    timeout_unit?: string | null
+    timeout_value?: number | null
   }
   productTypeId: string
 }
@@ -44,6 +46,10 @@ export function StageTriggerRow({ trigger, productTypeId }: Props) {
       <div className="flex items-center gap-2 min-w-0">
         <span className="shrink-0 text-xs font-medium bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
           {EVENT_LABEL[trigger.event_type] ?? trigger.event_type}
+          {trigger.event_type === 'on_timeout' &&
+            trigger.timeout_value &&
+            trigger.timeout_unit &&
+            ` (${trigger.timeout_value} ${trigger.timeout_unit === 'minutes' ? 'min' : trigger.timeout_unit === 'hours' ? 'h' : 'd'})`}
         </span>
         <span className="text-muted-foreground truncate font-mono text-xs">
           {trigger.webhook_url}

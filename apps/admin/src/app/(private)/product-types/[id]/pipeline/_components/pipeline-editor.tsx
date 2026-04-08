@@ -33,7 +33,11 @@ type Props = {
   otherProductTypes: ProductTypeOption[]
 }
 
-export function PipelineEditor({ productTypeId, initialStages, otherProductTypes }: Props) {
+export function PipelineEditor({
+  productTypeId,
+  initialStages,
+  otherProductTypes,
+}: Props) {
   const router = useRouter()
   const [stages, setStages] = useState(initialStages)
   const [, startReorderTransition] = useTransition()
@@ -84,6 +88,7 @@ export function PipelineEditor({ productTypeId, initialStages, otherProductTypes
       )}
 
       <DndContext
+        id="pipeline-stages-dnd"
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}

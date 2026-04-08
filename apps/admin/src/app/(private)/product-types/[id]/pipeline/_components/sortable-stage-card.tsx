@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { useFormState } from '@/hooks/use-form-state'
 
@@ -17,12 +17,6 @@ import { deleteStage, updateStage } from '../pipeline-actions'
 import type { PipelineStage } from '../pipeline-queries'
 import { AddTriggerForm } from './add-trigger-form'
 import { StageTriggerRow } from './stage-trigger-row'
-
-const TIMEOUT_UNIT_LABEL: Record<string, string> = {
-  minutes: 'min',
-  hours: 'h',
-  days: 'dias',
-}
 
 type Props = {
   stage: PipelineStage
@@ -34,8 +28,14 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
   const router = useRouter()
   const [isDeleting, startDeleteTransition] = useTransition()
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: stage.id })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: stage.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -46,7 +46,9 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
   const [, handleUpdateSubmit, isUpdating] = useFormState(
     updateStage,
     () => router.refresh(),
-    (msg) => { toast.error(msg) },
+    (msg) => {
+      toast.error(msg)
+    },
   )
 
   function handleDelete() {
@@ -63,7 +65,7 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
   return (
     <div ref={setNodeRef} style={style}>
       <Card className="bg-card">
-        <CardHeader className="pb-2 border-b flex-row items-center gap-2">
+        <CardHeader className="flex flex-row items-center gap-2 pb-2 border-b">
           <button
             type="button"
             {...attributes}
@@ -78,7 +80,10 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
             {index + 1}.
           </span>
 
-          <form onSubmit={handleUpdateSubmit} className="flex-1 flex items-center gap-3">
+          <form
+            onSubmit={handleUpdateSubmit}
+            className="flex-1 flex items-center gap-3"
+          >
             <input type="hidden" name="stage_id" value={stage.id} />
             <input type="hidden" name="product_type_id" value={productTypeId} />
 
@@ -95,39 +100,6 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
                 }}
               />
             </Field>
-
-            <div className="flex items-center gap-1 shrink-0">
-              <FieldLabel className="text-xs text-muted-foreground whitespace-nowrap">
-                Timeout:
-              </FieldLabel>
-              <div className="flex items-center gap-1">
-                <Input
-                  name="timeout_value"
-                  type="number"
-                  min="1"
-                  defaultValue={stage.timeout_value ?? ''}
-                  placeholder="—"
-                  className="h-8 w-16 text-xs text-center"
-                  onBlur={(e) => {
-                    const changed = (e.target.value || null) !== String(stage.timeout_value ?? '')
-                    if (changed) e.target.form?.requestSubmit()
-                  }}
-                />
-                <select
-                  name="timeout_unit"
-                  defaultValue={stage.timeout_unit ?? 'null'}
-                  onChange={(e) => {
-                    e.target.form?.requestSubmit()
-                  }}
-                  className="h-8 rounded-md border border-input bg-background px-1.5 text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <option value="null">—</option>
-                  <option value="minutes">min</option>
-                  <option value="hours">h</option>
-                  <option value="days">dias</option>
-                </select>
-              </div>
-            </div>
 
             {isUpdating && (
               <Loader2 className="size-3.5 animate-spin text-muted-foreground shrink-0" />
@@ -153,7 +125,7 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
         <CardContent className="pt-3 pb-3">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-              Triggers ({stage.stage_triggers.length})
+              Eventos ({stage.stage_triggers.length})
             </p>
 
             {stage.stage_triggers.length > 0 ? (
@@ -167,7 +139,9 @@ export function SortableStageCard({ stage, index, productTypeId }: Props) {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Nenhum trigger configurado.</p>
+              <p className="text-xs text-muted-foreground">
+                Nenhum evento configurado.
+              </p>
             )}
 
             <AddTriggerForm stageId={stage.id} productTypeId={productTypeId} />
