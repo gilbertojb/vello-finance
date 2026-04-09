@@ -576,12 +576,63 @@ O PostgreSQL ENUM é a **fonte de verdade**. O pacote `@vello/auth` espelha os v
 | PostgreSQL ENUM | Valores | TypeScript (`@vello/auth`) |
 |---|---|---|
 | `backoffice_role` | `super_admin`, `admin`, `financial`, `support` | `BackofficeRole` |
-| `tenant_role` *(F3)* | `tenant_admin`, `tenant_operator` | `TenantRole` |
+| `tenant_role` | `tenant_admin`, `tenant_operator` | `TenantRole` |
 | `tenant_type` | `whitelabel`, `subscription` | *(apenas DB)* |
 | `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(apenas DB)* |
 
 **Regra:** ao adicionar um role novo:
 1. `ALTER TYPE [enum_name] ADD VALUE 'novo_role'` na migration
-2. Atualizar `z.union([...z.literal('novo_role')])` em `packages/auth/src/vello-roles.ts`
+2. Atualizar `z.union([...z.literal('novo_role')])` em `packages/auth/src/roles/role.ts`
 3. Regenerar types: `pnpm db:types`
 4. Atualizar policies RLS que usam `ANY(ARRAY[...])` se necessário
+
+### Regra obrigatória: `@vello/auth` como fonte de RBAC nos apps
+
+**Nunca inserir arrays de roles hardcoded nos apps** (`admin`, `console`, `store`). Sempre importar de `@vello/auth`:
+
+```typescript
+import { hasTenantAccess, hasBackofficeAccess, getJwtClaims } from '@vello/auth'
+
+// ✅ Correto
+if (!hasTenantAccess(claims.user_role)) { ... }
+
+// ❌ Errado — hardcoded
+if (!['tenant_admin', 'tenant_operator'].includes(role)) { ... }
+```
+
+| Função | Uso |
+|---|---|
+| `hasTenantAccess(role)` | Verifica se role é `tenant_admin` ou `tenant_operator` |
+| `hasBackofficeAccess(role)` | Verifica se role é qualquer role backoffice |
+| `isTenantRole(role)` | Alias de `hasTenantAccess` |
+| `isBackofficeRole(role)` | Alias de `hasBackofficeAccess` |
+| `getJwtClaims(user)` | Extrai e valida claims do JWT via Zod |
+| `jwtClaimsSchema` | Schema Zod das claims |
+
+> **Status de adoção:**
+> - `apps/console` — obrigatório desde o início (implementado nesta spec)
+> - `apps/admin` — pendente de auditoria para alinhar ao padrão
+
+---
+
+## Isolamento de Sessão entre Apps (Admin × Console)
+
+Ambos os apps usam o mesmo projeto Supabase. Para evitar que sessões vazem entre apps em subdomínios do mesmo domínio pai (`.vellofinance.com.br`), cada app usa um `storageKey` distinto em **todos** os clientes Supabase:
+
+```typescript
+// apps/admin — lib/supabase/server.ts, proxy.ts, client.ts
+createServerClient(url, key, {
+  auth: { storageKey: 'vello-admin-auth' },
+  cookies: { ... }
+})
+
+// apps/console — lib/supabase/server.ts, proxy.ts, client.ts
+createServerClient(url, key, {
+  auth: { storageKey: 'vello-console-auth' },
+  cookies: { ... }
+})
+```
+
+Além disso, o middleware de cada app valida o `user_role` do JWT via `@vello/auth`:
+- **Console:** rejeita roles de backoffice → signOut + redirect `/sign-in`
+- **Admin:** rejeita roles de tenant → signOut + redirect `/sign-in` *(pendente de implementação)*

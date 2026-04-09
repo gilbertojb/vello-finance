@@ -240,6 +240,8 @@ Banco · Agência · Conta · Chave Pix — todos opcionais, preenchíveis depoi
 - Logo enviada → warning (não bloqueia)
 - Dados bancários preenchidos → warning (não bloqueia)
 
+**Pré-requisito:** a tabela `tenant_users` deve existir antes de implementar esta action. A migration `20260409000000_create_tenant_users.sql` é criada junto ao MVP do `apps/console` (ver `docs/superpowers/specs/2026-04-09-console-app-design.md`).
+
 **Fluxo de ativação (Server Action com `createServiceClient()` de `@/lib/supabase/service`):**
 
 ```typescript
@@ -250,7 +252,7 @@ const { data: authUser } = await supabase.auth.admin.createUser({
   email_confirm: true,
 })
 
-// 2. Insere em tenant_users
+// 2. Insere em tenant_users (tabela criada na migration do console)
 await supabase.from('tenant_users').insert({
   id: authUser.user.id,
   tenant_id: tenant.id,

@@ -174,7 +174,11 @@ rawCss (custom_css.rawCss)
 | `apps/console/src/app/api/tenant-theme/route.ts` | Lê `custom_css` JSONB, desestrutura `{ rawCss, ...tokenEntries }`, retorna payload tipado |
 | `apps/console/src/lib/theme/load-tenant-theme.ts` | `loadTenantTheme()` + `applyTenantTheme()` + `injectStyle()` |
 | `apps/console/src/components/tenant-theme-loader.tsx` | Client component com `useEffect` que chama `loadTenantTheme` |
-| `apps/console/src/app/layout.tsx` | Lê `x-tenant-slug` do header, seta `data-tenant-theme`, monta `TenantThemeLoader` |
+| `apps/console/src/app/layout.tsx` | Lê `x-tenant-slug` do header (injetado pelo `proxy.ts`), seta `data-tenant-theme`, monta `TenantThemeLoader` |
+
+## Observação: injeção do `x-tenant-slug`
+
+O header `x-tenant-slug` é injetado pelo `proxy.ts` do console (middleware Edge), que resolve o tenant a partir do subdomínio ou `custom_domain`. Detalhes do middleware em `docs/superpowers/specs/2026-04-09-console-app-design.md`.
 
 ## Tailwind 4 e shadcn
 
