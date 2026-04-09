@@ -135,16 +135,18 @@ export async function proxy(request: NextRequest) {
         const url = request.nextUrl.clone()
         url.pathname = '/sign-in'
         // Sinaliza que a sessão deve ser invalidada na próxima renderização
-        newResponse.headers.set('x-force-signout', '1')
-        return NextResponse.redirect(url)
+        const redirectResponse = NextResponse.redirect(url)
+        redirectResponse.headers.set('x-force-signout', '1')
+        return redirectResponse
       }
 
       // tenant_id no JWT deve bater com o tenant resolvido pelo host
       if (claims.tenant_id !== tenant.id) {
         const url = request.nextUrl.clone()
         url.pathname = '/sign-in'
-        newResponse.headers.set('x-force-signout', '1')
-        return NextResponse.redirect(url)
+        const redirectResponse = NextResponse.redirect(url)
+        redirectResponse.headers.set('x-force-signout', '1')
+        return redirectResponse
       }
     }
   }
