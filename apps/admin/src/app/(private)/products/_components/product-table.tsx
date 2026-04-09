@@ -2,7 +2,10 @@
 
 import { Pencil } from 'lucide-react'
 import Link from 'next/link'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+
 import { ProductTypeBadge } from './product-type-badge'
 
 type PartnerRow = {
@@ -76,13 +79,13 @@ export function ProductTable({
                 </td>
                 <td className="p-4 align-middle">
                   {product.is_active ? (
-                    <span className="text-2xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
                       Ativo
-                    </span>
+                    </Badge>
                   ) : (
-                    <span className="text-2xs bg-red-100 text-red-800 px-2 py-0.5 rounded">
+                    <Badge className="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
                       Inativo
-                    </span>
+                    </Badge>
                   )}
                 </td>
                 <td className="p-4 align-middle text-right">

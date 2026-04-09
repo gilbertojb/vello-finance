@@ -4,6 +4,7 @@ import { GitBranch, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 type ProductTypeRow = {
   id: string
@@ -54,7 +55,10 @@ export function ProductTypeTable({
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
           {productTypes.map((pt) => (
-            <tr key={pt.id} className="border-b transition-colors hover:bg-muted/50">
+            <tr
+              key={pt.id}
+              className="border-b transition-colors hover:bg-muted/50"
+            >
               <td className="p-4 align-middle font-medium">{pt.name}</td>
               <td className="p-4 align-middle text-muted-foreground text-xs font-mono">
                 {pt.slug}
@@ -64,13 +68,13 @@ export function ProductTypeTable({
               </td>
               <td className="p-4 align-middle">
                 {pt.is_active ? (
-                  <span className="text-2xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
+                  <Badge className="bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
                     Ativo
-                  </span>
+                  </Badge>
                 ) : (
-                  <span className="text-2xs bg-red-100 text-red-800 px-2 py-0.5 rounded">
+                  <Badge className="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
                     Inativo
-                  </span>
+                  </Badge>
                 )}
               </td>
               <td className="p-4 align-middle text-right">
