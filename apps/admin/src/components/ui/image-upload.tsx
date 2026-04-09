@@ -15,6 +15,7 @@ interface ImageUploadProps {
   currentUrl?: string | null
   hint?: string
   className?: string
+  imageContainerClassName?: string
 }
 
 export function ImageUpload({
@@ -25,6 +26,7 @@ export function ImageUpload({
   currentUrl,
   hint,
   className,
+  imageContainerClassName,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState<string | null>(currentUrl ?? null)
@@ -95,6 +97,7 @@ export function ImageUpload({
             ? 'border-primary bg-primary/5'
             : 'border-input hover:border-primary/40 hover:bg-muted/30',
           isSquare ? 'aspect-square' : 'aspect-video',
+          imageContainerClassName,
         )}
       >
         {preview ? (
@@ -127,7 +130,9 @@ export function ImageUpload({
             </div>
             <div className="space-y-0.5 text-center">
               <p className="text-xs font-medium">
-                {isDragging ? 'Solte para enviar' : 'Arraste ou clique para selecionar'}
+                {isDragging
+                  ? 'Solte para enviar'
+                  : 'Arraste ou clique para selecionar'}
               </p>
             </div>
           </div>

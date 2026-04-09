@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { ColorSwatchPicker } from '@/components/ui/color-swatch-picker'
 import {
   Field,
   FieldError,
@@ -63,81 +64,44 @@ type Props = {
   tenant?: TenantForEdit
 }
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
+import {
+  fetchCnpjData,
+  formatPhone,
+  maskCnpj,
+  normalizeBranding,
+  slugify,
+  validateCnpj,
+} from '@/lib/helpers'
 
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-}
+const BASE_COLOR_OPTIONS = [
+  { value: '', label: 'Padrão do sistema', className: '' },
+  { value: 'slate', label: 'Slate', className: 'bg-slate-500' },
+  { value: 'gray', label: 'Gray', className: 'bg-gray-500' },
+  { value: 'zinc', label: 'Zinc', className: 'bg-zinc-500' },
+  { value: 'neutral', label: 'Neutral', className: 'bg-neutral-500' },
+  { value: 'stone', label: 'Stone', className: 'bg-stone-500' },
+]
 
-function maskCnpj(value: string): string {
-  const d = value.replace(/\D/g, '').slice(0, 14)
-  return d
-    .replace(/(\d{2})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1/$2')
-    .replace(/(\d{4})(\d{1,2})$/, '$1-$2')
-}
-
-function validateCnpj(raw: string): boolean {
-  const n = raw.replace(/\D/g, '')
-  if (n.length !== 14 || /^(\d)\1{13}$/.test(n)) return false
-  const w1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-  const w2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
-  const dig = (digits: string, w: number[]) => {
-    const r = w.reduce((s, v, i) => s + Number(digits[i]) * v, 0) % 11
-    return r < 2 ? 0 : 11 - r
-  }
-  return dig(n, w1) === Number(n[12]) && dig(n, w2) === Number(n[13])
-}
-
-function formatPhone(raw: string): string {
-  const d = raw.replace(/\D/g, '')
-  if (d.length === 11) return `(${d.slice(0, 2)}) ${d[2]} ${d.slice(3, 7)}-${d.slice(7)}`
-  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
-  return raw
-}
-
-interface CnpjData {
-  name: string
-  companyName: string
-  email: string
-  phone: string
-}
-
-async function fetchCnpjData(cnpj: string): Promise<CnpjData> {
-  const digits = cnpj.replace(/\D/g, '')
-  const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${digits}`)
-  if (!res.ok) throw new Error('CNPJ não encontrado na Receita Federal.')
-  const data = await res.json() as {
-    razao_social?: string
-    nome_fantasia?: string
-    email?: string
-    ddd_telefone_1?: string
-  }
-  return {
-    name: data.nome_fantasia?.trim() || data.razao_social?.trim() || '',
-    companyName: data.razao_social?.trim() || '',
-    email: data.email?.trim().toLowerCase() || '',
-    phone: formatPhone(data.ddd_telefone_1 ?? ''),
-  }
-}
-
-function normalizeBranding(raw: TenantForEdit['tenant_branding']): BrandingData | null {
-  if (!raw) return null
-  return Array.isArray(raw) ? (raw[0] ?? null) : raw
-}
-
-const SELECT_CLASS =
-  'flex h-9 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50'
+const THEME_COLOR_OPTIONS = [
+  { value: '', label: 'Padrão do sistema', className: '' },
+  { value: 'red', label: 'Red', className: 'bg-red-500' },
+  { value: 'orange', label: 'Orange', className: 'bg-orange-500' },
+  { value: 'amber', label: 'Amber', className: 'bg-amber-500' },
+  { value: 'yellow', label: 'Yellow', className: 'bg-yellow-500' },
+  { value: 'lime', label: 'Lime', className: 'bg-lime-500' },
+  { value: 'green', label: 'Green', className: 'bg-green-500' },
+  { value: 'emerald', label: 'Emerald', className: 'bg-emerald-500' },
+  { value: 'teal', label: 'Teal', className: 'bg-teal-500' },
+  { value: 'cyan', label: 'Cyan', className: 'bg-cyan-500' },
+  { value: 'sky', label: 'Sky', className: 'bg-sky-500' },
+  { value: 'blue', label: 'Blue', className: 'bg-blue-500' },
+  { value: 'indigo', label: 'Indigo', className: 'bg-indigo-500' },
+  { value: 'violet', label: 'Violet', className: 'bg-violet-500' },
+  { value: 'purple', label: 'Purple', className: 'bg-purple-500' },
+  { value: 'fuchsia', label: 'Fuchsia', className: 'bg-fuchsia-500' },
+  { value: 'pink', label: 'Pink', className: 'bg-pink-500' },
+  { value: 'rose', label: 'Rose', className: 'bg-rose-500' },
+]
 
 // ---------------------------------------------------------------------------
 // Component
@@ -165,14 +129,20 @@ export function TenantForm({ tenant }: Props) {
   const [phone, setPhone] = useState(formatPhone(tenant?.phone ?? ''))
 
   // Identidade visual
-  const [isWhiteLabel, setIsWhiteLabel] = useState(branding?.use_custom_theme ?? false)
+  const [isWhiteLabel, setIsWhiteLabel] = useState(
+    branding?.use_custom_theme ?? false,
+  )
 
   const action = isEdit ? updateTenant : createTenant
 
   const [formState, handleSubmit, isPending] = useFormState(
     action,
     () => {
-      toast.success(isEdit ? 'Parceiro atualizado com sucesso!' : 'Parceiro cadastrado com sucesso!')
+      toast.success(
+        isEdit
+          ? 'Parceiro atualizado com sucesso!'
+          : 'Parceiro cadastrado com sucesso!',
+      )
       router.push('/tenants')
     },
     (msg: string) => {
@@ -188,11 +158,15 @@ export function TenantForm({ tenant }: Props) {
 
   async function handleCnpjBlur() {
     if (!cnpjDirty.current || !validateCnpj(cnpj)) return
+
     setIsFetchingCnpj(true)
     setCnpjLookupError(null)
+
     try {
       const data = await fetchCnpjData(cnpj)
+
       if (data.name && !slugManuallyEdited.current) setSlug(slugify(data.name))
+
       setName(data.name)
       setCompanyName(data.companyName)
       setEmail(data.email)
@@ -249,7 +223,9 @@ export function TenantForm({ tenant }: Props) {
                 )}
               </div>
               {cnpjLookupError && (
-                <p className="text-xs text-destructive mt-1">{cnpjLookupError}</p>
+                <p className="text-xs text-destructive mt-1">
+                  {cnpjLookupError}
+                </p>
               )}
               <FieldError errors={formState.errors?.cnpj} />
             </Field>
@@ -299,7 +275,9 @@ export function TenantForm({ tenant }: Props) {
                 id="phone"
                 name="phone"
                 value={phone}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPhone(e.target.value)
+                }
               />
               <FieldError errors={formState.errors?.phone} />
             </Field>
@@ -314,7 +292,9 @@ export function TenantForm({ tenant }: Props) {
             <Store className="size-5 text-muted-foreground" />
             <CardTitle>Configurações da Loja</CardTitle>
           </div>
-          <CardDescription>URL de acesso à loja e domínio personalizado.</CardDescription>
+          <CardDescription>
+            URL de acesso à loja e domínio personalizado.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,7 +317,9 @@ export function TenantForm({ tenant }: Props) {
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="custom_domain">Domínio Customizado</FieldLabel>
+              <FieldLabel htmlFor="custom_domain">
+                Domínio Customizado
+              </FieldLabel>
               <Input
                 id="custom_domain"
                 name="custom_domain"
@@ -364,7 +346,9 @@ export function TenantForm({ tenant }: Props) {
         <CardContent>
           <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Field>
-              <FieldLabel htmlFor="company_display_name">Nome de Exibição</FieldLabel>
+              <FieldLabel htmlFor="company_display_name">
+                Nome de Exibição
+              </FieldLabel>
               <Input
                 id="company_display_name"
                 name="company_display_name"
@@ -373,52 +357,50 @@ export function TenantForm({ tenant }: Props) {
               />
             </Field>
 
-            <Field>
+            <Field className="md:col-span-2">
               <FieldLabel htmlFor="base_color">Base Color</FieldLabel>
-              <select
-                id="base_color"
+              <ColorSwatchPicker
                 name="base_color"
                 defaultValue={branding?.base_color ?? ''}
-                className={SELECT_CLASS}
-              >
-                <option value="">Padrão do sistema</option>
-                <option value="Neutral">Neutral</option>
-                <option value="Stone">Stone</option>
-                <option value="Zinc">Zinc</option>
-                <option value="Mauve">Mauve</option>
-                <option value="Olive">Olive</option>
-                <option value="Mist">Mist</option>
-                <option value="Taupe">Taupe</option>
-              </select>
+                options={BASE_COLOR_OPTIONS}
+                className="mt-1"
+              />
+            </Field>
+
+            <Field className="md:col-span-2">
+              <FieldLabel htmlFor="theme_color">Theme Color</FieldLabel>
+              <ColorSwatchPicker
+                name="theme_color"
+                defaultValue={branding?.theme_color ?? ''}
+                options={THEME_COLOR_OPTIONS}
+                className="mt-1"
+              />
             </Field>
 
             <Field>
-              <FieldLabel htmlFor="theme_color">Theme Color</FieldLabel>
-              <select
-                id="theme_color"
-                name="theme_color"
-                defaultValue={branding?.theme_color ?? ''}
-                className={SELECT_CLASS}
-              >
-                <option value="">Padrão do sistema</option>
-                <option value="red">Red</option>
-                <option value="orange">Orange</option>
-                <option value="amber">Amber</option>
-                <option value="yellow">Yellow</option>
-                <option value="lime">Lime</option>
-                <option value="green">Green</option>
-                <option value="emerald">Emerald</option>
-                <option value="teal">Teal</option>
-                <option value="cyan">Cyan</option>
-                <option value="sky">Sky</option>
-                <option value="blue">Blue</option>
-                <option value="indigo">Indigo</option>
-                <option value="violet">Violet</option>
-                <option value="purple">Purple</option>
-                <option value="fuchsia">Fuchsia</option>
-                <option value="pink">Pink</option>
-                <option value="rose">Rose</option>
-              </select>
+              <FieldLabel>Logo</FieldLabel>
+              <ImageUpload
+                name="logo"
+                accept="image/png,image/svg+xml,image/webp"
+                maxSize={2 * 1024 * 1024}
+                variant="landscape"
+                imageContainerClassName="w-full max-w-[350px] h-[100px] !aspect-auto"
+                hint="PNG, SVG ou WebP. Máx 2MB."
+                currentUrl={branding?.logo_url}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel>Favicon</FieldLabel>
+              <ImageUpload
+                name="favicon"
+                accept="image/png,image/x-icon"
+                maxSize={512 * 1024}
+                variant="square"
+                imageContainerClassName="w-[100px]"
+                hint="PNG ou ICO. Máx 512KB."
+                currentUrl={branding?.favicon_url}
+              />
             </Field>
 
             <Field className="md:col-span-2">
@@ -441,58 +423,39 @@ export function TenantForm({ tenant }: Props) {
             </Field>
 
             {isWhiteLabel && (
-              <Field className="md:col-span-2">
-                <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
-                <textarea
-                  id="custom_css"
-                  name="custom_css"
-                  rows={8}
-                  defaultValue={rawCssDefault}
-                  placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
-                  <code className="font-mono">[data-tenant-theme=&quot;slug&quot;]</code> para escopo.
-                </p>
-              </Field>
+              <>
+                <Field className="md:col-span-2">
+                  <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
+                  <textarea
+                    id="custom_css"
+                    name="custom_css"
+                    rows={8}
+                    defaultValue={rawCssDefault}
+                    placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
+                    className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
+                    <code className="font-mono">
+                      [data-tenant-theme=&quot;slug&quot;]
+                    </code>{' '}
+                    para escopo.
+                  </p>
+                </Field>
+
+                <Field className="md:col-span-2">
+                  <FieldLabel>Imagem de Fundo Auth</FieldLabel>
+                  <ImageUpload
+                    name="auth_bg"
+                    accept="image/jpeg,image/png,image/webp"
+                    maxSize={5 * 1024 * 1024}
+                    variant="landscape"
+                    hint="JPG, PNG ou WebP. Máx 5MB."
+                    currentUrl={branding?.auth_bg_image_url}
+                  />
+                </Field>
+              </>
             )}
-
-            <Field>
-              <FieldLabel>Logo</FieldLabel>
-              <ImageUpload
-                name="logo"
-                accept="image/png,image/svg+xml,image/webp"
-                maxSize={2 * 1024 * 1024}
-                variant="square"
-                hint="PNG, SVG ou WebP. Máx 2MB."
-                currentUrl={branding?.logo_url}
-              />
-            </Field>
-
-            <Field>
-              <FieldLabel>Favicon</FieldLabel>
-              <ImageUpload
-                name="favicon"
-                accept="image/png,image/x-icon"
-                maxSize={512 * 1024}
-                variant="square"
-                hint="PNG ou ICO. Máx 512KB."
-                currentUrl={branding?.favicon_url}
-              />
-            </Field>
-
-            <Field className="md:col-span-2">
-              <FieldLabel>Imagem de Fundo Auth</FieldLabel>
-              <ImageUpload
-                name="auth_bg"
-                accept="image/jpeg,image/png,image/webp"
-                maxSize={5 * 1024 * 1024}
-                variant="landscape"
-                hint="JPG, PNG ou WebP. Máx 5MB."
-                currentUrl={branding?.auth_bg_image_url}
-              />
-            </Field>
           </FieldGroup>
         </CardContent>
       </Card>
@@ -505,7 +468,8 @@ export function TenantForm({ tenant }: Props) {
             <CardTitle>Dados Bancários</CardTitle>
           </div>
           <CardDescription>
-            Informações para repasse de comissões. Todos os campos são opcionais.
+            Informações para repasse de comissões. Todos os campos são
+            opcionais.
           </CardDescription>
         </CardHeader>
         <CardContent>
