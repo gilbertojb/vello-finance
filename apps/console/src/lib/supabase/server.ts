@@ -4,6 +4,7 @@ import { env } from '@vello/env/console'
 import { cookies } from 'next/headers'
 
 // Usar em: Server Components, Server Actions, Route Handlers.
+// Este client respeita RLS — as queries são feitas sob a sessão do usuário autenticado.
 export async function createClient() {
   const cookieStore = await cookies()
 
@@ -11,6 +12,7 @@ export async function createClient() {
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
+      auth: { storageKey: 'vello-console-auth' },
       cookies: {
         getAll() {
           return cookieStore.getAll()
