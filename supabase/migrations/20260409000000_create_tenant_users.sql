@@ -26,12 +26,17 @@ CREATE POLICY "backoffice_full_access" ON tenant_users
     (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
--- Tenant vê apenas usuários do seu próprio tenant
+-- Esta policy cobre o role tenant_operator (leitura dos membros do próprio tenant).
+-- O tenant_admin já possui acesso SELECT via tenant_admin_write (FOR ALL);
+-- a sobreposição em SELECT é intencional — simplifica o modelo sem efeito colateral.
 CREATE POLICY "tenant_read" ON tenant_users
   FOR SELECT USING (
     tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
   );
 
+-- FOR ALL inclui DELETE intencionalmente: no MVP, o tenant_admin pode excluir membros
+-- de forma permanente (hard-delete). O padrão de soft-delete via is_active=false é o
+-- comportamento esperado para tenant_operator, mas o admin tem autonomia de hard-delete.
 -- Apenas tenant_admin pode gerenciar usuários do seu tenant
 CREATE POLICY "tenant_admin_write" ON tenant_users
   FOR ALL
