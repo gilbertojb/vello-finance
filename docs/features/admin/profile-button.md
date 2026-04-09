@@ -244,6 +244,22 @@ apps/admin/src/
 
 ---
 
+---
+
+## Theme Switcher
+
+O `ProfileButton` integra o componente `ThemeSwitcher` para alternar entre light/dark mode.
+
+```tsx
+// src/components/sidebar/theme-switcher.tsx (Client Component)
+// Renderizado dentro do DropdownMenuContent do ProfileButton
+<ThemeSwitcher />
+```
+
+O `ThemeSwitcher` usa `next-themes` para persistir a preferência do usuário.
+
+---
+
 ## Fora do Escopo
 
 - Badge de role no dropdown

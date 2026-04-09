@@ -37,36 +37,39 @@ ON product_types(tenant_id, active);
 ### **Migration 002: proposal_stages.sql**
 ```sql
 CREATE TABLE proposal_stages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_type_id UUID NOT NULL REFERENCES product_types(id) ON DELETE CASCADE,
-  name VARCHAR(100) NOT NULL,
-  order_num INTEGER NOT NULL,
-  timeout_unit VARCHAR(10), -- NULL = sem timeout
-  timeout_value INTEGER CHECK (timeout_value IS NULL OR timeout_value > 0),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  name            VARCHAR(100) NOT NULL,
+  order_num       INTEGER NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (product_type_id, order_num)
 );
 
--- Constraints únicas por produto
-CREATE UNIQUE INDEX idx_stage_unique_order 
-ON proposal_stages(product_type_id, order_num);
-
-CREATE INDEX idx_stages_product_order ON proposal_stages(product_type_id, order_num);
+CREATE INDEX idx_proposal_stages_product_order
+  ON proposal_stages(product_type_id, order_num);
 ```
+
+> **Nota:** Timeout foi movido para `stage_triggers` — configurado por trigger, não por etapa.
 
 ### **Migration 003: stage_triggers.sql**
 ```sql
 CREATE TABLE stage_triggers (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  stage_id UUID NOT NULL REFERENCES proposal_stages(id) ON DELETE CASCADE,
-  event_type VARCHAR(20) NOT NULL CHECK (event_type IN ('on_enter', 'on_exit', 'on_timeout')),
-  webhook_url TEXT NOT NULL,
-  payload_template JSONB, -- opcional
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  stage_id         UUID NOT NULL REFERENCES proposal_stages(id) ON DELETE CASCADE,
+  event_type       VARCHAR(20) NOT NULL CHECK (event_type IN ('on_enter', 'on_exit', 'on_timeout')),
+  webhook_url      TEXT NOT NULL,
+  payload_template JSONB,
+  timeout_unit     VARCHAR(10) CHECK (timeout_unit IN ('minutes', 'hours', 'days')),
+  timeout_value    INTEGER CHECK (timeout_value IS NULL OR timeout_value > 0),
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_triggers_stage_event ON stage_triggers(stage_id, event_type);
+CREATE INDEX idx_stage_triggers_stage_event ON stage_triggers(stage_id, event_type);
 ```
+
+> **Nota:** `timeout_unit` e `timeout_value` são relevantes apenas para triggers `on_timeout`.
+> Ficam em `stage_triggers` para permitir múltiplos timeouts com ações diferentes por etapa.
 
 ### **Migration 004: proposals_timeline.sql** (futuro)
 ```sql
@@ -80,27 +83,31 @@ ADD COLUMN stage_timeline JSONB[] DEFAULT '{}';
 
 ### **RLS Policies**
 ```sql
--- proposal_stages: tenant_isolated via product_type
-CREATE POLICY tenant_stages ON proposal_stages 
-FOR ALL USING (
-  EXISTS (
-    SELECT 1 FROM product_types pt 
-    WHERE pt.id = product_type_id 
-    AND pt.tenant_id = current_setting('app.current_tenant')::uuid
-  )
-) WITH CHECK (true);
+-- proposal_stages: backoffice gerencia; tenants leem apenas etapas de tipos ativos
+CREATE POLICY "backoffice_full_access" ON proposal_stages
+  FOR ALL USING (
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin', 'admin', 'financial', 'support'])
+  );
 
--- stage_triggers
-CREATE POLICY tenant_triggers ON stage_triggers 
-FOR ALL USING (
-  EXISTS (
-    SELECT 1 FROM proposal_stages s 
-    JOIN product_types pt ON pt.id = s.product_type_id
-    WHERE s.id = stage_id 
-    AND pt.tenant_id = current_setting('app.current_tenant')::uuid
-  )
-) WITH CHECK (true);
+CREATE POLICY "tenant_read_active_pipeline" ON proposal_stages
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM product_types pt
+      WHERE pt.id = product_type_id
+        AND pt.is_active = true
+    )
+    AND (auth.jwt() ->> 'tenant_id') IS NOT NULL
+  );
+
+-- stage_triggers: backoffice apenas — triggers são automações internas
+CREATE POLICY "backoffice_full_access" ON stage_triggers
+  FOR ALL USING (
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin', 'admin', 'financial', 'support'])
+  );
 ```
+
+> **Importante:** Usar sempre `auth.jwt() ->> 'user_role'` (nunca `current_setting()`).
+> O claim `user_role` é injetado no JWT pelo Auth Hook do Supabase.
 
 ***
 

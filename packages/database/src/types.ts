@@ -285,8 +285,6 @@ export type Database = {
           name: string
           order_num: number
           product_type_id: string
-          timeout_unit: string | null
-          timeout_value: number | null
           updated_at: string
         }
         Insert: {
@@ -295,8 +293,6 @@ export type Database = {
           name: string
           order_num: number
           product_type_id: string
-          timeout_unit?: string | null
-          timeout_value?: number | null
           updated_at?: string
         }
         Update: {
@@ -305,8 +301,6 @@ export type Database = {
           name?: string
           order_num?: number
           product_type_id?: string
-          timeout_unit?: string | null
-          timeout_value?: number | null
           updated_at?: string
         }
         Relationships: [

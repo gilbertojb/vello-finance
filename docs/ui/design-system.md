@@ -259,7 +259,6 @@ export default config
 cd apps/admin
 npx shadcn@latest add button
 npx shadcn@latest add input
-npx shadcn@latest add badge
 npx shadcn@latest add table
 npx shadcn@latest add dialog
 npx shadcn@latest add dropdown-menu
@@ -271,6 +270,15 @@ npx shadcn@latest add separator
 npx shadcn@latest add avatar
 npx shadcn@latest add sonner
 ```
+
+### Componentes customizados (já presentes — não reinstalar via shadcn)
+
+| Componente | Arquivo | Descrição |
+|---|---|---|
+| `Badge` | `components/ui/badge.tsx` | Status badges com variantes cva |
+| `Toggle` | `components/ui/toggle.tsx` | Botão toggle acessível (Radix) |
+| `ToggleGroup` | `components/ui/toggle-group.tsx` | Grupo de toggles exclusivos |
+| `ButtonGroup` | `components/ui/button-group.tsx` | Agrupa botões relacionados |
 
 ### Customizações da marca aplicadas via CSS variables
 
