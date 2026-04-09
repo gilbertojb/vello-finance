@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -15,6 +16,7 @@ import {
 import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
 
 import { signOut } from '@/http/sign-out'
+import { ThemeSwitcher } from './theme-switcher'
 
 interface ProfileButtonProps {
   user: {
@@ -83,10 +85,20 @@ export function ProfileButton({ user }: ProfileButtonProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} disabled={isPending}>
-          <LogOut className="size-4" />
-          {isPending ? 'Saindo...' : 'Sair'}
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <ThemeSwitcher />
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem
+            onClick={handleSignOut}
+            disabled={isPending}
+            variant="destructive"
+          >
+            <LogOut className="size-4" />
+            {isPending ? 'Saindo...' : 'Sair'}
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   )
