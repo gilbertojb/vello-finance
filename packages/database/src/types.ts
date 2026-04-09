@@ -285,6 +285,8 @@ export type Database = {
           name: string
           order_num: number
           product_type_id: string
+          timeout_unit: string | null
+          timeout_value: number | null
           updated_at: string
         }
         Insert: {
@@ -293,6 +295,8 @@ export type Database = {
           name: string
           order_num: number
           product_type_id: string
+          timeout_unit?: string | null
+          timeout_value?: number | null
           updated_at?: string
         }
         Update: {
@@ -301,6 +305,8 @@ export type Database = {
           name?: string
           order_num?: number
           product_type_id?: string
+          timeout_unit?: string | null
+          timeout_value?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -455,6 +461,44 @@ export type Database = {
           },
         ]
       }
+      tenant_users: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          role: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["tenant_role"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          role?: Database["public"]["Enums"]["tenant_role"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tenants: {
         Row: {
           activated_at: string | null
@@ -538,6 +582,7 @@ export type Database = {
     }
     Enums: {
       backoffice_role: "super_admin" | "admin" | "financial" | "support"
+      tenant_role: "tenant_admin" | "tenant_operator"
       tenant_status: "pending" | "active" | "suspended" | "cancelled"
       tenant_type: "subscription" | "whitelabel"
     }
@@ -671,6 +716,7 @@ export const Constants = {
   public: {
     Enums: {
       backoffice_role: ["super_admin", "admin", "financial", "support"],
+      tenant_role: ["tenant_admin", "tenant_operator"],
       tenant_status: ["pending", "active", "suspended", "cancelled"],
       tenant_type: ["subscription", "whitelabel"],
     },
