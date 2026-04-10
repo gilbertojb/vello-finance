@@ -22,13 +22,16 @@ function getRouteType(pathname: string) {
 // Resolve o tenant a partir do host.
 // Subdomínio → slug; custom_domain → busca no banco via fetch REST.
 async function resolveTenant(
-  host: string,
+  rawHost: string,
 ): Promise<{ id: string; slug: string; status: string } | null> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceKey = process.env.SUPABASE_SECRET_KEY
   const baseDomain = process.env.CONSOLE_BASE_DOMAIN ?? 'vellofinance.com.br'
 
   if (!supabaseUrl || !serviceKey) return null
+
+  // Remover porta do host (ex: "slug.vellofinance.com.br:3001" → "slug.vellofinance.com.br")
+  const host = rawHost.split(':')[0]
 
   let filter: string
 
