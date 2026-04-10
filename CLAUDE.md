@@ -142,6 +142,7 @@ Tailwind base compartilhado. Cada app estende e adiciona tokens próprios.
 - **Snapshots de comissão são imutáveis** — ver `docs/features/admin/commissions/SPEC.md`
 - **Migrations são compartilhadas** — `supabase db push` afeta todos os apps
 - **Nunca expor `SUPABASE_SERVICE_ROLE_KEY` no cliente** — apenas Server Actions e Edge Functions
+- **Isolamento de sessão no console:** `storageKey` dinâmico por `tenant_id` (UUID), nunca por slug — ver `lib/supabase/storage-key.ts`
 - **Regenerar types** após toda nova migration: `pnpm db:types`
 - **Commits:** `feat(admin): descrição` | `fix(console): descrição` | `chore(packages/auth): descrição`
 

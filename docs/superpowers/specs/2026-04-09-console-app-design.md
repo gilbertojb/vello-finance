@@ -1,4 +1,4 @@
-# Spec: Vello Console — MVP
+# Spec: Vello Console
 
 **Data:** 2026-04-09
 **App:** `apps/console`
@@ -9,7 +9,7 @@
 
 ## Contexto
 
-O `apps/console` já tem um esqueleto mínimo: `layout.tsx` com `TenantThemeLoader`, rota `/api/tenant-theme`, e clientes Supabase básicos. Esta spec formaliza a estrutura completa do app, o middleware de resolução de tenant, isolamento de sessão entre admin e console, e os três módulos do MVP.
+O `apps/console` já tem um esqueleto mínimo: `layout.tsx` com `TenantThemeLoader`, rota `/api/tenant-theme`, e clientes Supabase básicos. Esta spec formaliza a estrutura completa do app, o middleware de resolução de tenant, isolamento de sessão entre admin e console, e os três módulos.
 
 ---
 
@@ -51,10 +51,11 @@ apps/console/src/
 │   └── sign-out.ts                   ← Server Action sem formulário
 ├── lib/
 │   ├── supabase/
-│   │   ├── server.ts                 ← já existe — adicionar storageKey: 'vello-console-auth'
+│   │   ├── storage-key.ts             ← helper getStorageKey(tenantId) — isolamento por tenant
+│   │   ├── server.ts                 ← storageKey dinâmico via x-tenant-id header
 │   │   ├── service.ts                ← já existe
-│   │   ├── client.ts                 ← CRIAR — somente auth.getUser() e signOut()
-│   │   └── proxy.ts                  ← CRIAR — updateSession com storageKey: 'vello-console-auth'
+│   │   ├── client.ts                 ← storageKey dinâmico via data-tenant-id do DOM
+│   │   └── proxy.ts                  ← updateSession(request, tenantId) com storageKey dinâmico
 │   ├── theme/
 │   │   └── load-tenant-theme.ts      ← já existe — mantém
 │   └── utils.ts                      ← cn()
@@ -118,31 +119,57 @@ O `CONSOLE_BASE_DOMAIN` é uma variável de ambiente server-side (sem prefixo `N
 
 ---
 
-## Seção 3 — Isolamento de Sessão entre Admin e Console
+## Seção 3 — Isolamento de Sessão
 
-### Problema
+### 3.1 Entre Apps (Admin × Console)
 
 Ambos os apps (`admin` e `console`) usam o mesmo projeto Supabase. O `@supabase/ssr` deriva o nome do cookie de sessão a partir do project-ref — sem intervenção, ambos os apps compartilhariam o mesmo cookie, o que permitiria que sessões do admin vazassem para o console em subdomínios do mesmo domínio pai (`.vellofinance.com.br`).
 
-### Solução: `storageKey` diferente por app
-
-Todo `createServerClient` e `createBrowserClient` em cada app deve usar um `storageKey` único:
+**Solução:** `storageKey` fixo e diferente no admin:
 
 ```typescript
-// apps/admin — todos os clientes Supabase
+// apps/admin — storageKey fixo (há apenas um "tenant": a própria Vello)
 createServerClient(url, key, {
   auth: { storageKey: 'vello-admin-auth' },
   cookies: { ... }
 })
+```
 
-// apps/console — todos os clientes Supabase
+### 3.2 Entre Tenants (Console)
+
+No console, cada tenant opera em seu próprio subdomínio (`slug.vellofinance.com.br`) ou domínio customizado. Sem isolamento, cookies de sessão de um tenant seriam enviados ao subdomínio de outro tenant, permitindo tentativas de cross-tenant access.
+
+**Solução:** `storageKey` dinâmico usando `tenant_id` (UUID):
+
+```typescript
+// apps/console — storageKey dinâmico por tenant_id
+import { getStorageKey } from './storage-key'
+
+// storage-key.ts → `vello-console-auth-${tenantId}`
 createServerClient(url, key, {
-  auth: { storageKey: 'vello-console-auth' },
+  auth: { storageKey: getStorageKey(tenantId) },
   cookies: { ... }
 })
 ```
 
-Isso garante cookies com nomes distintos — nunca se misturam, mesmo em subdomínios do mesmo domínio pai.
+**Por que `tenant_id` e não `slug`:** O slug é público (aparece na URL) e adivinhável. Se o `storageKey` usasse o slug, um atacante poderia fabricar um cookie com o nome `vello-console-auth-{slug-alvo}` e tentar roubar sessão. O `tenant_id` é um UUID opaco, nunca exposto em URLs.
+
+**Como o `tenantId` chega a cada camada:**
+
+| Arquivo | Fonte do `tenantId` |
+|---|---|
+| `proxy.ts` (middleware) | `resolveTenant(host)` → passa para `updateSession(request, tenantId)` |
+| `lib/supabase/proxy.ts` | Recebe como parâmetro de `updateSession()` |
+| `lib/supabase/server.ts` | `headers().get('x-tenant-id')` — injetado pelo middleware |
+| `lib/supabase/client.ts` | `document.documentElement.dataset.tenantId` — injetado no `<html>` pelo root layout |
+
+### 3.3 Defesa em profundidade
+
+Três camadas de proteção operam em paralelo:
+
+1. **Cookie por tenant_id** — sessão do tenant A simplesmente não existe no contexto do tenant B
+2. **Middleware** — valida `claims.tenant_id === tenant.id` (JWT vs host), rejeita cross-tenant
+3. **RLS no banco** — filtra por `(auth.jwt() ->> 'tenant_id')::uuid`, proteção na camada de dados
 
 ### Segunda camada: validação de role no middleware
 
@@ -222,7 +249,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 ---
 
-## Seção 5 — Módulos MVP
+## Seção 5 — Módulos
 
 ### Dashboard — `(private)/(dashboard)/page.tsx`
 
@@ -255,7 +282,7 @@ Formulário para o tenant personalizar a identidade visual do seu espaço:
 
 **Upload:** Server Action com `createServiceClient()`. O arquivo nunca transita pelo browser para o Supabase. Salvo em `tenant-assets/[tenant_id]/logo` e `tenant-assets/[tenant_id]/favicon`.
 
-**Campos fora do escopo do MVP do console:** auth_bg_image, custom CSS, company_display_name — esses ficam apenas no admin por ora.
+**Campos fora do escopo do console:** auth_bg_image, custom CSS, company_display_name — esses ficam apenas no admin por ora.
 
 ---
 
@@ -314,7 +341,7 @@ CREATE POLICY "tenant_admin_write" ON tenant_users
 
 ## Seção 7 — Atualizações em `packages/auth`
 
-O pacote já tem `isTenantRole`, `isBackofficeRole`, `hasTenantAccess`, `hasBackofficeAccess`, `getJwtClaims` e `jwtClaimsSchema`. Nenhuma mudança necessária para o MVP.
+O pacote já tem `isTenantRole`, `isBackofficeRole`, `hasTenantAccess`, `hasBackofficeAccess`, `getJwtClaims` e `jwtClaimsSchema`. Nenhuma mudança necessária.
 
 **O `roleSchema` já inclui** `tenant_admin` e `tenant_operator` — alinhado com o ENUM que será criado na migration.
 
@@ -353,7 +380,7 @@ Dependências a adicionar (espelhando o admin):
 }
 ```
 
-**Removidos do console (não necessários no MVP):**
+**Removidos do console (não necessários):**
 - `@dnd-kit/*` — sem drag-and-drop no console por ora
 - `@tiptap/*` — sem editor rich text no console por ora
 - `@tanstack/react-query` — sem TanStack Query no console por ora (dados simples via Server Components)
@@ -386,7 +413,7 @@ CONSOLE_BASE_DOMAIN  // domínio base (vellofinance.com.br) — server-side apen
 ## Critérios de Aceite
 
 - [ ] Middleware resolve tenant por subdomínio E por custom_domain
-- [ ] `storageKey: 'vello-console-auth'` em todos os clientes Supabase do console
+- [ ] `storageKey` dinâmico por `tenant_id` (UUID) em todos os clientes Supabase do console (`getStorageKey(tenantId)`)
 - [ ] `hasTenantAccess()` de `@vello/auth` valida role — sem arrays hardcoded
 - [ ] Mismatch de `tenant_id` (JWT vs URL) causa signOut + redirect
 - [ ] Layout público renderiza logo, favicon e cores do tenant server-side

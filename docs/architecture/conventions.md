@@ -615,23 +615,48 @@ if (!['tenant_admin', 'tenant_operator'].includes(role)) { ... }
 
 ---
 
-## Isolamento de Sessão entre Apps (Admin × Console)
+## Isolamento de Sessão
+
+### Entre Apps (Admin × Console)
 
 Ambos os apps usam o mesmo projeto Supabase. Para evitar que sessões vazem entre apps em subdomínios do mesmo domínio pai (`.vellofinance.com.br`), cada app usa um `storageKey` distinto em **todos** os clientes Supabase:
 
 ```typescript
-// apps/admin — lib/supabase/server.ts, proxy.ts, client.ts
+// apps/admin — storageKey fixo (há apenas um "tenant": a própria Vello)
 createServerClient(url, key, {
   auth: { storageKey: 'vello-admin-auth' },
   cookies: { ... }
 })
+```
 
-// apps/console — lib/supabase/server.ts, proxy.ts, client.ts
+### Entre Tenants (Console)
+
+No console, cada tenant tem seu próprio cookie de sessão. O `storageKey` é dinâmico e usa o `tenant_id` (UUID) — nunca o slug (que é público na URL e adivinhável):
+
+```typescript
+// apps/console — storageKey dinâmico por tenant_id
+import { getStorageKey } from './storage-key'
+
+// storage-key.ts → `vello-console-auth-${tenantId}`
 createServerClient(url, key, {
-  auth: { storageKey: 'vello-console-auth' },
+  auth: { storageKey: getStorageKey(tenantId) },
   cookies: { ... }
 })
 ```
+
+**Como o `tenantId` chega a cada camada:**
+
+| Arquivo | Fonte do `tenantId` |
+|---|---|
+| `proxy.ts` (middleware) | `resolveTenant(host)` → passa `tenant.id` para `updateSession()` |
+| `lib/supabase/server.ts` | `headers().get('x-tenant-id')` — injetado pelo middleware |
+| `lib/supabase/client.ts` | `document.documentElement.dataset.tenantId` — injetado no `<html>` pelo root layout |
+| `lib/supabase/proxy.ts` | Recebe `tenantId` como parâmetro de `updateSession(request, tenantId)` |
+
+**Segurança (defesa em profundidade):**
+1. Cookie por tenant_id (UUID) — sessão do tenant A simplesmente não existe no contexto do tenant B
+2. Middleware valida `claims.tenant_id === tenant.id` — rejeita cross-tenant mesmo com cookie válido
+3. RLS no banco filtra por `(auth.jwt() ->> 'tenant_id')::uuid` — proteção na camada de dados
 
 Além disso, o middleware de cada app valida o `user_role` do JWT via `@vello/auth`:
 - **Console:** rejeita roles de backoffice → signOut + redirect `/sign-in`
