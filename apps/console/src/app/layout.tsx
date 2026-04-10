@@ -8,7 +8,7 @@ import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 
 import { Toaster } from '@/components/ui/sonner'
-// TODO: TenantThemeLoader será adicionado na implementação do tema white-label
+import { createServiceClient } from '@/lib/supabase/service'
 
 import { Providers } from './providers'
 
@@ -19,10 +19,23 @@ export const metadata: Metadata = {
   },
 }
 
+async function getTenantCustomCss(tenantId: string): Promise<string | null> {
+  if (!tenantId) return null
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('tenant_branding')
+    .select('use_custom_theme, custom_css')
+    .eq('tenant_id', tenantId)
+    .single()
+  if (!data?.use_custom_theme) return null
+  return data.custom_css
+}
+
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
   const tenantSlug = headerStore.get('x-tenant-slug') ?? 'default'
   const tenantId = headerStore.get('x-tenant-id') ?? ''
+  const customCss = await getTenantCustomCss(tenantId)
 
   return (
     <html
@@ -32,6 +45,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       data-tenant-id={tenantId}
       suppressHydrationWarning
     >
+      <head>
+        {customCss && (
+          <style dangerouslySetInnerHTML={{ __html: customCss }} />
+        )}
+      </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
         <Toaster />

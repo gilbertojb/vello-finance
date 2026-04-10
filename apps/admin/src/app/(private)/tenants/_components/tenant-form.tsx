@@ -37,8 +37,7 @@ type BrandingData = {
   use_custom_theme: boolean
   base_color: string | null
   theme_color: string | null
-  // custom_css é JSONB — pode ser qualquer forma JSON válida
-  custom_css: unknown
+  custom_css: string | null
   logo_url: string | null
   favicon_url: string | null
   auth_bg_image_url: string | null
@@ -188,8 +187,7 @@ export function TenantForm({ tenant }: Props) {
     setSlug(e.target.value)
   }
 
-  const rawCssDefault =
-    (branding?.custom_css as Record<string, string> | null)?.rawCss ?? ''
+  const customCssDefault = branding?.custom_css ?? ''
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 w-full">
@@ -430,7 +428,7 @@ export function TenantForm({ tenant }: Props) {
                     id="custom_css"
                     name="custom_css"
                     rows={8}
-                    defaultValue={rawCssDefault}
+                    defaultValue={customCssDefault}
                     placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
                     className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
                   />

@@ -107,10 +107,7 @@ export async function createTenant(data: FormData) {
     }
   }
 
-  // custom_css é JSONB: { rawCss: "..." } + quaisquer tokens CSS adicionados futuramente
-  // O textarea do formulário envia texto plano; aqui embrulhamos como JSONB.
-  const rawCss = obj.custom_css as string | null | undefined
-  const customCssJson = rawCss ? { rawCss } : null
+  const customCss = (obj.custom_css as string | null | undefined) || null
 
   // Atualizar tenant_branding — remover nulls (colunas NOT NULL têm defaults)
   const brandingScalarPayload = Object.fromEntries(
@@ -123,7 +120,7 @@ export async function createTenant(data: FormData) {
     .from('tenant_branding')
     .update({
       ...brandingScalarPayload,
-      ...(customCssJson !== null ? { custom_css: customCssJson } : {}),
+      ...(customCss !== null ? { custom_css: customCss } : {}),
     })
     .eq('tenant_id', tenant.id)
 
@@ -217,9 +214,7 @@ export async function updateTenant(data: FormData) {
     }
   }
 
-  // custom_css: só atualiza se rawCss foi enviado; preserva tokens existentes caso vazio
-  const rawCss = obj.custom_css as string | null | undefined
-  const customCssJson = rawCss ? { rawCss } : null
+  const customCss = (obj.custom_css as string | null | undefined) || null
 
   const brandingScalarPayload = Object.fromEntries(
     Object.entries({ ...brandingResult.data, ...brandingUpdate }).filter(
@@ -231,7 +226,7 @@ export async function updateTenant(data: FormData) {
     .from('tenant_branding')
     .update({
       ...brandingScalarPayload,
-      ...(customCssJson !== null ? { custom_css: customCssJson } : {}),
+      ...(customCss !== null ? { custom_css: customCss } : {}),
     })
     .eq('tenant_id', id)
 

@@ -1,5 +1,6 @@
+import { type NextRequest, NextResponse } from 'next/server'
+
 import { createServiceClient } from '@/lib/supabase/service'
-import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug')
@@ -27,15 +28,12 @@ export async function GET(request: NextRequest) {
     .eq('tenant_id', tenant.id)
     .single()
 
-  // Se o tenant não usa tema customizado, retornar payload vazio
-  if (!branding?.use_custom_theme) {
+  if (!branding?.use_custom_theme || !branding.custom_css) {
     return NextResponse.json(
       {
-        selector: null,
+        css: null,
         baseColor: branding?.base_color ?? null,
         themeColor: branding?.theme_color ?? null,
-        variables: {},
-        customCss: null,
       },
       {
         headers: {
@@ -45,26 +43,8 @@ export async function GET(request: NextRequest) {
     )
   }
 
-  const selector = `[data-tenant-theme="${tenant.slug}"]`
-
-  // custom_css é JSONB: { token-name: "valor CSS", ..., rawCss: "..." }
-  // Todas as chaves exceto "rawCss" são CSS variables injetadas no seletor do tenant.
-  const themeConfig = (branding.custom_css ?? {}) as Record<string, string>
-  const { rawCss, ...tokenEntries } = themeConfig
-
-  const variables: Record<string, string> = {}
-  for (const [key, value] of Object.entries(tokenEntries)) {
-    if (value) variables[key] = value
-  }
-
   return NextResponse.json(
-    {
-      selector,
-      baseColor: branding.base_color ?? null,
-      themeColor: branding.theme_color ?? null,
-      variables,
-      customCss: rawCss ?? null,
-    },
+    { css: branding.custom_css },
     {
       headers: {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',

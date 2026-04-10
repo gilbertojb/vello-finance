@@ -1,16 +1,16 @@
-// apps/console/src/app/providers.tsx
 'use client'
 
 import { ThemeProvider } from 'next-themes'
 import type { ReactNode } from 'react'
+
 import { TooltipProvider } from '@/components/ui/tooltip'
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="light"
-      enableSystem={false}
+      defaultTheme="system"
+      enableSystem={true}
       disableTransitionOnChange
     >
       <TooltipProvider>{children}</TooltipProvider>

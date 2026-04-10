@@ -366,7 +366,7 @@ export type Database = {
           base_color: string | null
           company_display_name: string | null
           created_at: string
-          custom_css: Json | null
+          custom_css: string | null
           favicon_url: string | null
           id: string
           logo_url: string | null
@@ -380,7 +380,7 @@ export type Database = {
           base_color?: string | null
           company_display_name?: string | null
           created_at?: string
-          custom_css?: Json | null
+          custom_css?: string | null
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
@@ -394,7 +394,7 @@ export type Database = {
           base_color?: string | null
           company_display_name?: string | null
           created_at?: string
-          custom_css?: Json | null
+          custom_css?: string | null
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
