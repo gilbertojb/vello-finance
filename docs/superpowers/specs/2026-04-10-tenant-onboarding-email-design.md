@@ -31,14 +31,16 @@ packages/email/
 │   │   ├── admin/                   ← Emails do backoffice (branding Vello fixo)
 │   │   │   ├── confirm-email.tsx    ← migrado de emails/confirm-email.tsx
 │   │   │   └── password-recover.tsx ← migrado de emails/password-recover.tsx
-│   │   └── console/                 ← Emails do tenant (branding dinâmico)
-│   │       └── tenant-welcome.tsx   ← NOVO
+│   │   └── console/                 ← Emails do tenant (branding dinâmico — uso futuro)
+│   │       └── tenant-welcome.tsx   ← NOVO — email de ativação do tenant
 │   ├── layouts/
 │   │   ├── admin-layout.tsx         ← Logo Vello, cores fixas, footer "© Vello Finance"
-│   │   └── tenant-layout.tsx        ← Props: logoUrl, primaryColor, displayName
+│   │   └── tenant-layout.tsx        ← Props: logoUrl, primaryColor, displayName (uso futuro)
 │   └── index.ts                     ← Re-exports de templates + sendEmail
 ├── package.json                     ← nome: @vello/email, +resend dependency
 ```
+
+A estrutura de pastas e layouts já prevê multi-domínio no Resend. Nesta fase, o `tenant-welcome.tsx` usa o `admin-layout.tsx` (branding Vello). Quando emails com branding do tenant forem implementados, migram para `tenant-layout.tsx`.
 
 ### `client.ts`
 
@@ -66,69 +68,53 @@ A `apiKey` é passada como parâmetro (não lida do env no package) — o consum
 
 ### Layouts
 
-**`admin-layout.tsx`:** Wrapper com logo Vello fixo, fundo branco, footer "© {year} Vello Finance". Os templates existentes (`confirm-email`, `password-recover`) serão refatorados para usar este layout.
+**`admin-layout.tsx`:** Wrapper com logo Vello fixo, fundo branco, footer "© {year} Vello Finance". Os templates existentes (`confirm-email`, `password-recover`) e o novo `tenant-welcome` usam este layout.
 
-**`tenant-layout.tsx`:** Wrapper com branding dinâmico via props:
-
-```typescript
-interface TenantLayoutProps {
-  logoUrl?: string | null      // logo do tenant; fallback: logo Vello
-  primaryColor?: string | null // theme_color da tenant_branding; fallback: #4B64AA
-  displayName: string          // company_display_name ou tenant.name
-  children: React.ReactNode
-}
-```
-
-- Logo: `logoUrl` do tenant ou logo Vello como fallback
-- Botões: `backgroundColor` usa `primaryColor`
-- Footer: `"© {year} {displayName}"`
+**`tenant-layout.tsx`:** Wrapper preparado para branding dinâmico via props (logoUrl, primaryColor, displayName). Criado nesta fase mas usado apenas futuramente quando emails com branding do tenant forem implementados.
 
 ---
 
 ## Seção 2 — Template `TenantWelcomeEmail`
+
+Localizado em `templates/console/tenant-welcome.tsx`. Usa o `tenant-layout.tsx`.
 
 ### Props
 
 ```typescript
 interface TenantWelcomeEmailProps {
   contactName: string          // "Olá, {contactName}"
-  displayName: string          // nome de exibição do tenant
+  displayName: string          // nome de exibição do tenant (para o layout)
   resetLink: string            // URL completa de reset de senha
-  logoUrl?: string | null      // logo do tenant
-  primaryColor?: string | null // theme_color para cor do botão
+  logoUrl?: string | null      // logo do tenant (fallback: logo Vello)
+  primaryColor?: string | null // theme_color para cor do botão (fallback: #4B64AA)
 }
 ```
 
 ### Conteúdo
 
+Formatado com `@react-email/components`. O `tenant-layout.tsx` cuida do logo, cores e footer.
+
 ```
-[Logo do tenant ou Vello]
+[Logo — via tenant-layout (logoUrl ou Vello fallback)]
 
 Olá, {contactName}
 
-Sua conta na {displayName} foi criada com sucesso.
+Sua conta na Vello Finance foi criada com sucesso.
 Para começar a usar o painel, defina sua senha clicando no botão abaixo.
 
-[ Definir minha senha ]  ← botão com cor primaryColor
+[ Definir minha senha ]  ← botão com cor primaryColor (ou #4B64AA fallback)
 
 Ou copie e cole a URL abaixo no seu navegador:
 {resetLink}
 
 Se você não esperava este email, pode ignorá-lo com segurança.
 
-© {year} {displayName}
+© {year} {displayName} — via tenant-layout
 ```
-
-### Cores
-
-O botão usa `primaryColor` (vindo de `tenant_branding.theme_color`). Se `theme_color` for `null`, usa a cor padrão `#4B64AA` (azul Vello).
 
 ### `from` do email
 
-- Se o tenant tem `custom_domain`: `"{displayName} <noreply@vellofinance.com.br>"` (usar custom_domain como remetente fica pendente de configuração no Resend)
-- Caso contrário: `"{displayName} <noreply@vellofinance.com.br>"`
-
-Quando o Resend estiver configurado com domínios customizados, o `from` pode ser alterado para `noreply@{custom_domain}`.
+Fixo por enquanto: `"Vello Finance <noreply@vellofinance.com.br>"`. Quando domínios customizados forem configurados no Resend, o `from` poderá usar `noreply@{custom_domain}`.
 
 ---
 
@@ -234,8 +220,7 @@ const displayName = branding?.company_display_name ?? tenantResult.data.name
 const { error: emailError } = await sendEmail({
   apiKey: env.RESEND_API_KEY,
   to: tenantResult.data.email,
-  subject: `Bem-vindo à ${displayName} — defina sua senha`,
-  from: `${displayName} <noreply@vellofinance.com.br>`,
+  subject: 'Bem-vindo à Vello Finance — defina sua senha',
   react: TenantWelcomeEmail({
     contactName,
     displayName,
@@ -295,14 +280,15 @@ Na listagem de tenants:
 
 Atualizar a seção de packages para refletir:
 - `packages/email` em vez de `packages/transactional`
-- Descrição: "Templates React Email + envio via Resend"
-- Estrutura de pastas: `templates/admin/` e `templates/console/`
+- Descrição: "Templates React Email (admin/ e console/) + envio via Resend"
+- Layouts: `admin-layout.tsx` (branding Vello fixo) e `tenant-layout.tsx` (branding dinâmico por tenant)
 
 ---
 
 ## Seção 8 — Fora do Escopo
 
-- Configuração de domínio customizado no Resend (pendente de setup manual)
+- Configuração de domínio customizado no Resend para `from` com custom_domain (pendente de setup manual)
 - Email de ativação para tenants do tipo `subscription` (apenas `whitelabel` nesta spec)
 - Fluxo de reenvio automático (retry) — apenas manual via botão no admin
 - Tela de reset de senha no console (já existe em `/reset-password`)
+- Emails com branding do tenant no corpo (password-recover do console, etc.) — usar `tenant-layout.tsx` quando implementados
