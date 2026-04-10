@@ -7,7 +7,8 @@
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    "NODE_ENV"
+    "NODE_ENV",
+    "CONSOLE_BASE_DOMAIN"
   ],
   "tasks": {
     "build": {
