@@ -19,12 +19,12 @@ import * as React from 'react'
 
 interface PasswordRecoverEmailProps {
   recoverLink?: string
+  baseUrl?: string
 }
-
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
 
 export const PasswordRecoverEmail = ({
   recoverLink,
+  baseUrl = '',
 }: PasswordRecoverEmailProps) => (
   <Html>
     <Head />
@@ -87,9 +87,5 @@ export const PasswordRecoverEmail = ({
     </Tailwind>
   </Html>
 )
-
-PasswordRecoverEmail.PreviewProps = {
-  recoverLink: 'http://localhost:3000/reset-password?token=example-uuid-1234',
-} as PasswordRecoverEmailProps
 
 export default PasswordRecoverEmail
