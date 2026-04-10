@@ -378,6 +378,41 @@ Quando um valor arbitrário parecer necessário, **primeiro adicione um token** 
 | `h-topbar` | `52px` | Altura da topbar |
 | `text-2xs` | `10px` | Badges e labels de suporte |
 
+### Regra obrigatória: Tokens Semânticos (compatibilidade com temas de tenant)
+
+Os apps `console` e `store` suportam white-label — o tema visual é sobrescrito por tenant via CSS variables injetadas em `[data-tenant-theme="slug"]`. **Usar cores fixas (zinc-800, white, slate-500, etc.) quebra o tema do tenant.**
+
+**✅ Correto — tokens semânticos que respondem ao tema:**
+```tsx
+<h1 className="text-foreground">Título</h1>
+<p className="text-muted-foreground">Subtítulo</p>
+<div className="bg-background border-border">...</div>
+<input className="bg-input border-input" />
+<button className="bg-primary text-primary-foreground">Ação</button>
+```
+
+**❌ Errado — cores hardcoded que ignoram o tema:**
+```tsx
+<h1 className="text-white">Título</h1>
+<p className="text-zinc-400">Subtítulo</p>
+<div className="bg-zinc-900 border-zinc-700">...</div>
+<input className="bg-zinc-800 border-zinc-700 text-white" />
+```
+
+**Mapa de substituição rápida:**
+
+| Hardcoded | Token semântico |
+|---|---|
+| `text-white` / `text-black` | `text-foreground` |
+| `text-zinc-400` / `text-gray-500` | `text-muted-foreground` |
+| `text-zinc-300` | `text-foreground` (labels herdam do componente `FieldLabel`) |
+| `bg-zinc-800` / `bg-zinc-900` | `bg-background` ou `bg-card` |
+| `bg-white` | `bg-background` |
+| `border-zinc-700` / `border-zinc-800` | `border-border` ou `border-input` |
+| `bg-red-50 border-red-200` | Usar variant do componente (ex: `<Alert variant="destructive">`) |
+
+> **Regra:** se você está escrevendo uma classe Tailwind de cor e o nome contém um número (zinc-800, gray-500, red-50), está errado. Use o token semântico equivalente.
+
 ### Exceções permitidas
 
 - `app/page.tsx` (boilerplate temporário do `create-next-app` — será substituído)
