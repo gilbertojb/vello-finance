@@ -1,5 +1,5 @@
-// apps/console/src/proxy.ts
 import { getJwtClaims, hasTenantAccess } from '@vello/auth'
+import { env } from '@vello/env/console'
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/proxy'
 
@@ -24,9 +24,9 @@ function getRouteType(pathname: string) {
 async function resolveTenant(
   rawHost: string,
 ): Promise<{ id: string; slug: string; status: string } | null> {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SECRET_KEY
-  const baseDomain = process.env.CONSOLE_BASE_DOMAIN ?? 'vellofinance.com.br'
+  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceKey = env.SUPABASE_SECRET_KEY
+  const baseDomain = env.CONSOLE_BASE_DOMAIN
 
   if (!supabaseUrl || !serviceKey) return null
 
@@ -56,7 +56,11 @@ async function resolveTenant(
   })
 
   if (!response.ok) return null
-  const data = (await response.json()) as Array<{ id: string; slug: string; status: string }>
+  const data = (await response.json()) as Array<{
+    id: string
+    slug: string
+    status: string
+  }>
   return data[0] ?? null
 }
 
@@ -79,11 +83,16 @@ export async function proxy(request: NextRequest) {
 
   if (tenant.status !== 'active') {
     // Tenant inativo/suspenso — retornar 503
-    return new NextResponse('Este espaço está temporariamente indisponível', { status: 503 })
+    return new NextResponse('Este espaço está temporariamente indisponível', {
+      status: 503,
+    })
   }
 
   // 2. Renovar sessão Supabase e obter userId (storageKey dinâmico por tenant)
-  const { response, isAuthenticated, userId } = await updateSession(request, tenant.id)
+  const { response, isAuthenticated, userId } = await updateSession(
+    request,
+    tenant.id,
+  )
 
   // Copiar headers da resposta do updateSession para nossa resposta base
   const newResponse = NextResponse.next({
@@ -120,17 +129,19 @@ export async function proxy(request: NextRequest) {
   // 5. Validar role do usuário autenticado via @vello/auth (sem hardcode de arrays)
   if (isAuthenticated && userId) {
     // Buscar app_metadata do usuário para extrair claims
-    const userUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users/${userId}`
+    const userUrl = `${env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users/${userId}`
     const userResponse = await fetch(userUrl, {
       headers: {
-        apikey: process.env.SUPABASE_SECRET_KEY!,
-        Authorization: `Bearer ${process.env.SUPABASE_SECRET_KEY!}`,
+        apikey: env.SUPABASE_SECRET_KEY,
+        Authorization: `Bearer ${env.SUPABASE_SECRET_KEY}`,
       },
       cache: 'no-store',
     })
 
     if (userResponse.ok) {
-      const userData = (await userResponse.json()) as { app_metadata?: Record<string, unknown> }
+      const userData = (await userResponse.json()) as {
+        app_metadata?: Record<string, unknown>
+      }
       const claims = getJwtClaims(userData)
 
       // Role não é de tenant → expulsar (pode ser usuário do backoffice tentando acessar console)

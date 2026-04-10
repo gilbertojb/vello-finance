@@ -32,7 +32,7 @@ export default async function PublicLayout({
   const branding = await getTenantBranding(tenantId)
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-[40%_60%]">
+    <div className="grid min-h-svh lg:grid-cols-[30%_70%]">
       {/* Painel esquerdo — formulário */}
       <div className="flex flex-col gap-4 p-6 md:p-10 bg-background">
         <div>

@@ -11,6 +11,7 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components'
+import { env } from '@vello/env/admin'
 
 // biome-ignore lint/correctness/noUnusedImports: React is required for JSX
 import * as React from 'react'
@@ -19,7 +20,7 @@ interface ConfirmEmailProps {
   verificationCode?: string
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+const baseUrl = env.NEXT_PUBLIC_APP_URL
 
 export const ConfirmEmail = ({ verificationCode }: ConfirmEmailProps) => (
   <Html>
