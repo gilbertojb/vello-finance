@@ -2,9 +2,11 @@
 import { createServerClient } from '@supabase/ssr'
 import { env } from '@vello/env/console'
 import { type NextRequest, NextResponse } from 'next/server'
+import { getStorageKey } from './storage-key'
 
 export async function updateSession(
   request: NextRequest,
+  tenantId: string,
 ): Promise<{ response: NextResponse; isAuthenticated: boolean; userId: string | null }> {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -12,7 +14,7 @@ export async function updateSession(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
-      auth: { storageKey: 'vello-console-auth' },
+      auth: { storageKey: getStorageKey(tenantId) },
       cookies: {
         getAll() {
           return request.cookies.getAll()

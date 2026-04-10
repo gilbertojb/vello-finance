@@ -22,12 +22,14 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
   const tenantSlug = headerStore.get('x-tenant-slug') ?? 'default'
+  const tenantId = headerStore.get('x-tenant-id') ?? ''
 
   return (
     <html
       lang="pt-BR"
       className={`${GeistSans.variable} ${GeistMono.variable}`}
       data-tenant-theme={tenantSlug}
+      data-tenant-id={tenantId}
       suppressHydrationWarning
     >
       <body className="font-sans antialiased">

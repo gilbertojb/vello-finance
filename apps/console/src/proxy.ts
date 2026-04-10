@@ -79,8 +79,8 @@ export async function proxy(request: NextRequest) {
     return new NextResponse('Este espaço está temporariamente indisponível', { status: 503 })
   }
 
-  // 2. Renovar sessão Supabase e obter userId
-  const { response, isAuthenticated, userId } = await updateSession(request)
+  // 2. Renovar sessão Supabase e obter userId (storageKey dinâmico por tenant)
+  const { response, isAuthenticated, userId } = await updateSession(request, tenant.id)
 
   // Copiar headers da resposta do updateSession para nossa resposta base
   const newResponse = NextResponse.next({
