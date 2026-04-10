@@ -17,6 +17,7 @@ export async function signInWithEmailAndPassword(data: FormData) {
   }
 
   const { email, password } = result.data
+
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
