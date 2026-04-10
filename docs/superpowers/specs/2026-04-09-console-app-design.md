@@ -9,7 +9,7 @@
 
 ## Contexto
 
-O `apps/console` já tem um esqueleto mínimo: `layout.tsx` com `TenantThemeLoader`, rota `/api/tenant-theme`, e clientes Supabase básicos. Esta spec formaliza a estrutura completa do app, o middleware de resolução de tenant, isolamento de sessão entre admin e console, e os três módulos.
+O `apps/console` já tem um esqueleto mínimo: `layout.tsx` com injeção server-side de CSS do tenant, rota `/api/tenant-theme`, e clientes Supabase básicos. Esta spec formaliza a estrutura completa do app, o middleware de resolução de tenant, isolamento de sessão entre admin e console, e os três módulos.
 
 ---
 
@@ -20,7 +20,7 @@ Segue o mesmo padrão do `apps/admin` (documentado em `docs/architecture/convent
 ```
 apps/console/src/
 ├── app/
-│   ├── layout.tsx                    ← RootLayout: lê x-tenant-slug, seta data-tenant-theme, monta TenantThemeLoader
+│   ├── layout.tsx                    ← RootLayout: lê x-tenant-slug/id, injeta custom_css como <style> server-side
 │   ├── globals.css                   ← Tailwind 4 base + shadcn tokens (oklch)
 │   ├── providers.tsx                 ← next-themes + Sonner ('use client')
 │   ├── (public)/
@@ -29,10 +29,12 @@ apps/console/src/
 │   │       ├── page.tsx
 │   │       ├── actions.ts            ← 'use server' — signInWithEmailAndPassword
 │   │       └── sign-in-form.tsx      ← 'use client' — useFormState
-│   └── (private)/
-│       ├── layout.tsx                ← SidebarProvider + SidebarInset + Header
-│       └── (dashboard)/
-│           └── page.tsx              ← Dashboard em branco (placeholder)
+│   ├── (private)/
+│   │   ├── layout.tsx                ← SidebarProvider + SidebarInset + Header
+│   │   └── (dashboard)/
+│   │       └── page.tsx              ← Dashboard em branco (placeholder)
+│   ├── not-found/page.tsx            ← 404 estilizado (proxy rewrite quando tenant não existe)
+│   └── unavailable/page.tsx          ← 503 estilizado (proxy rewrite quando tenant inativo)
 ├── assets/
 │   └── logo.svg                      ← Logo Vello (fallback quando tenant sem logo)
 ├── components/
@@ -43,7 +45,6 @@ apps/console/src/
 │   │   ├── nav-user.tsx              ← Server — wrapper rodapé
 │   │   └── profile-button.tsx        ← Client — dropdown com logout
 │   ├── header.tsx                    ← Server Component
-│   ├── tenant-theme-loader.tsx       ← já existe — mantém
 │   └── ui/                           ← shadcn/ui primitivos (Button, Field, Input, etc.)
 ├── hooks/
 │   └── use-form-state.ts             ← mesmo padrão do admin
@@ -56,8 +57,6 @@ apps/console/src/
 │   │   ├── service.ts                ← já existe
 │   │   ├── client.ts                 ← storageKey dinâmico via data-tenant-id do DOM
 │   │   └── proxy.ts                  ← updateSession(request, tenantId) com storageKey dinâmico
-│   ├── theme/
-│   │   └── load-tenant-theme.ts      ← já existe — mantém
 │   └── utils.ts                      ← cn()
 └── proxy.ts                          ← middleware (era middleware.ts) — resolve tenant + protege rotas
 ```
@@ -79,7 +78,7 @@ proxy.ts (middleware Edge)
   2. Resolve tenant:
      a. Subdomínio de vellofinance.com.br → slug = parte antes do primeiro "."
      b. Domínio customizado (custom_domain) → busca via service role no banco
-  3. Valida que tenant.status = 'active' — senão: 404 ou página de tenant inativo
+  3. Valida que tenant.status = 'active' — senão: rewrite para /not-found (404) ou /unavailable (503)
   4. Injeta headers internos (não expostos ao browser):
        x-tenant-id: uuid
        x-tenant-slug: "empresa"
@@ -207,18 +206,39 @@ if (!claims || !hasTenantAccess(claims.user_role)) {
 
 O `(public)/layout.tsx` é Server Component. Lê os headers injetados pelo middleware e busca o branding **no servidor** via `createServiceClient()`. O browser recebe apenas HTML renderizado — sem URLs de API, sem chaves expostas.
 
+### White-Label: Tema do Tenant
+
+O tema do tenant é injetado **server-side** no root layout como `<style>` no `<head>`. Sem fetch client-side, sem FOUC.
+
+```typescript
+// apps/console/src/app/layout.tsx
+async function getTenantCustomCss(tenantId: string): Promise<string | null> {
+  if (!tenantId) return null
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('tenant_branding')
+    .select('use_custom_theme, custom_css')
+    .eq('tenant_id', tenantId)
+    .single()
+  if (!data?.use_custom_theme) return null
+  return data.custom_css  // TEXT puro — CSS injetado direto
+}
+```
+
+**`custom_css` é coluna TEXT** (não JSONB). O tenant cola CSS puro com seletores `[data-tenant-theme="slug"]` e `.dark[data-tenant-theme="slug"]`. O CSS é injetado sem parsing.
+
 ### Split 40/60
 
 ```
 ┌──────── 40% ──────────┬──────────── 60% ────────────┐
-│ bg: auth_bg_color     │                              │
-│ (padrão: #18181b)     │  auth_bg_image_url           │
+│ bg: bg-background     │                              │
+│ (token semântico)     │  auth_bg_image_url           │
 │                       │  object-cover                │
 │  [logo do tenant]     │                              │
 │  fallback: logo Vello │  Sem imagem: gradiente       │
-│                       │  via CSS vars tenant         │
-│  {children}           │  --tenant-primary →          │
-│  (form centralizado)  │  --tenant-secondary          │
+│                       │  via token primary           │
+│  {children}           │  bg-gradient-to-br           │
+│  (form centralizado)  │  from-primary/80 to-primary  │
 │                       │                              │
 └───────────────────────┴──────────────────────────────┘
 Mobile: empilhado, painel direito oculto

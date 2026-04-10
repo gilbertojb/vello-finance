@@ -18,6 +18,8 @@ apps/[admin|console|store]/src/
 │   ├── (private)/              ← Route group: rotas autenticadas
 │   │   ├── layout.tsx          ← SidebarProvider + Header + conteúdo
 │   │   └── [módulos]/          ← Ex: (dashboard)/, tenants/, plans/
+│   ├── not-found/page.tsx      ← 404 estilizado (rewrite do proxy quando tenant não existe)
+│   ├── unavailable/page.tsx    ← 503 estilizado (rewrite do proxy quando tenant inativo)
 │   └── api/                    ← Route Handlers (quando Edge Function não basta)
 ├── assets/                     ← SVGs e imagens estáticas importadas no código
 ├── components/
