@@ -18,7 +18,7 @@
 | F6 — Suspender/Cancelar | ⏳ Pendente | — |
 | F7 — Detalhes | ⏳ Pendente | — |
 
-## Decisões Técnicas (MVP)
+## Decisões Técnicas
 
 - `type` fixo em `whitelabel` no cadastro — sem campo no formulário por ora
 - `plan_id` tornado nullable via migration — associação de plano adiada para módulo de assinaturas
@@ -36,7 +36,7 @@
 | Identidade visual | Totalmente customizada | Identidade Vello padrão |
 | URL | Domínio próprio (`creditos.empresa.com.br`) | Subdomínio Vello (`slug.vellofinance.com.br`) |
 | Telas públicas | Logo, cores e imagem de fundo customizados | Layout Vello padrão |
-| Onboarding | Assistido pela equipe interna | Manual no MVP |
+| Onboarding | Assistido pela equipe interna | Manual |
 | Customização do Console | Completa | Limitada (logo opcional) |
 
 ---
@@ -240,7 +240,7 @@ Banco · Agência · Conta · Chave Pix — todos opcionais, preenchíveis depoi
 - Logo enviada → warning (não bloqueia)
 - Dados bancários preenchidos → warning (não bloqueia)
 
-**Pré-requisito:** a tabela `tenant_users` deve existir antes de implementar esta action. A migration `20260409000000_create_tenant_users.sql` é criada junto ao MVP do `apps/console` (ver `docs/superpowers/specs/2026-04-09-console-app-design.md`).
+**Pré-requisito:** a tabela `tenant_users` deve existir antes de implementar esta action. A migration `20260409000000_create_tenant_users.sql` é criada junto ao `apps/console` (ver `docs/superpowers/specs/2026-04-09-console-app-design.md`).
 
 **Fluxo de ativação (Server Action com `createServiceClient()` de `@/lib/supabase/service`):**
 
@@ -342,7 +342,7 @@ Para cada produto ativo da Vello:
 Coluna esquerda (2/3) com tabs:
 - **Dados Cadastrais** — dados da empresa, slug, domínio
 - **Produtos** — produtos habilitados e comissões
-- **Financeiro** — métricas e extrato (placeholder no MVP)
+- **Financeiro** — métricas e extrato (placeholder)
 - **Identidade Visual** — preview do branding + link de edição
 
 Coluna direita (1/3):

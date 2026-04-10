@@ -115,5 +115,5 @@ apps/admin/src/app/(private)/products/
 
 - `page.tsx` é Server Component — busca produtos e IFs diretamente no Supabase server client
 - `product-form.tsx` é Client Component — recebe `partners` via props, sem acesso ao banco
-- `actions.ts` usa `'use server'` — insere em `products` e em `product_financial_partners` na mesma operação (ou em sequência, sem transação explícita no MVP)
+- `actions.ts` usa `'use server'` — insere em `products` e em `product_financial_partners` na mesma operação (ou em sequência, sem transação explícita)
 - `queries.ts` importado apenas por Server Components e Actions

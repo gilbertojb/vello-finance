@@ -14,7 +14,7 @@
 4. Padrão de roles: DB ENUM como fonte de verdade, TypeScript espelha os valores
 
 **Fora deste spec:**
-- Tabela `tenant_users` → criada junto ao MVP do console (`docs/superpowers/specs/2026-04-09-console-app-design.md`, Seção 6)
+- Tabela `tenant_users` → criada junto ao console (`docs/superpowers/specs/2026-04-09-console-app-design.md`, Seção 6)
 - Ativação de tenant (F3) depende de `tenant_users` existir — ver pré-requisito na SPEC.md
 - UI de listagem, criação, detalhes, produtos → specs separados
 

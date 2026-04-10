@@ -1,4 +1,4 @@
-# Sprint 1 — Setup + Vello Admin (Módulo Admin MVP)
+# Sprint 1 — Setup + Vello Admin (Módulo Admin)
 
 **Objetivo:** Projeto estruturado no monorepo existente + módulo Admin funcionando em staging.
 **Estimativa:** 2 semanas · **Status:** 🔴 Não iniciado

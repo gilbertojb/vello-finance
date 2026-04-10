@@ -964,7 +964,7 @@ export function TenantThemeLoader({ tenantSlug }: TenantThemeLoaderProps) {
 
 - [ ] **Step 2: Atualizar `apps/console/src/app/layout.tsx`**
 
-O layout precisa ler o tenant atual a partir dos headers ou variável de ambiente. Para o MVP, usar o header `x-tenant-slug` (injetado pelo middleware) ou `NEXT_PUBLIC_TENANT_SLUG`. Por ora, usamos um placeholder que será completado quando o middleware for implementado:
+O layout precisa ler o tenant atual a partir dos headers ou variável de ambiente. Usar o header `x-tenant-slug` (injetado pelo middleware) ou `NEXT_PUBLIC_TENANT_SLUG`. Por ora, usamos um placeholder que será completado quando o middleware for implementado:
 
 ```tsx
 import type { Metadata } from 'next'

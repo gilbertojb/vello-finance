@@ -9,7 +9,7 @@
 
 ## Contexto
 
-Planos definem o modelo comercial de cada tenant. No MVP, a cobrança não é automatizada —
+Planos definem o modelo comercial de cada tenant. A cobrança não é automatizada —
 os planos orientam o onboarding manual e determinam o percentual de comissão padrão do tenant.
 
 Tipos de plano:

@@ -3,7 +3,7 @@
 > Banco centralizado no Supabase. RLS garante isolamento entre tenants.
 > Tabelas globais (`products`, `plans`) são gerenciadas pelo backoffice e lidas por todos.
 
-## Módulo Admin — Tabelas do MVP
+## Módulo Admin
 
 ### `plans`
 ```sql
@@ -170,7 +170,7 @@ Total Tenant:             tenant_commission_pct        ex:  3,50%
 Soma total:               if_commission_pct            ex: 10,00% ✓
 ```
 
-## Tabelas Futuras (fora do MVP Admin)
+## Tabelas Futuras
 
 - `proposals` — Propostas de empréstimo
 - `clients` — Clientes dos tenants
