@@ -77,15 +77,15 @@ export async function proxy(request: NextRequest) {
   const tenant = await resolveTenant(host)
 
   if (!tenant) {
-    // Tenant não encontrado — retornar 404 simples
-    return new NextResponse('Tenant não encontrado', { status: 404 })
+    const url = request.nextUrl.clone()
+    url.pathname = '/not-found'
+    return NextResponse.rewrite(url, { status: 404 })
   }
 
   if (tenant.status !== 'active') {
-    // Tenant inativo/suspenso — retornar 503
-    return new NextResponse('Este espaço está temporariamente indisponível', {
-      status: 503,
-    })
+    const url = request.nextUrl.clone()
+    url.pathname = '/unavailable'
+    return NextResponse.rewrite(url, { status: 503 })
   }
 
   // 2. Renovar sessão Supabase e obter userId (storageKey dinâmico por tenant)

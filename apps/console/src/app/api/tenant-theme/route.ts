@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     .single()
 
   if (tenantError || !tenant) {
-    return NextResponse.json({ error: 'Tenant not found' }, { status: 404 })
+    return NextResponse.json({ css: null })
   }
 
   const { data: branding } = await supabase
