@@ -34,7 +34,7 @@ export async function NavMain() {
           <SidebarGroupLabel>Cadastros</SidebarGroupLabel>
           <SidebarMenu>
             <SidebarMenuItem key="tenants">
-              <NavLink href="/tenants" icon={<Building2 />} label="Tenants" />
+              <NavLink href="/tenants" icon={<Building2 />} label="Parceiros" />
             </SidebarMenuItem>
 
             <SidebarMenuItem key="plans">
@@ -46,7 +46,11 @@ export async function NavMain() {
             </SidebarMenuItem>
 
             <SidebarMenuItem key="product-types">
-              <NavLink href="/product-types" icon={<Tag />} label="Tipos de Produto" />
+              <NavLink
+                href="/product-types"
+                icon={<Tag />}
+                label="Tipos de Produto"
+              />
             </SidebarMenuItem>
 
             <SidebarMenuItem key="financial-partners">

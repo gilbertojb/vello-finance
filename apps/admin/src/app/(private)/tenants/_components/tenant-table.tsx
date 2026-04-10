@@ -54,13 +54,19 @@ function StatusAction({ tenant }: { tenant: TenantRow }) {
         </DropdownMenuItem>
       )}
       {tenant.status === 'pending' && (
-        <DropdownMenuItem disabled={isPending} onClick={() => changeStatus('active')}>
+        <DropdownMenuItem
+          disabled={isPending}
+          onClick={() => changeStatus('active')}
+        >
           <Zap className="size-4" />
           Ativar
         </DropdownMenuItem>
       )}
       {tenant.status === 'suspended' && (
-        <DropdownMenuItem disabled={isPending} onClick={() => changeStatus('active')}>
+        <DropdownMenuItem
+          disabled={isPending}
+          onClick={() => changeStatus('active')}
+        >
           <RefreshCw className="size-4" />
           Reativar
         </DropdownMenuItem>
@@ -69,7 +75,11 @@ function StatusAction({ tenant }: { tenant: TenantRow }) {
   )
 }
 
-export function TenantTable({ tenants }: { tenants: ReadonlyArray<TenantRow> }) {
+export function TenantTable({
+  tenants,
+}: {
+  tenants: ReadonlyArray<TenantRow>
+}) {
   if (!tenants || tenants.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-card">
@@ -105,7 +115,10 @@ export function TenantTable({ tenants }: { tenants: ReadonlyArray<TenantRow> }) 
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
           {tenants.map((tenant) => (
-            <tr key={tenant.id} className="border-b transition-colors hover:bg-muted/50">
+            <tr
+              key={tenant.id}
+              className="border-b transition-colors hover:bg-muted/50"
+            >
               <td className="p-4 align-middle font-medium">{tenant.name}</td>
               <td className="p-4 align-middle text-muted-foreground text-xs">
                 {tenant.slug}.vellofinance.com.br
