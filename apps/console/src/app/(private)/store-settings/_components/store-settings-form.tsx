@@ -25,8 +25,8 @@ interface StoreSettingsFormProps {
 export function StoreSettingsForm({ defaultValues }: StoreSettingsFormProps) {
   const [, handleSubmit, isPending] = useFormState(
     updateStoreSettings,
-    () => toast.success('Configurações salvas!'),
-    (msg) => toast.error(msg),
+    () => { toast.success('Configurações salvas!') },
+    (msg) => { toast.error(msg) },
   )
 
   return (

@@ -7,8 +7,8 @@ import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 
-// TODO: import { Toaster } from '@/components/ui/sonner' — will be added in Task 6
-// TODO: import { TenantThemeLoader } from '@/components/tenant-theme-loader' — will be added with white-label theme feature
+import { Toaster } from '@/components/ui/sonner'
+// TODO: TenantThemeLoader será adicionado na implementação do tema white-label
 
 import { Providers } from './providers'
 
@@ -32,6 +32,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     >
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   )

@@ -13,7 +13,6 @@ export async function listTenantProducts() {
       products (
         id,
         name,
-        type,
         description,
         is_active
       )
