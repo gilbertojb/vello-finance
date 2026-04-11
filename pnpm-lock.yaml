@@ -77,6 +77,9 @@ importers:
       '@vello/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@vello/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@vello/env':
         specifier: workspace:*
         version: link:../../packages/env

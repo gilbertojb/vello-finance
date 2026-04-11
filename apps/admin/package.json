@@ -30,6 +30,7 @@
     "@tiptap/starter-kit": "^3.22.1",
     "@vello/auth": "workspace:*",
     "@vello/database": "workspace:*",
+    "@vello/email": "workspace:*",
     "@vello/env": "workspace:*",
     "@vercel/analytics": "^2.0.1",
     "class-variance-authority": "^0.7.1",
