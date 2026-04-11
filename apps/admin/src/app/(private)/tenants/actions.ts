@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { env } from '@vello/env/admin'
@@ -23,6 +24,22 @@ const tenantSchema = z.object({
   bank_pix_key: z.string().optional().nullable(),
 })
 
+const FORBIDDEN_CSS_PATTERNS = [
+  /url\s*\(/i,
+  /@import/i,
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /-moz-binding/i,
+  /behavior\s*:/i,
+]
+
+function sanitizeCss(css: string): string | null {
+  for (const pattern of FORBIDDEN_CSS_PATTERNS) {
+    if (pattern.test(css)) return null
+  }
+  return css
+}
+
 const brandingSchema = z.object({
   company_display_name: z.string().optional().nullable(),
   use_custom_theme: z.preprocess(
@@ -34,6 +51,8 @@ const brandingSchema = z.object({
 })
 
 export async function createTenant(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
 
   for (const [key, value] of Object.entries(obj)) {
@@ -114,7 +133,8 @@ export async function createTenant(data: FormData) {
     }
   }
 
-  const customCss = (obj.custom_css as string | null | undefined) || null
+  const rawCss = (obj.custom_css as string | null | undefined) || null
+  const customCss = rawCss ? sanitizeCss(rawCss) : null
 
   // Atualizar tenant_branding — remover nulls (colunas NOT NULL têm defaults)
   const brandingScalarPayload = Object.fromEntries(
@@ -225,6 +245,8 @@ export async function createTenant(data: FormData) {
 // ---------------------------------------------------------------------------
 
 export async function updateTenant(data: FormData) {
+  await requireBackofficeUser()
+
   const id = data.get('id') as string
   if (!id) return { success: false, message: 'ID não informado.', errors: null }
 
@@ -297,7 +319,8 @@ export async function updateTenant(data: FormData) {
     }
   }
 
-  const customCss = (obj.custom_css as string | null | undefined) || null
+  const rawCss = (obj.custom_css as string | null | undefined) || null
+  const customCss = rawCss ? sanitizeCss(rawCss) : null
 
   const brandingScalarPayload = Object.fromEntries(
     Object.entries({ ...brandingResult.data, ...brandingUpdate }).filter(
@@ -335,6 +358,8 @@ export async function setTenantStatus(
   id: string,
   status: 'active' | 'suspended' | 'cancelled',
 ) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
 
   const extra: Record<string, string> = {}
@@ -357,6 +382,8 @@ export async function setTenantStatus(
 // ---------------------------------------------------------------------------
 
 export async function resendWelcomeEmail(tenantId: string) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
   const serviceClient = createServiceClient()
 

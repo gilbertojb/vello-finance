@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { getJwtClaims, hasBackofficeAccess } from '@vello/auth'
 import { updateSession } from '@/lib/supabase/proxy'
 
 /**
@@ -23,7 +24,7 @@ function getIsPublicUrl(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  const { response, isAuthenticated } = await updateSession(request)
+  const { response, isAuthenticated, user } = await updateSession(request)
 
   const { pathname } = request.nextUrl
   const { isPublicUrl, whenAuthenticated } = getIsPublicUrl(pathname)
@@ -32,6 +33,15 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/sign-in'
     return NextResponse.redirect(url)
+  }
+
+  if (isAuthenticated && !isPublicUrl) {
+    const claims = getJwtClaims(user as { app_metadata?: Record<string, unknown> } | null)
+    if (!claims || !hasBackofficeAccess(claims.user_role)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/sign-in'
+      return NextResponse.redirect(url)
+    }
   }
 
   if (isAuthenticated && isPublicUrl && whenAuthenticated === 'redirect') {

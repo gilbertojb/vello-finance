@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 const productTypeSchema = z.object({
@@ -17,6 +18,8 @@ const productTypeSchema = z.object({
 })
 
 export async function createProductType(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
   obj.is_active = obj.is_active === 'on' || obj.is_active === 'true'
   for (const [key, value] of Object.entries(obj)) {
@@ -48,6 +51,8 @@ export async function createProductType(data: FormData) {
 const productTypeUpdateSchema = productTypeSchema.omit({ slug: true })
 
 export async function updateProductType(data: FormData) {
+  await requireBackofficeUser()
+
   const id = data.get('id') as string
   if (!id) return { success: false, message: 'ID não informado.', errors: null }
 

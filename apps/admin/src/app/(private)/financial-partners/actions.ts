@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 const baseSchema = z.object({
@@ -14,6 +15,8 @@ const baseSchema = z.object({
 })
 
 export async function createFinancialPartner(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
   obj.is_active = obj.is_active === 'on' || obj.is_active === 'true'
   for (const [key, value] of Object.entries(obj)) {
@@ -55,6 +58,8 @@ export async function createFinancialPartner(data: FormData) {
 }
 
 export async function updateFinancialPartner(data: FormData) {
+  await requireBackofficeUser()
+
   const id = data.get('id') as string
   if (!id) return { success: false, message: 'ID não informado.', errors: null }
 

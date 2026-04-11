@@ -12,6 +12,19 @@ import { createServiceClient } from '@/lib/supabase/service'
 
 import { Providers } from './providers'
 
+const FORBIDDEN_CSS_PATTERNS = [
+  /url\s*\(/i,
+  /@import/i,
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /-moz-binding/i,
+  /behavior\s*:/i,
+]
+
+function isSafeCss(css: string): boolean {
+  return !FORBIDDEN_CSS_PATTERNS.some((p) => p.test(css))
+}
+
 export const metadata: Metadata = {
   title: {
     template: '%s | Vello Console',
@@ -46,7 +59,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        {customCss && (
+        {customCss && isSafeCss(customCss) && (
           <style dangerouslySetInnerHTML={{ __html: customCss }} />
         )}
       </head>

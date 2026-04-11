@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 // ─── Stage Actions ─────────────────────────────────────────────────────────
@@ -13,6 +14,8 @@ const stageSchema = z.object({
 })
 
 export async function createStage(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     if (value === '' || value === 'null') obj[key] = null
@@ -70,6 +73,8 @@ const stageUpdateSchema = z.object({
 })
 
 export async function updateStage(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     if (value === '' || value === 'null') obj[key] = null
@@ -99,6 +104,8 @@ export async function updateStage(data: FormData) {
 }
 
 export async function deleteStage(stageId: string, productTypeId: string) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('proposal_stages')
@@ -115,6 +122,8 @@ export async function reorderStages(
   productTypeId: string,
   orderedIds: string[],
 ) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
 
   const updates = orderedIds.map((id, index) =>
@@ -138,6 +147,8 @@ export async function duplicateStagesFrom(
   targetProductTypeId: string,
   sourceProductTypeId: string,
 ) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
 
   const { data: sourceStages, error: fetchError } = await supabase
@@ -192,6 +203,8 @@ const triggerSchema = z.object({
 })
 
 export async function createTrigger(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     if (value === '') obj[key] = null
@@ -237,6 +250,8 @@ export async function createTrigger(data: FormData) {
 }
 
 export async function deleteTrigger(triggerId: string, productTypeId: string) {
+  await requireBackofficeUser()
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('stage_triggers')

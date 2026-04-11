@@ -4,7 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 export async function updateSession(
   request: NextRequest,
-): Promise<{ response: NextResponse; isAuthenticated: boolean }> {
+): Promise<{ response: NextResponse; isAuthenticated: boolean; user: Record<string, unknown> | null }> {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -43,5 +43,9 @@ export async function updateSession(
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getUser()
 
-  return { response: supabaseResponse, isAuthenticated: !!data?.user }
+  return {
+    response: supabaseResponse,
+    isAuthenticated: !!data?.user,
+    user: data?.user as Record<string, unknown> | null,
+  }
 }

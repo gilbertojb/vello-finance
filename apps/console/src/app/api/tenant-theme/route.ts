@@ -2,6 +2,19 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 import { createServiceClient } from '@/lib/supabase/service'
 
+const FORBIDDEN_CSS_PATTERNS = [
+  /url\s*\(/i,
+  /@import/i,
+  /expression\s*\(/i,
+  /javascript\s*:/i,
+  /-moz-binding/i,
+  /behavior\s*:/i,
+]
+
+function isSafeCss(css: string): boolean {
+  return !FORBIDDEN_CSS_PATTERNS.some((p) => p.test(css))
+}
+
 export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug')
 
@@ -18,8 +31,17 @@ export async function GET(request: NextRequest) {
     .eq('slug', slug)
     .single()
 
+  const emptyResponse = NextResponse.json(
+    { css: null, baseColor: null, themeColor: null },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+      },
+    },
+  )
+
   if (tenantError || !tenant) {
-    return NextResponse.json({ css: null })
+    return emptyResponse
   }
 
   const { data: branding } = await supabase
@@ -28,7 +50,7 @@ export async function GET(request: NextRequest) {
     .eq('tenant_id', tenant.id)
     .single()
 
-  if (!branding?.use_custom_theme || !branding.custom_css) {
+  if (!branding?.use_custom_theme || !branding.custom_css || !isSafeCss(branding.custom_css)) {
     return NextResponse.json(
       {
         css: null,

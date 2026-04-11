@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
 // Converte strings no formato brasileiro ("1.234,56" ou "10,50") para número.
@@ -46,6 +47,8 @@ const partnerCommissionSchema = z
   })
 
 export async function createProduct(data: FormData) {
+  await requireBackofficeUser()
+
   const obj = Object.fromEntries(data) as Record<string, unknown>
 
   obj.is_active = obj.is_active === 'on' || obj.is_active === 'true'
@@ -125,6 +128,8 @@ export async function createProduct(data: FormData) {
 const productUpdateSchema = productSchema.omit({ product_type_id: true })
 
 export async function updateProduct(data: FormData) {
+  await requireBackofficeUser()
+
   const productId = data.get('id') as string
   if (!productId) {
     return { success: false, message: 'ID do produto não informado.', errors: null }
