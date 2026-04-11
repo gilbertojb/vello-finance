@@ -25,7 +25,7 @@ vello-finance/
 ├── packages/
 │   ├── auth/               ← RBAC: roles e permissões (já existe — expandido)
 │   ├── env/                ← Variáveis de ambiente validadas com Zod/t3-env (já existe)
-│   ├── transactional/      ← Templates de email para Resend (já existe)
+│   ├── email/              ← Templates React Email (admin/ e console/) + envio via Resend
 │   ├── database/           ← Types gerados pelo Supabase CLI + helpers de query
 │   └── config/             ← Tailwind base compartilhado entre os 3 apps Next.js (já existe — expandido)
 ├── supabase/
@@ -93,12 +93,23 @@ packages/env/src/
 └── shared.ts       → variáveis comuns (SUPABASE_URL, etc.)
 ```
 
-### `packages/transactional` (já existe — expandir)
-Templates React Email para Resend. Emails disparados pela plataforma:
-- `TenantWelcomeEmail` — boas-vindas ao ativar um tenant (Admin)
-- `ProposalReceivedEmail` — confirmação de proposta para o cliente (Store)
-- `ProposalStatusEmail` — atualização de status da proposta (Console → cliente)
-- `CommissionPaidEmail` — notificação de repasse ao tenant (Admin → tenant)
+### `packages/email` (renomeado de `packages/transactional`)
+Templates React Email (admin/ e console/) + envio via Resend.
+
+```
+packages/email/src/
+├── client.ts                    ← sendEmail() via Resend SDK
+├── templates/
+│   ├── admin/                   ← Emails do backoffice (branding Vello fixo)
+│   │   ├── confirm-email.tsx
+│   │   └── password-recover.tsx
+│   └── console/                 ← Emails do tenant (branding dinâmico)
+│       └── tenant-welcome.tsx
+├── layouts/
+│   ├── admin-layout.tsx         ← Logo Vello, cores fixas, footer "© Vello Finance"
+│   └── tenant-layout.tsx        ← Props: logoUrl, primaryColor, displayName
+└── index.ts                     ← Re-exports de templates + sendEmail
+```
 
 ### `packages/database` (já existe — expandir)
 Types gerados pelo Supabase CLI + helpers reutilizáveis entre apps.
@@ -131,7 +142,7 @@ Tailwind base compartilhado. Cada app estende e adiciona tokens próprios.
 | Backend / BaaS | Supabase (PostgreSQL + Auth + Storage + Edge Functions + Realtime) |
 | Automações | N8N self-hosted (Railway) |
 | Serviços auxiliares | Python 3.12 + FastAPI (Railway) |
-| Emails | Resend + React Email (`packages/transactional`) |
+| Emails | Resend + React Email (`packages/email`) |
 | Deploy frontend | Vercel — 3 projetos distintos, mesmo repositório |
 | Deploy API + N8N | Railway |
 
