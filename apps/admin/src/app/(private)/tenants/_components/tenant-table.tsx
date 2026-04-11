@@ -22,6 +22,7 @@ type TenantRow = {
   slug: string
   status: string
   created_at: string
+  welcome_email_sent_at: string | null
 }
 
 function StatusAction({ tenant }: { tenant: TenantRow }) {
@@ -124,7 +125,14 @@ export function TenantTable({
                 {tenant.slug}.vellofinance.com.br
               </td>
               <td className="p-4 align-middle">
-                <TenantStatusBadge status={tenant.status} />
+                <div className="flex items-center gap-2">
+                  <TenantStatusBadge status={tenant.status} />
+                  {!tenant.welcome_email_sent_at && tenant.status === 'pending' && (
+                    <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-400">
+                      Email pendente
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="p-4 align-middle text-muted-foreground text-xs">
                 {new Date(tenant.created_at).toLocaleDateString('pt-BR')}

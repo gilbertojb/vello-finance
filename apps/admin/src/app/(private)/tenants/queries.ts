@@ -4,7 +4,7 @@ export async function listTenants() {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('tenants')
-    .select('id, name, slug, status, created_at')
+    .select('id, name, slug, status, created_at, welcome_email_sent_at')
     .order('created_at', { ascending: false })
   if (error) throw error
   return data

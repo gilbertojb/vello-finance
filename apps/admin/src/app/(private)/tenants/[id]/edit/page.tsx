@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 
+import { ResendWelcomeButton } from '../../_components/resend-welcome-button'
 import { TenantForm } from '../../_components/tenant-form'
 import { TenantStatusBadge } from '../../_components/tenant-status-badge'
 
@@ -37,6 +38,10 @@ export default async function EditTenantPage({ params }: Props) {
             </p>
           </div>
         </div>
+        <ResendWelcomeButton
+          tenantId={tenant.id}
+          welcomeEmailSentAt={tenant.welcome_email_sent_at}
+        />
       </div>
 
       <div className="pt-2">
