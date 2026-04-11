@@ -10,14 +10,12 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components'
-
-// biome-ignore lint/correctness/noUnusedImports: React is required for JSX
-import * as React from 'react'
+import type { ReactNode } from 'react'
 
 interface AdminLayoutProps {
   preview: string
   baseUrl?: string
-  children: React.ReactNode
+  children: ReactNode
 }
 
 export function AdminLayout({ preview, baseUrl = '', children }: AdminLayoutProps) {

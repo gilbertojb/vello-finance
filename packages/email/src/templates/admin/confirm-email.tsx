@@ -12,8 +12,6 @@ import {
   Text,
 } from '@react-email/components'
 
-// biome-ignore lint/correctness/noUnusedImports: React is required for JSX
-import * as React from 'react'
 
 interface ConfirmEmailProps {
   verificationCode?: string

@@ -1,9 +1,10 @@
+import type { ReactElement } from 'react'
 import { Resend } from 'resend'
 
 interface SendEmailOptions {
   to: string
   subject: string
-  react: React.ReactElement
+  react: ReactElement
   from?: string
   apiKey: string
 }

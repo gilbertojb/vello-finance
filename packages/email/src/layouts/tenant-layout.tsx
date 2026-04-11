@@ -10,19 +10,17 @@ import {
   Tailwind,
   Text,
 } from '@react-email/components'
-
-// biome-ignore lint/correctness/noUnusedImports: React is required for JSX
-import * as React from 'react'
+import type { ReactNode } from 'react'
 
 interface TenantLayoutProps {
   preview: string
   displayName: string
   logoUrl?: string | null
   primaryColor?: string | null
-  children: React.ReactNode
+  children: ReactNode
 }
 
-const VELLO_LOGO = 'https://admin.vellofinance.com.br/static/vello-logo.png'
+const VELLO_LOGO = 'https://dash.vellofinance.com.br/static/vello-logo.png'
 const DEFAULT_PRIMARY = '#4B64AA'
 
 export function TenantLayout({

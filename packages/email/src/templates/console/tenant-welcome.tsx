@@ -6,8 +6,6 @@ import {
   Text,
 } from '@react-email/components'
 
-// biome-ignore lint/correctness/noUnusedImports: React is required for JSX
-import * as React from 'react'
 
 import { DEFAULT_PRIMARY, TenantLayout } from '../../layouts/tenant-layout'
 
