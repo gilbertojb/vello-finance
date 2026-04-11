@@ -5,6 +5,8 @@ import { z } from 'zod'
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { env } from '@vello/env/admin'
+import { sendEmail, TenantWelcomeEmail } from '@vello/email'
 
 const tenantSchema = z.object({
   name: z.string().min(2).max(100),
@@ -14,6 +16,7 @@ const tenantSchema = z.object({
   phone: z.string().optional().nullable(),
   slug: z.string().min(2).max(63).regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
   custom_domain: z.string().optional().nullable(),
+  contact_name: z.string().min(2).max(100).optional().nullable(),
   bank_name: z.string().optional().nullable(),
   bank_agency: z.string().optional().nullable(),
   bank_account: z.string().optional().nullable(),
@@ -57,11 +60,15 @@ export async function createTenant(data: FormData) {
 
   const supabase = await createClient()
 
+  // Separar contact_name (não vai para tabela tenants)
+  const { contact_name: contactNameField, ...tenantData } = tenantResult.data
+  const contactName = contactNameField ?? tenantData.name
+
   // Inserir tenant (trigger cria tenant_branding automaticamente)
   const { data: tenant, error: tenantError } = await supabase
     .from('tenants')
     .insert({
-      ...tenantResult.data,
+      ...tenantData,
       type: 'whitelabel',
       status: 'pending',
     })
@@ -128,7 +135,95 @@ export async function createTenant(data: FormData) {
     return { success: false, message: brandingError.message, errors: null }
   }
 
+  // ---- Onboarding: criar auth user + enviar email ----
+
+  // Criar usuário no Supabase Auth
+  const tempPassword = crypto.randomUUID()
+  const { data: authUser, error: authError } = await serviceClient.auth.admin.createUser({
+    email: tenantData.email,
+    password: tempPassword,
+    email_confirm: true,
+  })
+
+  if (authError) {
+    revalidatePath('/tenants')
+    return {
+      success: false,
+      message: `Parceiro cadastrado, mas erro ao criar acesso: ${authError.message}`,
+      errors: null,
+    }
+  }
+
+  // Inserir em tenant_users
+  await serviceClient
+    .from('tenant_users')
+    .insert({
+      id: authUser.user.id,
+      tenant_id: tenant.id,
+      role: 'tenant_admin',
+      full_name: contactName,
+    })
+
+  // Gerar link de recovery
+  const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
+    type: 'recovery',
+    email: tenantData.email,
+  })
+
+  if (linkError || !linkData) {
+    revalidatePath('/tenants')
+    return {
+      success: true,
+      message: 'Parceiro cadastrado, mas o email de ativação não pôde ser gerado.',
+      errors: null,
+    }
+  }
+
+  // Construir URL de reset
+  const domain = tenantData.custom_domain
+    ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
+  const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
+
+  // Buscar branding para o email
+  const { data: brandingForEmail } = await serviceClient
+    .from('tenant_branding')
+    .select('logo_url, company_display_name, theme_color')
+    .eq('tenant_id', tenant.id)
+    .single()
+
+  const displayName = brandingForEmail?.company_display_name ?? tenantData.name
+
+  // Enviar email
+  const { error: emailError } = await sendEmail({
+    apiKey: env.RESEND_API_KEY,
+    to: tenantData.email,
+    subject: 'Bem-vindo à Vello Finance — defina sua senha',
+    react: TenantWelcomeEmail({
+      contactName,
+      displayName,
+      resetLink: resetUrl,
+      logoUrl: brandingForEmail?.logo_url,
+      primaryColor: brandingForEmail?.theme_color,
+    }),
+  })
+
+  // Atualizar welcome_email_sent_at
+  if (!emailError) {
+    await supabase
+      .from('tenants')
+      .update({ welcome_email_sent_at: new Date().toISOString() })
+      .eq('id', tenant.id)
+  }
+
   revalidatePath('/tenants')
+
+  if (emailError) {
+    return {
+      success: true,
+      message: 'Parceiro cadastrado, mas o email de ativação não pôde ser enviado.',
+      errors: null,
+    }
+  }
 
   return {
     success: true,
@@ -267,4 +362,88 @@ export async function setTenantStatus(
 
   revalidatePath('/tenants')
   return { success: true, message: '' }
+}
+
+// ---------------------------------------------------------------------------
+// resendWelcomeEmail
+// ---------------------------------------------------------------------------
+
+export async function resendWelcomeEmail(tenantId: string) {
+  const supabase = await createClient()
+  const serviceClient = createServiceClient()
+
+  // Buscar tenant
+  const { data: tenant, error: tenantError } = await supabase
+    .from('tenants')
+    .select('id, email, slug, custom_domain, name')
+    .eq('id', tenantId)
+    .single()
+
+  if (tenantError || !tenant) {
+    return { success: false, message: 'Parceiro não encontrado.' }
+  }
+
+  // Buscar branding
+  const { data: branding } = await serviceClient
+    .from('tenant_branding')
+    .select('logo_url, company_display_name, theme_color')
+    .eq('tenant_id', tenantId)
+    .single()
+
+  // Buscar tenant_user admin para obter full_name
+  const { data: tenantUser } = await serviceClient
+    .from('tenant_users')
+    .select('id, full_name')
+    .eq('tenant_id', tenantId)
+    .eq('role', 'tenant_admin')
+    .limit(1)
+    .single()
+
+  const contactName = tenantUser?.full_name ?? tenant.name
+
+  // Gerar novo link de recovery
+  const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
+    type: 'recovery',
+    email: tenant.email,
+  })
+
+  if (linkError || !linkData) {
+    return { success: false, message: 'Erro ao gerar link de recuperação.' }
+  }
+
+  // Construir URL de reset
+  const domain = tenant.custom_domain
+    ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
+  const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
+
+  const displayName = branding?.company_display_name ?? tenant.name
+
+  // Enviar email
+  const { error: emailError } = await sendEmail({
+    apiKey: env.RESEND_API_KEY,
+    to: tenant.email,
+    subject: 'Bem-vindo à Vello Finance — defina sua senha',
+    react: TenantWelcomeEmail({
+      contactName,
+      displayName,
+      resetLink: resetUrl,
+      logoUrl: branding?.logo_url,
+      primaryColor: branding?.theme_color,
+    }),
+  })
+
+  if (emailError) {
+    return { success: false, message: 'Erro ao enviar email de ativação.' }
+  }
+
+  // Atualizar welcome_email_sent_at
+  await supabase
+    .from('tenants')
+    .update({ welcome_email_sent_at: new Date().toISOString() })
+    .eq('id', tenantId)
+
+  revalidatePath(`/tenants/${tenantId}/edit`)
+  revalidatePath('/tenants')
+
+  return { success: true, message: 'Email de ativação reenviado com sucesso!' }
 }

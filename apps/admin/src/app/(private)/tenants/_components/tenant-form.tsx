@@ -268,6 +268,17 @@ export function TenantForm({ tenant }: Props) {
             </Field>
 
             <Field>
+              <FieldLabel htmlFor="contact_name">Nome do Contato *</FieldLabel>
+              <Input
+                id="contact_name"
+                name="contact_name"
+                required
+                placeholder="Nome da pessoa de contato"
+              />
+              <FieldError errors={formState.errors?.contact_name} />
+            </Field>
+
+            <Field>
               <FieldLabel htmlFor="phone">Telefone</FieldLabel>
               <PhoneInput
                 id="phone"
