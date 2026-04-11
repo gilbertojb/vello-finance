@@ -12,13 +12,15 @@ import {
   Text,
 } from '@react-email/components'
 
-
 interface ConfirmEmailProps {
   verificationCode?: string
   baseUrl?: string
 }
 
-export const ConfirmEmail = ({ verificationCode, baseUrl = '' }: ConfirmEmailProps) => (
+export const ConfirmEmail = ({
+  verificationCode,
+  baseUrl = '',
+}: ConfirmEmailProps) => (
   <Html>
     <Head />
     <Tailwind
@@ -66,5 +68,9 @@ export const ConfirmEmail = ({ verificationCode, baseUrl = '' }: ConfirmEmailPro
     </Tailwind>
   </Html>
 )
+
+ConfirmEmail.PreviewProps = {
+  verificationCode: 'DJZ-TLX',
+} as ConfirmEmailProps
 
 export default ConfirmEmail

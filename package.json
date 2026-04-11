@@ -8,8 +8,8 @@
     "db:types": "turbo db:types"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.7",
-    "turbo": "^2.8.17"
+    "@biomejs/biome": "^2.4.11",
+    "turbo": "^2.9.6"
   },
   "packageManager": "pnpm@10.30.2",
   "engines": {

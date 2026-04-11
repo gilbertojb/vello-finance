@@ -184,15 +184,6 @@ export async function createTenant(data: FormData) {
     ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
-  // Buscar branding para o email
-  const { data: brandingForEmail } = await serviceClient
-    .from('tenant_branding')
-    .select('logo_url, company_display_name, theme_color')
-    .eq('tenant_id', tenant.id)
-    .single()
-
-  const displayName = brandingForEmail?.company_display_name ?? tenantData.name
-
   // Enviar email
   const { error: emailError } = await sendEmail({
     apiKey: env.RESEND_API_KEY,
@@ -200,10 +191,7 @@ export async function createTenant(data: FormData) {
     subject: 'Bem-vindo à Vello Finance — defina sua senha',
     react: TenantWelcomeEmail({
       contactName,
-      displayName,
       resetLink: resetUrl,
-      logoUrl: brandingForEmail?.logo_url,
-      primaryColor: brandingForEmail?.theme_color,
     }),
   })
 
@@ -383,13 +371,6 @@ export async function resendWelcomeEmail(tenantId: string) {
     return { success: false, message: 'Parceiro não encontrado.' }
   }
 
-  // Buscar branding
-  const { data: branding } = await serviceClient
-    .from('tenant_branding')
-    .select('logo_url, company_display_name, theme_color')
-    .eq('tenant_id', tenantId)
-    .single()
-
   // Buscar tenant_user admin para obter full_name
   const { data: tenantUser } = await serviceClient
     .from('tenant_users')
@@ -416,8 +397,6 @@ export async function resendWelcomeEmail(tenantId: string) {
     ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
-  const displayName = branding?.company_display_name ?? tenant.name
-
   // Enviar email
   const { error: emailError } = await sendEmail({
     apiKey: env.RESEND_API_KEY,
@@ -425,10 +404,7 @@ export async function resendWelcomeEmail(tenantId: string) {
     subject: 'Bem-vindo à Vello Finance — defina sua senha',
     react: TenantWelcomeEmail({
       contactName,
-      displayName,
       resetLink: resetUrl,
-      logoUrl: branding?.logo_url,
-      primaryColor: branding?.theme_color,
     }),
   })
 

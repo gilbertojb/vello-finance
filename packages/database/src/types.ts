@@ -520,6 +520,7 @@ export type Database = {
           suspended_at: string | null
           type: Database["public"]["Enums"]["tenant_type"]
           updated_at: string
+          welcome_email_sent_at: string | null
         }
         Insert: {
           activated_at?: string | null
@@ -541,6 +542,7 @@ export type Database = {
           suspended_at?: string | null
           type: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
+          welcome_email_sent_at?: string | null
         }
         Update: {
           activated_at?: string | null
@@ -562,6 +564,7 @@ export type Database = {
           suspended_at?: string | null
           type?: Database["public"]["Enums"]["tenant_type"]
           updated_at?: string
+          welcome_email_sent_at?: string | null
         }
         Relationships: [
           {

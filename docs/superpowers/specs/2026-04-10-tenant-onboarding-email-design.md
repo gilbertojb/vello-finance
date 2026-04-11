@@ -76,17 +76,14 @@ A `apiKey` é passada como parâmetro (não lida do env no package) — o consum
 
 ## Seção 2 — Template `TenantWelcomeEmail`
 
-Localizado em `templates/console/tenant-welcome.tsx`. Usa o `tenant-layout.tsx`.
+Localizado em `templates/admin/tenant-welcome.tsx`. Usa o `tenant-layout.tsx`.
 
 ### Props
 
 ```typescript
 interface TenantWelcomeEmailProps {
   contactName: string          // "Olá, {contactName}"
-  displayName: string          // nome de exibição do tenant (para o layout)
   resetLink: string            // URL completa de reset de senha
-  logoUrl?: string | null      // logo do tenant (fallback: logo Vello)
-  primaryColor?: string | null // theme_color para cor do botão (fallback: #4B64AA)
 }
 ```
 

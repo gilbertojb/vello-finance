@@ -14,7 +14,6 @@ import {
   Text,
 } from '@react-email/components'
 
-
 interface PasswordRecoverEmailProps {
   recoverLink?: string
   baseUrl?: string
@@ -85,5 +84,9 @@ export const PasswordRecoverEmail = ({
     </Tailwind>
   </Html>
 )
+
+PasswordRecoverEmail.PreviewProps = {
+  recoverLink: 'https://dash.vellofinance.com.br/reset-password',
+} as PasswordRecoverEmailProps
 
 export default PasswordRecoverEmail
