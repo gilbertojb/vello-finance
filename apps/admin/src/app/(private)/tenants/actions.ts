@@ -1,13 +1,14 @@
 'use server'
 
+import { sendEmail, TenantWelcomeEmail } from '@vello/email'
+import { env } from '@vello/env/admin'
+
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
 import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { env } from '@vello/env/admin'
-import { sendEmail, TenantWelcomeEmail } from '@vello/email'
 
 const tenantSchema = z.object({
   name: z.string().min(2).max(100),
@@ -15,7 +16,14 @@ const tenantSchema = z.object({
   cnpj: z.string().optional().nullable(),
   email: z.string().email(),
   phone: z.string().optional().nullable(),
-  slug: z.string().min(2).max(63).regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
+  slug: z
+    .string()
+    .min(2)
+    .max(63)
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug deve conter apenas letras minúsculas, números e hífens',
+    ),
   custom_domain: z.string().optional().nullable(),
   contact_name: z.string().min(2).max(100).optional().nullable(),
   bank_name: z.string().optional().nullable(),
@@ -105,7 +113,11 @@ export async function createTenant(data: FormData) {
   const uploads: Array<{ field: string; path: string; maxSize: number }> = [
     { field: 'logo', path: `${tenant.id}/logo`, maxSize: 2 * 1024 * 1024 },
     { field: 'favicon', path: `${tenant.id}/favicon`, maxSize: 512 * 1024 },
-    { field: 'auth_bg', path: `${tenant.id}/auth-bg`, maxSize: 5 * 1024 * 1024 },
+    {
+      field: 'auth_bg',
+      path: `${tenant.id}/auth-bg`,
+      maxSize: 5 * 1024 * 1024,
+    },
   ]
 
   const urlFields: Record<string, string> = {
@@ -126,9 +138,9 @@ export async function createTenant(data: FormData) {
       .upload(path, buffer, { contentType: file.type, upsert: true })
 
     if (!uploadError) {
-      const { data: { publicUrl } } = serviceClient.storage
-        .from('tenant-assets')
-        .getPublicUrl(path)
+      const {
+        data: { publicUrl },
+      } = serviceClient.storage.from('tenant-assets').getPublicUrl(path)
       brandingUpdate[urlFields[field]] = publicUrl
     }
   }
@@ -159,11 +171,12 @@ export async function createTenant(data: FormData) {
 
   // Criar usuário no Supabase Auth
   const tempPassword = crypto.randomUUID()
-  const { data: authUser, error: authError } = await serviceClient.auth.admin.createUser({
-    email: tenantData.email,
-    password: tempPassword,
-    email_confirm: true,
-  })
+  const { data: authUser, error: authError } =
+    await serviceClient.auth.admin.createUser({
+      email: tenantData.email,
+      password: tempPassword,
+      email_confirm: true,
+    })
 
   if (authError) {
     revalidatePath('/tenants')
@@ -175,33 +188,33 @@ export async function createTenant(data: FormData) {
   }
 
   // Inserir em tenant_users
-  await serviceClient
-    .from('tenant_users')
-    .insert({
-      id: authUser.user.id,
-      tenant_id: tenant.id,
-      role: 'tenant_admin',
-      full_name: contactName,
-    })
+  await serviceClient.from('tenant_users').insert({
+    id: authUser.user.id,
+    tenant_id: tenant.id,
+    role: 'tenant_admin',
+    full_name: contactName,
+  })
 
   // Gerar link de recovery
-  const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
-    type: 'recovery',
-    email: tenantData.email,
-  })
+  const { data: linkData, error: linkError } =
+    await serviceClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: tenantData.email,
+    })
 
   if (linkError || !linkData) {
     revalidatePath('/tenants')
     return {
       success: true,
-      message: 'Parceiro cadastrado, mas o email de ativação não pôde ser gerado.',
+      message:
+        'Parceiro cadastrado, mas o email de ativação não pôde ser gerado.',
       errors: null,
     }
   }
 
   // Construir URL de reset
-  const domain = tenantData.custom_domain
-    ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
+  const domain =
+    tenantData.custom_domain ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
   // Enviar email
@@ -228,7 +241,8 @@ export async function createTenant(data: FormData) {
   if (emailError) {
     return {
       success: true,
-      message: 'Parceiro cadastrado, mas o email de ativação não pôde ser enviado.',
+      message:
+        'Parceiro cadastrado, mas o email de ativação não pôde ser enviado.',
       errors: null,
     }
   }
@@ -312,9 +326,9 @@ export async function updateTenant(data: FormData) {
       .upload(path, buffer, { contentType: file.type, upsert: true })
 
     if (!uploadError) {
-      const { data: { publicUrl } } = serviceClient.storage
-        .from('tenant-assets')
-        .getPublicUrl(path)
+      const {
+        data: { publicUrl },
+      } = serviceClient.storage.from('tenant-assets').getPublicUrl(path)
       brandingUpdate[urlFields[field]] = publicUrl
     }
   }
@@ -410,18 +424,19 @@ export async function resendWelcomeEmail(tenantId: string) {
   const contactName = tenantUser?.full_name ?? tenant.name
 
   // Gerar novo link de recovery
-  const { data: linkData, error: linkError } = await serviceClient.auth.admin.generateLink({
-    type: 'recovery',
-    email: tenant.email,
-  })
+  const { data: linkData, error: linkError } =
+    await serviceClient.auth.admin.generateLink({
+      type: 'recovery',
+      email: tenant.email,
+    })
 
   if (linkError || !linkData) {
     return { success: false, message: 'Erro ao gerar link de recuperação.' }
   }
 
   // Construir URL de reset
-  const domain = tenant.custom_domain
-    ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
+  const domain =
+    tenant.custom_domain ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
   // Enviar email

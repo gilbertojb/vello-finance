@@ -17,7 +17,11 @@ import { useFormState } from '@/hooks/use-form-state'
 
 import { signInWithEmailAndPassword } from './actions'
 
-export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
+interface SignInFormProps extends React.ComponentProps<'form'> {
+  errorMessage?: string
+}
+
+export function SignInForm({ errorMessage, ...props }: SignInFormProps) {
   const router = useRouter()
 
   const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
@@ -36,6 +40,14 @@ export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
             Insira seus dados abaixo para acessar sua conta
           </p>
         </div>
+
+        {errorMessage && !message && (
+          <Alert variant="destructive" className="border-red-200 bg-red-50">
+            <AlertCircleIcon />
+            <AlertTitle>Atenção</AlertTitle>
+            <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+          </Alert>
+        )}
 
         {success === false && message && (
           <Alert variant="destructive" className="border-red-200 bg-red-50">

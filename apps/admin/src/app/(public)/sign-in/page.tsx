@@ -4,10 +4,16 @@ export const metadata = {
   title: 'Acesse sua conta',
 }
 
-export default function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
+
   return (
     <div className="w-full max-w-sm">
-      <SignInForm />
+      <SignInForm errorMessage={error} />
     </div>
   )
 }
