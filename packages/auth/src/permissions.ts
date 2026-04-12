@@ -11,14 +11,18 @@ type PermissionsByRole = (
 ) => void
 
 export const permissions: Record<Role, PermissionsByRole> = {
-  super_admin(_user, { can }) {
+  super_admin(user, { can, cannot }) {
     can('manage', 'all')
+    cannot('delete', 'User', { id: { $eq: user.id } })
+    cannot('deactivate', 'User', { id: { $eq: user.id } })
   },
-  admin(_user, { can }) {
+  admin(user, { can, cannot }) {
     can('manage', 'Tenant')
     can('manage', 'Product')
     can('manage', 'FinancialPartner')
-    can('get', 'User')
+    can('manage', 'User')
+    cannot('delete', 'User')
+    cannot('deactivate', 'User', { id: { $eq: user.id } })
   },
   financial(_user, { can }) {
     can('manage', 'Tenant')
