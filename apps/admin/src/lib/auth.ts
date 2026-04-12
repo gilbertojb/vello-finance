@@ -1,6 +1,6 @@
 'use server'
 
-import { hasBackofficeAccess, jwtClaimsSchema } from '@vello/auth'
+import { defineAbilityFor, hasBackofficeAccess, jwtClaimsSchema, userSchema } from '@vello/auth'
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -37,4 +37,24 @@ export async function requireBackofficeUser() {
   }
 
   return { user: data.user, claims }
+}
+
+export async function ability() {
+  const { user, claims } = await requireBackofficeUser()
+
+  const ability = defineAbilityFor(
+    userSchema.parse({ id: user.id, user_role: claims.user_role }),
+  )
+
+  return ability
+}
+
+export async function auth() {
+  const { user, claims } = await requireBackofficeUser()
+
+  const permissions = defineAbilityFor(
+    userSchema.parse({ id: user.id, user_role: claims.user_role }),
+  )
+
+  return { user, claims, ability: permissions }
 }

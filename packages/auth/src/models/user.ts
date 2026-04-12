@@ -3,9 +3,9 @@ import { z } from 'zod'
 import { roleSchema } from '../roles'
 
 export const userSchema = z.object({
+  __typename: z.literal('User').default('User'),
   id: z.string(),
   user_role: roleSchema,
-  tenant_id: z.string().uuid().nullable().optional(),
 })
 
 export type User = z.infer<typeof userSchema>

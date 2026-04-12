@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Receipt,
   Tag,
+  Users,
 } from 'lucide-react'
 
 import {
@@ -59,6 +60,10 @@ export async function NavMain() {
                 icon={<Landmark />}
                 label="Instituições Financeiras"
               />
+            </SidebarMenuItem>
+
+            <SidebarMenuItem key="users">
+              <NavLink href="/users" icon={<Users />} label="Usuários" />
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
