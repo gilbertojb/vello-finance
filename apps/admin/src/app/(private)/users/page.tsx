@@ -19,20 +19,18 @@ export default async function UsersPage() {
 
   const canCreate = permissions.can('create', 'User')
 
+  const userPermissions: Record<string, { canDelete: boolean; canDeactivate: boolean }> = {}
+  for (const u of users) {
+    const target = userSchema.parse({ id: u.id, user_role: u.role })
+    userPermissions[u.id] = {
+      canDelete: permissions.can('delete', target),
+      canDeactivate: permissions.can('deactivate', target),
+    }
+  }
+
   const tablePermissions = {
     canEdit: permissions.can('update', 'User'),
-    canDelete: (targetId: string) => {
-      const target = users.find((u) => u.id === targetId)
-      if (!target) return false
-      const targetUser = userSchema.parse({ id: target.id, user_role: target.role })
-      return permissions.can('delete', targetUser)
-    },
-    canDeactivate: (targetId: string) => {
-      const target = users.find((u) => u.id === targetId)
-      if (!target) return false
-      const targetUser = userSchema.parse({ id: target.id, user_role: target.role })
-      return permissions.can('deactivate', targetUser)
-    },
+    userPermissions,
   }
 
   return (

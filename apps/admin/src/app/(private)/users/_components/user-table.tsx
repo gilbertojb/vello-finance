@@ -29,8 +29,7 @@ type UserRow = {
 
 type Permissions = {
   canEdit: boolean
-  canDelete: (userId: string) => boolean
-  canDeactivate: (userId: string) => boolean
+  userPermissions: Record<string, { canDelete: boolean; canDeactivate: boolean }>
 }
 
 const ROLE_LABELS: Record<string, { label: string; className: string }> = {
@@ -79,8 +78,9 @@ function UserActions({
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const showDeactivate = permissions.canDeactivate(user.id)
-  const showDelete = permissions.canDelete(user.id)
+  const userPerms = permissions.userPermissions[user.id]
+  const showDeactivate = userPerms?.canDeactivate ?? false
+  const showDelete = userPerms?.canDelete ?? false
 
   function handleToggleActive() {
     if (!confirm(user.is_active ? 'Desativar este usuário?' : 'Reativar este usuário?')) return
