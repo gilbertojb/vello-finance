@@ -23,6 +23,7 @@ import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createUser, updateUser } from '../actions'
+import { PasswordInput } from './password-input'
 
 export type UserForEdit = {
   id: string
@@ -127,14 +128,7 @@ export function UserForm({ user, canDeactivate = false }: Props) {
               <FieldLabel htmlFor="password">
                 {isEdit ? 'Gerar nova senha' : 'Gerar senha *'}
               </FieldLabel>
-              <Input
-                id="password"
-                name="password"
-                type="text"
-                required={!isEdit}
-                placeholder={isEdit ? 'Deixe vazio para manter a atual' : 'Mínimo 8 caracteres'}
-                minLength={isEdit ? undefined : 8}
-              />
+              <PasswordInput isEdit={isEdit} />
               <FieldError errors={formState.errors?.password} />
             </Field>
 
