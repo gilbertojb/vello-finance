@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "frontend-design": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "063a0e6448123cd359ad0044cc46b0e490cc7964d45ef4bb9fd842bd2ffbca67"
+    },
+    "token-optimizer": {
+      "source": "alexismunoz1/token-optimizer",
+      "sourceType": "github",
+      "computedHash": "838f65366e16489da3b137dd3e6f63ee17809891e3b4a50e7ae30ed664cd77c5"
+    }
+  }
+}

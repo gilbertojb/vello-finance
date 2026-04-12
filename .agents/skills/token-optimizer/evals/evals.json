@@ -1,0 +1,44 @@
+{
+  "skill_name": "token-optimizer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Tengo este archivo TypeScript de 814 lineas en monolithic/app.ts. Las sesiones de Claude Code son caras y lentas. Como reduzco tokens?",
+      "expected_output": "Identifies the monolithic file as the main problem, recommends splitting into files of max 150 lines, proposes a concrete split plan, and cites the 18.2% token savings from experiment data.",
+      "files": ["monolithic/app.ts"],
+      "expectations": [
+        "Identifies monolithic/app.ts (814 lines) as the primary source of token waste",
+        "Recommends a maximum of 150 lines per file as the target",
+        "Proposes a concrete split plan with specific file names and responsibilities",
+        "Cites the 18.2% token savings figure from experiment data",
+        "Mentions noise reduction (92% less noise on focused tasks)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Mi CLAUDE.md tiene 800 lineas con docs API inline, snippets, y toda la arquitectura. Cada interaccion cuesta demasiados tokens.",
+      "expected_output": "Recommends keeping CLAUDE.md under 500 lines, explains lazy loading pattern, and mentions 50-70% reduction potential.",
+      "files": [],
+      "expectations": [
+        "Recommends keeping CLAUDE.md under 500 lines",
+        "Explains the lazy loading pattern (triggers in CLAUDE.md, details in referenced files)",
+        "Mentions 50-70% reduction in token consumption",
+        "Suggests moving API docs and architecture details to separate referenced files",
+        "Recommends running /context to measure current token usage before and after"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Llevo 2 horas con Claude Code, esta lento, respuestas peores. Tengo 15 MCPs conectados. Que hago?",
+      "expected_output": "Recommends /clear or /compact for context reset, limiting MCPs to 10 or fewer, using subagents for verbose tasks, and strategic model selection.",
+      "files": [],
+      "expectations": [
+        "Recommends /clear or /compact to manage accumulated context",
+        "Advises limiting active MCPs to 10 or fewer",
+        "Suggests using subagents (Task tool) for verbose operations",
+        "Mentions strategic model selection (Sonnet for routine, Haiku for simple tasks)",
+        "Explains that each unused MCP still costs tokens in tool descriptions"
+      ]
+    }
+  ]
+}
