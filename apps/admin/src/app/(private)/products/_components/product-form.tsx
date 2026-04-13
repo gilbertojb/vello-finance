@@ -1,62 +1,20 @@
 'use client'
 
-import { AlertTriangle, Banknote, Calendar, Info, Loader2, TrendingUp } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { MoneyInput, PercentInput } from '@/components/ui/masked-input'
-import { Switch } from '@/components/ui/switch'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
 import { useFormState } from '@/hooks/use-form-state'
 
 import { createProduct, updateProduct } from '../actions'
-import { PartnerItem } from './partner-item'
+import { ProductCreditParamsCard } from './product-credit-params-card'
+import type { Partner, ProductType, ProductWithPartners } from './product-form-types'
+import { ProductIdentificationCard } from './product-identification-card'
+import { ProductPartnersCard } from './product-partners-card'
 
-type Partner = { id: string; name: string }
-type ProductType = { id: string; name: string; slug: string }
-
-export type ProductWithPartners = {
-  id: string
-  name: string
-  product_type_id: string
-  product_type: { id: string; name: string; slug: string } | null
-  description: string | null
-  internal_description: string | null
-  min_amount: number | null
-  max_amount: number | null
-  min_term_months: number | null
-  max_term_months: number | null
-  min_rate_monthly: number | null
-  max_rate_monthly: number | null
-  is_active: boolean
-  product_financial_partners: Array<{
-    financial_partner_id: string
-    if_commission_pct: number
-    vello_commission_pct: number
-  }>
-}
+export type { ProductWithPartners } from './product-form-types'
 
 type Props = {
   partners: Partner[]
@@ -115,254 +73,24 @@ export function ProductForm({ partners, product, productTypes }: Props) {
         </div>
       )}
 
-      {/* Card 1 — Identificação */}
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>Identificação</CardTitle>
-          <CardDescription>
-            Defina as informações básicas e a visibilidade do produto na
-            plataforma.
-          </CardDescription>
-          <CardAction className="my-auto">
-            <div className="flex items-center space-x-2">
-              <FieldLabel htmlFor="is_active" className="cursor-pointer">
-                Produto Ativo
-              </FieldLabel>
-              <Switch
-                id="is_active"
-                name="is_active"
-                defaultChecked={product?.is_active ?? true}
-              />
-            </div>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Field className="col-span-full md:col-span-2">
-              <FieldLabel htmlFor="name">Nome do Produto *</FieldLabel>
-              <Input
-                id="name"
-                name="name"
-                required
-                placeholder="Ex: Consignado INSS"
-                defaultValue={product?.name ?? ''}
-              />
-              <FieldError errors={formState.errors?.name} />
-            </Field>
+      <ProductIdentificationCard
+        product={product}
+        productTypes={productTypes}
+        isEdit={isEdit}
+        errors={formState.errors}
+      />
 
-            <Field className="col-span-full md:col-span-2">
-              <FieldLabel htmlFor="product_type_id">Tipo *</FieldLabel>
-              {isEdit && (
-                <input type="hidden" name="product_type_id" value={product.product_type_id} />
-              )}
-              <select
-                id="product_type_id"
-                name={isEdit ? undefined : 'product_type_id'}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required={!isEdit}
-                disabled={isEdit}
-                defaultValue={product?.product_type_id ?? ''}
-              >
-                <option value="">Selecione...</option>
-                {productTypes.map((pt) => (
-                  <option key={pt.id} value={pt.id}>
-                    {pt.name}
-                  </option>
-                ))}
-              </select>
-              <FieldError errors={formState.errors?.product_type_id} />
-            </Field>
+      <ProductCreditParamsCard
+        product={product}
+        errors={formState.errors}
+      />
 
-            <Field className="col-span-full md:col-span-2 mt-4">
-              <div className="flex flex-col">
-                <FieldLabel htmlFor="description">
-                  Descrição Pública
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="size-3 stroke-accent" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Informação pública exibida para clientes.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </FieldLabel>
-              </div>
-              <WysiwygEditor
-                id="description"
-                name="description"
-                placeholder="Ex: Antecipação do saque-aniversário"
-                defaultValue={product?.description ?? ''}
-              />
-              <FieldError errors={formState.errors?.description} />
-            </Field>
-
-            <Field className="col-span-full md:col-span-2 mt-4">
-              <div className="flex flex-col">
-                <FieldLabel htmlFor="internal_description">
-                  Descrição Interna
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="size-3 stroke-accent" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        Informação confidencial visível apenas para os
-                        parceiros.
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </FieldLabel>
-              </div>
-              <WysiwygEditor
-                id="internal_description"
-                name="internal_description"
-                placeholder="Ex: Lembre-se de validar a taxa balcão 2x antes de fechar."
-                defaultValue={product?.internal_description ?? ''}
-              />
-              <FieldError errors={formState.errors?.internal_description} />
-            </Field>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-
-      {/* Card 2 — Parâmetros de Crédito */}
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>Parâmetros de Crédito</CardTitle>
-          <CardDescription>
-            Limites operacionais e precificação padrão do produto
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="flex items-center gap-2 uppercase text-sm font-medium text-primary/50">
-                <Banknote className="size-4" />
-                Limites de Valores
-              </h2>
-              <Field>
-                <FieldLabel htmlFor="min_amount">Valor Mínimo</FieldLabel>
-                <MoneyInput
-                  id="min_amount"
-                  name="min_amount"
-                  defaultValue={product?.min_amount ?? ''}
-                />
-                <FieldError errors={formState.errors?.min_amount} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="max_amount">Valor Máximo</FieldLabel>
-                <MoneyInput
-                  id="max_amount"
-                  name="max_amount"
-                  defaultValue={product?.max_amount ?? ''}
-                />
-                <FieldError errors={formState.errors?.max_amount} />
-              </Field>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="flex items-center gap-2 uppercase text-sm font-medium text-primary/50">
-                <Calendar className="size-4" />
-                Prazos em Meses
-              </h2>
-              <Field>
-                <FieldLabel htmlFor="min_term_months">
-                  Prazo Mínimo (meses)
-                </FieldLabel>
-                <Input
-                  id="min_term_months"
-                  name="min_term_months"
-                  type="number"
-                  step="1"
-                  placeholder="1"
-                  defaultValue={product?.min_term_months ?? ''}
-                />
-                <FieldError errors={formState.errors?.min_term_months} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="max_term_months">
-                  Prazo Máximo (meses)
-                </FieldLabel>
-                <Input
-                  id="max_term_months"
-                  name="max_term_months"
-                  type="number"
-                  step="1"
-                  placeholder="120"
-                  defaultValue={product?.max_term_months ?? ''}
-                />
-                <FieldError errors={formState.errors?.max_term_months} />
-              </Field>
-            </div>
-
-            <div className="bg-card border border-border rounded-lg p-6 space-y-6">
-              <h2 className="flex items-center gap-2 uppercase text-sm font-medium text-primary/50">
-                <TrendingUp className="size-4" />
-                Taxas de Juros (% A.M.)
-              </h2>
-              <Field>
-                <FieldLabel htmlFor="min_rate_monthly">
-                  Taxa Mínima (% a.m.)
-                </FieldLabel>
-                <PercentInput
-                  id="min_rate_monthly"
-                  name="min_rate_monthly"
-                  defaultValue={product?.min_rate_monthly ?? ''}
-                />
-                <FieldError errors={formState.errors?.min_rate_monthly} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="max_rate_monthly">
-                  Taxa Máxima (% a.m.)
-                </FieldLabel>
-                <PercentInput
-                  id="max_rate_monthly"
-                  name="max_rate_monthly"
-                  defaultValue={product?.max_rate_monthly ?? ''}
-                />
-                <FieldError errors={formState.errors?.max_rate_monthly} />
-              </Field>
-            </div>
-          </FieldGroup>
-        </CardContent>
-      </Card>
-
-      {/* Card 3 — Instituições Financeiras */}
-      <Card>
-        <CardHeader className="border-b">
-          <CardTitle>Instituições Financeiras</CardTitle>
-          <CardDescription>
-            Selecione as IFs que operam este produto e informe os percentuais de
-            comissão negociados.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {partners.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-4">
-              Nenhuma instituição financeira cadastrada.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {partners.map((partner) => {
-                const isSelected = selectedPartners.has(partner.id)
-                const linked = product?.product_financial_partners.find(
-                  (p) => p.financial_partner_id === partner.id,
-                )
-                return (
-                  <PartnerItem
-                    key={partner.id}
-                    partner={partner}
-                    isSelected={isSelected}
-                    onToggle={togglePartner}
-                    defaultIfCommission={linked?.if_commission_pct}
-                    defaultVelloCommission={linked?.vello_commission_pct}
-                  />
-                )
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <ProductPartnersCard
+        partners={partners}
+        product={product}
+        selectedPartners={selectedPartners}
+        onTogglePartner={togglePartner}
+      />
 
       <div className="flex justify-end space-x-4">
         <Button
