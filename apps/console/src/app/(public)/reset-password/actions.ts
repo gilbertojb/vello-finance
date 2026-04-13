@@ -44,6 +44,7 @@ export async function resetPassword(data: FormData) {
       success: false,
       message: 'Link inválido ou expirado. Solicite um novo.',
       errors: null,
+      data: { code: 'TOKEN_INVALID' },
     }
   }
 

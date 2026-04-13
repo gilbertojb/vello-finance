@@ -25,7 +25,7 @@ export function ResetPasswordForm({
   type,
   ...props
 }: ResetPasswordFormProps) {
-  const [{ errors, message, success }, handleSubmit, isPending] =
+  const [{ errors, message, success, data }, handleSubmit, isPending] =
     useFormState(resetPassword)
 
   return (
@@ -50,7 +50,7 @@ export function ResetPasswordForm({
             <AlertTitle>Não foi possível redefinir sua senha</AlertTitle>
             <AlertDescription className="text-xs">
               {message}{' '}
-              {message.includes('inválido') && (
+              {data?.code === 'TOKEN_INVALID' && (
                 <a href="/forgot-password" className="underline">
                   Solicitar novo link.
                 </a>
