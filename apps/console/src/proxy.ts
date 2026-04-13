@@ -1,7 +1,8 @@
-import { getJwtClaims, hasTenantAccess } from '@vello/auth'
-import { env } from '@vello/env/console'
+import { hasTenantAccess, jwtClaimsSchema } from '@vello/auth'
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { updateSession } from '@/lib/supabase/proxy'
+import { resolveTenant } from '@/lib/tenant/resolve-tenant'
 
 // Rotas públicas e comportamento quando o usuário já está autenticado.
 const publicRoutes = [
@@ -17,51 +18,6 @@ function getRouteType(pathname: string) {
     }
   }
   return { isPublic: false, whenAuthenticated: null }
-}
-
-// Resolve o tenant a partir do host.
-// Subdomínio → slug; custom_domain → busca no banco via fetch REST.
-async function resolveTenant(
-  rawHost: string,
-): Promise<{ id: string; slug: string; status: string } | null> {
-  const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = env.SUPABASE_SECRET_KEY
-  const baseDomain = env.CONSOLE_BASE_DOMAIN
-
-  if (!supabaseUrl || !serviceKey) return null
-
-  // Remover porta do host (ex: "slug.vellofinance.com.br:3001" → "slug.vellofinance.com.br")
-  const host = rawHost.split(':')[0]
-
-  let filter: string
-
-  if (host.endsWith(`.${baseDomain}`)) {
-    // Subdomínio: slug.vellofinance.com.br → slug=slug
-    const slug = host.slice(0, host.length - baseDomain.length - 1)
-    if (!slug) return null
-    filter = `slug=eq.${slug}`
-  } else {
-    // Domínio customizado → busca por custom_domain
-    filter = `custom_domain=eq.${host}`
-  }
-
-  const url = `${supabaseUrl}/rest/v1/tenants?select=id,slug,status&${filter}&limit=1`
-
-  const response = await fetch(url, {
-    headers: {
-      apikey: serviceKey,
-      Authorization: `Bearer ${serviceKey}`,
-    },
-    cache: 'no-store',
-  })
-
-  if (!response.ok) return null
-  const data = (await response.json()) as Array<{
-    id: string
-    slug: string
-    status: string
-  }>
-  return data[0] ?? null
 }
 
 export async function proxy(request: NextRequest) {
@@ -88,8 +44,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(url, { status: 503 })
   }
 
-  // 2. Renovar sessão Supabase e obter userId (storageKey dinâmico por tenant)
-  const { response, isAuthenticated, userId } = await updateSession(
+  // 2. Renovar sessão Supabase e obter jwtClaims (storageKey dinâmico por tenant)
+  let { response, isAuthenticated, jwtClaims } = await updateSession(
     request,
     tenant.id,
   )
@@ -112,57 +68,51 @@ export async function proxy(request: NextRequest) {
 
   const { isPublic, whenAuthenticated } = getRouteType(pathname)
 
-  // 3. Rota privada sem autenticação → redirect para sign-in
+  let isAuthorized = false
+  let needsForceSignout = false
+
+  // 3. Validar role e tenant do usuário autenticado via JWT Claims
+  if (isAuthenticated) {
+    const parsed = jwtClaims ? jwtClaimsSchema.safeParse(jwtClaims) : null
+    const claims = parsed?.success ? parsed.data : null
+
+    if (
+      claims &&
+      hasTenantAccess(claims.user_role) &&
+      claims.tenant_id === tenant.id
+    ) {
+      isAuthorized = true
+    } else {
+      needsForceSignout = true
+    }
+  }
+
+  // 4. Se a sessão é aparentemente válida mas não tem autorização correta, trata como não autenticado
+  if (isAuthenticated && !isAuthorized) {
+    isAuthenticated = false
+  }
+
+  // 5. Rota privada sem autenticação/autorização → redirect para sign-in
   if (!isAuthenticated && !isPublic) {
     const url = request.nextUrl.clone()
     url.pathname = '/sign-in'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    if (needsForceSignout) {
+      redirectResponse.headers.set('x-force-signout', '1')
+    }
+    return redirectResponse
   }
 
-  // 4. Usuário autenticado em rota pública (ex: /sign-in) → redirect para dashboard
+  // 6. Usuário autenticado e autorizado em rota pública (ex: /sign-in) → redirect para dashboard
   if (isAuthenticated && isPublic && whenAuthenticated === 'redirect') {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
 
-  // 5. Validar role do usuário autenticado via @vello/auth (sem hardcode de arrays)
-  if (isAuthenticated && userId) {
-    // Buscar app_metadata do usuário para extrair claims
-    const userUrl = `${env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users/${userId}`
-    const userResponse = await fetch(userUrl, {
-      headers: {
-        apikey: env.SUPABASE_SECRET_KEY,
-        Authorization: `Bearer ${env.SUPABASE_SECRET_KEY}`,
-      },
-      cache: 'no-store',
-    })
-
-    if (userResponse.ok) {
-      const userData = (await userResponse.json()) as {
-        app_metadata?: Record<string, unknown>
-      }
-      const claims = getJwtClaims(userData)
-
-      // Role não é de tenant → expulsar (pode ser usuário do backoffice tentando acessar console)
-      if (!claims || !hasTenantAccess(claims.user_role)) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/sign-in'
-        // Sinaliza que a sessão deve ser invalidada na próxima renderização
-        const redirectResponse = NextResponse.redirect(url)
-        redirectResponse.headers.set('x-force-signout', '1')
-        return redirectResponse
-      }
-
-      // tenant_id no JWT deve bater com o tenant resolvido pelo host
-      if (claims.tenant_id !== tenant.id) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/sign-in'
-        const redirectResponse = NextResponse.redirect(url)
-        redirectResponse.headers.set('x-force-signout', '1')
-        return redirectResponse
-      }
-    }
+  // 7. Repassa a intenção de force sign-out para a página carregada
+  if (needsForceSignout) {
+    newResponse.headers.set('x-force-signout', '1')
   }
 
   return newResponse

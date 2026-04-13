@@ -4,10 +4,21 @@ import { env } from '@vello/env/console'
 import { type NextRequest, NextResponse } from 'next/server'
 import { getStorageKey } from './storage-key'
 
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const [, payload] = token.split('.')
+    if (!payload) return null
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
+
 export async function updateSession(
   request: NextRequest,
   tenantId: string,
-): Promise<{ response: NextResponse; isAuthenticated: boolean; userId: string | null }> {
+): Promise<{ response: NextResponse; isAuthenticated: boolean; userId: string | null; jwtClaims: Record<string, unknown> | null }> {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -35,9 +46,15 @@ export async function updateSession(
   // IMPORTANTE: não inserir código entre createServerClient e getUser()
   const { data } = await supabase.auth.getUser()
 
+  const { data: { session } } = await supabase.auth.getSession()
+  const jwtClaims = session?.access_token
+    ? decodeJwtPayload(session.access_token)
+    : null
+
   return {
     response: supabaseResponse,
     isAuthenticated: !!data?.user,
     userId: data?.user?.id ?? null,
+    jwtClaims,
   }
 }
