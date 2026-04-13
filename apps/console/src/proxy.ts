@@ -47,24 +47,8 @@ export async function proxy(request: NextRequest) {
   // 2. Renovar sessão Supabase e obter jwtClaims (storageKey dinâmico por tenant)
   let { response, isAuthenticated, jwtClaims } = await updateSession(
     request,
-    tenant.id,
+    tenant,
   )
-
-  // Copiar headers da resposta do updateSession para nossa resposta base
-  const newResponse = NextResponse.next({
-    request: {
-      headers: new Headers(request.headers),
-    },
-  })
-
-  // Injetar headers internos (não expostos ao browser pelo Next.js)
-  newResponse.headers.set('x-tenant-id', tenant.id)
-  newResponse.headers.set('x-tenant-slug', tenant.slug)
-
-  // Propagar cookies da sessão do updateSession
-  response.cookies.getAll().forEach((cookie) => {
-    newResponse.cookies.set(cookie)
-  })
 
   const { isPublic, whenAuthenticated } = getRouteType(pathname)
 
@@ -112,10 +96,10 @@ export async function proxy(request: NextRequest) {
 
   // 7. Repassa a intenção de force sign-out para a página carregada
   if (needsForceSignout) {
-    newResponse.headers.set('x-force-signout', '1')
+    response.headers.set('x-force-signout', '1')
   }
 
-  return newResponse
+  return response
 }
 
 export const config = {

@@ -3,11 +3,14 @@ import './globals.css'
 
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
+
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 
 import { Toaster } from '@/components/ui/sonner'
+
+import { getTenantBranding } from '@/lib/branding'
 import { createServiceClient } from '@/lib/supabase/service'
 
 import { Providers } from './providers'
@@ -25,11 +28,20 @@ function isSafeCss(css: string): boolean {
   return !FORBIDDEN_CSS_PATTERNS.some((p) => p.test(css))
 }
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | Vello Console',
-    default: 'Vello Console',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const headerStore = await headers()
+  const tenantId = headerStore.get('x-tenant-id')
+  const branding = await getTenantBranding(tenantId)
+
+  return {
+    title: branding?.company_display_name
+      ? {
+          template: `%s | ${branding.company_display_name}`,
+          default: branding.company_display_name,
+        }
+      : { template: '%s | Vello Console', default: 'Vello Console' },
+    icons: branding?.favicon_url ? { icon: branding.favicon_url } : undefined,
+  }
 }
 
 async function getTenantCustomCss(tenantId: string): Promise<string | null> {
@@ -44,7 +56,11 @@ async function getTenantCustomCss(tenantId: string): Promise<string | null> {
   return data.custom_css
 }
 
-export default async function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
   const headerStore = await headers()
   const tenantSlug = headerStore.get('x-tenant-slug') ?? 'default'
   const tenantId = headerStore.get('x-tenant-id') ?? ''

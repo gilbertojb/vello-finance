@@ -62,6 +62,8 @@ export default async function PublicLayout({
             src={branding.auth_bg_image_url}
             alt=""
             className="absolute inset-0 h-full w-full object-cover"
+            loading="eager"
+            unoptimized
             fill
           />
         ) : (

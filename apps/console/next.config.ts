@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  allowedDevOrigins: ['zp-pay.vellofinance.com.br'],
 }
 
 export default nextConfig

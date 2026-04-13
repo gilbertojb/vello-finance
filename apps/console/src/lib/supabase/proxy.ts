@@ -2,6 +2,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { env } from '@vello/env/console'
 import { type NextRequest, NextResponse } from 'next/server'
+
 import { getStorageKey } from './storage-key'
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -17,15 +18,28 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 export async function updateSession(
   request: NextRequest,
-  tenantId: string,
-): Promise<{ response: NextResponse; isAuthenticated: boolean; userId: string | null; jwtClaims: Record<string, unknown> | null }> {
-  let supabaseResponse = NextResponse.next({ request })
+  tenant: { id: string; slug: string },
+): Promise<{
+  response: NextResponse
+  isAuthenticated: boolean
+  userId: string | null
+  jwtClaims: Record<string, unknown> | null
+}> {
+  const requestHeaders = new Headers(request.headers)
+  requestHeaders.set('x-tenant-id', tenant.id)
+  requestHeaders.set('x-tenant-slug', tenant.slug)
+
+  let supabaseResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
 
   const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
-      auth: { storageKey: getStorageKey(tenantId) },
+      auth: { storageKey: getStorageKey(tenant.id) },
       cookies: {
         getAll() {
           return request.cookies.getAll()
@@ -34,7 +48,11 @@ export async function updateSession(
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           )
-          supabaseResponse = NextResponse.next({ request })
+          supabaseResponse = NextResponse.next({
+            request: {
+              headers: requestHeaders,
+            },
+          })
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           )
@@ -46,7 +64,9 @@ export async function updateSession(
   // IMPORTANTE: não inserir código entre createServerClient e getUser()
   const { data } = await supabase.auth.getUser()
 
-  const { data: { session } } = await supabase.auth.getSession()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
   const jwtClaims = session?.access_token
     ? decodeJwtPayload(session.access_token)
     : null
