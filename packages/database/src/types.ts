@@ -415,6 +415,7 @@ export type Database = {
       }
       tenant_products: {
         Row: {
+          cover_url: string | null
           created_at: string
           id: string
           is_active: boolean
@@ -425,6 +426,7 @@ export type Database = {
           vello_spread_pct: number
         }
         Insert: {
+          cover_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean
@@ -435,6 +437,7 @@ export type Database = {
           vello_spread_pct: number
         }
         Update: {
+          cover_url?: string | null
           created_at?: string
           id?: string
           is_active?: boolean

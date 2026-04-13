@@ -1,11 +1,17 @@
 import type { Metadata } from 'next'
+
+import { AvailableProducts } from './_components/available-products'
 import { ProductList } from './_components/product-list'
-import { listTenantProducts } from './queries'
+
+import { listActiveProducts, listTenantProducts } from './queries'
 
 export const metadata: Metadata = { title: 'Produtos' }
 
 export default async function ProductsPage() {
-  const products = await listTenantProducts()
+  const [tenantProducts, activeProducts] = await Promise.all([
+    listTenantProducts(),
+    listActiveProducts(),
+  ])
 
   return (
     <div className="flex flex-col gap-6 px-4 lg:px-6">
@@ -16,7 +22,20 @@ export default async function ProductsPage() {
         </p>
       </div>
 
-      <ProductList products={products} />
+      <AvailableProducts
+        products={activeProducts}
+        tenantProducts={tenantProducts}
+      />
+
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-medium tracking-tight">Meus Produtos</h2>
+          <p className="text-sm text-muted-foreground">
+            Gerencie itens adicionados ao seu portfólio.
+          </p>
+        </div>
+        <ProductList products={tenantProducts} />
+      </div>
     </div>
   )
 }

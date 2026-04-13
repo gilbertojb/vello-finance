@@ -9,6 +9,7 @@ export async function listTenantProducts() {
     .select(`
       id,
       is_active,
+      cover_url,
       tenant_commission_pct,
       products (
         id,
@@ -20,7 +21,27 @@ export async function listTenantProducts() {
     .order('created_at')
 
   if (error) throw error
+
   return data ?? []
 }
 
-export type TenantProductRow = Awaited<ReturnType<typeof listTenantProducts>>[number]
+export type TenantProductRow = Awaited<
+  ReturnType<typeof listTenantProducts>
+>[number]
+
+export async function listActiveProducts() {
+  const supabase = await createClient()
+
+  // RLS (tenant_read_active) filtra automaticamente para is_active = true
+  const { data, error } = await supabase
+    .from('products')
+    .select('id, name, description, is_active')
+    .eq('is_active', true)
+    .order('name')
+
+  if (error) throw error
+
+  return data ?? []
+}
+
+export type ProductRow = Awaited<ReturnType<typeof listActiveProducts>>[number]

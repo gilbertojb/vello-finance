@@ -14,6 +14,10 @@ import { getTenantBranding } from '@/lib/branding'
 import { createServiceClient } from '@/lib/supabase/service'
 
 import { Providers } from './providers'
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const FORBIDDEN_CSS_PATTERNS = [
   /url\s*\(/i,
@@ -69,7 +73,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${GeistSans.variable} ${GeistMono.variable}`}
+      className={cn(GeistSans.variable, GeistMono.variable, "font-sans", geist.variable)}
       data-tenant-theme={tenantSlug}
       data-tenant-id={tenantId}
       suppressHydrationWarning
