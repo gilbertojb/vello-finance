@@ -39,7 +39,7 @@ export function TenantLayout({
           <Preview>{preview}</Preview>
           <Container className="mx-auto my-0 py-0 px-5">
             <Section className="mt-8">
-              <Img src={logo} width="120" height="32" alt={displayName} />
+              <Img src={logo} height="32" alt={displayName} style={{ width: 'auto', height: '32px' }} />
             </Section>
             {children}
             <Section>
