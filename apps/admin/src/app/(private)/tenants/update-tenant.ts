@@ -41,18 +41,29 @@ export async function updateTenant(data: FormData) {
   }
 
   const supabase = await createClient()
+  const serviceClient = createServiceClient()
+
+  // contact_name não existe na tabela tenants — atualiza tenant_users.full_name separadamente
+  const { contact_name: contactName, ...tenantData } = tenantResult.data
 
   const { error: tenantError } = await supabase
     .from('tenants')
-    .update(tenantResult.data)
+    .update(tenantData)
     .eq('id', id)
 
   if (tenantError) {
     return { success: false, message: tenantError.message, errors: null }
   }
 
+  if (contactName) {
+    await serviceClient
+      .from('tenant_users')
+      .update({ full_name: contactName })
+      .eq('tenant_id', id)
+      .eq('role', 'tenant_admin')
+  }
+
   // Upload de arquivos — apenas se um novo arquivo foi selecionado
-  const serviceClient = createServiceClient()
   const brandingUpdate: Record<string, string> = {}
 
   const uploads: Array<{ field: string; path: string; maxSize: number }> = [

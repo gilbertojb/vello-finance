@@ -1,10 +1,20 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const [, payload] = token.split('.')
+    if (!payload) return null
+    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(json)
+  } catch {
+    return null
+  }
+}
 
 export async function toggleTenantProduct(id: string, isActive: boolean) {
   const supabase = await createClient()
@@ -69,10 +79,13 @@ export async function uploadProductCover(id: string, formData: FormData) {
     data: { publicUrl },
   } = serviceClient.storage.from('tenant-assets').getPublicUrl(path)
 
+  // Adicionar cache-busting para garantir que browsers/CDN não sirvam a versão anterior
+  const publicUrlWithBust = `${publicUrl}?t=${Date.now()}`
+
   // Atualizar cover_url
   const { error } = await supabase
     .from('tenant_products')
-    .update({ cover_url: publicUrl })
+    .update({ cover_url: publicUrlWithBust })
     .eq('id', id)
 
   if (error) return { success: false, message: error.message, errors: null }
@@ -87,11 +100,26 @@ export async function uploadProductCover(id: string, formData: FormData) {
 
 export async function addTenantProduct(productId: string) {
   const supabase = await createClient()
-  const headerStore = await headers()
-  const tenantId = headerStore.get('x-tenant-id')
+
+  // Verificar autenticação (network call — token verificado no servidor)
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) {
+    return { success: false, message: 'Não autenticado.', errors: null }
+  }
+
+  // Extrair tenant_id das claims JWT (não do header — evita dependência de valor externo)
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const jwtClaims = session?.access_token
+    ? decodeJwtPayload(session.access_token)
+    : null
+  const tenantId = jwtClaims?.tenant_id as string | null
 
   if (!tenantId) {
-    return { success: false, message: 'Tenant não identificado.', errors: null }
+    return { success: false, message: 'Conta não identificada.', errors: null }
   }
 
   const { error } = await supabase.from('tenant_products').insert({

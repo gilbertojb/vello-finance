@@ -5,6 +5,7 @@ import { env } from '@vello/env/console'
 import { headers } from 'next/headers'
 import { z } from 'zod'
 
+import { getTenantBranding } from '@/lib/branding'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const forgotPasswordSchema = z.object({
@@ -59,11 +60,18 @@ export async function requestPasswordReset(data: FormData) {
 
   const resetUrl = `https://${host}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
+  const branding = await getTenantBranding(tenantId)
+
   await sendEmail({
     apiKey: env.RESEND_API_KEY,
     to: email,
     subject: 'Recuperação de senha',
-    react: TenantPasswordRecoveryEmail({ resetLink: resetUrl }),
+    react: TenantPasswordRecoveryEmail({
+      resetLink: resetUrl,
+      displayName: branding?.company_display_name ?? undefined,
+      logoUrl: branding?.logo_url ?? undefined,
+      primaryColor: branding?.theme_color ?? undefined,
+    }),
   })
 
   return { success: true, message: SUCCESS_MESSAGE, errors: null }

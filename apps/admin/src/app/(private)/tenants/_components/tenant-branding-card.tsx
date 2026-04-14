@@ -11,13 +11,11 @@ import { ColorSwatchPicker } from '@/components/ui/color-swatch-picker'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
 
-import { BASE_COLOR_OPTIONS, THEME_COLOR_OPTIONS } from './tenant-form-types'
+import { THEME_COLOR_OPTIONS } from './tenant-form-types'
 
 type BrandingDefaults = {
   company_display_name: string | null
-  base_color: string | null
   theme_color: string | null
   custom_css: string | null
   logo_url: string | null
@@ -27,15 +25,9 @@ type BrandingDefaults = {
 
 type Props = {
   branding: BrandingDefaults | null
-  isWhiteLabel: boolean
-  onWhiteLabelChange: (checked: boolean) => void
 }
 
-export function TenantBrandingCard({
-  branding,
-  isWhiteLabel,
-  onWhiteLabelChange,
-}: Props) {
+export function TenantBrandingCard({ branding }: Props) {
   return (
     <Card>
       <CardHeader className="border-b">
@@ -48,8 +40,25 @@ export function TenantBrandingCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Field>
+        {/* White-label sempre ativo — enviado como campo oculto */}
+        <input type="hidden" name="use_custom_theme" value="on" />
+
+        <FieldGroup className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Field className="md:col-span-3">
+            <FieldLabel htmlFor="theme_color">Cor Principal</FieldLabel>
+            <ColorSwatchPicker
+              name="theme_color"
+              defaultValue={branding?.theme_color ?? ''}
+              options={THEME_COLOR_OPTIONS}
+              allowCustom
+              className="mt-1"
+            />
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Usada em emails e como cor de destaque da conta.
+            </p>
+          </Field>
+
+          <Field className="md:col-span-3">
             <FieldLabel htmlFor="company_display_name">
               Nome de Exibição
             </FieldLabel>
@@ -61,26 +70,6 @@ export function TenantBrandingCard({
             />
           </Field>
 
-          <Field className="md:col-span-2">
-            <FieldLabel htmlFor="base_color">Base Color</FieldLabel>
-            <ColorSwatchPicker
-              name="base_color"
-              defaultValue={branding?.base_color ?? ''}
-              options={BASE_COLOR_OPTIONS}
-              className="mt-1"
-            />
-          </Field>
-
-          <Field className="md:col-span-2">
-            <FieldLabel htmlFor="theme_color">Theme Color</FieldLabel>
-            <ColorSwatchPicker
-              name="theme_color"
-              defaultValue={branding?.theme_color ?? ''}
-              options={THEME_COLOR_OPTIONS}
-              className="mt-1"
-            />
-          </Field>
-
           <Field>
             <FieldLabel>Logo</FieldLabel>
             <ImageUpload
@@ -88,78 +77,56 @@ export function TenantBrandingCard({
               accept="image/png,image/svg+xml,image/webp"
               maxSize={2 * 1024 * 1024}
               variant="landscape"
-              imageContainerClassName="w-full max-w-[350px] h-[100px] !aspect-auto"
+              imageContainerClassName="w-full h-20 !aspect-auto"
               hint="PNG, SVG ou WebP. Máx 2MB."
               currentUrl={branding?.logo_url}
             />
           </Field>
 
           <Field>
-            <FieldLabel>Favicon</FieldLabel>
+            <FieldLabel>Ícone</FieldLabel>
             <ImageUpload
               name="favicon"
               accept="image/png,image/x-icon"
               maxSize={512 * 1024}
               variant="square"
-              imageContainerClassName="w-[100px]"
+              imageContainerClassName="h-20 aspect-square"
               hint="PNG ou ICO. Máx 512KB."
               currentUrl={branding?.favicon_url}
             />
           </Field>
 
-          <Field className="md:col-span-2">
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <FieldLabel htmlFor="use_custom_theme" className="text-base">
-                  Tema White-Label
-                </FieldLabel>
-                <p className="text-sm text-muted-foreground">
-                  Ativa personalização avançada de tokens CSS por tenant.
-                </p>
-              </div>
-              <Switch
-                id="use_custom_theme"
-                name="use_custom_theme"
-                checked={isWhiteLabel}
-                onCheckedChange={onWhiteLabelChange}
-              />
-            </div>
+          <Field>
+            <FieldLabel>Imagem Auth</FieldLabel>
+            <ImageUpload
+              name="auth_bg"
+              accept="image/jpeg,image/png,image/webp"
+              maxSize={5 * 1024 * 1024}
+              variant="landscape"
+              imageContainerClassName="w-full h-20 !aspect-auto"
+              hint="JPG, PNG ou WebP. Máx 5MB."
+              currentUrl={branding?.auth_bg_image_url}
+            />
           </Field>
 
-          {isWhiteLabel && (
-            <>
-              <Field className="md:col-span-2">
-                <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
-                <textarea
-                  id="custom_css"
-                  name="custom_css"
-                  rows={8}
-                  defaultValue={branding?.custom_css ?? ''}
-                  placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
-                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
-                  <code className="font-mono">
-                    [data-tenant-theme=&quot;slug&quot;]
-                  </code>{' '}
-                  para escopo.
-                </p>
-              </Field>
-
-              <Field className="md:col-span-2">
-                <FieldLabel>Imagem de Fundo Auth</FieldLabel>
-                <ImageUpload
-                  name="auth_bg"
-                  accept="image/jpeg,image/png,image/webp"
-                  maxSize={5 * 1024 * 1024}
-                  variant="landscape"
-                  hint="JPG, PNG ou WebP. Máx 5MB."
-                  currentUrl={branding?.auth_bg_image_url}
-                />
-              </Field>
-            </>
-          )}
+          <Field className="md:col-span-3">
+            <FieldLabel htmlFor="custom_css">CSS Customizado</FieldLabel>
+            <textarea
+              id="custom_css"
+              name="custom_css"
+              rows={8}
+              defaultValue={branding?.custom_css ?? ''}
+              placeholder={`[data-tenant-theme="meu-tenant"] .hero-panel {\n  background: linear-gradient(135deg, #4b281e, #190c0a);\n}`}
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 resize-y"
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              CSS avançado aplicado depois do tema gerado. Use o seletor{' '}
+              <code className="font-mono">
+                [data-tenant-theme=&quot;slug&quot;]
+              </code>{' '}
+              para escopo.
+            </p>
+          </Field>
         </FieldGroup>
       </CardContent>
     </Card>

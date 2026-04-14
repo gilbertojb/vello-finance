@@ -16,7 +16,8 @@ export async function getTenant(id: string) {
     .from('tenants')
     .select(`
       *,
-      tenant_branding(*)
+      tenant_branding(*),
+      tenant_users(full_name)
     `)
     .eq('id', id)
     .single()

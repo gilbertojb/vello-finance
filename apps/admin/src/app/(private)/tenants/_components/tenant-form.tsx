@@ -49,10 +49,10 @@ export function TenantForm({ tenant }: Props) {
   const [companyName, setCompanyName] = useState(tenant?.company_name ?? '')
   const [email, setEmail] = useState(tenant?.email ?? '')
   const [phone, setPhone] = useState(formatPhone(tenant?.phone ?? ''))
-
-  // Identidade visual
-  const [isWhiteLabel, setIsWhiteLabel] = useState(
-    branding?.use_custom_theme ?? false,
+  const [contactName, setContactName] = useState(
+    Array.isArray(tenant?.tenant_users) && tenant.tenant_users.length > 0
+      ? (tenant.tenant_users[0]?.full_name ?? '')
+      : '',
   )
 
   const action = isEdit ? updateTenant : createTenant
@@ -126,6 +126,8 @@ export function TenantForm({ tenant }: Props) {
         onCompanyNameChange={(e) => setCompanyName(e.target.value)}
         email={email}
         onEmailChange={(e) => setEmail(e.target.value)}
+        contactName={contactName}
+        onContactNameChange={(e) => setContactName(e.target.value)}
         phone={phone}
         onPhoneChange={(e) => setPhone(e.target.value)}
         errors={formState.errors}
@@ -138,11 +140,7 @@ export function TenantForm({ tenant }: Props) {
         errors={formState.errors}
       />
 
-      <TenantBrandingCard
-        branding={branding}
-        isWhiteLabel={isWhiteLabel}
-        onWhiteLabelChange={setIsWhiteLabel}
-      />
+      <TenantBrandingCard branding={branding} />
 
       <TenantBankCard
         defaultBankName={tenant?.bank_name ?? ''}

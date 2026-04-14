@@ -27,6 +27,7 @@ interface ProductListProps {
 
 export function ProductList({ products }: ProductListProps) {
   const [isPending, startTransition] = useTransition()
+  const [, startUploadTransition] = useTransition()
   const [uploadingId, setUploadingId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [targetUploadId, setTargetUploadId] = useState<string | null>(null)
@@ -47,25 +48,28 @@ export function ProductList({ products }: ProductListProps) {
     fileInputRef.current?.click()
   }
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file || !targetUploadId) return
 
-    setUploadingId(targetUploadId)
+    const uploadId = targetUploadId
+    setUploadingId(uploadId)
     const formData = new FormData()
     formData.append('cover', file)
 
-    const result = await uploadProductCover(targetUploadId, formData)
+    startUploadTransition(async () => {
+      const result = await uploadProductCover(uploadId, formData)
 
-    if (!result.success) {
-      toast.error(result.message ?? 'Falha no upload da capa.')
-    } else {
-      toast.success(result.message)
-    }
+      if (!result.success) {
+        toast.error(result.message ?? 'Falha no upload da capa.')
+      } else {
+        toast.success(result.message)
+      }
 
-    setUploadingId(null)
-    setTargetUploadId(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+      setUploadingId(null)
+      setTargetUploadId(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    })
   }
 
   if (products.length === 0) {

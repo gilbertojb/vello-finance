@@ -13,11 +13,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { getTenantBranding } from '@/lib/branding'
 import { createServiceClient } from '@/lib/supabase/service'
 
+import { cn } from '@/lib/utils'
 import { Providers } from './providers'
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const FORBIDDEN_CSS_PATTERNS = [
   /url\s*\(/i,
@@ -73,7 +70,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={cn(GeistSans.variable, GeistMono.variable, "font-sans", geist.variable)}
+      className={cn(GeistSans.variable, GeistMono.variable, 'font-sans')}
       data-tenant-theme={tenantSlug}
       data-tenant-id={tenantId}
       suppressHydrationWarning

@@ -30,6 +30,8 @@ type Props = {
   onCompanyNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   email: string
   onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  contactName: string
+  onContactNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   phone: string
   onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   errors: FormErrors
@@ -47,6 +49,8 @@ export function TenantCompanyCard({
   onCompanyNameChange,
   email,
   onEmailChange,
+  contactName,
+  onContactNameChange,
   phone,
   onPhoneChange,
   errors,
@@ -132,6 +136,8 @@ export function TenantCompanyCard({
               name="contact_name"
               required
               placeholder="Nome da pessoa de contato"
+              value={contactName}
+              onChange={onContactNameChange}
             />
             <FieldError errors={errors?.contact_name} />
           </Field>

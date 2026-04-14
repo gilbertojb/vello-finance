@@ -32,7 +32,6 @@ export type TenantProductRow = Awaited<
 export async function listActiveProducts() {
   const supabase = await createClient()
 
-  // RLS (tenant_read_active) filtra automaticamente para is_active = true
   const { data, error } = await supabase
     .from('products')
     .select('id, name, description, is_active')
