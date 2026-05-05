@@ -1,4 +1,3 @@
-// apps/console/src/app/layout.tsx
 import './globals.css'
 
 import { GeistMono } from 'geist/font/mono'
