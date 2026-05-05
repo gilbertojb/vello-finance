@@ -76,9 +76,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {customCss && isSafeCss(customCss) && (
-          <style dangerouslySetInnerHTML={{ __html: customCss }} />
-        )}
+        {customCss && isSafeCss(customCss) && <style>{customCss}</style>}
       </head>
       <body className="font-sans antialiased">
         <Providers>{children}</Providers>
