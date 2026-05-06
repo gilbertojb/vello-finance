@@ -170,9 +170,38 @@ Total Tenant:             tenant_commission_pct        ex:  3,50%
 Soma total:               if_commission_pct            ex: 10,00% ✓
 ```
 
+## Módulo Store
+
+### `proposals`
+```sql
+CREATE TABLE proposals (
+  id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id            UUID NOT NULL REFERENCES tenants(id),
+  product_id           UUID NOT NULL REFERENCES products(id),
+  status               TEXT NOT NULL DEFAULT 'simulation'
+                       CHECK (status IN ('simulation','in_pipeline','approved','rejected','cancelled')),
+  stage_id             UUID REFERENCES proposal_stages(id),
+  purpose              TEXT CHECK (purpose IN ('pessoal','empresa','imovel','veiculo','outro')),
+  desired_amount       NUMERIC(12,2) NOT NULL,
+  desired_term_months  INT NOT NULL,
+  estimated_rate       NUMERIC(6,4),
+  estimated_payment    NUMERIC(12,2),
+  client_name          TEXT NOT NULL,
+  client_email         TEXT NOT NULL,
+  client_cpf           TEXT NOT NULL,
+  client_phone         TEXT NOT NULL,
+  client_birthdate     DATE NOT NULL,
+  client_address       JSONB NOT NULL,
+  submitted_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  approved_at          TIMESTAMPTZ,
+  rejected_at          TIMESTAMPTZ,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+```
+
 ## Tabelas Futuras
 
-- `proposals` — Propostas de empréstimo
 - `clients` — Clientes dos tenants
 - `documents` — Documentos das propostas (Supabase Storage)
 - `commissions` — Comissões calculadas e a pagar
