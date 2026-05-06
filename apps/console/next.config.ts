@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       ? [{ protocol: 'https', hostname: supabaseHostname }]
       : [],
   },
-  allowedDevOrigins: ['zp-pay.app.vellofinance.com.br'],
+  allowedDevOrigins: ['*.localhost', 'zp-pay.app.vellofinance.com.br'],
 }
 
 export default nextConfig
