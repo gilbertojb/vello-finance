@@ -25,7 +25,7 @@ type Props = {
   tenantProductId: string
   coverUrl: string | null
   productName: string
-  productType: string
+  productTypeSlug: string | null
   minAmount: number | null
   maxAmount: number | null
   minTermMonths: number | null
@@ -36,14 +36,15 @@ export function ProductCard({
   tenantProductId,
   coverUrl,
   productName,
-  productType,
+  productTypeSlug,
   minAmount,
   maxAmount,
   minTermMonths,
   maxTermMonths,
 }: Props) {
-  const gradient = PRODUCT_TYPE_GRADIENTS[productType] ?? PRODUCT_TYPE_GRADIENTS.outros
-  const typeLabel = PRODUCT_TYPE_LABELS[productType] ?? productType
+  const slug = productTypeSlug ?? 'outros'
+  const gradient = PRODUCT_TYPE_GRADIENTS[slug] ?? PRODUCT_TYPE_GRADIENTS.outros
+  const typeLabel = PRODUCT_TYPE_LABELS[slug] ?? slug
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">

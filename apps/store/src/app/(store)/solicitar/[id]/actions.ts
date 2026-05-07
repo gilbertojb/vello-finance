@@ -9,13 +9,13 @@ import { validateCPF } from '@/lib/utils/cpf'
 const proposalSchema = z.object({
   // Passo 1 (via hidden inputs)
   purpose: z.enum(['pessoal', 'empresa', 'imovel', 'veiculo', 'outro'], {
-    errorMap: () => ({ message: 'Selecione uma finalidade' }),
+    error: 'Selecione uma finalidade',
   }),
   desired_amount: z.coerce
-    .number({ invalid_type_error: 'Valor inválido' })
+    .number()
     .positive('Informe um valor positivo'),
   desired_term_months: z.coerce
-    .number({ invalid_type_error: 'Prazo inválido' })
+    .number()
     .int()
     .positive(),
   client_name: z.string().min(3, 'Nome deve ter ao menos 3 caracteres'),

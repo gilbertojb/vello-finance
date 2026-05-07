@@ -10,14 +10,14 @@ export async function listActiveProducts(tenantId: string) {
       products (
         id,
         name,
-        type,
         description,
         min_amount,
         max_amount,
         min_term_months,
         max_term_months,
         min_rate_monthly,
-        max_rate_monthly
+        max_rate_monthly,
+        product_type:product_types ( slug )
       )
     `)
     .eq('tenant_id', tenantId)
@@ -36,14 +36,14 @@ export async function getTenantProduct(tenantProductId: string, tenantId: string
       products (
         id,
         name,
-        type,
         description,
         min_amount,
         max_amount,
         min_term_months,
         max_term_months,
         min_rate_monthly,
-        max_rate_monthly
+        max_rate_monthly,
+        product_type:product_types ( slug )
       )
     `)
     .eq('id', tenantProductId)

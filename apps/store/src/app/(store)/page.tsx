@@ -49,7 +49,7 @@ export default async function HomePage() {
                     tenantProductId={tp.id}
                     coverUrl={tp.cover_url ?? null}
                     productName={tp.products.name}
-                    productType={tp.products.type}
+                    productTypeSlug={(tp.products.product_type as { slug: string } | null)?.slug ?? null}
                     minAmount={tp.products.min_amount ?? null}
                     maxAmount={tp.products.max_amount ?? null}
                     minTermMonths={tp.products.min_term_months ?? null}
