@@ -27,3 +27,14 @@ export function formatCurrency(value: number): string {
 export function formatRate(rate: number): string {
   return rate.toFixed(2).replace('.', ',')
 }
+
+export function calcPMT(pv: number, rateMonthly: number, nper: number): number {
+  const r = rateMonthly / 100
+  if (r === 0) return pv / nper
+  return (pv * (r * Math.pow(1 + r, nper))) / (Math.pow(1 + r, nper) - 1)
+}
+
+export function calcCETAnual(rateMonthly: number): number {
+  const r = rateMonthly / 100
+  return (Math.pow(1 + r, 12) - 1) * 100
+}
