@@ -1,19 +1,29 @@
 import './globals.css'
-
+import { Poppins, Playfair_Display } from 'next/font/google'
 import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
-
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
-
 import { Toaster } from '@/components/ui/sonner'
-
 import { getTenantBranding } from '@/lib/branding'
 import { createServiceClient } from '@/lib/supabase/service'
-
 import { cn } from '@/lib/utils'
 import { Providers } from './providers'
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700', '800'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
+  weight: ['400', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+})
 
 const FORBIDDEN_CSS_PATTERNS = [
   /url\s*\(/i,
@@ -32,13 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const headerStore = await headers()
   const tenantId = headerStore.get('x-tenant-id')
   const branding = await getTenantBranding(tenantId)
-
   return {
     title: branding?.company_display_name
-      ? {
-          template: `%s | ${branding.company_display_name}`,
-          default: branding.company_display_name,
-        }
+      ? { template: `%s | ${branding.company_display_name}`, default: branding.company_display_name }
       : { template: '%s | Vello Store', default: 'Vello Store' },
     icons: branding?.favicon_url ? { icon: branding.favicon_url } : undefined,
   }
@@ -46,7 +52,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getTenantCustomCss(tenantId: string): Promise<string | null> {
   if (!tenantId) return null
-
   const supabase = createServiceClient()
   const { data } = await supabase
     .from('tenant_branding')
@@ -57,11 +62,7 @@ async function getTenantCustomCss(tenantId: string): Promise<string | null> {
   return data.custom_css
 }
 
-export default async function RootLayout({
-  children,
-}: {
-  children: ReactNode
-}) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
   const tenantSlug = headerStore.get('x-tenant-slug') ?? 'default'
   const tenantId = headerStore.get('x-tenant-id') ?? ''
@@ -70,7 +71,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={cn(GeistSans.variable, GeistMono.variable, 'font-sans')}
+      className={cn(poppins.variable, playfair.variable, GeistMono.variable)}
       data-tenant-theme={tenantSlug}
       data-tenant-id={tenantId}
       suppressHydrationWarning
@@ -78,7 +79,7 @@ export default async function RootLayout({
       <head>
         {customCss && isSafeCss(customCss) && <style>{customCss}</style>}
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
         <Toaster />
       </body>
