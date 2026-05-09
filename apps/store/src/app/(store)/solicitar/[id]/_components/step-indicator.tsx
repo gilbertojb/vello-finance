@@ -1,39 +1,15 @@
 import { cn } from '@/lib/utils'
 
-type Props = {
-  currentStep: 1 | 2
-  totalSteps?: number
-}
+type Props = { currentStep: 1 | 2 }
 
-export function StepIndicator({ currentStep, totalSteps = 2 }: Props) {
+export function StepIndicator({ currentStep }: Props) {
   return (
-    <div className="flex items-center gap-2">
-      {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
-        <div key={step} className="flex items-center gap-2">
-          <div
-            className={cn(
-              'flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold',
-              step < currentStep
-                ? 'bg-primary text-primary-foreground'
-                : step === currentStep
-                  ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2'
-                  : 'bg-muted text-muted-foreground',
-            )}
-          >
-            {step < currentStep ? '✓' : step}
-          </div>
-          {step < totalSteps && (
-            <div
-              className={cn(
-                'h-px w-8',
-                step < currentStep ? 'bg-primary' : 'bg-border',
-              )}
-            />
-          )}
-        </div>
-      ))}
-      <span className="ml-2 text-xs text-muted-foreground">
-        Passo {currentStep} de {totalSteps}
+    <div className="flex items-center gap-1.5">
+      <span className="h-1 w-7 rounded-full bg-surface-foreground/40" />
+      <span className={cn('h-1 w-7 rounded-full', currentStep === 1 ? 'bg-primary' : 'bg-surface-foreground/40')} />
+      <span className={cn('h-1 w-7 rounded-full', currentStep === 2 ? 'bg-primary' : 'bg-surface-foreground/12')} />
+      <span className="ml-2 text-[11px] uppercase tracking-[.18em] text-surface-foreground/50">
+        Etapa {currentStep + 1} de 3
       </span>
     </div>
   )
