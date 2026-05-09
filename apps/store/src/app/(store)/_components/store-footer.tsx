@@ -1,25 +1,42 @@
+import Image from 'next/image'
+import Link from 'next/link'
+
 type Props = {
   displayName: string | null
+  logoUrl: string | null
 }
 
-export function StoreFooter({ displayName }: Props) {
+export function StoreFooter({ displayName, logoUrl }: Props) {
   const name = displayName ?? 'Vello Store'
   const year = new Date().getFullYear()
+  const initials = name.slice(0, 2).toUpperCase()
 
   return (
-    <footer className="border-t border-border bg-background">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row sm:px-6">
-        <p className="text-sm text-muted-foreground">
-          © {year} {name}. Todos os direitos reservados.
-        </p>
-        <div className="flex gap-6 text-sm text-muted-foreground">
-          <a href="#" className="hover:text-foreground transition-colors">
-            Política de Privacidade
-          </a>
-          <a href="#" className="hover:text-foreground transition-colors">
-            Termos de Uso
-          </a>
+    <footer className="border-t border-primary/[0.08] bg-background py-12">
+      <div className="mx-auto max-w-7xl px-8">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <Link href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
+            {logoUrl ? (
+              <Image src={logoUrl} alt={name} width={100} height={32} className="h-8 w-auto object-contain" />
+            ) : (
+              <>
+                <span
+                  className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-foreground text-sm font-extrabold italic tracking-[-0.04em] text-background"
+                  style={{ transform: 'skewX(-8deg)' }}
+                >
+                  {initials}
+                </span>
+                <span>{name}</span>
+              </>
+            )}
+          </Link>
+          <nav className="flex gap-8 text-xs font-medium uppercase tracking-[.06em]">
+            <Link href="#" className="text-foreground/60 transition-colors hover:text-primary">Privacidade</Link>
+            <Link href="#" className="text-foreground/60 transition-colors hover:text-primary">Termos</Link>
+            <Link href="#" className="text-foreground/60 transition-colors hover:text-primary">Suporte</Link>
+          </nav>
         </div>
+        <p className="mt-6 text-xs text-foreground/40">© {year} {name} · Todos os direitos reservados.</p>
       </div>
     </footer>
   )

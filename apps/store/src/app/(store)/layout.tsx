@@ -16,7 +16,10 @@ export default async function StoreLayout({ children }: { children: ReactNode })
         displayName={branding?.company_display_name ?? null}
       />
       <main className="flex-1">{children}</main>
-      <StoreFooter displayName={branding?.company_display_name ?? null} />
+      <StoreFooter
+        displayName={branding?.company_display_name ?? null}
+        logoUrl={branding?.logo_url ?? null}
+      />
     </div>
   )
 }
