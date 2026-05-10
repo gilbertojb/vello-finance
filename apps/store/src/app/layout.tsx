@@ -1,6 +1,5 @@
 import './globals.css'
 import { Poppins, Playfair_Display } from 'next/font/google'
-import { GeistMono } from 'geist/font/mono'
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
@@ -71,7 +70,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html
       lang="pt-BR"
-      className={cn(poppins.variable, playfair.variable, GeistMono.variable)}
+      className={cn(poppins.variable, playfair.variable)}
       data-tenant-theme={tenantSlug}
       data-tenant-id={tenantId}
       suppressHydrationWarning
