@@ -93,3 +93,9 @@
     @apply font-sans;
   }
 }
+
+html,
+body {
+  background-color: oklch(0.08 0.008 55);
+  color: oklch(0.96 0.015 88);
+}

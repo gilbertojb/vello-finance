@@ -14,7 +14,7 @@ const TYPE_LABELS: Record<string, string> = {
 }
 
 type Product = {
-  id: string
+  tenantProductId: string
   coverUrl: string | null
   productName: string
   productTypeSlug: string | null
@@ -79,7 +79,7 @@ export function ProductsSection({ products }: Props) {
         ) : (
           <div className="grid grid-cols-3 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-1">
             {filtered.map((p, index) => (
-              <div key={p.id} className={cn(index === 0 && filtered.length > 1 ? 'row-span-2 max-lg:row-span-1' : '')}>
+              <div key={p.tenantProductId} className={cn(index === 0 && filtered.length > 1 ? 'row-span-2 max-lg:row-span-1' : '')}>
                 <ProductCard {...p} featured={index === 0 && filtered.length > 1} />
               </div>
             ))}

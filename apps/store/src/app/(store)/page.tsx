@@ -25,7 +25,7 @@ export default async function HomePage() {
   const minRate = featuredProduct?.products?.min_rate_monthly ?? null
 
   const productList = validProducts.map((tp) => ({
-    id: tp.id,
+    tenantProductId: tp.id,
     coverUrl: tp.cover_url ?? null,
     productName: tp.products!.name,
     productTypeSlug: (tp.products!.product_type as { slug: string } | null)?.slug ?? null,
