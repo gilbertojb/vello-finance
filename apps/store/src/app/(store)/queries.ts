@@ -55,7 +55,7 @@ export async function getTenantProduct(tenantProductId: string, tenantId: string
 
 export async function getProposalConfirmation(proposalId: string, tenantId: string) {
   const supabase = createServiceClient()
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('proposals')
     .select(`
       id,
@@ -68,5 +68,8 @@ export async function getProposalConfirmation(proposalId: string, tenantId: stri
     .eq('id', proposalId)
     .eq('tenant_id', tenantId)
     .single()
+  if (error) {
+    console.error('[getProposalConfirmation] id=%s tenantId=%s error=%s', proposalId, tenantId, JSON.stringify(error))
+  }
   return data
 }
