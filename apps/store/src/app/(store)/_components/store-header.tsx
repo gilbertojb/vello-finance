@@ -1,13 +1,13 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { TenantLogo } from '@/components/tenant-logo'
 
 type Props = {
-  logoUrl: string | null
+  logoUrl:     string | null
   displayName: string | null
 }
 
 export function StoreHeader({ logoUrl, displayName }: Props) {
-  const name = displayName ?? 'Vello Store'
+  const name     = displayName ?? 'Vello Store'
   const initials = name.slice(0, 2).toUpperCase()
 
   return (
@@ -15,7 +15,7 @@ export function StoreHeader({ logoUrl, displayName }: Props) {
       <div className="mx-auto flex h-[78px] max-w-7xl items-center gap-10 px-8">
         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-foreground">
           {logoUrl ? (
-            <Image src={logoUrl} alt={name} width={120} height={36} className="h-9 w-auto object-contain" />
+            <TenantLogo url={logoUrl} alt={name} width={120} height={36} className="h-9 w-auto" />
           ) : (
             <>
               <span
@@ -29,11 +29,10 @@ export function StoreHeader({ logoUrl, displayName }: Props) {
           )}
         </Link>
 
-        {/* TODO: [White-label] links configuráveis por tenant */}
         <nav className="ml-auto hidden items-center gap-8 text-sm text-foreground/78 md:flex">
-          <Link href="#produtos" className="transition-colors hover:text-primary">Produtos</Link>
+          <Link href="#produtos"      className="transition-colors hover:text-primary">Produtos</Link>
           <Link href="#como-funciona" className="transition-colors hover:text-primary">Como funciona</Link>
-          <Link href="#" className="transition-colors hover:text-primary">Sobre</Link>
+          <Link href="#"              className="transition-colors hover:text-primary">Sobre</Link>
         </nav>
 
         <Link

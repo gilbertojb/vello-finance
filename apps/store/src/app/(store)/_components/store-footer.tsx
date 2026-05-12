@@ -1,14 +1,14 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { TenantLogo } from '@/components/tenant-logo'
 
 type Props = {
   displayName: string | null
-  logoUrl: string | null
+  logoUrl:     string | null
 }
 
 export function StoreFooter({ displayName, logoUrl }: Props) {
-  const name = displayName ?? 'Vello Store'
-  const year = new Date().getFullYear()
+  const name     = displayName ?? 'Vello Store'
+  const year     = new Date().getFullYear()
   const initials = name.slice(0, 2).toUpperCase()
 
   return (
@@ -17,7 +17,7 @@ export function StoreFooter({ displayName, logoUrl }: Props) {
         <div className="flex flex-wrap items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
             {logoUrl ? (
-              <Image src={logoUrl} alt={name} width={100} height={32} className="h-8 w-auto object-contain" />
+              <TenantLogo url={logoUrl} alt={name} width={100} height={32} className="h-8 w-auto" />
             ) : (
               <>
                 <span

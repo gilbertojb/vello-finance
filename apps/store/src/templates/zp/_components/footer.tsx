@@ -1,5 +1,5 @@
-import Image from 'next/image'
 import Link from 'next/link'
+import { TenantLogo } from '@/components/tenant-logo'
 
 type Props = {
   logoUrl:     string | null
@@ -11,22 +11,14 @@ export function ZpFooter({ logoUrl, displayName }: Props) {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="border-t border-primary/[0.08] bg-background py-12">
+    <footer className="border-t border-primary/8 bg-background py-12">
       <div className="mx-auto max-w-7xl px-8">
         <div className="flex flex-wrap items-center justify-between gap-6">
           <Link href="/" className="flex items-center gap-2.5 font-bold text-lg text-foreground">
             {logoUrl ? (
-              <Image
-                src={logoUrl}
-                alt={name}
-                width={120}
-                height={36}
-                className="h-9 w-auto object-contain"
-              />
+              <TenantLogo url={logoUrl} alt={name} width={120} height={36} className="h-9 w-auto" />
             ) : (
-              <span className="text-lg font-bold tracking-tight text-foreground">
-                {name}
-              </span>
+              <span className="text-lg font-bold tracking-tight text-foreground">{name}</span>
             )}
           </Link>
 
