@@ -1,10 +1,16 @@
-import type { ReactNode } from 'react'
 import { headers } from 'next/headers'
-import { getTenantBranding } from '@/lib/branding'
-import { StoreHeader } from './_components/store-header'
-import { StoreFooter } from './_components/store-footer'
+import type { ReactNode } from 'react'
 
-export default async function StoreLayout({ children }: { children: ReactNode }) {
+import { getTenantBranding } from '@/lib/branding'
+
+import { StoreFooter } from './_components/store-footer'
+import { StoreHeader } from './_components/store-header'
+
+export default async function StoreLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
   const headerStore = await headers()
   const tenantId = headerStore.get('x-tenant-id') ?? ''
   const branding = await getTenantBranding(tenantId)
