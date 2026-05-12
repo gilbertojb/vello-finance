@@ -5,9 +5,9 @@ export const defaultTemplate: TemplateConfig = {
   displayName: 'Vello Store',
 
   colors: {
-    primary:    { l: 0.83, c: 0.10, h: 85  },
-    background: { l: 0.08, c: 0.008, h: 55 },
-    surface:    { l: 0.94, c: 0.018, h: 88 },
+    primary:    { l: 0.48, c: 0.25, h: 258 },
+    background: { l: 0.35, c: 0.18, h: 258 },
+    surface:    { l: 0.42, c: 0.17, h: 258 },
   },
 
   layout: {
