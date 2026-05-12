@@ -7,7 +7,14 @@ const supabaseHostname = process.env.NEXT_PUBLIC_SUPABASE_URL
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: supabaseHostname
-      ? [{ protocol: 'https', hostname: supabaseHostname }]
+      ? [
+          {
+            protocol: 'https',
+            hostname: supabaseHostname,
+            dangerouslyAllowSVG: true,
+            contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+          },
+        ]
       : [],
   },
   allowedDevOrigins: ['*.localhost'],
