@@ -464,6 +464,7 @@ export type Database = {
           favicon_url: string | null
           id: string
           logo_url: string | null
+          template_id: string | null
           tenant_id: string
           theme_color: string | null
           updated_at: string
@@ -478,6 +479,7 @@ export type Database = {
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
+          template_id?: string | null
           tenant_id: string
           theme_color?: string | null
           updated_at?: string
@@ -492,6 +494,7 @@ export type Database = {
           favicon_url?: string | null
           id?: string
           logo_url?: string | null
+          template_id?: string | null
           tenant_id?: string
           theme_color?: string | null
           updated_at?: string

@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { ProductCard } from './product-card'
+
 import { cn } from '@/lib/utils'
+
+import { ProductCard } from './product-card'
 
 const TYPE_LABELS: Record<string, string> = {
   fgts: 'FGTS',
@@ -29,8 +31,13 @@ type Props = { products: Product[] }
 export function ProductsSection({ products }: Props) {
   const [activeFilter, setActiveFilter] = useState('todos')
 
-  const types = Array.from(new Set(products.map((p) => p.productTypeSlug ?? 'outros')))
-  const filtered = activeFilter === 'todos' ? products : products.filter((p) => (p.productTypeSlug ?? 'outros') === activeFilter)
+  const types = Array.from(
+    new Set(products.map((p) => p.productTypeSlug ?? 'outros')),
+  )
+  const filtered =
+    activeFilter === 'todos'
+      ? products
+      : products.filter((p) => (p.productTypeSlug ?? 'outros') === activeFilter)
 
   const tabClass = (active: boolean) =>
     cn(
@@ -50,37 +57,79 @@ export function ProductsSection({ products }: Props) {
               Catálogo de crédito
             </span>
             <h2 className="mt-[18px] text-[54px] font-light leading-none tracking-tight text-surface-foreground max-lg:text-5xl max-sm:text-4xl">
-              Produtos de empréstimo<br />
-              <em className="font-serif not-italic font-normal text-[oklch(0.48_0.07_50)]">desenhados para sua jornada.</em>
+              Produtos de empréstimo
+              <br />
+              <em className="font-serif not-italic font-normal text-[oklch(0.48_0.07_50)]">
+                desenhados para sua jornada.
+              </em>
             </h2>
           </div>
           {/* TODO: [White-label] descrição configurável */}
           <p className="max-w-[420px] text-[15px] leading-relaxed text-surface-foreground/62">
-            Linhas distintas, do consignado ao home equity. Toque em qualquer produto para simular e ver sua parcela em tempo real.
+            Linhas distintas, do consignado ao home equity. Toque em qualquer
+            produto para simular e ver sua parcela em tempo real.
           </p>
         </div>
 
         <div className="mb-8 flex flex-wrap gap-2.5">
-          <button type="button" onClick={() => setActiveFilter('todos')} className={tabClass(activeFilter === 'todos')}>
-            Todos os produtos <span className={cn('ml-2 text-[11px]', activeFilter === 'todos' ? 'opacity-50' : 'opacity-40')}>{products.length}</span>
+          <button
+            type="button"
+            onClick={() => setActiveFilter('todos')}
+            className={tabClass(activeFilter === 'todos')}
+          >
+            Todos os produtos{' '}
+            <span
+              className={cn(
+                'ml-2 text-[11px]',
+                activeFilter === 'todos' ? 'opacity-50' : 'opacity-40',
+              )}
+            >
+              {products.length}
+            </span>
           </button>
           {types.map((type) => (
-            <button key={type} type="button" onClick={() => setActiveFilter(type)} className={tabClass(activeFilter === type)}>
+            <button
+              key={type}
+              type="button"
+              onClick={() => setActiveFilter(type)}
+              className={tabClass(activeFilter === type)}
+            >
               {TYPE_LABELS[type] ?? type}
-              <span className={cn('ml-2 text-[11px]', activeFilter === type ? 'opacity-50' : 'opacity-40')}>
-                {products.filter((p) => (p.productTypeSlug ?? 'outros') === type).length}
+              <span
+                className={cn(
+                  'ml-2 text-[11px]',
+                  activeFilter === type ? 'opacity-50' : 'opacity-40',
+                )}
+              >
+                {
+                  products.filter(
+                    (p) => (p.productTypeSlug ?? 'outros') === type,
+                  ).length
+                }
               </span>
             </button>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <p className="py-16 text-center text-surface-foreground/50">Nenhum produto disponível no momento.</p>
+          <p className="py-16 text-center text-surface-foreground/50">
+            Nenhum produto disponível no momento.
+          </p>
         ) : (
           <div className="grid grid-cols-3 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-1">
             {filtered.map((p, index) => (
-              <div key={p.tenantProductId} className={cn(index === 0 && filtered.length > 1 ? 'row-span-2 max-lg:row-span-1' : '')}>
-                <ProductCard {...p} featured={index === 0 && filtered.length > 1} />
+              <div
+                key={p.tenantProductId}
+                className={cn(
+                  index === 0 && filtered.length > 1
+                    ? 'row-span-2 max-lg:row-span-1'
+                    : '',
+                )}
+              >
+                <ProductCard
+                  {...p}
+                  featured={index === 0 && filtered.length > 1}
+                />
               </div>
             ))}
           </div>

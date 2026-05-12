@@ -5,7 +5,8 @@ import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { getTenantBranding } from '@/lib/branding'
-import { createServiceClient } from '@/lib/supabase/service'
+import { getTemplate } from '@/templates'
+import { generateThemeCss } from '@/lib/template/generate-theme'
 import { cn } from '@/lib/utils'
 import { Providers } from './providers'
 
@@ -49,23 +50,17 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function getTenantCustomCss(tenantId: string): Promise<string | null> {
-  if (!tenantId) return null
-  const supabase = createServiceClient()
-  const { data } = await supabase
-    .from('tenant_branding')
-    .select('use_custom_theme, custom_css')
-    .eq('tenant_id', tenantId)
-    .single()
-  if (!data?.use_custom_theme) return null
-  return data.custom_css
-}
-
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const headerStore = await headers()
   const tenantSlug = headerStore.get('x-tenant-slug') ?? 'default'
-  const tenantId = headerStore.get('x-tenant-id') ?? ''
-  const customCss = await getTenantCustomCss(tenantId)
+  const tenantId   = headerStore.get('x-tenant-id') ?? ''
+
+  const branding  = await getTenantBranding(tenantId)
+  const template  = getTemplate(branding?.template_id)
+  const themeCss  = generateThemeCss(template.colors)
+  const customCss = branding?.use_custom_theme && branding?.custom_css
+    ? String(branding.custom_css)
+    : null
 
   return (
     <html
@@ -76,7 +71,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       suppressHydrationWarning
     >
       <head>
-        {customCss && isSafeCss(customCss) && <style>{customCss}</style>}
+        {/* Tema do template — sobrescreve globals.css para cada tenant */}
+        <style dangerouslySetInnerHTML={{ __html: themeCss }} />
+        {/* CSS customizado adicional do tenant (apenas white-labels com use_custom_theme=true) */}
+        {customCss && isSafeCss(customCss) && (
+          <style dangerouslySetInnerHTML={{ __html: customCss }} />
+        )}
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
         <Providers>{children}</Providers>
