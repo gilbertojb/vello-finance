@@ -1,9 +1,8 @@
-// TODO: [White-label] steps configuráveis por tenant (JSON/DB)
 const STEPS = [
-  { n: 'I', title: 'Simule o crédito', description: 'Escolha o produto e ajuste valor e prazo em tempo real. Veja sua parcela na hora.' },
-  { n: 'II', title: 'Preencha os dados', description: 'Formulário digital rápido. Sem papelada, sem filas, sem agência.' },
+  { n: 'I',   title: 'Simule o crédito',    description: 'Escolha o produto e ajuste valor e prazo em tempo real. Veja sua parcela na hora.' },
+  { n: 'II',  title: 'Preencha os dados',   description: 'Formulário digital rápido. Sem papelada, sem filas, sem agência.' },
   { n: 'III', title: 'Análise instantânea', description: 'Sua proposta é analisada em minutos. Você recebe uma resposta pelo e-mail.' },
-  { n: 'IV', title: 'Crédito aprovado', description: 'Assine digitalmente e acompanhe pelo painel. Dinheiro disponível em até 24 horas.' },
+  { n: 'IV',  title: 'Crédito aprovado',    description: 'Assine digitalmente e acompanhe pelo painel. Dinheiro disponível em até 24 horas.' },
 ]
 
 export function HowItWorks() {

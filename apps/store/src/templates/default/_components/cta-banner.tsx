@@ -12,7 +12,6 @@ export function CtaBanner({ featuredProductId }: Props) {
               <span className="h-1.5 w-1.5 rounded-full bg-surface-foreground/40" />
               Pronto para começar
             </span>
-            {/* TODO: [White-label] copy configurável */}
             <h2 className="mb-5 mt-[18px] text-[56px] font-light leading-none tracking-tight text-surface-foreground max-lg:text-5xl max-sm:text-4xl">
               Simule sem<br />
               <em className="font-serif not-italic font-normal text-[oklch(0.48_0.07_50)]">compromisso.</em>
@@ -22,17 +21,22 @@ export function CtaBanner({ featuredProductId }: Props) {
             </p>
             <div className="flex gap-3.5">
               {featuredProductId && (
-                <Link href={`/produto/${featuredProductId}`} className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90">
+                <Link
+                  href={`/produto/${featuredProductId}`}
+                  className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90"
+                >
                   Iniciar simulação
                 </Link>
               )}
-              <Link href="#" className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground">
+              <Link
+                href="#"
+                className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground"
+              >
                 Falar com consultor
               </Link>
             </div>
           </div>
 
-          {/* TODO: [White-label] depoimento configurável */}
           <div className="relative rounded-[20px] border border-black/[0.06] bg-white p-8">
             <span className="absolute -top-2.5 left-6 font-serif text-[90px] leading-none text-primary" aria-hidden="true">&ldquo;</span>
             <blockquote className="mt-6 font-serif italic text-[17px] leading-relaxed text-surface-foreground">
