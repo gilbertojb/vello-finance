@@ -52,7 +52,7 @@ export function ProductsSection({ products }: Props) {
       <div className="mx-auto max-w-7xl px-8">
         <div className="mb-12 flex items-end justify-between gap-12 max-lg:flex-col max-lg:items-start">
           <div>
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-surface-foreground/20 bg-surface-foreground/[0.04] px-3.5 py-2 text-[11px] font-medium uppercase tracking-[.22em] text-surface-foreground/60">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-surface-foreground/20 bg-surface-foreground/4 px-3.5 py-2 text-[11px] font-medium uppercase tracking-[.22em] text-surface-foreground/60">
               <span className="h-1.5 w-1.5 rounded-full bg-surface-foreground/40" />
               Catálogo de crédito
             </span>
