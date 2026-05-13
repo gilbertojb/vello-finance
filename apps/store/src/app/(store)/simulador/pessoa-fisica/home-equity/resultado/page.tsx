@@ -12,20 +12,14 @@ export const metadata: Metadata = { title: 'Sua simulação está pronta' }
 type Props = {
   searchParams: Promise<{
     productId?: string
-    nome?: string
-    whatsapp?: string
-    valorImovel?: string
-    valorCredito?: string
-    outroCredito?: string
-    instituicao?: string
   }>
 }
 
 export default async function HomeEquityResultadoPage({ searchParams }: Props) {
   const sp = await searchParams
-  const { productId, nome, valorImovel, valorCredito } = sp
+  const { productId } = sp
 
-  if (!productId || !nome || !valorImovel || !valorCredito) notFound()
+  if (!productId) notFound()
 
   const tenantId = (await headers()).get('x-tenant-id') ?? ''
   const tp = await getTenantProduct(productId, tenantId)
@@ -56,16 +50,14 @@ export default async function HomeEquityResultadoPage({ searchParams }: Props) {
             Sua simulação está pronta!
           </h2>
           <p className="mb-8 text-sm leading-relaxed text-surface-foreground/55">
-            {tp.products.name} · Olá, {nome}! Confira os detalhes abaixo.
+            {tp.products.name} · Confira os detalhes abaixo.
           </p>
 
           <HomeEquityResultado
             productId={productId}
             productName={tp.products.name}
-            nome={nome}
-            valorImovel={Number(valorImovel)}
-            valorCredito={Number(valorCredito)}
             rateMonthly={rate}
+            isPj={false}
           />
         </div>
       </div>

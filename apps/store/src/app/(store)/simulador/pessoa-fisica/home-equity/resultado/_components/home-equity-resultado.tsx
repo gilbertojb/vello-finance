@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCw, Info, Download } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
@@ -12,10 +12,8 @@ type Modalidade = 'SAC' | 'PRICE'
 type Props = {
   productId: string
   productName: string
-  nome: string
-  valorImovel: number
-  valorCredito: number
   rateMonthly: number
+  isPj?: boolean
 }
 
 function calcSAC(principal: number, ratePercent: number, n: number) {
@@ -32,25 +30,49 @@ function calcPRICE(principal: number, ratePercent: number, n: number) {
   return (principal * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1)
 }
 
-export function HomeEquityResultado({ productId, valorImovel, valorCredito, rateMonthly }: Props) {
+export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Props) {
   const router = useRouter()
+  const [data, setData] = useState<{ nome: string; valorImovel: number; valorCredito: number } | null>(null)
   const [parcelas, setParcelas] = useState(240)
   const [modalidade, setModalidade] = useState<Modalidade>('SAC')
 
-  const ltv = Math.round((valorCredito / valorImovel) * 100)
+  useEffect(() => {
+    const key = isPj ? 'sim:home-equity-pj' : 'sim:home-equity'
+    const stored = sessionStorage.getItem(key)
+    const route = isPj ? '/simulador/pessoa-juridica/home-equity-pj' : '/simulador/pessoa-fisica/home-equity'
+    if (!stored) {
+      router.replace(route + `?productId=${productId}`)
+      return
+    }
+    try {
+      setData(JSON.parse(stored))
+    } catch {
+      router.replace(route + `?productId=${productId}`)
+    }
+  }, [router, isPj, productId])
+
+  const ltv = data ? Math.round((data.valorCredito / data.valorImovel) * 100) : 0
 
   const calc = useMemo(() => {
+    if (!data) return { firstInstallment: 0, lastInstallment: 0, amortization: 0 }
     if (modalidade === 'SAC') {
-      return calcSAC(valorCredito, rateMonthly, parcelas)
+      return calcSAC(data.valorCredito, rateMonthly, parcelas)
     }
-    const installment = calcPRICE(valorCredito, rateMonthly, parcelas)
+    const installment = calcPRICE(data.valorCredito, rateMonthly, parcelas)
     return { firstInstallment: installment, lastInstallment: installment, amortization: null }
-  }, [valorCredito, rateMonthly, parcelas, modalidade])
+  }, [data, rateMonthly, parcelas, modalidade])
 
   const isSAC = modalidade === 'SAC'
 
+  if (!data) {
+    return <div className="py-12 text-center text-sm text-surface-foreground/50">Carregando dados da simulação...</div>
+  }
+
   return (
     <div className="space-y-5">
+      <div className="mb-4">
+        <p className="text-[15px] font-medium text-surface-foreground">Olá, {data.nome}!</p>
+      </div>
       {/* Valores do imóvel e crédito (somente leitura) */}
       <div className="grid grid-cols-2 gap-3">
         <div>
@@ -58,7 +80,7 @@ export function HomeEquityResultado({ productId, valorImovel, valorCredito, rate
             Valor do imóvel
           </label>
           <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
-            R$ {valorImovel.toLocaleString('pt-BR')}
+            R$ {data.valorImovel.toLocaleString('pt-BR')}
           </div>
         </div>
         <div>
@@ -66,7 +88,7 @@ export function HomeEquityResultado({ productId, valorImovel, valorCredito, rate
             Valor do crédito
           </label>
           <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
-            R$ {valorCredito.toLocaleString('pt-BR')}
+            R$ {data.valorCredito.toLocaleString('pt-BR')}
           </div>
         </div>
       </div>
@@ -137,7 +159,7 @@ export function HomeEquityResultado({ productId, valorImovel, valorCredito, rate
         <div className="mt-5 border-t border-white/10 pt-4">
           <div className="grid grid-cols-4 gap-2 text-xs">
             {[
-              { label: 'Crédito', value: formatCurrency(valorCredito) },
+              { label: 'Crédito', value: formatCurrency(data.valorCredito) },
               { label: 'Prazo', value: `${parcelas}x` },
               { label: 'Taxa ref.', value: `${rateMonthly.toFixed(2).replace('.', ',')}% a.m.` },
               { label: 'LTV', value: `${ltv}%` },
@@ -162,7 +184,7 @@ export function HomeEquityResultado({ productId, valorImovel, valorCredito, rate
       {/* CTAs */}
       <button
         type="button"
-        onClick={() => router.push(`/solicitar/${productId}?amount=${valorCredito}&term=${parcelas}`)}
+        onClick={() => router.push(`/solicitar/${productId}?amount=${data.valorCredito}&term=${parcelas}`)}
         className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
       >
         Quero contratar este crédito →

@@ -16,9 +16,9 @@ function parseBRL(raw: string): number {
   return Math.max(0, Number(raw.replace(/\D/g, '')) || 0)
 }
 
-type Props = { productId: string }
+type Props = { productId: string; isPj?: boolean }
 
-export function HomeEquityForm({ productId }: Props) {
+export function HomeEquityForm({ productId, isPj = false }: Props) {
   const router = useRouter()
 
   const [nome, setNome] = useState('')
@@ -43,26 +43,34 @@ export function HomeEquityForm({ productId }: Props) {
     outroCredito !== '' &&
     (!showInstituicao || instituicao.trim().length > 0)
 
-  const params = useMemo(() => {
-    const p = new URLSearchParams({
-      productId,
-      nome: nome.trim(),
-      whatsapp: whatsapp.replace(/\D/g, ''),
-      valorImovel: String(valorImovel),
-      valorCredito: String(valorCredito),
-      outroCredito,
-      ...(showInstituicao ? { instituicao: instituicao.trim() } : {}),
-    })
-    return p.toString()
-  }, [productId, nome, whatsapp, valorImovel, valorCredito, outroCredito, instituicao, showInstituicao])
-
   function handleSubmit() {
     if (!canSubmit) return
-    router.push(`/simulador/pessoa-fisica/home-equity/resultado?${params}`)
+    const payload = {
+      nome: nome.trim(),
+      whatsapp: whatsapp.replace(/\D/g, ''),
+      valorImovel,
+      valorCredito,
+      outroCredito,
+      instituicao: showInstituicao ? instituicao.trim() : undefined,
+    }
+    const key = isPj ? 'sim:home-equity-pj' : 'sim:home-equity'
+    sessionStorage.setItem(key, JSON.stringify(payload))
+    
+    const route = isPj 
+      ? '/simulador/pessoa-juridica/home-equity-pj/resultado' 
+      : '/simulador/pessoa-fisica/home-equity/resultado'
+    router.push(`${route}?productId=${productId}`)
   }
 
   return (
     <div className="space-y-5">
+      {/* Chip Pessoa */}
+      <div className="mb-6 flex justify-center">
+        <span className="inline-flex items-center rounded-full bg-[oklch(0.96_0.03_85)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-[oklch(0.48_0.07_50)]">
+          {isPj ? 'Pessoa Jurídica' : 'Pessoa Física'}
+        </span>
+      </div>
+
       {/* Nome */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">

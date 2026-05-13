@@ -12,14 +12,16 @@ const PESSOA_FISICA_LABELS: Record<string, string> = {
   home_equity: 'Empréstimo com garantia de imóvel',
   auto_equity: 'Empréstimo com garantia de veículo',
   fgts: 'Antecipação de saque FGTS',
-  consignado_privado: 'Consignado CLT',
+  emprestimo_pessoal: 'Empréstimo Pessoal',
+  conta_luz: 'Crédito na Conta de Luz',
 }
 
 const SLUG_TO_ROUTE: Record<string, string> = {
   home_equity: '/simulador/pessoa-fisica/home-equity',
   auto_equity: '/simulador/pessoa-fisica/auto-equity',
   fgts: '/simulador/pessoa-fisica/fgts',
-  consignado_privado: '/simulador/pessoa-fisica/consignado',
+  emprestimo_pessoal: '/simulador/pessoa-fisica/emprestimo-pessoal',
+  conta_luz: '/simulador/pessoa-fisica/conta-luz',
 }
 
 export default async function PessoaFisicaPage() {
