@@ -85,7 +85,7 @@ export function SimulatorPanel({ tenantProductId, minAmount, maxAmount, termOpti
         </div>
         <button
           type="button"
-          onClick={() => router.push(`/solicitar/${tenantProductId}?amount=${amount}&term=${term}`)}
+          onClick={() => router.push(`/simulador`)}
           className="whitespace-nowrap rounded-full bg-gradient-to-b from-primary to-primary/80 px-[22px] py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_oklch(0.83_0.10_85/50%)] transition-all hover:brightness-110"
         >
           Continuar →
