@@ -191,6 +191,7 @@ export type Database = {
       }
       product_types: {
         Row: {
+          category: string | null
           created_at: string
           description: string | null
           id: string
@@ -200,6 +201,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -209,6 +211,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -406,6 +409,69 @@ export type Database = {
           },
           {
             foreignKeyName: "proposals_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulations: {
+        Row: {
+          client_name: string
+          client_phone: string
+          created_at: string
+          desired_amount: number
+          desired_term_months: number
+          estimated_payment: number | null
+          estimated_rate: number | null
+          id: string
+          product_id: string
+          simulation_data: Json | null
+          status: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          client_name: string
+          client_phone: string
+          created_at?: string
+          desired_amount: number
+          desired_term_months: number
+          estimated_payment?: number | null
+          estimated_rate?: number | null
+          id?: string
+          product_id: string
+          simulation_data?: Json | null
+          status?: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          client_name?: string
+          client_phone?: string
+          created_at?: string
+          desired_amount?: number
+          desired_term_months?: number
+          estimated_payment?: number | null
+          estimated_rate?: number | null
+          id?: string
+          product_id?: string
+          simulation_data?: Json | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_tenant_id_fkey"
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
