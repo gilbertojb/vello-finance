@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info } from 'lucide-react'
 import { formatCurrency, formatRate, calcPMT, calcCETAnual } from '@/lib/utils/simulator'
+import { saveSimulation, qualifySimulation } from '../../../../actions'
 
 const PARCELAS_OPTIONS = [6, 12, 18, 24]
 
@@ -25,6 +26,8 @@ export function ContaLuzResultado({ productId, productName, rateMonthly }: Props
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
   const [parcelas, setParcelas] = useState(12)
+  const [simulationId, setSimulationId] = useState<string | null>(null)
+  const [isQualifying, setIsQualifying] = useState(false)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('sim:conta-luz')
@@ -36,10 +39,33 @@ export function ContaLuzResultado({ productId, productName, rateMonthly }: Props
       const parsed: SimData = JSON.parse(stored)
       setData(parsed)
       setParcelas(parsed.parcelas)
+
+      const SIM_ID_KEY = 'sim:conta-luz:id'
+      const existingId = sessionStorage.getItem(SIM_ID_KEY)
+      if (existingId) {
+        setSimulationId(existingId)
+      } else {
+        const payment = calcPMT(parsed.valorDesejado, rateMonthly, parsed.parcelas)
+        saveSimulation({
+          tenantProductId: productId,
+          clientName: parsed.nome,
+          clientPhone: parsed.whatsapp,
+          desiredAmount: parsed.valorDesejado,
+          desiredTermMonths: parsed.parcelas,
+          estimatedRate: rateMonthly,
+          estimatedPayment: payment,
+          simulationData: parsed as Record<string, unknown>,
+        }).then((id: string | null) => {
+          if (id) {
+            sessionStorage.setItem(SIM_ID_KEY, id)
+            setSimulationId(id)
+          }
+        })
+      }
     } catch {
       router.replace(`/simulador/pessoa-fisica/conta-luz?productId=${productId}`)
     }
-  }, [router, productId])
+  }, [router, productId, rateMonthly])
 
   const installment = useMemo(() => {
     if (!data) return 0
@@ -129,12 +155,15 @@ export function ContaLuzResultado({ productId, productName, rateMonthly }: Props
 
       <button
         type="button"
-        onClick={() =>
-          router.push(`/solicitar/${productId}?amount=${data.valorDesejado}&term=${parcelas}`)
-        }
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
+        disabled={!simulationId || isQualifying}
+        onClick={async () => {
+          if (!simulationId) return
+          setIsQualifying(true)
+          await qualifySimulation(simulationId)
+        }}
+        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        Quero contratar →
+        {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
     </div>
   )

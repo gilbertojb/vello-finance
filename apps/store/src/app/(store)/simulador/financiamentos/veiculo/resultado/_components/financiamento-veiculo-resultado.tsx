@@ -4,11 +4,13 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info } from 'lucide-react'
 import { formatCurrency, calcPMT } from '@/lib/utils/simulator'
+import { saveSimulation, qualifySimulation } from '../../../../actions'
 
 const PARCELAS_OPTIONS = [12, 24, 36, 48, 60]
 
 type SimData = {
   nome: string
+  whatsapp: string
   valorVeiculo: number
   entrada: number
   parcelas: number
@@ -23,6 +25,8 @@ export function FinanciamentoVeiculoResultado({ productId, rateMonthly }: Props)
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
   const [parcelas, setParcelas] = useState(48)
+  const [simulationId, setSimulationId] = useState<string | null>(null)
+  const [isQualifying, setIsQualifying] = useState(false)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('sim:financiamento-veiculo')
@@ -34,10 +38,34 @@ export function FinanciamentoVeiculoResultado({ productId, rateMonthly }: Props)
       const parsed: SimData = JSON.parse(stored)
       setData(parsed)
       setParcelas(parsed.parcelas)
+
+      const SIM_ID_KEY = 'sim:financiamento-veiculo:id'
+      const existingId = sessionStorage.getItem(SIM_ID_KEY)
+      if (existingId) {
+        setSimulationId(existingId)
+      } else {
+        const principal = parsed.valorVeiculo - parsed.entrada
+        const payment = calcPMT(principal, rateMonthly, parsed.parcelas)
+        saveSimulation({
+          tenantProductId: productId,
+          clientName: parsed.nome,
+          clientPhone: parsed.whatsapp,
+          desiredAmount: principal,
+          desiredTermMonths: parsed.parcelas,
+          estimatedRate: rateMonthly,
+          estimatedPayment: payment,
+          simulationData: parsed as Record<string, unknown>,
+        }).then((id: string | null) => {
+          if (id) {
+            sessionStorage.setItem(SIM_ID_KEY, id)
+            setSimulationId(id)
+          }
+        })
+      }
     } catch {
       router.replace(`/simulador/financiamentos/veiculo?productId=${productId}`)
     }
-  }, [router, productId])
+  }, [router, productId, rateMonthly])
 
   const principal = data ? data.valorVeiculo - data.entrada : 0
   const ltv = data ? Math.round((principal / data.valorVeiculo) * 100) : 0
@@ -151,14 +179,15 @@ export function FinanciamentoVeiculoResultado({ productId, rateMonthly }: Props)
       {/* CTA */}
       <button
         type="button"
-        onClick={() =>
-          router.push(
-            `/solicitar/${productId}?amount=${principal}&term=${parcelas}`,
-          )
-        }
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
+        disabled={!simulationId || isQualifying}
+        onClick={async () => {
+          if (!simulationId) return
+          setIsQualifying(true)
+          await qualifySimulation(simulationId)
+        }}
+        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        Quero contratar este financiamento →
+        {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
     </div>
   )

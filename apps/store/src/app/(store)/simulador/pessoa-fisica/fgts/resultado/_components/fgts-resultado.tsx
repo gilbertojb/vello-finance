@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info, AlertTriangle } from 'lucide-react'
 import { formatCurrency, formatRate } from '@/lib/utils/simulator'
+import { saveSimulation, qualifySimulation } from '../../../../actions'
 
 type Props = {
   productId: string
@@ -20,6 +21,8 @@ type SimData = {
 export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
+  const [simulationId, setSimulationId] = useState<string | null>(null)
+  const [isQualifying, setIsQualifying] = useState(false)
 
   useEffect(() => {
     const stored = sessionStorage.getItem('sim:fgts')
@@ -28,11 +31,34 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
       return
     }
     try {
-      setData(JSON.parse(stored))
+      const parsed: SimData = JSON.parse(stored)
+      setData(parsed)
+
+      const SIM_ID_KEY = 'sim:fgts:id'
+      const existingId = sessionStorage.getItem(SIM_ID_KEY)
+      if (existingId) {
+        setSimulationId(existingId)
+      } else {
+        saveSimulation({
+          tenantProductId: productId,
+          clientName: parsed.nome,
+          clientPhone: parsed.whatsapp,
+          desiredAmount: parsed.saldoFgts * 0.75,
+          desiredTermMonths: 120,
+          estimatedRate: rateMonthly,
+          estimatedPayment: 0,
+          simulationData: parsed as Record<string, unknown>,
+        }).then((id: string | null) => {
+          if (id) {
+            sessionStorage.setItem(SIM_ID_KEY, id)
+            setSimulationId(id)
+          }
+        })
+      }
     } catch {
       router.replace(`/simulador/pessoa-fisica/fgts?productId=${productId}`)
     }
-  }, [router, productId])
+  }, [router, productId, rateMonthly])
 
   if (!data) {
     return (
@@ -120,10 +146,15 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
 
       <button
         type="button"
-        onClick={() => router.push(`/solicitar/${productId}`)}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
+        disabled={!simulationId || isQualifying}
+        onClick={async () => {
+          if (!simulationId) return
+          setIsQualifying(true)
+          await qualifySimulation(simulationId)
+        }}
+        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        Quero contratar →
+        {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
     </div>
   )

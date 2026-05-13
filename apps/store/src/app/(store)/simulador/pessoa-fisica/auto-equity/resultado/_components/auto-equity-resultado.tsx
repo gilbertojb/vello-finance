@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCw, Info, Download } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
+import { saveSimulation, qualifySimulation } from '../../../../actions'
 
 const PARCELAS_OPTIONS = [24, 36, 48, 60]
 
@@ -24,12 +25,16 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
   const router = useRouter()
   const [data, setData] = useState<{
     nome: string
+    whatsapp: string
     valorFipe: number
     valorCredito: number
     marca: string
     ano: number
+    parcelas?: number
   } | null>(null)
   const [parcelas, setParcelas] = useState(48)
+  const [simulationId, setSimulationId] = useState<string | null>(null)
+  const [isQualifying, setIsQualifying] = useState(false)
 
   useEffect(() => {
     const key = isPj ? 'sim:auto-equity-pj' : 'sim:auto-equity'
@@ -40,11 +45,37 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
       return
     }
     try {
-      setData(JSON.parse(stored))
+      const parsed = JSON.parse(stored)
+      setData(parsed)
+      if (parsed.parcelas) setParcelas(parsed.parcelas)
+
+      const SIM_ID_KEY = isPj ? 'sim:auto-equity-pj:id' : 'sim:auto-equity:id'
+      const existingId = sessionStorage.getItem(SIM_ID_KEY)
+      if (existingId) {
+        setSimulationId(existingId)
+      } else {
+        const termMonths = parsed.parcelas ?? 48
+        const payment = calcPRICE(parsed.valorCredito, rateMonthly, termMonths)
+        saveSimulation({
+          tenantProductId: productId,
+          clientName: parsed.nome,
+          clientPhone: parsed.whatsapp ?? '',
+          desiredAmount: parsed.valorCredito,
+          desiredTermMonths: termMonths,
+          estimatedRate: rateMonthly,
+          estimatedPayment: payment,
+          simulationData: parsed as Record<string, unknown>,
+        }).then((id: string | null) => {
+          if (id) {
+            sessionStorage.setItem(SIM_ID_KEY, id)
+            setSimulationId(id)
+          }
+        })
+      }
     } catch {
       router.replace(route + `?productId=${productId}`)
     }
-  }, [router, isPj, productId])
+  }, [router, isPj, productId, rateMonthly])
 
   const ltv = data ? Math.round((data.valorCredito / data.valorFipe) * 100) : 0
 
@@ -144,10 +175,15 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
 
       <button
         type="button"
-        onClick={() => router.push(`/solicitar/${productId}?amount=${data.valorCredito}&term=${parcelas}`)}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
+        disabled={!simulationId || isQualifying}
+        onClick={async () => {
+          if (!simulationId) return
+          setIsQualifying(true)
+          await qualifySimulation(simulationId)
+        }}
+        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        Quero contratar este crédito →
+        {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
 
       <div className="flex items-center justify-center gap-6 pt-2">
