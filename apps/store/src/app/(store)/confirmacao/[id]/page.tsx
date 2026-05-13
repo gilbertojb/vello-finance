@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
-import { getProposalConfirmation } from '../../queries'
+import { getSimulation } from '../../queries'
 
 export const metadata: Metadata = { title: 'Solicitação recebida' }
 
@@ -13,7 +13,7 @@ type Props = { params: Promise<{ id: string }> }
 export default async function ConfirmationPage({ params }: Props) {
   const { id } = await params
   const tenantId = (await headers()).get('x-tenant-id') ?? ''
-  const proposal = await getProposalConfirmation(id, tenantId)
+  const proposal = await getSimulation(id, tenantId)
   if (!proposal) notFound()
 
   const protocol = proposal.id.replace(/-/g, '').slice(0, 8).toUpperCase()

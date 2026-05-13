@@ -53,23 +53,50 @@ export async function getTenantProduct(tenantProductId: string, tenantId: string
   return data
 }
 
-export async function getProposalConfirmation(proposalId: string, tenantId: string) {
+export async function listActiveProductsByCategory(
+  tenantId: string,
+  category: 'pessoa_fisica' | 'pessoa_juridica' | 'financiamentos',
+) {
   const supabase = createServiceClient()
-  const { data, error } = await supabase
-    .from('proposals')
+  const { data } = await supabase
+    .from('tenant_products')
+    .select(`
+      id,
+      cover_url,
+      products (
+        id,
+        name,
+        description,
+        min_amount,
+        max_amount,
+        min_term_months,
+        max_term_months,
+        min_rate_monthly,
+        max_rate_monthly,
+        product_type:product_types ( slug, category )
+      )
+    `)
+    .eq('tenant_id', tenantId)
+    .eq('is_active', true)
+    .eq('products.product_types.category', category)
+    .order('created_at')
+  return (data ?? []).filter((tp) => tp.products !== null)
+}
+
+export async function getSimulation(simulationId: string, tenantId: string) {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('simulations')
     .select(`
       id,
       client_name,
       desired_amount,
       desired_term_months,
-      submitted_at,
+      status,
       products ( name )
     `)
-    .eq('id', proposalId)
+    .eq('id', simulationId)
     .eq('tenant_id', tenantId)
     .single()
-  if (error) {
-    console.error('[getProposalConfirmation] id=%s tenantId=%s error=%s', proposalId, tenantId, JSON.stringify(error))
-  }
   return data
 }
