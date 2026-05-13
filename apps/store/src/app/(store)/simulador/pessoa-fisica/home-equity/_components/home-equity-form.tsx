@@ -9,7 +9,10 @@ const MIN_IMOVEL = 150_000
 const LTV_LIMIT = 0.5
 
 function formatBRL(n: number) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(n)
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(n)
 }
 
 function parseBRL(raw: string): number {
@@ -31,8 +34,12 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
   const valorImovel = parseBRL(rawImovel)
   const valorCreditoTyped = parseBRL(rawCredito)
   const limite = valorImovel * LTV_LIMIT
-  const valorCredito = Math.min(valorCreditoTyped, limite > 0 ? limite : Infinity)
-  const showWarning = valorImovel > 0 && valorCreditoTyped > limite && limite > 0
+  const valorCredito = Math.min(
+    valorCreditoTyped,
+    limite > 0 ? limite : Infinity,
+  )
+  const showWarning =
+    valorImovel > 0 && valorCreditoTyped > limite && limite > 0
   const showInstituicao = outroCredito === 'sim'
 
   const canSubmit =
@@ -55,9 +62,9 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
     }
     const key = isPj ? 'sim:home-equity-pj' : 'sim:home-equity'
     sessionStorage.setItem(key, JSON.stringify(payload))
-    
-    const route = isPj 
-      ? '/simulador/pessoa-juridica/home-equity-pj/resultado' 
+
+    const route = isPj
+      ? '/simulador/pessoa-juridica/home-equity-pj/resultado'
       : '/simulador/pessoa-fisica/home-equity/resultado'
     router.push(`${route}?productId=${productId}`)
   }
@@ -73,11 +80,15 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
 
       {/* Nome */}
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
+        <label
+          htmlFor="nome"
+          className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+        >
           Seu nome completo <span className="text-red-400">*</span>
         </label>
         <input
           type="text"
+          id="nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
@@ -87,7 +98,10 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
 
       {/* WhatsApp */}
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
+        <label
+          htmlFor="whatsapp"
+          className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+        >
           WhatsApp para contato <span className="text-red-400">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
@@ -97,6 +111,7 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
           <div className="h-5 w-px bg-surface-foreground/12" />
           <input
             type="tel"
+            id="whatsapp"
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             placeholder="(11) 99999-9999"
@@ -107,7 +122,10 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
 
       {/* Valor do imóvel */}
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
+        <label
+          htmlFor="valorImovel"
+          className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+        >
           Valor de avaliação do imóvel <span className="text-red-400">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
@@ -116,12 +134,14 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
           </span>
           <input
             type="text"
+            id="valorImovel"
             inputMode="numeric"
             value={rawImovel}
             onChange={(e) => setRawImovel(e.target.value.replace(/\D/g, ''))}
-            onBlur={() => valorImovel > 0 && setRawImovel(
-              new Intl.NumberFormat('pt-BR').format(valorImovel)
-            )}
+            onBlur={() =>
+              valorImovel > 0 &&
+              setRawImovel(new Intl.NumberFormat('pt-BR').format(valorImovel))
+            }
             placeholder="0,00"
             className="flex-1 bg-transparent py-4 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
@@ -133,8 +153,12 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
 
       {/* Valor do crédito */}
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Quanto você precisa de crédito? <span className="text-red-400">*</span>
+        <label
+          htmlFor="valorCredito"
+          className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+        >
+          Quanto você precisa de crédito?{' '}
+          <span className="text-red-400">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">
@@ -142,12 +166,16 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
           </span>
           <input
             type="text"
+            id="valorCredito"
             inputMode="numeric"
             value={rawCredito}
             onChange={(e) => setRawCredito(e.target.value.replace(/\D/g, ''))}
-            onBlur={() => valorCreditoTyped > 0 && setRawCredito(
-              new Intl.NumberFormat('pt-BR').format(valorCreditoTyped)
-            )}
+            onBlur={() =>
+              valorCreditoTyped > 0 &&
+              setRawCredito(
+                new Intl.NumberFormat('pt-BR').format(valorCreditoTyped),
+              )
+            }
             placeholder="0,00"
             className="flex-1 bg-transparent py-4 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
@@ -167,31 +195,40 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
 
       {/* Já tem crédito em outro banco */}
       <div>
-        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Já tem crédito solicitado em outro banco? <span className="text-red-400">*</span>
+        <label className="block text-sm font-semibold text-surface-foreground">
+          <span className="mb-1.5 block">
+            Já tem crédito solicitado em outro banco? <span className="text-red-400">*</span>
+          </span>
+          <div className="relative">
+            <select
+              id="outroCredito"
+              value={outroCredito}
+              onChange={(e) => setOutroCredito(e.target.value)}
+              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-[15px] text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="" disabled>
+                Selecione...
+              </option>
+              <option value="nao">Não</option>
+              <option value="sim">Sim, já tenho uma proposta</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" />
+          </div>
         </label>
-        <div className="relative">
-          <select
-            value={outroCredito}
-            onChange={(e) => setOutroCredito(e.target.value)}
-            className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-[15px] text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="" disabled>Selecione...</option>
-            <option value="nao">Não</option>
-            <option value="sim">Sim, já tenho uma proposta</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" />
-        </div>
       </div>
 
       {/* Banco / instituição (condicional) */}
       {showInstituicao && (
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
+          <label
+            htmlFor="instituicao"
+            className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+          >
             Qual banco ou instituição? <span className="text-red-400">*</span>
           </label>
           <input
             type="text"
+            id="instituicao"
             value={instituicao}
             onChange={(e) => setInstituicao(e.target.value)}
             placeholder="Ex: Itaú, Bradesco..."
