@@ -46,7 +46,13 @@ export default async function FinanciamentoVeiculoPage({ searchParams }: Props) 
             A simulação é 100% gratuita, segura e sem compromisso. Leva menos de 1 minuto.
           </p>
 
-          <FinanciamentoVeiculoForm productId={productId} />
+          <FinanciamentoVeiculoForm
+            productId={productId}
+            minTermMonths={tp.products.min_term_months ?? 12}
+            maxTermMonths={tp.products.max_term_months ?? 60}
+            maxAmount={tp.products.max_amount ?? undefined}
+            minAmount={tp.products.min_amount ?? 10000}
+          />
         </div>
       </div>
     </div>

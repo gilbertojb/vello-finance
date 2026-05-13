@@ -46,7 +46,13 @@ export default async function FinanciamentoImovelPage({ searchParams }: Props) {
             A simulação é 100% gratuita, segura e sem compromisso. Leva menos de 1 minuto.
           </p>
 
-          <FinanciamentoImovelForm productId={productId} />
+          <FinanciamentoImovelForm
+            productId={productId}
+            minTermMonths={tp.products.min_term_months ?? 60}
+            maxTermMonths={tp.products.max_term_months ?? 360}
+            maxAmount={tp.products.max_amount ?? undefined}
+            minAmount={tp.products.min_amount ?? 150000}
+          />
         </div>
       </div>
     </div>

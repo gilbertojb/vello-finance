@@ -46,7 +46,13 @@ export default async function ContaLuzPage({ searchParams }: Props) {
             A simulação é 100% gratuita, segura e sem compromisso. Leva menos de 1 minuto.
           </p>
 
-          <ContaLuzForm productId={productId} />
+          <ContaLuzForm
+            productId={productId}
+            minTermMonths={tp.products.min_term_months ?? 6}
+            maxTermMonths={tp.products.max_term_months ?? 24}
+            maxAmount={tp.products.max_amount ?? 2100}
+            minAmount={tp.products.min_amount ?? undefined}
+          />
         </div>
       </div>
     </div>

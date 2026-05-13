@@ -47,7 +47,13 @@ export default async function AutoEquityDadosPage({ searchParams }: Props) {
             A simulação é 100% gratuita, segura e sem compromisso. Leva menos de 1 minuto.
           </p>
 
-          <AutoEquityForm productId={productId} />
+          <AutoEquityForm
+            productId={productId}
+            minTermMonths={tp.products.min_term_months ?? 12}
+            maxTermMonths={tp.products.max_term_months ?? 90}
+            maxAmount={tp.products.max_amount ?? undefined}
+            minAmount={tp.products.min_amount ?? 10000}
+          />
         </div>
       </div>
     </div>

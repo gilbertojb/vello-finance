@@ -46,7 +46,13 @@ export default async function EmprestimoPessoalPage({ searchParams }: Props) {
             A simulação é 100% gratuita, segura e sem compromisso. Leva menos de 1 minuto.
           </p>
 
-          <EmprestimoPessoalForm productId={productId} />
+          <EmprestimoPessoalForm
+            productId={productId}
+            minTermMonths={tp.products.min_term_months ?? 6}
+            maxTermMonths={tp.products.max_term_months ?? 48}
+            maxAmount={tp.products.max_amount ?? 10000}
+            minAmount={tp.products.min_amount ?? undefined}
+          />
         </div>
       </div>
     </div>
