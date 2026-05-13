@@ -3,9 +3,9 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '../../../../queries'
-import { SimuladorStepIndicator } from '../../../../_components/simulador-step-indicator'
-import { AutoEquityForm } from '../../../pessoa-fisica/auto-equity/_components/auto-equity-form'
+import { getTenantProduct } from '../../../queries'
+import { SimuladorStepIndicator } from '../../../_components/simulador-step-indicator'
+import { AutoEquityForm } from '../../pessoa-fisica/auto-equity/_components/auto-equity-form'
 
 export const metadata: Metadata = { title: 'Empréstimo com Garantia de Veículo PJ' }
 

@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '../../../../../queries'
-import { SimuladorStepIndicator } from '../../../../../_components/simulador-step-indicator'
+import { getTenantProduct } from '../../../../queries'
+import { SimuladorStepIndicator } from '../../../../_components/simulador-step-indicator'
 import { AutoEquityResultado } from '../../../pessoa-fisica/auto-equity/resultado/_components/auto-equity-resultado'
 
 export const metadata: Metadata = { title: 'Sua simulação está pronta' }
