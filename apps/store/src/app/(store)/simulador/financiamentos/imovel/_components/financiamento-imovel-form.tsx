@@ -1,28 +1,44 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils/simulator'
+import { formatCurrency, generateTermOptions } from '@/lib/utils/simulator'
 
-const MIN_IMOVEL = 150_000
 const ENTRADA_MIN_RATIO = 0.2
-const PARCELAS_OPTIONS = [60, 120, 180, 240, 300, 360]
 
 function parseBRL(raw: string): number {
   return Math.max(0, Number(raw.replace(/\D/g, '')) || 0)
 }
 
-type Props = { productId: string }
+type Props = {
+  productId: string
+  minTermMonths: number
+  maxTermMonths: number
+  minAmount?: number
+  maxAmount?: number
+}
 
-export function FinanciamentoImovelForm({ productId }: Props) {
+export function FinanciamentoImovelForm({
+  productId,
+  minTermMonths,
+  maxTermMonths,
+  minAmount,
+  maxAmount: _maxAmount,
+}: Props) {
+  const MIN_IMOVEL = minAmount ?? 150_000
   const router = useRouter()
+
+  const PARCELAS_OPTIONS = useMemo(
+    () => generateTermOptions(minTermMonths, maxTermMonths),
+    [minTermMonths, maxTermMonths],
+  )
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawImovel, setRawImovel] = useState('')
   const [rawEntrada, setRawEntrada] = useState('')
-  const [parcelas, setParcelas] = useState(360)
+  const [parcelas, setParcelas] = useState(() => maxTermMonths ?? 360)
 
   const valorImovel = parseBRL(rawImovel)
   const entrada = parseBRL(rawEntrada)

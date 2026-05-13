@@ -3,16 +3,26 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, ChevronDown } from 'lucide-react'
-import { formatBRL } from '@/lib/utils/simulator'
+import { formatCurrency } from '@/lib/utils/simulator'
 
 type Props = {
   productId: string
   isPj?: boolean
+  minTermMonths: number
+  maxTermMonths: number
+  minAmount?: number
+  maxAmount?: number
 }
 
-const MIN_FIPE = 10000
-
-export function AutoEquityForm({ productId, isPj = false }: Props) {
+export function AutoEquityForm({
+  productId,
+  isPj = false,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
+  minAmount,
+  maxAmount: _maxAmount,
+}: Props) {
+  const MIN_FIPE = minAmount ?? 10000
   const router = useRouter()
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
@@ -156,7 +166,7 @@ export function AutoEquityForm({ productId, isPj = false }: Props) {
             className="flex-1 bg-transparent py-4 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
-        <p className="mt-1.5 text-xs text-surface-foreground/50">Valor mínimo: {formatBRL(MIN_FIPE)}</p>
+        <p className="mt-1.5 text-xs text-surface-foreground/50">Valor mínimo: {formatCurrency(MIN_FIPE)}</p>
       </div>
 
       {/* Valor do crédito */}
@@ -184,7 +194,7 @@ export function AutoEquityForm({ productId, isPj = false }: Props) {
           <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
             <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
-              Valor ajustado ao limite de 70% ({formatBRL(limite)})
+              Valor ajustado ao limite de 70% ({formatCurrency(limite)})
             </p>
           </div>
         )}

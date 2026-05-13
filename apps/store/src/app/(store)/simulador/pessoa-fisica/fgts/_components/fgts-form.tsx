@@ -3,9 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-type Props = { productId: string }
+type Props = { productId: string; minRateMonthly?: number }
 
-export function FgtsForm({ productId }: Props) {
+export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) {
   const router = useRouter()
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')

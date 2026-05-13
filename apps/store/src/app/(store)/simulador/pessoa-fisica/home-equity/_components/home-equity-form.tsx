@@ -4,25 +4,34 @@ import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
 import { ChevronDown } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/simulator'
 
-const MIN_IMOVEL = 150_000
 const LTV_LIMIT = 0.5
-
-function formatBRL(n: number) {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  }).format(n)
-}
 
 function parseBRL(raw: string): number {
   return Math.max(0, Number(raw.replace(/\D/g, '')) || 0)
 }
 
-type Props = { productId: string; isPj?: boolean }
+type Props = {
+  productId: string
+  isPj?: boolean
+  minTermMonths: number
+  maxTermMonths: number
+  minAmount?: number
+  maxAmount?: number
+}
 
-export function HomeEquityForm({ productId, isPj = false }: Props) {
+export function HomeEquityForm({
+  productId,
+  isPj = false,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
+  minAmount,
+  maxAmount: _maxAmount,
+}: Props) {
   const router = useRouter()
+
+  const MIN_IMOVEL = minAmount ?? 150_000
 
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
@@ -147,7 +156,7 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
           />
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">
-          Valor mínimo: {formatBRL(MIN_IMOVEL)}
+          Valor mínimo: {formatCurrency(MIN_IMOVEL)}
         </p>
       </div>
 
@@ -187,7 +196,7 @@ export function HomeEquityForm({ productId, isPj = false }: Props) {
           <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
             <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
-              Valor ajustado ao limite de 50% do imóvel ({formatBRL(limite)})
+              Valor ajustado ao limite de 50% do imóvel ({formatCurrency(limite)})
             </p>
           </div>
         )}

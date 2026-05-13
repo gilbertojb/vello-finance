@@ -1,15 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, ChevronDown } from 'lucide-react'
+import { generateTermOptions } from '@/lib/utils/simulator'
 
-const PARCELAS_OPTIONS = [6, 12, 18, 24]
+type Props = {
+  productId: string
+  minTermMonths: number
+  maxTermMonths: number
+  maxAmount?: number
+  minAmount?: number
+}
 
-type Props = { productId: string }
-
-export function AntecipacaoReceiveisForm({ productId }: Props) {
+export function AntecipacaoReceiveisForm({
+  productId,
+  minTermMonths,
+  maxTermMonths,
+  maxAmount: _maxAmount,
+  minAmount: _minAmount,
+}: Props) {
   const router = useRouter()
+  const PARCELAS_OPTIONS = useMemo(
+    () => generateTermOptions(minTermMonths, maxTermMonths),
+    [minTermMonths, maxTermMonths],
+  )
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawRecebiveis, setRawRecebiveis] = useState('')

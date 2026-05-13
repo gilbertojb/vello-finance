@@ -1,15 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle, ChevronDown } from 'lucide-react'
+import { generateTermOptions, formatCurrency } from '@/lib/utils/simulator'
 
-const MAX_VALOR = 2100
-const PARCELAS_OPTIONS = [6, 12, 18, 24]
+type Props = {
+  productId: string
+  minTermMonths: number
+  maxTermMonths: number
+  maxAmount?: number
+  minAmount?: number
+}
 
-type Props = { productId: string }
-
-export function ContaLuzForm({ productId }: Props) {
+export function ContaLuzForm({
+  productId,
+  minTermMonths,
+  maxTermMonths,
+  maxAmount,
+  minAmount: _minAmount,
+}: Props) {
   const router = useRouter()
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
@@ -18,14 +28,20 @@ export function ContaLuzForm({ productId }: Props) {
   const [parcelas, setParcelas] = useState<number | null>(null)
   const [showMaxWarning, setShowMaxWarning] = useState(false)
 
+  const teto = maxAmount ?? 2100
+  const PARCELAS_OPTIONS = useMemo(
+    () => generateTermOptions(minTermMonths, maxTermMonths),
+    [minTermMonths, maxTermMonths],
+  )
+
   const valorTyped = Number(rawValor.replace(/\D/g, '')) / 100
-  const valorDesejado = valorTyped > MAX_VALOR ? MAX_VALOR : valorTyped
+  const valorDesejado = valorTyped > teto ? teto : valorTyped
 
   const handleValorChange = (v: string) => {
     const digits = v.replace(/\D/g, '')
     setRawValor(digits)
     const parsed = Number(digits) / 100
-    if (parsed > MAX_VALOR) {
+    if (parsed > teto) {
       setShowMaxWarning(true)
     } else {
       setShowMaxWarning(false)
@@ -129,18 +145,18 @@ export function ContaLuzForm({ productId }: Props) {
             onChange={(e) => handleValorChange(e.target.value)}
             onBlur={() =>
               valorTyped > 0 &&
-              setRawValor(new Intl.NumberFormat('pt-BR').format(valorTyped > MAX_VALOR ? MAX_VALOR : valorTyped))
+              setRawValor(new Intl.NumberFormat('pt-BR').format(valorTyped > teto ? teto : valorTyped))
             }
             placeholder="0,00"
             className="flex-1 bg-transparent py-4 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
-        <p className="mt-1.5 text-xs text-surface-foreground/50">Valor máximo: R$ 2.100,00</p>
+        <p className="mt-1.5 text-xs text-surface-foreground/50">Valor máximo: {formatCurrency(teto)}</p>
         {showMaxWarning && (
           <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
             <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
-              Valor máximo: R$ 2.100,00
+              Valor máximo: {formatCurrency(teto)}
             </p>
           </div>
         )}
