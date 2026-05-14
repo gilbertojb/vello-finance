@@ -1,4 +1,4 @@
-import { LayoutDashboard, Package, Settings } from 'lucide-react'
+import { LayoutDashboard, Package, Settings, ClipboardList } from 'lucide-react'
 
 import {
   SidebarGroup,
@@ -27,6 +27,14 @@ export function NavMain() {
               href="/products"
               icon={<Package className="size-4" />}
               label="Produtos"
+            />
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <NavLink
+              href="/simulations"
+              icon={<ClipboardList className="size-4" />}
+              label="Simulações"
             />
           </SidebarMenuItem>
 
