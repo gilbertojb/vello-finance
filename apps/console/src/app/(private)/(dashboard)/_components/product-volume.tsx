@@ -1,20 +1,12 @@
-import { Card } from '@/components/ui/card'
-
 import type { ProductVolume } from '../queries'
 
-const PALETTE = [
-  '#F59E0B',
-  '#10B981',
-  '#3B82F6',
-  '#EF4444',
-  '#8B5CF6',
-  '#F97316',
-  '#EC4899',
-  '#14B8A6',
-]
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const PALETTE = ['#e9c77b', '#5a8a4c', '#c9a47a', '#8b5e3c', '#c45947', '#a87f3a', '#3b5e34']
 
-function brl(value: number): string {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+function brl(v: number): string {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`
+  if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(1)}k`
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
 interface Props {
@@ -23,51 +15,114 @@ interface Props {
 
 export function ProductVolume({ data }: Props) {
   return (
-    <Card className="p-5">
-      <div className="mb-4">
-        <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-          Produtos
+    <div
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid rgba(233,199,123,.10)',
+        borderRadius: 14,
+        padding: '20px 22px',
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <h3
+          style={{
+            fontWeight: 600,
+            fontSize: 15,
+            color: '#f6efe4',
+            margin: '0 0 3px',
+            letterSpacing: '-.005em',
+          }}
+        >
+          Volume por linha
+        </h3>
+        <p style={{ fontSize: 12, color: 'rgba(246,239,228,.45)', margin: 0 }}>
+          Top produtos contratados
         </p>
-        <h2 className="font-heading text-xl font-medium">Volume por linha</h2>
-        <p className="text-xs text-muted-foreground">Top produtos contratados</p>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {data.map((item, idx) => {
           const color = PALETTE[idx % PALETTE.length]!
           return (
-            <div key={item.name} className="flex items-center gap-3">
-              <span
-                className="size-2 shrink-0 rounded-full"
-                style={{ backgroundColor: color }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="mb-0.5 flex items-center justify-between gap-2">
-                  <span className="truncate text-xs font-medium">{item.name}</span>
-                  <span className="font-mono text-xs font-semibold tabular-nums">
-                    {brl(item.volume)}
-                  </span>
-                </div>
-                <p className="mb-1 text-[10px] text-muted-foreground">
-                  {item.count} proposta{item.count !== 1 ? 's' : ''}
-                </p>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${item.percentage}%`, backgroundColor: color }}
-                  />
-                </div>
+            <div key={item.name}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  marginBottom: 6,
+                }}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 2,
+                    backgroundColor: color,
+                    flexShrink: 0,
+                    display: 'inline-block',
+                  }}
+                />
+                <span
+                  style={{
+                    flex: 1,
+                    fontSize: 12.5,
+                    color: 'rgba(246,239,228,.7)',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {item.name}
+                </span>
+                <span
+                  style={{
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: '#f6efe4',
+                    fontVariantNumeric: 'tabular-nums',
+                    flexShrink: 0,
+                  }}
+                >
+                  {brl(item.volume)}
+                </span>
+              </div>
+              <div
+                style={{
+                  height: 5,
+                  borderRadius: 3,
+                  background: 'rgba(246,239,228,.06)',
+                  overflow: 'hidden',
+                }}
+              >
+                <div
+                  style={{
+                    height: '100%',
+                    borderRadius: 3,
+                    width: `${item.percentage}%`,
+                    backgroundColor: color,
+                    transition: 'width 500ms ease',
+                  }}
+                />
               </div>
             </div>
           )
         })}
 
         {data.length === 0 && (
-          <p className="py-4 text-center text-xs text-muted-foreground">
+          <p
+            style={{
+              padding: '16px 0',
+              textAlign: 'center',
+              fontSize: 12,
+              color: 'rgba(246,239,228,.38)',
+            }}
+          >
             Nenhum produto com propostas ainda.
           </p>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

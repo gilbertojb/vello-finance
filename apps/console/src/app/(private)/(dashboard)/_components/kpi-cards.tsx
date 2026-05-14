@@ -1,103 +1,240 @@
 import { Activity, CheckCircle, TrendingUp, Wallet } from 'lucide-react'
 
-import { Card } from '@/components/ui/card'
-
 import type { DashboardKpis } from '../queries'
 
-function brl(value: number): string {
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const GOLD = '#e9c77b'
+const GREEN_ACC = '#a8d490'
+const RED_ACC = '#e8a092'
+const TAN = '#c9a47a'
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function brl(v: number): string {
+  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`
+  if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(1)}k`
+  return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-interface Props {
-  kpis: DashboardKpis
+function brlM(v: number): string {
+  return brl(v)
 }
 
-function GrowthBadge({ value }: { value: number }) {
-  const positive = value >= 0
+// ── Sparkline ─────────────────────────────────────────────────────────────────
+function Spark({ data, color = GOLD }: { data: number[]; color?: string }) {
+  if (data.length < 2) return null
+  const w = 80, h = 28
+  const max = Math.max(...data)
+  const min = Math.min(...data)
+  const pts = data
+    .map((v, i) => {
+      const x = (i / (data.length - 1)) * w
+      const y = h - ((v - min) / (max - min || 1)) * h
+      return `${x},${y}`
+    })
+    .join(' ')
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
+      <polyline
+        points={`0,${h} ${pts} ${w},${h}`}
+        fill={color}
+        fillOpacity="0.08"
+        stroke="none"
+      />
+      <polyline
+        points={pts}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+// ── Delta ─────────────────────────────────────────────────────────────────────
+function Delta({ value, suffix = '%' }: { value: number; suffix?: string }) {
+  const up = value >= 0
   return (
     <span
-      className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-        positive
-          ? 'bg-emerald-500/15 text-emerald-400'
-          : 'bg-red-500/15 text-red-400'
-      }`}
+      style={{
+        color: up ? '#a8d490' : '#e8a092',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontWeight: 600,
+        fontSize: 11.5,
+      }}
     >
-      {positive ? '+' : ''}
-      {value.toFixed(1)}%
+      {up ? '▲' : '▼'} {Math.abs(value).toFixed(1)}{suffix}
     </span>
   )
 }
 
+// ── KPI Card ───────────────────────────────────────────────────────────────────
+interface CardProps {
+  label: string
+  value: string
+  goldVal?: boolean
+  featured?: boolean
+  icon: React.ReactNode
+  spark: number[]
+  sparkColor?: string
+  delta: React.ReactNode
+  foot?: string
+}
+
+function KpiCard({
+  label,
+  value,
+  goldVal,
+  featured,
+  icon,
+  spark,
+  sparkColor = GOLD,
+  delta,
+  foot,
+}: CardProps) {
+  return (
+    <div
+      style={{
+        background: featured
+          ? 'linear-gradient(140deg,#1d150f 0%,#0d0a07 80%)'
+          : 'var(--color-card)',
+        border: `1px solid ${featured ? 'rgba(233,199,123,.2)' : 'rgba(233,199,123,.10)'}`,
+        borderRadius: 14,
+        padding: '20px 22px',
+      }}
+    >
+      {/* Head */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 14,
+        }}
+      >
+        <span
+          style={{
+            fontSize: 11,
+            letterSpacing: '.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(246,239,228,.55)',
+            fontWeight: 500,
+          }}
+        >
+          {label}
+        </span>
+        <span
+          style={{
+            width: 30,
+            height: 30,
+            borderRadius: 8,
+            background: 'rgba(233,199,123,.08)',
+            color: GOLD,
+            display: 'grid',
+            placeItems: 'center',
+          }}
+        >
+          {icon}
+        </span>
+      </div>
+
+      {/* Value */}
+      <div
+        style={{
+          fontSize: 30,
+          fontWeight: 600,
+          letterSpacing: '-.025em',
+          lineHeight: 1,
+          color: goldVal ? GOLD : '#f6efe4',
+        }}
+      >
+        {value}
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: 14,
+          fontSize: 11.5,
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {delta}
+          {foot && (
+            <span style={{ fontSize: 10.5, color: 'rgba(246,239,228,.38)' }}>{foot}</span>
+          )}
+        </div>
+        <Spark data={spark} color={sparkColor} />
+      </div>
+    </div>
+  )
+}
+
+// ── Props ──────────────────────────────────────────────────────────────────────
+interface Props {
+  kpis: DashboardKpis
+}
+
 export function KpiCards({ kpis }: Props) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Card 1 — Volume contratado */}
-      <Card className="p-5">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Volume Contratado
-          </p>
-          <Wallet className="size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p className="mt-2 text-2xl font-bold text-amber-400">
-          {brl(kpis.volumeContratado)}
-        </p>
-        <div className="mt-1.5 flex items-center justify-between gap-2">
-          <GrowthBadge value={kpis.simsGrowth} />
-          <span className="text-[11px] text-muted-foreground">
-            {kpis.activeProposals} propostas ativas
-          </span>
-        </div>
-      </Card>
+    <div
+      style={{
+        display: 'grid',
+        gap: 12,
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      }}
+    >
+      {/* Card 1 — Volume Contratado (featured) */}
+      <KpiCard
+        featured
+        goldVal
+        label="Volume Contratado"
+        value={brl(kpis.volumeContratado)}
+        icon={<Wallet size={15} />}
+        spark={[38, 42, 40, 45, 48, 52, 50, 55, 60, 58, 62, 65]}
+        sparkColor={GOLD}
+        delta={<Delta value={kpis.simsGrowth} />}
+        foot={`${kpis.activeProposals} propostas ativas`}
+      />
 
-      {/* Card 2 — Simulações 30d */}
-      <Card className="p-5">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Simulações (30D)
-          </p>
-          <Activity className="size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p className="mt-2 text-2xl font-bold">
-          {kpis.sims30Count.toLocaleString('pt-BR')}
-        </p>
-        <div className="mt-1.5 flex items-center justify-between gap-2">
-          <GrowthBadge value={kpis.simsGrowth} />
-          <span className="text-[11px] text-muted-foreground">
-            {brl(kpis.sims30Volume)} simulados
-          </span>
-        </div>
-      </Card>
+      {/* Card 2 — Simulações (30d) */}
+      <KpiCard
+        label="Simulações (30d)"
+        value={kpis.sims30Count.toLocaleString('pt-BR')}
+        icon={<Activity size={15} />}
+        spark={[12, 14, 11, 18, 16, 22, 28, 26, 31, 29, 34, 38]}
+        sparkColor={GREEN_ACC}
+        delta={<Delta value={kpis.simsGrowth} />}
+        foot={`${brlM(kpis.sims30Volume)} simulados`}
+      />
 
-      {/* Card 3 — Conversão */}
-      <Card className="p-5">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Taxa de Conversão
-          </p>
-          <TrendingUp className="size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p className="mt-2 text-2xl font-bold">
-          {kpis.conversionRate.toFixed(1)}%
-        </p>
-        <p className="mt-1.5 text-[11px] text-muted-foreground">
-          simulação → proposta
-        </p>
-      </Card>
+      {/* Card 3 — Taxa de Conversão */}
+      <KpiCard
+        label="Taxa de Conversão"
+        value={`${kpis.conversionRate.toFixed(1)}%`}
+        icon={<TrendingUp size={15} />}
+        spark={[8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 12]}
+        sparkColor={TAN}
+        delta={<Delta value={0.0} />}
+        foot="simulação → proposta"
+      />
 
       {/* Card 4 — Desembolsado */}
-      <Card className="p-5">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Desembolsado
-          </p>
-          <CheckCircle className="size-4 shrink-0 text-muted-foreground" />
-        </div>
-        <p className="mt-2 text-2xl font-bold">
-          {brl(kpis.disbursed)}
-        </p>
-        <p className="mt-1.5 text-[11px] text-muted-foreground">esta semana</p>
-      </Card>
+      <KpiCard
+        label="Desembolsado"
+        value={brl(kpis.disbursed)}
+        icon={<CheckCircle size={15} />}
+        spark={[5, 8, 6, 9, 11, 10, 13, 12, 11, 14, 13, 15]}
+        sparkColor={RED_ACC}
+        delta={<Delta value={kpis.disbursedGrowth} />}
+        foot="esta semana"
+      />
     </div>
   )
 }

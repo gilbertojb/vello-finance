@@ -1,8 +1,11 @@
 import { CheckCircle2, FileCheck, FileText, XCircle } from 'lucide-react'
 
-import { Card } from '@/components/ui/card'
-
 import type { RecentActivity } from '../queries'
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const GREEN_ACC = '#a8d490'
+const RED_ACC = '#e8a092'
+const GOLD = '#e9c77b'
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -16,15 +19,15 @@ function relativeTime(iso: string): string {
 
 function ActivityIcon({ type, status }: { type: 'simulation' | 'proposal'; status: string }) {
   if (status === 'approved') {
-    return <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+    return <CheckCircle2 size={16} style={{ color: GREEN_ACC, flexShrink: 0 }} />
   }
   if (status === 'rejected') {
-    return <XCircle className="size-4 shrink-0 text-red-400" />
+    return <XCircle size={16} style={{ color: RED_ACC, flexShrink: 0 }} />
   }
   if (type === 'proposal') {
-    return <FileCheck className="size-4 shrink-0 text-amber-400" />
+    return <FileCheck size={16} style={{ color: GOLD, flexShrink: 0 }} />
   }
-  return <FileText className="size-4 shrink-0 text-muted-foreground" />
+  return <FileText size={16} style={{ color: 'rgba(246,239,228,.4)', flexShrink: 0 }} />
 }
 
 interface Props {
@@ -33,50 +36,105 @@ interface Props {
 
 export function ActivityFeed({ activities }: Props) {
   return (
-    <Card className="p-5">
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Atividade
-          </p>
-          <span className="relative flex size-2">
-            <span className="animate-ping absolute inline-flex size-2 rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+    <div
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid rgba(233,199,123,.10)',
+        borderRadius: 14,
+        padding: '20px 22px',
+      }}
+    >
+      {/* Header */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+          <h3
+            style={{
+              fontWeight: 600,
+              fontSize: 15,
+              color: '#f6efe4',
+              margin: 0,
+              letterSpacing: '-.005em',
+            }}
+          >
+            Últimos eventos
+          </h3>
+          {/* Live dot */}
+          <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
+            <span
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: '50%',
+                background: '#5a8a4c',
+                opacity: 0.75,
+                animation: 'ping 1s cubic-bezier(0,0,.2,1) infinite',
+              }}
+            />
+            <span
+              style={{
+                position: 'relative',
+                display: 'inline-flex',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: '#5a8a4c',
+              }}
+            />
           </span>
-          <span className="text-[10px] text-muted-foreground">ao vivo</span>
+          <span style={{ fontSize: 11, color: 'rgba(246,239,228,.38)' }}>ao vivo</span>
         </div>
-        <h2 className="font-heading text-xl font-medium">Últimos eventos</h2>
-        <p className="text-xs text-muted-foreground">Em tempo real</p>
+        <p style={{ fontSize: 12, color: 'rgba(246,239,228,.45)', margin: 0 }}>Em tempo real</p>
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        {activities.map((activity) => (
+      <div>
+        {activities.map((activity, idx) => (
           <div
             key={activity.id}
-            className="flex items-start gap-2.5 rounded-md px-1 py-2 hover:bg-muted/30 transition-colors"
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 10,
+              padding: '10px 0',
+              borderBottom:
+                idx < activities.length - 1 ? '1px solid rgba(233,199,123,.06)' : 'none',
+            }}
           >
             <ActivityIcon type={activity.type} status={activity.status} />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs leading-snug">
-                <span className="font-medium">{activity.client_name}</span>{' '}
-                <span className="text-muted-foreground">{activity.action}</span>{' '}
-                <span className="text-[10px] text-muted-foreground/70">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: '0 0 2px', fontSize: 12.5, lineHeight: 1.4 }}>
+                <span style={{ fontWeight: 600, color: '#f6efe4' }}>{activity.client_name}</span>{' '}
+                <span style={{ color: 'rgba(246,239,228,.55)' }}>{activity.action}</span>{' '}
+                <span style={{ fontSize: 11, color: 'rgba(246,239,228,.35)' }}>
                   em {activity.product}
                 </span>
               </p>
-              <p className="mt-0.5 text-[10px] text-muted-foreground">
-                {relativeTime(activity.time)}
-              </p>
             </div>
+            <span
+              style={{
+                fontSize: 11,
+                color: 'rgba(246,239,228,.35)',
+                flexShrink: 0,
+                paddingTop: 1,
+              }}
+            >
+              {relativeTime(activity.time)}
+            </span>
           </div>
         ))}
 
         {activities.length === 0 && (
-          <p className="py-4 text-center text-xs text-muted-foreground">
+          <p
+            style={{
+              padding: '16px 0',
+              textAlign: 'center',
+              fontSize: 12,
+              color: 'rgba(246,239,228,.38)',
+            }}
+          >
             Nenhuma atividade recente.
           </p>
         )}
       </div>
-    </Card>
+    </div>
   )
 }

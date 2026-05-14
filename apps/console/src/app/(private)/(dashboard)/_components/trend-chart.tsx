@@ -2,7 +2,6 @@
 
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ResponsiveContainer,
@@ -11,9 +10,11 @@ import {
   YAxis,
 } from 'recharts'
 
-import { Card } from '@/components/ui/card'
-
 import type { TrendData } from '../queries'
+
+// ── Design tokens ──────────────────────────────────────────────────────────────
+const GOLD = '#e9c77b'
+const GREEN_ACC = '#a8d490'
 
 interface Props {
   data: TrendData
@@ -31,21 +32,28 @@ function CustomTooltip({
   if (!active || !payload?.length) return null
   return (
     <div
-      className="rounded-lg border px-3 py-2 text-xs shadow-xl"
       style={{
-        backgroundColor: '#1c1917',
-        borderColor: 'rgba(255,255,255,0.1)',
+        background: '#0e0a08',
+        border: '1px solid rgba(233,199,123,.15)',
+        borderRadius: 8,
+        padding: '8px 12px',
+        fontSize: 12,
       }}
     >
-      <p className="mb-1.5 font-medium text-muted-foreground">{label}</p>
+      <p style={{ marginBottom: 6, color: 'rgba(246,239,228,.55)', fontWeight: 500 }}>{label}</p>
       {payload.map((entry) => (
-        <div key={entry.name} className="flex items-center gap-2">
+        <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span
-            className="inline-block size-2 rounded-full"
-            style={{ backgroundColor: entry.color }}
+            style={{
+              display: 'inline-block',
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              backgroundColor: entry.color,
+            }}
           />
-          <span className="text-foreground">
-            {entry.name}: <span className="font-semibold">{entry.value}</span>
+          <span style={{ color: '#f6efe4' }}>
+            {entry.name}: <span style={{ fontWeight: 600 }}>{entry.value}</span>
           </span>
         </div>
       ))}
@@ -55,30 +63,68 @@ function CustomTooltip({
 
 export function TrendChart({ data }: Props) {
   return (
-    <Card className="p-5">
-      <div className="mb-4 flex items-start justify-between gap-4">
+    <div
+      style={{
+        background: 'var(--color-card)',
+        border: '1px solid rgba(233,199,123,.10)',
+        borderRadius: 14,
+        padding: '20px 22px',
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'space-between',
+          marginBottom: 20,
+        }}
+      >
         <div>
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground">
-            Tendência
+          <h3
+            style={{
+              fontWeight: 600,
+              fontSize: 15,
+              color: '#f6efe4',
+              margin: '0 0 3px',
+              letterSpacing: '-.005em',
+            }}
+          >
+            Simulações × Propostas
+          </h3>
+          <p style={{ fontSize: 12, color: 'rgba(246,239,228,.45)', margin: 0 }}>
+            Volume diário · Últimos 30 dias
           </p>
-          <h2 className="font-heading text-xl font-medium">Simulações × Propostas</h2>
-          <p className="text-xs text-muted-foreground">Volume diário · Últimos 30 dias</p>
         </div>
-        <div className="flex shrink-0 items-center gap-4 pt-1">
-          <div className="flex items-center gap-1.5">
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              color: 'rgba(246,239,228,.55)',
+            }}
+          >
             <span
-              className="inline-block size-2 rounded-full"
-              style={{ backgroundColor: '#F59E0B' }}
+              style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, display: 'inline-block' }}
             />
-            <span className="text-xs text-muted-foreground">Simulações</span>
-          </div>
-          <div className="flex items-center gap-1.5">
+            Simulações
+          </span>
+          <span
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              fontSize: 12,
+              color: 'rgba(246,239,228,.55)',
+            }}
+          >
             <span
-              className="inline-block size-2 rounded-full"
-              style={{ backgroundColor: '#10B981' }}
+              style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN_ACC, display: 'inline-block' }}
             />
-            <span className="text-xs text-muted-foreground">Propostas</span>
-          </div>
+            Propostas
+          </span>
         </div>
       </div>
 
@@ -86,7 +132,7 @@ export function TrendChart({ data }: Props) {
         <LineChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke="rgba(233,199,123,.06)"
             vertical={false}
           />
           <XAxis
@@ -104,7 +150,7 @@ export function TrendChart({ data }: Props) {
                   x={x}
                   y={y + 12}
                   textAnchor="middle"
-                  fill="rgba(255,255,255,0.4)"
+                  fill="rgba(246,239,228,.3)"
                   fontSize={10}
                 >
                   {payload.value}
@@ -115,35 +161,32 @@ export function TrendChart({ data }: Props) {
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 10 }}
+            tick={{ fill: 'rgba(246,239,228,.3)', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             allowDecimals={false}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            wrapperStyle={{ display: 'none' }}
-          />
           <Line
             type="monotone"
             dataKey="simulations"
             name="Simulações"
-            stroke="#F59E0B"
+            stroke={GOLD}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: '#F59E0B' }}
+            activeDot={{ r: 4, fill: GOLD }}
           />
           <Line
             type="monotone"
             dataKey="proposals"
             name="Propostas"
-            stroke="#10B981"
+            stroke={GREEN_ACC}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: '#10B981' }}
+            activeDot={{ r: 4, fill: GREEN_ACC }}
           />
         </LineChart>
       </ResponsiveContainer>
-    </Card>
+    </div>
   )
 }
