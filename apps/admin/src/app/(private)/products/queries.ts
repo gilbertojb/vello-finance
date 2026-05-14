@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { ProductCategory } from './product-schema'
 
 export type ProductFilters = {
   category?: string
@@ -42,7 +43,20 @@ export async function listProducts(filters: ProductFilters = {}) {
 
   const { data, error } = await query
   if (error) throw error
-  return data
+  return (data ?? []) as Array<{
+    id: string
+    name: string
+    category: ProductCategory
+    is_active: boolean
+    product_type: { id: string; name: string; slug: string } | null
+    product_financial_partners: Array<{
+      id: string
+      if_commission_pct: number
+      vello_commission_pct: number
+      is_active: boolean
+      financial_partner: { id: string; name: string } | null
+    }>
+  }>
 }
 
 export async function getProduct(id: string) {

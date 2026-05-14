@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
-import { ProductTypeBadge } from './product-type-badge'
+import { CATEGORY_LABELS, ProductCategory } from '../product-schema'
 
 type PartnerRow = {
   financial_partner: { name: string } | null
@@ -15,6 +15,7 @@ type PartnerRow = {
 type ProductRow = {
   id: string
   name: string
+  category: ProductCategory
   is_active: boolean
   product_type: { id: string; name: string; slug: string } | null
   product_financial_partners: PartnerRow[]
@@ -45,10 +46,13 @@ export function ProductTable({
               Nome
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
-              Tipo
+              Categoria
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
               Instituições Financeiras
+            </th>
+            <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+              Esteira
             </th>
             <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
               Status
@@ -72,10 +76,22 @@ export function ProductTable({
               >
                 <td className="p-4 align-middle font-medium">{product.name}</td>
                 <td className="p-4 align-middle">
-                  <ProductTypeBadge name={product.product_type?.name ?? '-'} />
+                  <Badge variant="outline">{CATEGORY_LABELS[product.category]}</Badge>
                 </td>
                 <td className="p-4 align-middle text-muted-foreground">
                   {ifNames || '-'}
+                </td>
+                <td className="p-4 align-middle">
+                  {product.product_type ? (
+                    <Link
+                      href={`/pipelines/${product.product_type.id}/pipeline`}
+                      className="text-primary hover:underline"
+                    >
+                      {product.product_type.name}
+                    </Link>
+                  ) : (
+                    '-'
+                  )}
                 </td>
                 <td className="p-4 align-middle">
                   {product.is_active ? (
