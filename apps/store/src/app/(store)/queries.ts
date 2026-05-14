@@ -100,3 +100,37 @@ export async function getSimulation(simulationId: string, tenantId: string) {
     .single()
   return data
 }
+
+export async function getSimulationForPdf(simulationId: string, tenantId: string) {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('simulations')
+    .select(`
+      id,
+      client_name,
+      desired_amount,
+      desired_term_months,
+      estimated_rate,
+      estimated_payment,
+      simulation_data,
+      created_at,
+      products (
+        name,
+        product_type:product_types ( slug )
+      )
+    `)
+    .eq('id', simulationId)
+    .eq('tenant_id', tenantId)
+    .single()
+  return data
+}
+
+export async function getTenantBranding(tenantId: string) {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('tenant_branding')
+    .select('logo_url, company_display_name, template_id')
+    .eq('tenant_id', tenantId)
+    .single()
+  return data
+}
