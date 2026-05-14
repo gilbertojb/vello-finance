@@ -1,6 +1,3 @@
-import Image from 'next/image'
-
-import logo from '@/assets/logo.svg'
 import { createClient } from '@/lib/supabase/server'
 
 import {
@@ -27,15 +24,27 @@ export async function Sidebar({ ...props }: SidebarProps) {
 
   return (
     <SidebarPrimitive collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="border-b border-sidebar-border pb-3 pt-4">
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            {branding?.logo_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={branding.logo_url} alt="Logo" className="h-6 w-auto" />
-            ) : (
-              <Image src={logo} alt="Vello" height={24} loading="eager" />
-            )}
+          <SidebarMenuItem>
+            <div className="flex items-center gap-2.5 px-2">
+              {branding?.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={branding.logo_url} alt="Logo" className="h-7 w-auto" />
+              ) : (
+                <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] text-xs font-bold shrink-0">
+                  VP
+                </div>
+              )}
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="font-semibold text-sm text-sidebar-foreground truncate">
+                  Vello Pay
+                </span>
+                <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] shrink-0">
+                  admin
+                </span>
+              </div>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

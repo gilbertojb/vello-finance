@@ -3,7 +3,6 @@
 import { EllipsisVertical, LogOut } from 'lucide-react'
 import { useTransition } from 'react'
 
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,17 +17,18 @@ import { signOut } from '@/http/sign-out'
 
 interface ProfileButtonProps {
   user: { name: string; email: string }
+  initials?: string
 }
 
-function initials(name: string) {
-  return name
-    .split(' ')
-    .slice(0, 2)
-    .map((part: string) => part[0].toUpperCase())
-    .join('')
-}
-
-export function ProfileButton({ user }: ProfileButtonProps) {
+export function ProfileButton({ user, initials: initialsOverride }: ProfileButtonProps) {
+  function computeInitials(name: string) {
+    return name
+      .split(' ')
+      .slice(0, 2)
+      .map((part: string) => part[0]?.toUpperCase() ?? '')
+      .join('')
+  }
+  const avatarInitials = initialsOverride ?? computeInitials(user.name)
   const { isMobile } = useSidebar()
   const [isPending, startTransition] = useTransition()
 
@@ -43,11 +43,9 @@ export function ProfileButton({ user }: ProfileButtonProps) {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <Avatar className="h-8 w-8 rounded-lg grayscale">
-            <AvatarFallback className="rounded-lg">
-              {initials(user.name)}
-            </AvatarFallback>
-          </Avatar>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] text-xs font-bold">
+            {avatarInitials}
+          </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">{user.name}</span>
             <span className="text-muted-foreground truncate text-xs">
@@ -66,11 +64,9 @@ export function ProfileButton({ user }: ProfileButtonProps) {
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarFallback className="rounded-lg">
-                {initials(user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] text-xs font-bold">
+              {avatarInitials}
+            </div>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
               <span className="text-muted-foreground truncate text-xs">
