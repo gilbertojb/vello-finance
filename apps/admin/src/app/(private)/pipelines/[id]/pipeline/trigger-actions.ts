@@ -59,7 +59,7 @@ export async function createTrigger(data: FormData) {
 
   if (error) return { success: false, message: error.message, errors: null }
 
-  revalidatePath(`/product-types/${parsed.data.product_type_id}/pipeline`)
+  revalidatePath(`/pipelines/${parsed.data.product_type_id}/pipeline`)
   return { success: true, message: 'Trigger criado.', errors: null }
 }
 
@@ -74,6 +74,6 @@ export async function deleteTrigger(triggerId: string, productTypeId: string) {
 
   if (error) return { success: false, message: error.message }
 
-  revalidatePath(`/product-types/${productTypeId}/pipeline`)
+  revalidatePath(`/pipelines/${productTypeId}/pipeline`)
   return { success: true, message: '' }
 }

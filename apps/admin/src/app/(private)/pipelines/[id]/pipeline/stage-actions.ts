@@ -55,7 +55,7 @@ export async function createStage(data: FormData) {
 
   if (error) return { success: false, message: error.message, errors: null }
 
-  revalidatePath(`/product-types/${parsed.data.product_type_id}/pipeline`)
+  revalidatePath(`/pipelines/${parsed.data.product_type_id}/pipeline`)
   return {
     success: true,
     message: 'Etapa criada.',
@@ -95,7 +95,7 @@ export async function updateStage(data: FormData) {
 
   if (error) return { success: false, message: error.message, errors: null }
 
-  revalidatePath(`/product-types/${parsed.data.product_type_id}/pipeline`)
+  revalidatePath(`/pipelines/${parsed.data.product_type_id}/pipeline`)
   return { success: true, message: 'Etapa atualizada.', errors: null }
 }
 
@@ -110,7 +110,7 @@ export async function deleteStage(stageId: string, productTypeId: string) {
 
   if (error) return { success: false, message: error.message }
 
-  revalidatePath(`/product-types/${productTypeId}/pipeline`)
+  revalidatePath(`/pipelines/${productTypeId}/pipeline`)
   return { success: true, message: '' }
 }
 
@@ -135,7 +135,7 @@ export async function reorderStages(
   if (firstError?.error)
     return { success: false, message: firstError.error.message }
 
-  revalidatePath(`/product-types/${productTypeId}/pipeline`)
+  revalidatePath(`/pipelines/${productTypeId}/pipeline`)
   return { success: true, message: '' }
 }
 
@@ -179,7 +179,7 @@ export async function duplicateStagesFrom(
     .insert(rows)
   if (insertError) return { success: false, message: insertError.message }
 
-  revalidatePath(`/product-types/${targetProductTypeId}/pipeline`)
+  revalidatePath(`/pipelines/${targetProductTypeId}/pipeline`)
   return {
     success: true,
     message: `${rows.length} etapas duplicadas com sucesso.`,

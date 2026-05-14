@@ -6,7 +6,7 @@ import { z } from 'zod'
 import { requireBackofficeUser } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 
-const productTypeSchema = z.object({
+const pipelineSchema = z.object({
   name: z.string().min(2).max(100),
   slug: z
     .string()
@@ -17,7 +17,7 @@ const productTypeSchema = z.object({
   is_active: z.boolean().default(true),
 })
 
-export async function createProductType(data: FormData) {
+export async function createPipeline(data: FormData) {
   await requireBackofficeUser()
 
   const obj = Object.fromEntries(data) as Record<string, unknown>
@@ -26,7 +26,7 @@ export async function createProductType(data: FormData) {
     if (value === '') obj[key] = null
   }
 
-  const parsed = productTypeSchema.safeParse(obj)
+  const parsed = pipelineSchema.safeParse(obj)
   if (!parsed.success) {
     return {
       success: false,
@@ -40,17 +40,17 @@ export async function createProductType(data: FormData) {
 
   if (error) {
     const msg =
-      error.code === '23505' ? 'Já existe um tipo com este slug.' : error.message
+      error.code === '23505' ? 'Já existe uma esteira com este slug.' : error.message
     return { success: false, message: msg, errors: null }
   }
 
-  revalidatePath('/product-types')
-  return { success: true, message: 'Tipo de produto criado com sucesso!', errors: null }
+  revalidatePath('/pipelines')
+  return { success: true, message: 'Esteira criada com sucesso!', errors: null }
 }
 
-const productTypeUpdateSchema = productTypeSchema.omit({ slug: true })
+const pipelineUpdateSchema = pipelineSchema.omit({ slug: true })
 
-export async function updateProductType(data: FormData) {
+export async function updatePipeline(data: FormData) {
   await requireBackofficeUser()
 
   const id = data.get('id') as string
@@ -62,7 +62,7 @@ export async function updateProductType(data: FormData) {
     if (value === '') obj[key] = null
   }
 
-  const parsed = productTypeUpdateSchema.safeParse(obj)
+  const parsed = pipelineUpdateSchema.safeParse(obj)
   if (!parsed.success) {
     return {
       success: false,
@@ -79,7 +79,7 @@ export async function updateProductType(data: FormData) {
 
   if (error) return { success: false, message: error.message, errors: null }
 
-  revalidatePath('/product-types')
-  revalidatePath(`/product-types/${id}/edit`)
-  return { success: true, message: 'Tipo de produto atualizado com sucesso!', errors: null }
+  revalidatePath('/pipelines')
+  revalidatePath(`/pipelines/${id}/edit`)
+  return { success: true, message: 'Esteira atualizada com sucesso!', errors: null }
 }

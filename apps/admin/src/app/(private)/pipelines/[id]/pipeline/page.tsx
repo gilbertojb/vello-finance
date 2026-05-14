@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 
-import { getProductType, listProductTypes } from '../../queries'
+import { getPipeline, listPipelines } from '../../queries'
 
 import { PipelineEditor } from './_components/pipeline-editor'
 import { getProductTypePipeline } from './pipeline-queries'
@@ -14,8 +14,8 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const productType = await getProductType(id).catch(() => null)
-  return { title: productType ? `Pipeline — ${productType.name}` : 'Pipeline' }
+  const pipeline = await getPipeline(id).catch(() => null)
+  return { title: pipeline ? `Pipeline — ${pipeline.name}` : 'Pipeline' }
 }
 
 export default async function PipelinePage({
@@ -25,15 +25,15 @@ export default async function PipelinePage({
 }) {
   const { id } = await params
 
-  const [productType, stages, allProductTypes] = await Promise.all([
-    getProductType(id).catch(() => null),
+  const [pipeline, stages, allPipelines] = await Promise.all([
+    getPipeline(id).catch(() => null),
     getProductTypePipeline(id),
-    listProductTypes(true),
+    listPipelines(true),
   ])
 
-  if (!productType) notFound()
+  if (!pipeline) notFound()
 
-  const otherProductTypes = allProductTypes.filter(
+  const otherProductTypes = allPipelines.filter(
     (pt: { id: string; name: string; slug: string }) => pt.id !== id,
   )
 
@@ -42,22 +42,22 @@ export default async function PipelinePage({
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-            <Link href="/product-types" className="hover:underline">
-              Tipos de Produto
+            <Link href="/pipelines" className="hover:underline">
+              Esteiras
             </Link>
             <span>/</span>
-            <span>{productType.name}</span>
+            <span>{pipeline.name}</span>
           </div>
           <h2 className="text-3xl font-bold tracking-tight">
             Etapas da Esteira
           </h2>
           <p className="text-muted-foreground mt-1">
             Configure as etapas do pipeline de propostas para{' '}
-            <strong>{productType.name}</strong>.
+            <strong>{pipeline.name}</strong>.
           </p>
         </div>
         <Button variant="outline" asChild>
-          <Link href={`/product-types/${id}/edit`}>Editar Tipo</Link>
+          <Link href={`/pipelines/${id}/edit`}>Editar Esteira</Link>
         </Button>
       </div>
 

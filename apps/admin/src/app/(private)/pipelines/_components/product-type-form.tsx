@@ -23,7 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { useFormState } from '@/hooks/use-form-state'
 
-import { createProductType, updateProductType } from '../actions'
+import { createPipeline, updatePipeline } from '../actions'
 
 type ProductTypeData = {
   id: string
@@ -41,13 +41,13 @@ export function ProductTypeForm({ productType }: Props) {
   const router = useRouter()
   const isEdit = !!productType
 
-  const action = isEdit ? updateProductType : createProductType
+  const action = isEdit ? updatePipeline : createPipeline
 
   const [formState, handleSubmit, isPending] = useFormState(
     action,
     () => {
       toast.success(isEdit ? 'Tipo atualizado!' : 'Tipo criado com sucesso!')
-      router.push('/product-types')
+      router.push('/pipelines')
     },
     (msg: string) => {
       toast.error(msg)
@@ -68,7 +68,7 @@ export function ProductTypeForm({ productType }: Props) {
           <CardAction className="my-auto">
             <div className="flex items-center space-x-2">
               <FieldLabel htmlFor="is_active" className="cursor-pointer">
-                Tipo Ativo
+                Esteira Ativa
               </FieldLabel>
               <Switch
                 id="is_active"
@@ -124,7 +124,7 @@ export function ProductTypeForm({ productType }: Props) {
         <Button
           variant="outline"
           type="button"
-          onClick={() => router.push('/product-types')}
+          onClick={() => router.push('/pipelines')}
         >
           Cancelar
         </Button>
@@ -135,3 +135,5 @@ export function ProductTypeForm({ productType }: Props) {
     </form>
   )
 }
+
+export { ProductTypeForm as PipelineForm }

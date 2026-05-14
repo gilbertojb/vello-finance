@@ -46,11 +46,11 @@ export async function NavMain() {
               <NavLink href="/products" icon={<Receipt />} label="Produtos" />
             </SidebarMenuItem>
 
-            <SidebarMenuItem key="product-types">
+            <SidebarMenuItem key="pipelines">
               <NavLink
-                href="/product-types"
+                href="/pipelines"
                 icon={<Tag />}
-                label="Tipos de Produto"
+                label="Esteiras"
               />
             </SidebarMenuItem>
 

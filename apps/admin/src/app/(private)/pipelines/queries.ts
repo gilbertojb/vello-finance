@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 
-export async function listProductTypes(onlyActive = false) {
+export async function listPipelines(onlyActive = false) {
   const supabase = await createClient()
   let query = supabase
     .from('product_types')
@@ -16,7 +16,7 @@ export async function listProductTypes(onlyActive = false) {
   return data
 }
 
-export async function getProductType(id: string) {
+export async function getPipeline(id: string) {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('product_types')

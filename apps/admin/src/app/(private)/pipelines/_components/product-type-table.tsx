@@ -3,10 +3,10 @@
 import { GitBranch, Pencil } from 'lucide-react'
 import Link from 'next/link'
 
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
-type ProductTypeRow = {
+type PipelineRow = {
   id: string
   name: string
   slug: string
@@ -15,17 +15,17 @@ type ProductTypeRow = {
   created_at: string
 }
 
-export function ProductTypeTable({
-  productTypes,
+export function PipelineTable({
+  pipelines,
 }: {
-  productTypes: ReadonlyArray<ProductTypeRow>
+  pipelines: ReadonlyArray<PipelineRow>
 }) {
-  if (!productTypes || productTypes.length === 0) {
+  if (!pipelines || pipelines.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-8 text-center text-muted-foreground border border-dashed rounded-lg bg-card">
-        <p>Nenhum tipo de produto cadastrado.</p>
+        <p>Nenhuma esteira cadastrada.</p>
         <Button variant="link" asChild className="mt-2">
-          <Link href="/product-types/new">Cadastrar o primeiro tipo</Link>
+          <Link href="/pipelines/new">Cadastrar a primeira esteira</Link>
         </Button>
       </div>
     )
@@ -54,7 +54,7 @@ export function ProductTypeTable({
           </tr>
         </thead>
         <tbody className="[&_tr:last-child]:border-0">
-          {productTypes.map((pt) => (
+          {pipelines.map((pt) => (
             <tr
               key={pt.id}
               className="border-b transition-colors hover:bg-muted/50"
@@ -80,12 +80,12 @@ export function ProductTypeTable({
               <td className="p-4 align-middle text-right">
                 <div className="flex items-center justify-end gap-1">
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/product-types/${pt.id}/pipeline`}>
+                    <Link href={`/pipelines/${pt.id}/pipeline`}>
                       <GitBranch className="size-4" />
                     </Link>
                   </Button>
                   <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/product-types/${pt.id}/edit`}>
+                    <Link href={`/pipelines/${pt.id}/edit`}>
                       <Pencil className="size-4" />
                     </Link>
                   </Button>
