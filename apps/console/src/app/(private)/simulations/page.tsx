@@ -43,7 +43,7 @@ export default async function SimulationsPage() {
             <Download className="size-4" />
             Exportar CSV
           </Button>
-          <Button size="sm" className="gap-2 bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] hover:bg-[oklch(0.70_0.15_70)]">
+          <Button size="sm" className="gap-2">
             <Plus className="size-4" />
             Nova simulação
           </Button>

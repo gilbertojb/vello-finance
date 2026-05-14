@@ -32,7 +32,7 @@ function Sparkline({ data, positive = true }: { data: number[]; positive?: boole
       <polyline
         points={pts}
         fill="none"
-        stroke={positive ? 'oklch(0.75 0.15 70)' : 'oklch(0.65 0.18 25)'}
+        stroke={positive ? 'var(--color-primary)' : 'oklch(0.65 0.18 25)'}
         strokeWidth="1.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -96,7 +96,7 @@ export function KpiCards({ kpis, sparklines }: Props) {
             </p>
             {card.icon}
           </div>
-          <p className="text-3xl font-bold text-[oklch(0.80_0.18_70)] mb-1">
+          <p className="text-3xl font-bold text-primary mb-1">
             {card.value}
           </p>
           <div className="flex items-center justify-between">

@@ -34,7 +34,7 @@ export function NavLink({ icon, label, badge, disabled, href, ...props }: NavLin
               : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground',
         )}
       >
-        <span className={cn('shrink-0', isActive ? 'text-[oklch(0.80_0.18_70)]' : '')}>
+        <span className={cn('shrink-0', isActive ? 'text-sidebar-primary' : '')}>
           {icon}
         </span>
         <span className="flex-1 truncate">{label}</span>

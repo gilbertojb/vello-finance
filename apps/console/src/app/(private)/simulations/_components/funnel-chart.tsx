@@ -17,7 +17,7 @@ export function FunnelChart({ data }: Props) {
           {['7d','30d','90d'].map(p => (
             <button key={p} className={`rounded px-2 py-1 text-[10px] font-medium transition-colors ${
               p === '30d'
-                ? 'bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)]'
+                ? 'bg-primary text-primary-foreground'
                 : 'text-muted-foreground hover:bg-muted'
             }`}>{p}</button>
           ))}

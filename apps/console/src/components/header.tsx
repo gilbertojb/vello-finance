@@ -17,7 +17,7 @@ export function Header() {
         </div>
         <button className="relative flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
           <Bell className="size-4" />
-          <span className="absolute right-1 top-1 flex size-2 items-center justify-center rounded-full bg-[oklch(0.75_0.15_70)]" />
+          <span className="absolute right-1 top-1 flex size-2 items-center justify-center rounded-full bg-primary" />
         </button>
       </div>
     </header>

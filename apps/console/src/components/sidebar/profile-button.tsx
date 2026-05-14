@@ -43,7 +43,7 @@ export function ProfileButton({ user, initials: initialsOverride }: ProfileButto
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] text-xs font-bold">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
             {avatarInitials}
           </div>
           <div className="grid flex-1 text-left text-sm leading-tight">
@@ -64,7 +64,7 @@ export function ProfileButton({ user, initials: initialsOverride }: ProfileButto
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)] text-xs font-bold">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
               {avatarInitials}
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">

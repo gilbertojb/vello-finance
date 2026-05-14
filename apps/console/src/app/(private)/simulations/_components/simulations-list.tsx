@@ -148,7 +148,7 @@ export function SimulationsList({ simulations }: Props) {
                 onClick={() => handleTabChange(tab.key)}
                 className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)]'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                 }`}
               >
@@ -235,7 +235,7 @@ export function SimulationsList({ simulations }: Props) {
                     </td>
                     {/* ID */}
                     <td className="px-4 py-3.5">
-                      <span className="font-mono text-xs text-[oklch(0.75_0.15_70)] font-medium">
+                      <span className="font-mono text-xs text-primary font-medium">
                         {simDisplayId(sim.id)}
                       </span>
                     </td>
@@ -276,7 +276,7 @@ export function SimulationsList({ simulations }: Props) {
                     <td className="px-4 py-3.5">
                       <div className="flex items-center gap-1.5">
                         <span
-                          className={`size-2 rounded-full shrink-0 ${isPreQ ? 'bg-emerald-400' : 'bg-[oklch(0.75_0.15_70)]'}`}
+                          className={`size-2 rounded-full shrink-0 ${isPreQ ? 'bg-emerald-400' : 'bg-primary'}`}
                         />
                         <span className="text-xs font-medium">
                           {isPreQ ? 'Qualificado' : 'Novo'}
@@ -342,7 +342,7 @@ export function SimulationsList({ simulations }: Props) {
                   onClick={() => setPage(p)}
                   className={`flex size-7 items-center justify-center rounded text-xs font-medium transition-colors ${
                     page === p
-                      ? 'bg-[oklch(0.75_0.15_70)] text-[oklch(0.10_0_0)]'
+                      ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:bg-muted'
                   }`}
                 >
