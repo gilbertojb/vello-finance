@@ -31,9 +31,9 @@ Esta spec reestrutura a UI e o banco para refletir o modelo mental correto:
 |---|---|---|
 | 05 | Capital de Giro | `capital_giro` |
 | 06 | Antecipação de Recebíveis | `antecipacao_recebiveis` |
-| 07 | CGI PJ (Empréstimo com Imóvel em Garantia) | `home_equity` |
+| 07 | CGI PJ (Empréstimo com Imóvel em Garantia) | `home_equity_pj` |
 
-> CGI PF e CGI PJ compartilham a mesma esteira (`home_equity`) pois o pipeline é idêntico. A distinção é feita pela categoria do produto.
+> CGI PF e CGI PJ usam esteiras separadas pois terão campos e documentos diferentes por etapa.
 
 ### Financiamentos
 | # | Nome | Slug esteira |
@@ -48,7 +48,7 @@ Esta spec reestrutura a UI e o banco para refletir o modelo mental correto:
 | Questão | Decisão |
 |---|---|
 | Pipeline por tipo ou por produto? | Por esteira (product_type) — pipeline é idêntico independente da IF |
-| CGI PF e CGI PJ — esteiras separadas? | Não — mesma esteira, produtos distintos com categorias diferentes |
+| CGI PF e CGI PJ — esteiras separadas? | Sim — esteiras distintas (`home_equity` e `home_equity_pj`) pois terão campos/documentos diferentes por etapa |
 | Onde vive `category`? | Em `products` (migrada de `product_types`) |
 | Nomenclatura UI | "Esteiras" (antes "Tipos de Produto") |
 | URL | `/pipelines` (antes `/product-types`) — sem redirect |
@@ -78,12 +78,6 @@ UPDATE products p
 ALTER TABLE product_types DROP COLUMN category;
 ```
 
-### Esteiras órfãs após a migração
-
-As esteiras `home_equity_pj` e `auto_equity_pj` existem hoje como product_types separados para variantes PJ. Com CGI PJ passando a usar a esteira `home_equity`, elas ficam sem produtos vinculados. Devem ser desativadas (não deletadas, para preservar histórico de proposals).
-
-A remoção física dessas esteiras é opcional e pode ser feita manualmente no Supabase Studio após confirmar que não há `proposal_stages` em uso.
-
 ### Sem outras alterações no banco
 
 `proposal_stages`, `stage_triggers`, `product_financial_partners` — sem alteração.
@@ -105,25 +99,26 @@ A rota `/product-types` é simplesmente renomeada para `/pipelines` no sistema d
 
 ### Layout
 
-Tabs no topo da página:
+Lista única com todos os produtos. Filtros na parte superior:
 
-```
-[ Pessoa Física ]  [ Pessoa Jurídica ]  [ Financiamentos ]
-```
+| Filtro | Tipo | Valores |
+|---|---|---|
+| Categoria | Select | Todos · Pessoa Física · Pessoa Jurídica · Financiamentos |
+| Status | Select | Todos · Ativo · Inativo |
+| Busca | Text | Filtra por nome do produto |
 
-### Tabela (dentro de cada tab)
+Filtros implementados via `searchParams` — a página é um Server Component.
+
+### Tabela
 
 | Coluna | Descrição |
 |---|---|
-| Nome | Ex: "CGI – QI Tech" |
+| Nome | Ex: "CGI PF – QI Tech" |
+| Categoria | Badge: Pessoa Física / Pessoa Jurídica / Financiamentos |
 | Instituições Financeiras | Badges das IFs vinculadas |
 | Esteira | Badge com nome da esteira, linkável para `/pipelines/[id]/pipeline` |
 | Status | Ativo / Inativo |
 | Ações | Editar · Desativar |
-
-### Filtros
-
-Busca por nome dentro de cada tab.
 
 ---
 
@@ -199,12 +194,12 @@ apps/admin/src/app/(private)/
 │   ├── actions.ts
 │   └── queries.ts                    ← remover filtro por category
 └── products/
-    ├── page.tsx                      ← adicionar tabs por category
+    ├── page.tsx                      ← lista única com filtros por category/status
     ├── new/page.tsx                  ← adicionar campo category + seção esteira
     ├── [id]/edit/page.tsx            ← idem
     ├── queries.ts                    ← adicionar category no select
     └── _components/
-        ├── product-table.tsx         ← receber tab ativa como prop
+        ├── product-table.tsx         ← receber filtros ativos como props
         └── product-form.tsx          ← seção 1 + seção 4 atualizadas
 
 supabase/migrations/
@@ -215,7 +210,7 @@ supabase/migrations/
 
 ## Restrições de implementação
 
-- `page.tsx` é Server Component — tabs implementadas via `searchParams` (ex: `?tab=pessoa_juridica`), com `Pessoa Física` como padrão
+- `page.tsx` é Server Component — filtros implementados via `searchParams` (ex: `?category=pessoa_juridica&status=active`)
 - `category` no formulário é um campo controlado no Client Component
 - A seção "Esteira" do formulário faz fetch das esteiras ativas via Server Component (passadas como prop)
 - Queries de `product_types` que hoje filtram por `category` devem ser removidas ou ignoradas após a migration
