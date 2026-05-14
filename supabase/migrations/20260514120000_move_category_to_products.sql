@@ -13,6 +13,9 @@ UPDATE products p
   WHERE p.product_type_id = pt.id
     AND pt.category IS NOT NULL;
 
+-- Fallback: garante que não há NULL antes do NOT NULL (product_type sem categoria definida)
+UPDATE products SET category = 'pessoa_fisica' WHERE category IS NULL;
+
 -- 3. Tornar obrigatório após popular
 ALTER TABLE products
   ALTER COLUMN category SET NOT NULL,
