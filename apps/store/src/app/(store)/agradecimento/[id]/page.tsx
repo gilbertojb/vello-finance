@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { CheckCircle } from 'lucide-react'
@@ -13,9 +12,9 @@ export default async function AgradecimentoPage({ params }: Props) {
   const { id } = await params
   const tenantId = (await headers()).get('x-tenant-id') ?? ''
   const simulation = await getSimulation(id, tenantId)
-  if (!simulation) notFound()
 
-  const productName = (simulation.products as { name: string } | null)?.name ?? 'Crédito'
+  const productName = (simulation?.products as { name: string } | null)?.name ?? 'Crédito'
+  const clientName = simulation?.client_name
 
   return (
     <div className="min-h-[calc(100vh-78px)] bg-surface py-12 text-surface-foreground">
@@ -31,7 +30,11 @@ export default async function AgradecimentoPage({ params }: Props) {
             Recebemos seu interesse!
           </h2>
           <p className="mb-8 text-sm leading-relaxed text-surface-foreground/60">
-            Olá, <strong className="text-surface-foreground">{simulation.client_name}</strong>!
+            {clientName ? (
+              <>
+                Olá, <strong className="text-surface-foreground">{clientName}</strong>!{' '}
+              </>
+            ) : null}
             Um de nossos consultores vai entrar em contato pelo seu WhatsApp em breve para
             dar continuidade à sua solicitação de <strong>{productName}</strong>.
           </p>

@@ -7,8 +7,8 @@ export async function proxy(request: NextRequest) {
   const host = request.headers.get('host') ?? ''
   const { pathname } = request.nextUrl
 
-  // Ignorar assets estáticos (coberto pelo matcher, mas por precaução)
-  if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
+  // Ignorar assets estáticos e requests internos do Next.js
+  if (pathname.startsWith('/_next/')) {
     return NextResponse.next({ request })
   }
 
