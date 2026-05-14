@@ -136,9 +136,26 @@ export function SimulationsList({ simulations }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filtros de aba + search + período */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex flex-wrap gap-1">
+      {/* Toolbar card — igual ao design */}
+      <div style={{
+        background: 'var(--color-card)',
+        border: '1px solid rgba(233,199,123,.10)',
+        borderRadius: 14,
+        padding: '14px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        flexWrap: 'wrap' as const,
+        marginBottom: 16,
+      }}>
+        {/* Segmented control */}
+        <div style={{
+          display: 'flex',
+          background: 'rgba(246,239,228,.04)',
+          border: '1px solid rgba(233,199,123,.10)',
+          borderRadius: 9,
+          padding: 3,
+        }}>
           {TABS.map(tab => {
             const count = counts[tab.key]
             const isActive = activeTab === tab.key
@@ -146,17 +163,30 @@ export function SimulationsList({ simulations }: Props) {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                }`}
+                style={{
+                  padding: '7px 14px',
+                  borderRadius: 7,
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  transition: 'all .12s',
+                  background: isActive ? '#e9c77b' : 'transparent',
+                  color: isActive ? '#3b2418' : 'rgba(246,239,228,.55)',
+                  cursor: 'pointer',
+                  border: 'none',
+                }}
               >
                 {tab.label}
                 {count > 0 && (
-                  <span className={`text-[10px] tabular-nums ${
-                    isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}>
+                  <span style={{
+                    fontSize: 10.5,
+                    background: isActive ? 'rgba(13,10,7,.18)' : 'rgba(246,239,228,.08)',
+                    padding: '1px 6px',
+                    borderRadius: 999,
+                    fontWeight: 600,
+                  }}>
                     {count}
                   </span>
                 )}
@@ -165,26 +195,46 @@ export function SimulationsList({ simulations }: Props) {
           })}
         </div>
 
-        <div className="ml-auto flex items-center gap-2">
-          {/* Search */}
-          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground w-56">
-            <Search className="size-3.5 shrink-0" />
-            <input
-              value={search}
-              onChange={e => { setSearch(e.target.value); setPage(1) }}
-              placeholder="Buscar por nome, CPF, ID..."
-              className="flex-1 bg-transparent outline-none placeholder:text-muted-foreground text-foreground text-xs"
-            />
-          </div>
-          {/* Período */}
-          <button className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Período: <span className="text-foreground font-medium">Últimos 30d</span>
-            <span className="text-[10px]">▾</span>
-          </button>
-          <button className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Mais filtros
-          </button>
+        {/* Search */}
+        <div style={{
+          flex: 1,
+          minWidth: 240,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          background: 'rgba(246,239,228,.04)',
+          border: '1px solid rgba(233,199,123,.10)',
+          borderRadius: 9,
+          padding: '8px 14px',
+        }}>
+          <Search className="size-3.5 shrink-0" style={{ color: 'rgba(246,239,228,.55)' }} />
+          <input
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1) }}
+            placeholder="Buscar por nome, CPF, ID…"
+            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#f6efe4', fontSize: 13 }}
+          />
         </div>
+
+        {/* Dropdowns */}
+        <button style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: 'rgba(246,239,228,.04)',
+          border: '1px solid rgba(233,199,123,.10)',
+          borderRadius: 9, padding: '8px 12px', fontSize: 12.5, color: '#f6efe4', cursor: 'pointer',
+        }}>
+          <span style={{ color: 'rgba(246,239,228,.55)' }}>Período:</span>
+          <b>Últimos 30d</b>
+          <span style={{ fontSize: 10 }}>▾</span>
+        </button>
+        <button style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          background: 'rgba(246,239,228,.04)',
+          border: '1px solid rgba(233,199,123,.10)',
+          borderRadius: 9, padding: '8px 12px', fontSize: 12.5, color: 'rgba(246,239,228,.55)', cursor: 'pointer',
+        }}>
+          Mais filtros
+        </button>
       </div>
 
       {/* Tabela */}
@@ -235,7 +285,7 @@ export function SimulationsList({ simulations }: Props) {
                     </td>
                     {/* ID */}
                     <td className="px-4 py-3.5">
-                      <span className="font-mono text-xs text-primary font-medium">
+                      <span style={{ color: 'rgba(246,239,228,.55)', fontFamily: 'monospace', fontSize: 12 }}>
                         {simDisplayId(sim.id)}
                       </span>
                     </td>
