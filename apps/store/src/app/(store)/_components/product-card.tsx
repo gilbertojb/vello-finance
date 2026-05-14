@@ -50,7 +50,7 @@ export function ProductCard({
 
   return (
     <Link
-      href={`/produto/${tenantProductId}`}
+      href={`/product/${tenantProductId}`}
       className={cn(
         'group flex h-full cursor-pointer flex-col overflow-hidden rounded-[20px] border transition-all duration-200 hover:-translate-y-[3px]',
         featured

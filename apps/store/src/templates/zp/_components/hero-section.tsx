@@ -37,28 +37,28 @@ export function HeroSection({ displayName, featuredProductId, minRate }: Props) 
 
             <div className="flex flex-col gap-2.5">
               <Link
-                href="/simulador/pessoa-fisica"
+                href="/simulator/individual"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Crédito Pessoa Física</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href="/simulador/pessoa-juridica"
+                href="/simulator/business"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Crédito Pessoa Jurídica</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href="/simulador/financiamentos"
+                href="/simulator/financing"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Financiamentos</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href={featuredProductId ? `/produto/${featuredProductId}` : '#produtos'}
+                href={featuredProductId ? `/product/${featuredProductId}` : '#produtos'}
                 className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/18 px-6 py-4 text-sm font-semibold text-primary transition-all hover:bg-primary/25"
               >
                 <span>Fazer Simulação Gratuita</span>

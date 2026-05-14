@@ -26,7 +26,7 @@ export function CtaBanner({ featuredProductId }: Props) {
             <div className="flex gap-3.5">
               {featuredProductId && (
                 <Link
-                  href={`/produto/${featuredProductId}`}
+                  href={`/product/${featuredProductId}`}
                   className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90"
                 >
                   Iniciar simulação
