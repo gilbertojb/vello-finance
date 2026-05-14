@@ -23,28 +23,21 @@ import {
 } from '@/components/ui/tooltip'
 import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
 
-import type { FormErrors, Pipeline, ProductWithPartners } from './product-form-types'
+import { CATEGORY_LABELS, PRODUCT_CATEGORIES } from '../product-schema'
+import type { FormErrors, ProductWithPartners } from './product-form-types'
 
 type Props = {
   product?: ProductWithPartners
-  productTypes: Pipeline[]
-  isEdit: boolean
   errors: FormErrors
 }
 
-export function ProductIdentificationCard({
-  product,
-  productTypes,
-  isEdit,
-  errors,
-}: Props) {
+export function ProductIdentificationCard({ product, errors }: Props) {
   return (
     <Card>
       <CardHeader className="border-b">
         <CardTitle>Identificação</CardTitle>
         <CardDescription>
-          Defina as informações básicas e a visibilidade do produto na
-          plataforma.
+          Defina as informações básicas e a visibilidade do produto na plataforma.
         </CardDescription>
         <CardAction className="my-auto">
           <div className="flex items-center space-x-2">
@@ -67,33 +60,29 @@ export function ProductIdentificationCard({
               id="name"
               name="name"
               required
-              placeholder="Ex: Consignado INSS"
+              placeholder="Ex: FGTS – QI Tech"
               defaultValue={product?.name ?? ''}
             />
             <FieldError errors={errors?.name} />
           </Field>
 
           <Field className="col-span-full md:col-span-2">
-            <FieldLabel htmlFor="product_type_id">Tipo *</FieldLabel>
-            {isEdit && (
-              <input type="hidden" name="product_type_id" value={product!.product_type_id} />
-            )}
+            <FieldLabel htmlFor="category">Categoria *</FieldLabel>
             <select
-              id="product_type_id"
-              name={isEdit ? undefined : 'product_type_id'}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              required={!isEdit}
-              disabled={isEdit}
-              defaultValue={product?.product_type_id ?? ''}
+              id="category"
+              name="category"
+              required
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              defaultValue={product?.category ?? ''}
             >
               <option value="">Selecione...</option>
-              {productTypes.map((pt) => (
-                <option key={pt.id} value={pt.id}>
-                  {pt.name}
+              {PRODUCT_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {CATEGORY_LABELS[cat]}
                 </option>
               ))}
             </select>
-            <FieldError errors={errors?.product_type_id} />
+            <FieldError errors={errors?.category} />
           </Field>
 
           <Field className="col-span-full md:col-span-2 mt-4">
@@ -128,10 +117,7 @@ export function ProductIdentificationCard({
                     <Info className="size-3 stroke-accent" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>
-                      Informação confidencial visível apenas para os
-                      parceiros.
-                    </p>
+                    <p>Informação confidencial visível apenas para os parceiros.</p>
                   </TooltipContent>
                 </Tooltip>
               </FieldLabel>

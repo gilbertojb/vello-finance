@@ -26,7 +26,7 @@ export default async function NewProductPage() {
       </div>
 
       <div className="pt-4">
-        <ProductForm partners={partners} productTypes={pipelines} />
+        <ProductForm partners={partners} pipelines={pipelines} />
       </div>
     </div>
   )

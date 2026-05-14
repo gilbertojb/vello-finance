@@ -33,7 +33,7 @@ export default async function EditProductPage({
       </div>
 
       <div className="pt-4">
-        <ProductForm product={product as ProductWithPartners} partners={partners} productTypes={pipelines} />
+        <ProductForm product={product as ProductWithPartners} partners={partners} pipelines={pipelines} />
       </div>
     </div>
   )
