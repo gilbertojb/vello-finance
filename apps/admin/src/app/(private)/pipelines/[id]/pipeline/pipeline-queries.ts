@@ -16,7 +16,7 @@ export type PipelineStage = {
   stage_triggers: StageTrigger[]
 }
 
-export async function getProductTypePipeline(
+export async function getPipelineStages(
   productTypeId: string,
 ): Promise<PipelineStage[]> {
   const supabase = await createClient()

@@ -46,7 +46,7 @@ export function ProductTypeForm({ productType }: Props) {
   const [formState, handleSubmit, isPending] = useFormState(
     action,
     () => {
-      toast.success(isEdit ? 'Tipo atualizado!' : 'Tipo criado com sucesso!')
+      toast.success(isEdit ? 'Esteira atualizada!' : 'Esteira criada com sucesso!')
       router.push('/pipelines')
     },
     (msg: string) => {
@@ -62,7 +62,7 @@ export function ProductTypeForm({ productType }: Props) {
         <CardHeader className="border-b">
           <CardTitle>Identificação</CardTitle>
           <CardDescription>
-            Nome e slug do tipo de produto. O slug não pode ser alterado após a
+            Nome e slug da esteira. O slug não pode ser alterado após a
             criação.
           </CardDescription>
           <CardAction className="my-auto">

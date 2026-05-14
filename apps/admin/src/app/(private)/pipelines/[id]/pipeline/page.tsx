@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { getPipeline, listPipelines } from '../../queries'
 
 import { PipelineEditor } from './_components/pipeline-editor'
-import { getProductTypePipeline } from './pipeline-queries'
+import { getPipelineStages } from './pipeline-queries'
 
 export async function generateMetadata({
   params,
@@ -27,13 +27,13 @@ export default async function PipelinePage({
 
   const [pipeline, stages, allPipelines] = await Promise.all([
     getPipeline(id).catch(() => null),
-    getProductTypePipeline(id),
+    getPipelineStages(id),
     listPipelines(true),
   ])
 
   if (!pipeline) notFound()
 
-  const otherProductTypes = allPipelines.filter(
+  const otherPipelines = allPipelines.filter(
     (pt: { id: string; name: string; slug: string }) => pt.id !== id,
   )
 
@@ -64,7 +64,7 @@ export default async function PipelinePage({
       <PipelineEditor
         productTypeId={id}
         initialStages={stages}
-        otherProductTypes={otherProductTypes}
+        otherPipelines={otherPipelines}
       />
     </div>
   )
