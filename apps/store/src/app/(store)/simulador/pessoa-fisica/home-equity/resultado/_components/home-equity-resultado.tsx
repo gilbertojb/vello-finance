@@ -224,14 +224,26 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
 
-      <button
-        type="button"
-        disabled
-        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-[15px] font-medium text-surface-foreground/50 disabled:cursor-not-allowed"
-      >
-        <Download className="h-4 w-4" />
-        Baixar simulação em PDF
-      </button>
+      <div className="flex items-center justify-center gap-6 pt-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Refazer
+        </button>
+        <button
+          type="button"
+          disabled={!simulationId}
+          onClick={() => {
+            if (!simulationId) return
+            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
+          }}
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Download className="h-3.5 w-3.5" /> Baixar PDF
+        </button>
+      </div>
     </div>
   )
 }

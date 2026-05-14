@@ -195,7 +195,15 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refazer
         </button>
-        <button className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground">
+        <button
+          type="button"
+          disabled={!simulationId}
+          onClick={() => {
+            if (!simulationId) return
+            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
+          }}
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        >
           <Download className="h-3.5 w-3.5" /> Baixar PDF
         </button>
       </div>

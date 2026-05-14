@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Info } from 'lucide-react'
+import { Info, RefreshCw, Download } from 'lucide-react'
 import { formatCurrency, calcPMT } from '@/lib/utils/simulator'
 import { saveSimulation, qualifySimulation } from '../../../../actions'
 
@@ -189,6 +189,27 @@ export function FinanciamentoImovelResultado({ productId, rateMonthly }: Props) 
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
+
+      <div className="flex items-center justify-center gap-6 pt-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground"
+        >
+          <RefreshCw className="h-3.5 w-3.5" /> Refazer
+        </button>
+        <button
+          type="button"
+          disabled={!simulationId}
+          onClick={() => {
+            if (!simulationId) return
+            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
+          }}
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Download className="h-3.5 w-3.5" /> Baixar PDF
+        </button>
+      </div>
     </div>
   )
 }
