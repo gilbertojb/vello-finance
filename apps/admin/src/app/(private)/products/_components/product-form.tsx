@@ -10,7 +10,7 @@ import { useFormState } from '@/hooks/use-form-state'
 
 import { createProduct, updateProduct } from '../actions'
 import { ProductCreditParamsCard } from './product-credit-params-card'
-import type { Partner, ProductType, ProductWithPartners } from './product-form-types'
+import type { Partner, Pipeline, ProductWithPartners } from './product-form-types'
 import { ProductIdentificationCard } from './product-identification-card'
 import { ProductPartnersCard } from './product-partners-card'
 
@@ -19,7 +19,7 @@ export type { ProductWithPartners } from './product-form-types'
 type Props = {
   partners: Partner[]
   product?: ProductWithPartners
-  productTypes: ProductType[]
+  productTypes: Pipeline[]
 }
 
 export function ProductForm({ partners, product, productTypes }: Props) {

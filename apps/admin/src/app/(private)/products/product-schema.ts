@@ -1,7 +1,5 @@
 import { z } from 'zod'
 
-// Converte strings no formato brasileiro ("1.234,56" ou "10,50") para número.
-// Necessário porque MoneyInput e PercentInput submetem valores formatados.
 export function parseBrNumber(val: unknown): unknown {
   if (typeof val !== 'string' || val === '') return val
   const n = val.includes(',')
@@ -10,9 +8,26 @@ export function parseBrNumber(val: unknown): unknown {
   return isNaN(n) ? val : n
 }
 
+export const PRODUCT_CATEGORIES = ['pessoa_fisica', 'pessoa_juridica', 'financiamentos'] as const
+export type ProductCategory = typeof PRODUCT_CATEGORIES[number]
+
+export const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  pessoa_fisica: 'Pessoa Física',
+  pessoa_juridica: 'Pessoa Jurídica',
+  financiamentos: 'Financiamentos',
+}
+
 export const productSchema = z.object({
   name: z.string().min(3).max(100),
-  product_type_id: z.string().uuid('Tipo de produto inválido.'),
+  product_type_id: z
+    .string()
+    .regex(
+      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+      'Tipo de produto inválido.',
+    ),
+  category: z.enum(PRODUCT_CATEGORIES, {
+    error: 'Categoria inválida.',
+  }),
   description: z.string().optional().nullable(),
   internal_description: z.string().optional().nullable(),
   min_amount: z.preprocess(parseBrNumber, z.number().optional().nullable()),

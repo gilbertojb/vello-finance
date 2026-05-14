@@ -1,10 +1,22 @@
+import type { ProductCategory } from '../product-schema'
+
 export type Partner = { id: string; name: string }
+
+/** @deprecated Use Pipeline instead */
 export type ProductType = { id: string; name: string; slug: string }
+
+export type Pipeline = {
+  id: string
+  name: string
+  slug: string
+  proposal_stages: { id: string; name: string; order_num: number }[]
+}
 
 export type ProductWithPartners = {
   id: string
   name: string
   product_type_id: string
+  category: ProductCategory
   product_type: { id: string; name: string; slug: string } | null
   description: string | null
   internal_description: string | null

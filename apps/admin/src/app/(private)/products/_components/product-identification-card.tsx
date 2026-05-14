@@ -23,11 +23,11 @@ import {
 } from '@/components/ui/tooltip'
 import { WysiwygEditor } from '@/components/ui/wysiwyg-editor'
 
-import type { FormErrors, ProductType, ProductWithPartners } from './product-form-types'
+import type { FormErrors, Pipeline, ProductWithPartners } from './product-form-types'
 
 type Props = {
   product?: ProductWithPartners
-  productTypes: ProductType[]
+  productTypes: Pipeline[]
   isEdit: boolean
   errors: FormErrors
 }

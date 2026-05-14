@@ -1,14 +1,14 @@
 import { ProductForm } from '../_components/product-form'
-import { listFinancialPartners, listProductTypes } from '../queries'
+import { listFinancialPartners, listPipelines } from '../queries'
 
 export const metadata = {
   title: 'Cadastrar Produto',
 }
 
 export default async function NewProductPage() {
-  const [partners, productTypes] = await Promise.all([
+  const [partners, pipelines] = await Promise.all([
     listFinancialPartners(),
-    listProductTypes(),
+    listPipelines(),
   ])
 
   return (
@@ -26,7 +26,7 @@ export default async function NewProductPage() {
       </div>
 
       <div className="pt-4">
-        <ProductForm partners={partners} productTypes={productTypes} />
+        <ProductForm partners={partners} productTypes={pipelines} />
       </div>
     </div>
   )
