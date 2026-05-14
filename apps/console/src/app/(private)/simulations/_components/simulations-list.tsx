@@ -1,73 +1,83 @@
 'use client'
 
-import { ClipboardList, TrendingUp, Wallet } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { ClipboardList, Eye, TrendingUp, Wallet } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 
 import type { SimulationRow } from '../queries'
+import { SimulationDetailSheet } from './simulation-detail-sheet'
+
+// ─── Utilitários ─────────────────────────────────────────────────────────────
 
 function brl(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-  })
+function relativeTime(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'agora'
+  if (mins < 60) return `há ${mins}min`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `há ${hrs}h`
+  return `há ${Math.floor(hrs / 24)}d`
 }
 
-function formatPhone(phone: string): string {
-  const d = phone.replace(/\D/g, '')
-  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
-  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
-  return phone
+function initials(name: string): string {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
 }
 
-function StatusBadge({ status }: { status: string }) {
-  if (status === 'pre_qualificado') {
-    return (
-      <Badge className="border-emerald-500/20 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25">
-        Pré-qualificado
-      </Badge>
-    )
-  }
-  return <Badge variant="secondary">Simulação</Badge>
+function productName(sim: SimulationRow): string {
+  const p = sim.products
+  if (!p) return '—'
+  return Array.isArray(p) ? (p[0]?.name ?? '—') : (p as { name: string }).name
 }
 
-const STATUS_FILTERS = [
-  { label: 'Todas', value: undefined },
-  { label: 'Simulações', value: 'rascunho' },
-  { label: 'Pré-qualificados', value: 'pre_qualificado' },
-] as const
+const PRODUCT_COLORS = [
+  '#F59E0B',
+  '#10B981',
+  '#3B82F6',
+  '#8B5CF6',
+  '#EF4444',
+  '#F97316',
+  '#EC4899',
+  '#14B8A6',
+]
+
+function productDotColor(name: string): string {
+  let h = 0
+  for (let i = 0; i < name.length; i++) h = ((h * 31 + name.charCodeAt(i)) >>> 0)
+  return PRODUCT_COLORS[h % PRODUCT_COLORS.length]
+}
+
+// ─── Tipos ───────────────────────────────────────────────────────────────────
+
+type Tab = 'all' | 'pre_qualificado' | 'rascunho'
 
 interface Props {
   simulations: SimulationRow[]
-  activeStatus?: string
 }
 
-export function SimulationsList({ simulations, activeStatus }: Props) {
-  const router = useRouter()
-  const pathname = usePathname()
+// ─── Componente principal ─────────────────────────────────────────────────────
+
+export function SimulationsList({ simulations }: Props) {
+  const [activeTab, setActiveTab] = useState<Tab>('all')
+  const [selectedSim, setSelectedSim] = useState<SimulationRow | null>(null)
 
   const total = simulations.length
   const preQualified = simulations.filter((s) => s.status === 'pre_qualificado').length
+  const notQualified = simulations.filter((s) => s.status === 'rascunho').length
   const totalVolume = simulations.reduce((sum, s) => sum + Number(s.desired_amount), 0)
 
   const displayed =
-    activeStatus === 'rascunho' || activeStatus === 'pre_qualificado'
-      ? simulations.filter((s) => s.status === activeStatus)
-      : simulations
-
-  function setFilter(status: string | undefined) {
-    const params = new URLSearchParams()
-    if (status) params.set('status', status)
-    const qs = params.toString()
-    router.push(qs ? `${pathname}?${qs}` : pathname)
-  }
+    activeTab === 'all' ? simulations : simulations.filter((s) => s.status === activeTab)
 
   return (
     <div className="flex flex-col gap-6">
@@ -104,15 +114,21 @@ export function SimulationsList({ simulations, activeStatus }: Props) {
         </Card>
       </div>
 
-      {/* Filters */}
+      {/* Tabs */}
       <div className="flex flex-wrap gap-2">
-        {STATUS_FILTERS.map((tab) => (
+        {(
+          [
+            { label: `Todas (${total})`, value: 'all' },
+            { label: `Pré-qualificados (${preQualified})`, value: 'pre_qualificado' },
+            { label: `Não qualificados (${notQualified})`, value: 'rascunho' },
+          ] as const
+        ).map((tab) => (
           <button
-            key={tab.label}
+            key={tab.value}
             type="button"
-            onClick={() => setFilter(tab.value)}
+            onClick={() => setActiveTab(tab.value)}
             className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-              activeStatus === tab.value
+              activeTab === tab.value
                 ? 'bg-foreground text-background'
                 : 'bg-muted text-muted-foreground hover:bg-muted/80'
             }`}
@@ -122,7 +138,7 @@ export function SimulationsList({ simulations, activeStatus }: Props) {
         ))}
       </div>
 
-      {/* List */}
+      {/* Lista */}
       {displayed.length === 0 ? (
         <EmptyState />
       ) : (
@@ -131,54 +147,93 @@ export function SimulationsList({ simulations, activeStatus }: Props) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/30 text-left">
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Data</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">ID</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Lead</th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Produto</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Cliente</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Telefone</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
-                    Crédito
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">
+                    Valor / Condições
                   </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
-                    Parcela
-                  </th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Prazo</th>
                   <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Status</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Recebida</th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {displayed.map((sim) => {
-                  const product = Array.isArray(sim.products)
-                    ? sim.products[0]
-                    : sim.products
+                  const name = productName(sim)
+                  const dotColor = name !== '—' ? productDotColor(name) : '#94a3b8'
 
                   return (
                     <tr
                       key={sim.id}
                       className="border-b border-border/50 transition-colors last:border-0 hover:bg-muted/30"
                     >
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        {formatDate(sim.created_at)}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        #{sim.id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-3 font-medium">{product?.name ?? '—'}</td>
-                      <td className="px-4 py-3">{sim.client_name}</td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        {formatPhone(sim.client_phone)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-medium">
-                        {brl(Number(sim.desired_amount))}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                        {sim.estimated_payment ? brl(Number(sim.estimated_payment)) : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {sim.desired_term_months}x
-                      </td>
+                      {/* Lead */}
                       <td className="px-4 py-3">
-                        <StatusBadge status={sim.status} />
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium text-muted-foreground">
+                            {initials(sim.client_name)}
+                          </div>
+                          <div>
+                            <p className="font-medium">{sim.client_name}</p>
+                            {(sim as { client_email?: string | null }).client_email && (
+                              <p className="text-xs text-muted-foreground">
+                                {(sim as { client_email?: string | null }).client_email}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Produto */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center">
+                          <span
+                            className="mr-2 inline-block size-2 rounded-full"
+                            style={{ backgroundColor: dotColor }}
+                          />
+                          {name}
+                        </div>
+                      </td>
+
+                      {/* Valor / Condições */}
+                      <td className="px-4 py-3">
+                        <p className="font-mono font-medium">
+                          {brl(Number(sim.desired_amount))}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {sim.desired_term_months}m ·{' '}
+                          {sim.estimated_rate != null
+                            ? `${Number(sim.estimated_rate).toFixed(2)}% a.m.`
+                            : '—'}
+                        </p>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        {sim.status === 'pre_qualificado' ? (
+                          <Badge className="border-emerald-500/20 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25">
+                            Pré-qualificado
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">Não qualificado</Badge>
+                        )}
+                      </td>
+
+                      {/* Recebida */}
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {relativeTime(sim.created_at)}
+                      </td>
+
+                      {/* Ações */}
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedSim(sim)}
+                          className="text-muted-foreground transition-colors hover:text-foreground"
+                          aria-label="Ver detalhes"
+                        >
+                          <Eye className="size-4" />
+                        </button>
                       </td>
                     </tr>
                   )
@@ -188,6 +243,8 @@ export function SimulationsList({ simulations, activeStatus }: Props) {
           </div>
         </Card>
       )}
+
+      <SimulationDetailSheet simulation={selectedSim} onClose={() => setSelectedSim(null)} />
     </div>
   )
 }

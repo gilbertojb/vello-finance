@@ -5,12 +5,7 @@ import { listSimulations } from './queries'
 
 export const metadata: Metadata = { title: 'Simulações' }
 
-export default async function SimulationsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>
-}) {
-  const { status } = await searchParams
+export default async function SimulationsPage() {
   const simulations = await listSimulations()
 
   return (
@@ -22,7 +17,7 @@ export default async function SimulationsPage({
         </p>
       </div>
 
-      <SimulationsList simulations={simulations} activeStatus={status} />
+      <SimulationsList simulations={simulations} />
     </div>
   )
 }

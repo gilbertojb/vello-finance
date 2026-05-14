@@ -21,7 +21,18 @@ export async function listSimulations() {
 
   if (error) throw error
 
-  return data ?? []
+  // Cast to include optional fields added by pending migration.
+  // After running `pnpm db:types`, add these columns to the SELECT above
+  // and remove this cast.
+  return (data ?? []) as Array<
+    (typeof data extends Array<infer T> ? T : never) & {
+      client_email?: string | null
+      client_cpf?: string | null
+      client_birthdate?: string | null
+      client_city?: string | null
+      client_income?: number | null
+    }
+  >
 }
 
 export type SimulationRow = Awaited<ReturnType<typeof listSimulations>>[number]
