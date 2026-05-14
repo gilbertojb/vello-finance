@@ -30,7 +30,7 @@ export default async function ProductsPage({
           </Button>
         </div>
       </div>
-      <Suspense>
+      <Suspense fallback={null}>
         <ProductFilters category={category} status={status} q={q} />
       </Suspense>
       <ProductTable products={products} />

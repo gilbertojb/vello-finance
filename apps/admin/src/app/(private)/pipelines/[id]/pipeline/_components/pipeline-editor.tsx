@@ -30,13 +30,13 @@ type ProductTypeOption = { id: string; name: string }
 type Props = {
   productTypeId: string
   initialStages: PipelineStage[]
-  otherProductTypes: ProductTypeOption[]
+  otherPipelines: ProductTypeOption[]
 }
 
 export function PipelineEditor({
   productTypeId,
   initialStages,
-  otherProductTypes,
+  otherPipelines,
 }: Props) {
   const router = useRouter()
   const [stages, setStages] = useState(initialStages)
@@ -115,7 +115,7 @@ export function PipelineEditor({
       <div className="pt-2 border-t">
         <DuplicateStagesSelect
           productTypeId={productTypeId}
-          otherProductTypes={otherProductTypes}
+          otherProductTypes={otherPipelines}
         />
       </div>
     </div>
