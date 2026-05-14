@@ -3,6 +3,7 @@ import './globals.css'
 
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
+import { Lora } from 'next/font/google'
 
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
@@ -15,6 +16,12 @@ import { createServiceClient } from '@/lib/supabase/service'
 
 import { cn } from '@/lib/utils'
 import { Providers } from './providers'
+
+const lora = Lora({
+  subsets: ['latin'],
+  variable: '--font-lora',
+  display: 'swap',
+})
 
 const FORBIDDEN_CSS_PATTERNS = [
   /url\s*\(/i,
@@ -70,7 +77,7 @@ export default async function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={cn(GeistSans.variable, GeistMono.variable, 'font-sans')}
+      className={cn(GeistSans.variable, GeistMono.variable, lora.variable, 'font-sans')}
       data-tenant-theme={tenantSlug}
       data-tenant-id={tenantId}
       suppressHydrationWarning
