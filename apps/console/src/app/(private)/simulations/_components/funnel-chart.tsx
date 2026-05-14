@@ -24,25 +24,26 @@ export function FunnelChart({ data }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2.5">
         {data.map((row, i) => {
           const width = maxCount > 0 ? Math.round((row.count / maxCount) * 100) : 0
-          // Fade do amber para verde conforme avança no funil
-          const colors = ['#D4A53B','#C9A04C','#A0B845','#65BD6A','#10B981']
-          const color = colors[Math.min(i, colors.length - 1)]
+          const isLast = i === data.length - 1
           return (
-            <div key={row.label} className="grid grid-cols-[140px_1fr_80px_60px] items-center gap-3">
-              <p className="text-xs text-muted-foreground">{row.label}</p>
-              <div className="h-6 rounded bg-muted/30 overflow-hidden">
+            <div key={row.label} className="grid grid-cols-[130px_1fr_80px_56px] items-center gap-3">
+              <p className="text-xs text-muted-foreground leading-tight">{row.label}</p>
+              <div className="h-7 rounded bg-muted/20 overflow-hidden">
                 <div
                   className="h-full rounded transition-all"
-                  style={{ width: `${width}%`, backgroundColor: color }}
+                  style={{
+                    width: `${width}%`,
+                    backgroundColor: isLast ? '#10B981' : 'var(--color-primary)',
+                  }}
                 />
               </div>
-              <p className="text-right font-mono text-sm font-medium">
+              <p className="text-right font-mono text-sm font-medium tabular-nums">
                 {row.count.toLocaleString('pt-BR')}
               </p>
-              <p className="text-right text-xs text-muted-foreground">
+              <p className="text-right text-xs text-muted-foreground tabular-nums">
                 {row.pct}%
               </p>
             </div>

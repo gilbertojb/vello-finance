@@ -146,16 +146,16 @@ export function SimulationsList({ simulations }: Props) {
               <button
                 key={tab.key}
                 onClick={() => handleTabChange(tab.key)}
-                className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+                className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   isActive
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 {tab.label}
                 {count > 0 && (
-                  <span className={`rounded-full px-1.5 text-[10px] font-bold ${
-                    isActive ? 'bg-black/20 text-white' : 'bg-background text-foreground'
+                  <span className={`text-[10px] tabular-nums ${
+                    isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'
                   }`}>
                     {count}
                   </span>

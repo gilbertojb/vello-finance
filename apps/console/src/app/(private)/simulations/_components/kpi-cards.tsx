@@ -90,20 +90,23 @@ export function KpiCards({ kpis, sparklines }: Props) {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
         <Card key={card.label} className="p-5 relative overflow-hidden">
-          <div className="flex items-start justify-between mb-3">
-            <p className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">
+          {/* Label + ícone no topo */}
+          <div className="flex items-start justify-between mb-4">
+            <p className="text-[9px] font-semibold tracking-[0.12em] uppercase text-muted-foreground leading-tight">
               {card.label}
             </p>
-            {card.icon}
+            <span className="text-muted-foreground shrink-0">{card.icon}</span>
           </div>
-          <p className="text-3xl font-bold text-primary mb-1">
+          {/* Valor grande */}
+          <p className="text-3xl font-bold text-primary mb-2">
             {card.value}
           </p>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
+          {/* Growth + sparkline na base */}
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex flex-col gap-0.5">
               {card.growth}
               {card.sub && (
-                <span className="text-xs text-muted-foreground">{card.sub}</span>
+                <span className="text-[10px] text-muted-foreground">{card.sub}</span>
               )}
             </div>
             <Sparkline data={card.spark} positive={card.positive} />
