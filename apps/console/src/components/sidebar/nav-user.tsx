@@ -1,4 +1,6 @@
+import { SidebarMenu, SidebarMenuItem } from '@/components/ui/sidebar'
 import { createClient } from '@/lib/supabase/server'
+
 import { ProfileButton } from './profile-button'
 
 export async function NavUser() {
@@ -19,8 +21,10 @@ export async function NavUser() {
   }
 
   return (
-    <div className="border-t border-sidebar-border pt-3">
-      <ProfileButton user={{ name, email }} />
-    </div>
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <ProfileButton user={{ name, email }} />
+      </SidebarMenuItem>
+    </SidebarMenu>
   )
 }
