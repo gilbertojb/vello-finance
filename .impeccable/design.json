@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-15T00:00:00Z",
+  "title": "Design System: Vello Console",
+  "extensions": {
+    "colorMeta": {
+      "papel": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": ["oklch(0.10 0 0)", "oklch(0.20 0 0)", "oklch(0.35 0 0)", "oklch(0.50 0 0)", "oklch(0.65 0 0)", "oklch(0.78 0 0)", "oklch(0.90 0 0)", "oklch(1 0 0)"]
+      },
+      "grafite-profundo": {
+        "role": "neutral",
+        "displayName": "Grafite Profundo",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": ["oklch(0.10 0 0)", "oklch(0.145 0 0)", "oklch(0.25 0 0)", "oklch(0.38 0 0)", "oklch(0.52 0 0)", "oklch(0.68 0 0)", "oklch(0.83 0 0)", "oklch(0.95 0 0)"]
+      },
+      "grafite": {
+        "role": "primary",
+        "displayName": "Grafite",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": ["oklch(0.10 0 0)", "oklch(0.205 0 0)", "oklch(0.30 0 0)", "oklch(0.42 0 0)", "oklch(0.56 0 0)", "oklch(0.70 0 0)", "oklch(0.84 0 0)", "oklch(0.95 0 0)"]
+      },
+      "chumbo": {
+        "role": "neutral",
+        "displayName": "Chumbo",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": ["oklch(0.12 0 0)", "oklch(0.22 0 0)", "oklch(0.35 0 0)", "oklch(0.47 0 0)", "oklch(0.556 0 0)", "oklch(0.68 0 0)", "oklch(0.82 0 0)", "oklch(0.94 0 0)"]
+      },
+      "verde-aprovacao": {
+        "role": "semantic-success",
+        "displayName": "Verde Aprovação",
+        "canonical": "oklch(0.596 0.145 163.225)",
+        "tonalRamp": ["oklch(0.20 0.080 163.2)", "oklch(0.30 0.110 163.2)", "oklch(0.40 0.130 163.2)", "oklch(0.50 0.145 163.2)", "oklch(0.596 0.145 163.2)", "oklch(0.70 0.110 163.2)", "oklch(0.82 0.070 163.2)", "oklch(0.93 0.030 163.2)"]
+      },
+      "vermelho-alerta": {
+        "role": "semantic-error",
+        "displayName": "Vermelho Alerta",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": ["oklch(0.22 0.120 27.3)", "oklch(0.32 0.165 27.3)", "oklch(0.42 0.200 27.3)", "oklch(0.52 0.230 27.3)", "oklch(0.577 0.245 27.3)", "oklch(0.68 0.200 27.3)", "oklch(0.80 0.140 27.3)", "oklch(0.92 0.055 27.3)"]
+      },
+      "ambar": {
+        "role": "data",
+        "displayName": "Âmbar",
+        "canonical": "oklch(0.646 0.222 41.116)",
+        "tonalRamp": ["oklch(0.22 0.110 41.1)", "oklch(0.32 0.155 41.1)", "oklch(0.42 0.185 41.1)", "oklch(0.52 0.210 41.1)", "oklch(0.646 0.222 41.1)", "oklch(0.74 0.185 41.1)", "oklch(0.84 0.120 41.1)", "oklch(0.93 0.055 41.1)"]
+      },
+      "ciano-fundo": {
+        "role": "data",
+        "displayName": "Ciano Fundo",
+        "canonical": "oklch(0.600 0.118 184.704)",
+        "tonalRamp": ["oklch(0.22 0.060 184.7)", "oklch(0.32 0.080 184.7)", "oklch(0.42 0.100 184.7)", "oklch(0.52 0.110 184.7)", "oklch(0.600 0.118 184.7)", "oklch(0.70 0.090 184.7)", "oklch(0.82 0.055 184.7)", "oklch(0.93 0.022 184.7)"]
+      },
+      "indigo": {
+        "role": "data",
+        "displayName": "Índigo",
+        "canonical": "oklch(0.398 0.070 227.392)",
+        "tonalRamp": ["oklch(0.15 0.040 227.4)", "oklch(0.25 0.055 227.4)", "oklch(0.35 0.065 227.4)", "oklch(0.398 0.070 227.4)", "oklch(0.52 0.065 227.4)", "oklch(0.65 0.050 227.4)", "oklch(0.80 0.030 227.4)", "oklch(0.93 0.012 227.4)"]
+      },
+      "limao": {
+        "role": "data",
+        "displayName": "Limão",
+        "canonical": "oklch(0.828 0.189 84.429)",
+        "tonalRamp": ["oklch(0.25 0.100 84.4)", "oklch(0.38 0.140 84.4)", "oklch(0.52 0.165 84.4)", "oklch(0.65 0.180 84.4)", "oklch(0.75 0.189 84.4)", "oklch(0.828 0.189 84.4)", "oklch(0.90 0.140 84.4)", "oklch(0.95 0.070 84.4)"]
+      },
+      "ambar-suave": {
+        "role": "data",
+        "displayName": "Âmbar Suave",
+        "canonical": "oklch(0.769 0.188 70.080)",
+        "tonalRamp": ["oklch(0.22 0.095 70.1)", "oklch(0.34 0.135 70.1)", "oklch(0.46 0.160 70.1)", "oklch(0.58 0.178 70.1)", "oklch(0.68 0.188 70.1)", "oklch(0.769 0.188 70.1)", "oklch(0.87 0.140 70.1)", "oklch(0.94 0.065 70.1)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Títulos de página. O único ornamento tipográfico do sistema é o ponto em text-primary ao final do título." },
+      "headline": { "displayName": "Headline", "purpose": "Valores de KPI e métricas primárias. Números em destaque máximo." },
+      "title": { "displayName": "Title", "purpose": "Nomes de cliente em cards, subcabeçalhos de seção." },
+      "body": { "displayName": "Body", "purpose": "Texto operacional, labels de filtro, conteúdo de cards. Max 75ch em cópia corrida." },
+      "label": { "displayName": "Label", "purpose": "Labels de categoria acima de títulos de página e KPI cards. Sempre uppercase com tracking largo." },
+      "mono": { "displayName": "Mono", "purpose": "IDs de proposta (PROP-A1B2C), códigos de referência. Nunca para texto narrativo." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-state", "value": "150ms ease-out", "purpose": "Transições de cor em botões, bordas de card, itens de nav. Velocidade padrão do sistema." },
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Para transições de entrada de elementos (slides, drawers). Nunca bounce ou elastic." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão Primário",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal da página. Nova proposta, confirmar, salvar.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"12\" y1=\"5\" x2=\"12\" y2=\"19\"/><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/></svg> Nova proposta</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 8px; background-color: oklch(0.205 0 0); color: oklch(0.985 0 0); border: none; border-radius: 10px; padding: 10px 16px; font-family: Geist Sans, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; line-height: 1.5; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background-color: oklch(0.145 0 0); } .ds-btn-primary:focus-visible { outline: 2px solid oklch(0.556 0 0 / 50%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Botão Fantasma",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Ação secundária. Exportar CSV, seletor de período, ações de suporte.",
+      "html": "<button class=\"ds-btn-ghost\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4\"/><polyline points=\"7 10 12 15 17 10\"/><line x1=\"12\" y1=\"15\" x2=\"12\" y2=\"3\"/></svg> Exportar CSV</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; gap: 8px; background-color: oklch(0.145 0 0 / 4%); color: oklch(0.145 0 0); border: 1px solid oklch(0.205 0 0 / 16%); border-radius: 10px; padding: 10px 16px; font-family: Geist Sans, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; line-height: 1.5; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-ghost:hover { background-color: oklch(0.145 0 0 / 8%); } .ds-btn-ghost:focus-visible { outline: 2px solid oklch(0.556 0 0 / 50%); outline-offset: 2px; }"
+    },
+    {
+      "name": "Pílula de Filtro",
+      "kind": "chip",
+      "refersTo": "filter-pill-active",
+      "description": "Filtro de tipo de produto financeiro. Ponto colorido identifica o produto.",
+      "html": "<div style=\"display:flex;gap:4px;flex-wrap:wrap\"><button class=\"ds-filter-pill\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"7\"/><rect x=\"14\" y=\"14\" width=\"7\" height=\"7\"/><rect x=\"3\" y=\"14\" width=\"7\" height=\"7\"/></svg> Todos <span class=\"ds-filter-pill__count\">47</span></button><button class=\"ds-filter-pill ds-filter-pill--active\"><span class=\"ds-filter-pill__dot\"></span> FGTS <span class=\"ds-filter-pill__count\">12</span></button><button class=\"ds-filter-pill\"><span class=\"ds-filter-pill__dot\" style=\"background:oklch(0.600 0.118 184.704)\"></span> Consignado INSS <span class=\"ds-filter-pill__count\">8</span></button></div>",
+      "css": ".ds-filter-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 9999px; border: 1px solid transparent; background: transparent; font-family: Geist Sans, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; color: oklch(0.145 0 0 / 45%); cursor: pointer; transition: color 150ms ease-out; flex-shrink: 0; } .ds-filter-pill:hover { color: oklch(0.145 0 0); } .ds-filter-pill--active { background-color: oklch(0.205 0 0 / 10%); border-color: oklch(0.205 0 0 / 30%); color: oklch(0.145 0 0); } .ds-filter-pill__dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background-color: oklch(0.646 0.222 41.116); flex-shrink: 0; } .ds-filter-pill__count { font-size: 0.75rem; color: oklch(0.145 0 0 / 30%); } .ds-filter-pill--active .ds-filter-pill__count { color: oklch(0.145 0 0 / 55%); }"
+    },
+    {
+      "name": "Card de Proposta",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Container operacional principal. Dados de proposta de crédito: cliente, valor, produto, status.",
+      "html": "<div class=\"ds-proposal-card\"><div class=\"ds-proposal-card__header\"><span class=\"ds-proposal-card__id\">PROP-A1B2C</span><span class=\"ds-proposal-card__priority ds-proposal-card__priority--media\">· Média</span></div><div class=\"ds-proposal-card__client\"><div class=\"ds-proposal-card__avatar\">JS</div><div><p class=\"ds-proposal-card__name\">João da Silva</p><p class=\"ds-proposal-card__email\">joao@email.com</p></div></div><div><p class=\"ds-proposal-card__value\">R$ 45.000,00</p><p class=\"ds-proposal-card__terms\">36× R$ 1.480,00 · 1,90% a.m.</p></div><div class=\"ds-proposal-card__tags\"><span class=\"ds-proposal-card__product\"><span class=\"ds-proposal-card__product-dot\"></span>FGTS</span><span class=\"ds-proposal-card__status ds-proposal-card__status--pipeline\"><span class=\"ds-proposal-card__status-dot\"></span>Em análise</span></div><div class=\"ds-proposal-card__footer\"><span class=\"ds-proposal-card__date\">há 3d</span></div></div>",
+      "css": ".ds-proposal-card { display: flex; flex-direction: column; gap: 16px; border-radius: 16px; border: 1px solid oklch(0.205 0 0 / 10%); background-color: oklch(1 0 0); padding: 16px; transition: border-color 150ms ease-out; } .ds-proposal-card:hover { border-color: oklch(0.205 0 0 / 25%); } .ds-proposal-card__header { display: flex; align-items: center; justify-content: space-between; } .ds-proposal-card__id { font-family: Geist Mono, ui-monospace, monospace; font-size: 0.6875rem; letter-spacing: 0.06em; color: oklch(0.145 0 0 / 35%); } .ds-proposal-card__priority { font-size: 0.75rem; font-weight: 500; } .ds-proposal-card__priority--alta { color: oklch(0.65 0.175 55); } .ds-proposal-card__priority--media { color: oklch(0.72 0.160 80); } .ds-proposal-card__priority--baixa { color: oklch(0.145 0 0 / 40%); } .ds-proposal-card__client { display: flex; align-items: center; gap: 12px; } .ds-proposal-card__avatar { width: 36px; height: 36px; border-radius: 9999px; background-color: oklch(0.646 0.222 41.116 / 25%); color: oklch(0.646 0.222 41.116); font-size: 0.75rem; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; } .ds-proposal-card__name { font-size: 0.875rem; font-weight: 600; color: oklch(0.145 0 0); line-height: 1.25; } .ds-proposal-card__email { font-size: 0.75rem; color: oklch(0.145 0 0 / 40%); line-height: 1.25; } .ds-proposal-card__value { font-size: 1.25rem; font-weight: 700; letter-spacing: -0.025em; color: oklch(0.145 0 0); } .ds-proposal-card__terms { font-size: 0.75rem; color: oklch(0.145 0 0 / 40%); margin-top: 2px; } .ds-proposal-card__tags { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; } .ds-proposal-card__product { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; color: oklch(0.145 0 0 / 55%); } .ds-proposal-card__product-dot { width: 10px; height: 10px; border-radius: 2px; background-color: oklch(0.646 0.222 41.116); flex-shrink: 0; } .ds-proposal-card__status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 500; } .ds-proposal-card__status-dot { width: 6px; height: 6px; border-radius: 9999px; flex-shrink: 0; } .ds-proposal-card__status--pipeline .ds-proposal-card__status-dot { background-color: oklch(0.205 0 0); } .ds-proposal-card__status--pipeline { color: oklch(0.205 0 0); } .ds-proposal-card__status--approved .ds-proposal-card__status-dot { background-color: oklch(0.596 0.145 163.225); } .ds-proposal-card__status--approved { color: oklch(0.596 0.145 163.225); } .ds-proposal-card__status--rejected .ds-proposal-card__status-dot { background-color: oklch(0.577 0.245 27.325); } .ds-proposal-card__status--rejected { color: oklch(0.577 0.245 27.325); } .ds-proposal-card__footer { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid oklch(0.205 0 0 / 8%); padding-top: 10px; } .ds-proposal-card__date { font-size: 0.75rem; color: oklch(0.145 0 0 / 35%); }"
+    },
+    {
+      "name": "Card KPI",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Métrica operacional. Grid de 4 colunas no topo das páginas de pipeline.",
+      "html": "<div class=\"ds-kpi-card\"><div class=\"ds-kpi-card__header\"><span class=\"ds-kpi-card__label\">Em andamento</span><span class=\"ds-kpi-card__icon\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/><line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\"/><line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\"/></svg></span></div><p class=\"ds-kpi-card__value\">24</p><p class=\"ds-kpi-card__sub\">vs. semana anterior</p></div>",
+      "css": ".ds-kpi-card { border-radius: 16px; border: 1px solid oklch(0.205 0 0 / 10%); background-color: oklch(1 0 0); padding: 20px; } .ds-kpi-card__header { display: flex; align-items: flex-start; justify-content: space-between; } .ds-kpi-card__label { font-family: Geist Sans, system-ui, sans-serif; font-size: 0.625rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: oklch(0.145 0 0 / 40%); } .ds-kpi-card__icon { color: oklch(0.145 0 0 / 25%); } .ds-kpi-card__value { margin-top: 16px; font-family: Geist Sans, system-ui, sans-serif; font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; color: oklch(0.145 0 0); line-height: 1; } .ds-kpi-card__sub { margin-top: 10px; font-size: 0.75rem; color: oklch(0.145 0 0 / 45%); }"
+    },
+    {
+      "name": "Campo de Busca",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Busca inline por nome, CPF, ID de proposta.",
+      "html": "<div class=\"ds-input-search\"><svg class=\"ds-input-search__icon\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><line x1=\"21\" y1=\"21\" x2=\"16.65\" y2=\"16.65\"/></svg><input class=\"ds-input-search__input\" type=\"text\" placeholder=\"Buscar por nome, CPF, ID...\" /></div>",
+      "css": ".ds-input-search { display: flex; align-items: center; gap: 10px; border-radius: 10px; border: 1px solid oklch(0.205 0 0 / 10%); background-color: oklch(0.145 0 0 / 4%); padding: 8px 14px; min-width: 208px; transition: border-color 150ms ease-out; } .ds-input-search:focus-within { border-color: oklch(0.205 0 0 / 25%); } .ds-input-search__icon { color: oklch(0.145 0 0 / 55%); flex-shrink: 0; } .ds-input-search__input { flex: 1; background: transparent; border: none; outline: none; font-family: Geist Sans, system-ui, sans-serif; font-size: 0.875rem; color: oklch(0.145 0 0); } .ds-input-search__input::placeholder { color: oklch(0.145 0 0 / 40%); }"
+    },
+    {
+      "name": "Item de Navegação",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Link de sidebar. Active state com bg accent e ícone em primary.",
+      "html": "<nav style=\"display:flex;flex-direction:column;gap:2px;width:180px\"><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\"><svg class=\"ds-nav-item__icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z\"/><polyline points=\"14 2 14 8 20 8\"/></svg><span class=\"ds-nav-item__label\">Propostas</span><span class=\"ds-nav-item__badge\">7</span></a><a class=\"ds-nav-item\" href=\"#\"><svg class=\"ds-nav-item__icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"22 12 18 12 15 21 9 3 6 12 2 12\"/></svg><span class=\"ds-nav-item__label\">Simulações</span></a></nav>",
+      "css": ".ds-nav-item { display: flex; align-items: center; gap: 10px; width: 100%; border-radius: 6px; padding: 8px 10px; text-decoration: none; font-family: Geist Sans, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; color: oklch(0.145 0 0 / 70%); transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-nav-item:hover { background-color: oklch(0.97 0 0 / 40%); color: oklch(0.145 0 0); } .ds-nav-item--active { background-color: oklch(0.97 0 0); color: oklch(0.145 0 0); font-weight: 500; } .ds-nav-item__icon { flex-shrink: 0; color: oklch(0.145 0 0 / 40%); } .ds-nav-item--active .ds-nav-item__icon { color: oklch(0.205 0 0); } .ds-nav-item__label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-nav-item__badge { border-radius: 9999px; padding: 2px 6px; font-size: 0.625rem; font-weight: 600; line-height: 1; background-color: oklch(0.97 0 0); color: oklch(0.556 0 0); } .ds-nav-item--active .ds-nav-item__badge { background-color: oklch(0 0 0 / 20%); color: oklch(1 0 0); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Caderno de Campo",
+    "overview": "O Vello Console é o caderno de campo do consultor de crédito. Como um caderno profissional bem mantido, cada elemento ocupa exatamente o espaço que merece, nada é decorativo, e a informação chega antes de ser pedida. O sistema não impressiona pela beleza: impõe respeito pela clareza.\n\nA paleta é quase acromática: grafite profundo sobre papel branco, com acentos cromáticos reservados exclusivamente para dados (tipos de produto financeiro e estados semânticos). Cor é sinal, nunca decoração. Profundidade é expressa através de opacidade de borda, não de sombras.\n\nO que o sistema rejeita: hero-metrics com gradientes decorativos; grids de cards com ícone + título + texto genérico; paletas de finança clássica em azul-marinho e dourado; qualquer coisa que pareça um template comprado.",
+    "keyCharacteristics": [
+      "Paleta acromática: grafite + papel, sem matiz na base neutra",
+      "Cor entra apenas para dados e estados semânticos",
+      "Profundidade via opacidade de borda, sem box shadows em nenhum estado",
+      "Cards com 16px de radius, bordas sutis, hover suave",
+      "Geist Sans: limpo sem ser frio; Geist Mono para IDs e códigos de referência",
+      "Hierarquia por peso e escala, nunca por cor",
+      "Cópia no tom de colega: Você tem 3 propostas em risco de SLA"
+    ],
+    "rules": [
+      { "name": "The Achromatic Foundation Rule", "body": "A base neutra tem chroma zero. Cor cromática entra apenas para dados de produto e estados semânticos. Nunca use chart colors como acento decorativo, cor de marca, ou destaque editorial.", "section": "colors" },
+      { "name": "The Border-Depth Rule", "body": "Profundidade é comunicada por opacidade de borda: primary/10 em repouso, primary/25 no hover, primary/20 + bg primary/8 para superfícies em destaque. Nenhuma sombra em nenhum estado.", "section": "colors" },
+      { "name": "The Tight Numbers Rule", "body": "Valores monetários e numéricos usam tracking negativo (-0.025em). Labels de categoria usam tracking positivo (0.12em) uppercase. Nunca misture.", "section": "typography" },
+      { "name": "The Point Rule", "body": "O ponto final colorido após o título de página (Propostas.) é o único ornamento tipográfico do sistema, e text-primary nunca aparece em tipografia fora desse contexto e de botões ou estados ativos.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Superfícies são planas em repouso. Hover escurece a borda. Featured escurece o fundo. Nenhuma das duas estratégias usa sombra. Jamais.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do usar tracking-tight (-0.025em) em todos os valores numéricos e monetários.",
+      "Do usar text-xs uppercase tracking-[0.12em] para labels de categoria acima de headings.",
+      "Do expressar hover em cards escurecendo a borda: hover:border-primary/25.",
+      "Do usar chart colors apenas como pontos (10x10px radius 2px), fills de avatar (25% opacidade), e traços de sparkline.",
+      "Do usar Geist Mono para IDs de proposta, códigos de referência, e qualquer valor que o consultor precise comparar ou copiar.",
+      "Do manter o ponto colorido no título de página (Propostas.) como único ornamento tipográfico.",
+      "Do usar status badges como ponto (6px) + texto colorido em token semântico, sem chip ou badge opaca.",
+      "Do falar como colega na cópia: Você tem 3 propostas em risco de SLA.",
+      "Do variar padding para criar ritmo: p-4 em cards de proposta, p-5 em KPI cards, p-8 em containers de página."
+    ],
+    "donts": [
+      "Don't adicionar box shadows. Nem shadow-sm. Nem drop-shadow. Nenhuma sombra em nenhum estado.",
+      "Don't usar hero-metrics com gradiente decorativo: número grande, label pequena, gradiente de acento.",
+      "Don't usar chart colors fora do contexto de dados. ambar não é cor de acento de UI, é a cor do FGTS.",
+      "Don't criar grids de cards com ícone + heading + texto genérico.",
+      "Don't usar border-left maior que 1px como stripe colorida em cards ou list items.",
+      "Don't usar gradient text (background-clip: text). Texto é sempre uma cor sólida.",
+      "Don't usar azul-marinho e dourado como paleta.",
+      "Don't escalar o padding uniformemente em toda a interface.",
+      "Don't usar em dashes na cópia. Use vírgula, dois-pontos, ponto-e-vírgula, ou parênteses.",
+      "Don't usar glassmorphism. Blur + glass card é decoração, não profundidade."
+    ]
+  }
+}

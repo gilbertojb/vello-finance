@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Download } from 'lucide-react'
+import { Download, Plus } from 'lucide-react'
 
 import { ProposalsList } from './_components/proposals-list'
 import { listProposals } from './queries'
@@ -26,8 +26,8 @@ export default async function ProposalsPage({
             Propostas<span className="text-primary">.</span>
           </h1>
           <p className="m-0 max-w-xl text-sm leading-normal text-foreground/55">
-            Pipeline de propostas enviadas pelos clientes da sua loja. Acompanhe o status e a
-            etapa de cada operação em tempo real.
+            Acompanhe contratos em andamento. Filtre por produto ou status e visualize todas as
+            operações em formato de cartões.
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -36,6 +36,12 @@ export default async function ProposalsPage({
             className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
           >
             <Download size={14} /> Exportar CSV
+          </button>
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-none bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          >
+            <Plus size={14} /> Nova proposta
           </button>
         </div>
       </div>
