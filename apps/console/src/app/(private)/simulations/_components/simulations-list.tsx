@@ -1,37 +1,25 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, Phone, MoreHorizontal, Search } from 'lucide-react'
+import { Eye, MoreHorizontal, Phone, Search } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
 import type { SimulationRow } from '../queries'
 import { SimulationDetailSheet } from './simulation-detail-sheet'
 
-// ── Design tokens ─────────────────────────────────────────────────────────────
-const GOLD = '#e9c77b'
-const BROWN_DEEP = '#3b2418'
-
-// ── Avatar gradient ───────────────────────────────────────────────────────────
-const AVATAR_PAIRS: [string, string][] = [
-  ['#3b2418', '#8b5e3c'],
-  ['#5a1d10', '#c45947'],
-  ['#1a3a2e', '#5a8a4c'],
-  ['#2d2418', '#a87f3a'],
-  ['#3b1a18', '#8b5e3c'],
-  ['#1d2638', '#476285'],
-  ['#3b2820', '#c9a47a'],
+// ── Chart tokens para cores dinâmicas (sem hex) ───────────────────────────────
+const CHART_TOKENS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
 ]
-function avatarGradient(name: string): string {
-  let h = 0
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  const pair = AVATAR_PAIRS[h % AVATAR_PAIRS.length]!
-  return `linear-gradient(135deg,${pair[0]},${pair[1]})`
-}
 
-// ── Product colors ────────────────────────────────────────────────────────────
-const PRODUCT_COLORS = ['#e9c77b', '#5a8a4c', '#c9a47a', '#8b5e3c', '#c45947', '#a87f3a', '#3b5e34']
-function productDotColor(name: string): string {
+function nameToToken(name: string): string {
   let h = 0
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  return PRODUCT_COLORS[h % PRODUCT_COLORS.length]!
+  return CHART_TOKENS[h % CHART_TOKENS.length]!
 }
 
 // ── Utilitários ───────────────────────────────────────────────────────────────
@@ -45,7 +33,12 @@ function relativeTime(iso: string): string {
 }
 
 function initials(name: string): string {
-  return name.split(' ').slice(0, 2).map(n => n[0] ?? '').join('').toUpperCase()
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((n) => n[0] ?? '')
+    .join('')
+    .toUpperCase()
 }
 
 function productName(sim: SimulationRow): string {
@@ -60,42 +53,54 @@ function simDisplayId(id: string): string {
 
 // ── StatusPill ────────────────────────────────────────────────────────────────
 export function StatusPill({ status }: { status: string }) {
-  const MAP: Record<string, { label: string; bg: string; color: string; dot: string }> = {
-    rascunho:        { label: 'Novo lead',   bg: 'rgba(90,138,76,.14)',   color: '#a8d490', dot: '#5a8a4c' },
-    pre_qualificado: { label: 'Qualificado', bg: 'rgba(180,130,60,.14)',  color: '#e0a76b', dot: '#c98e3f' },
-    em_contato:      { label: 'Em contato',  bg: 'rgba(233,199,123,.10)', color: '#e9c77b', dot: '#e9c77b' },
-    convertido:      { label: 'Convertido',  bg: 'rgba(74,140,90,.18)',   color: '#9bd2a8', dot: '#5fa86c' },
-    perdido:         { label: 'Perdido',     bg: 'rgba(196,89,71,.14)',   color: '#e8a092', dot: '#c45947' },
+  const MAP: Record<string, { label: string; bg: string; color: string }> = {
+    rascunho:        { label: 'Novo lead',   bg: 'color-mix(in oklch, var(--success) 14%, transparent)',     color: 'var(--success)' },
+    pre_qualificado: { label: 'Qualificado', bg: 'color-mix(in oklch, var(--primary) 14%, transparent)',     color: 'var(--primary)' },
+    em_contato:      { label: 'Em contato',  bg: 'color-mix(in oklch, var(--primary) 10%, transparent)',     color: 'var(--primary)' },
+    convertido:      { label: 'Convertido',  bg: 'color-mix(in oklch, var(--success) 18%, transparent)',     color: 'var(--success)' },
+    perdido:         { label: 'Perdido',     bg: 'color-mix(in oklch, var(--destructive) 14%, transparent)', color: 'var(--destructive)' },
   }
   const s = MAP[status] ?? MAP['rascunho']!
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 7,
-      fontSize: 11.5, fontWeight: 600, padding: '5px 11px',
-      borderRadius: 999, letterSpacing: '.02em',
-      background: s.bg, color: s.color,
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.dot }} />
+    <span
+      style={{ background: s.bg, color: s.color }}
+      className="inline-flex items-center gap-1.5 rounded-full px-[11px] py-[5px] text-[11.5px] font-semibold tracking-[.02em]"
+    >
+      <span className="size-1.5 rounded-full" style={{ background: s.color }} />
       {s.label}
     </span>
   )
 }
 
-// ── Checkbox customizado ───────────────────────────────────────────────────────
-function Checkbox({ checked, onClick }: { checked: boolean; onClick?: (e: React.MouseEvent) => void }) {
+// ── Checkbox ──────────────────────────────────────────────────────────────────
+function Checkbox({
+  checked,
+  onClick,
+}: {
+  checked: boolean
+  onClick?: (e: React.MouseEvent) => void
+}) {
   return (
     <span
       onClick={onClick}
-      style={{
-        width: 16, height: 16, borderRadius: 4, flexShrink: 0,
-        border: checked ? 'none' : '1.5px solid rgba(246,239,228,.25)',
-        background: checked ? GOLD : 'transparent',
-        color: checked ? BROWN_DEEP : 'transparent',
-        display: 'grid', placeItems: 'center', cursor: 'pointer',
-      }}
+      className={cn(
+        'grid size-4 shrink-0 cursor-pointer place-items-center rounded-[4px]',
+        checked
+          ? 'bg-primary text-primary-foreground'
+          : 'border-[1.5px] border-foreground/25 bg-transparent text-transparent',
+      )}
     >
       {checked && (
-        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="10"
+          height="10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M5 12l5 5 9-11" />
         </svg>
       )}
@@ -103,7 +108,7 @@ function Checkbox({ checked, onClick }: { checked: boolean; onClick?: (e: React.
   )
 }
 
-// ── Tipos de aba ──────────────────────────────────────────────────────────────
+// ── Tabs ──────────────────────────────────────────────────────────────────────
 type Tab = 'all' | 'rascunho' | 'em_contato' | 'pre_qualificado' | 'convertido' | 'perdido'
 
 const TABS: { key: Tab; label: string; statusFilter?: string }[] = [
@@ -128,39 +133,37 @@ export function SimulationsList({ simulations }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [detailSim, setDetailSim] = useState<SimulationRow | null>(null)
 
-  // Contagens por aba
   const counts: Record<Tab, number> = {
     all: simulations.length,
-    rascunho: simulations.filter(s => s.status === 'rascunho').length,
+    rascunho: simulations.filter((s) => s.status === 'rascunho').length,
     em_contato: 0,
-    pre_qualificado: simulations.filter(s => s.status === 'pre_qualificado').length,
+    pre_qualificado: simulations.filter((s) => s.status === 'pre_qualificado').length,
     convertido: 0,
     perdido: 0,
   }
 
-  // Filtragem
-  const tabFilter = TABS.find(t => t.key === activeTab)?.statusFilter
+  const tabFilter = TABS.find((t) => t.key === activeTab)?.statusFilter
   let displayed = tabFilter
-    ? simulations.filter(s => s.status === tabFilter)
+    ? simulations.filter((s) => s.status === tabFilter)
     : activeTab === 'all'
       ? simulations
       : []
 
   if (search.trim()) {
     const q = search.toLowerCase()
-    displayed = displayed.filter(s =>
-      s.client_name.toLowerCase().includes(q) ||
-      (s.client_email ?? '').toLowerCase().includes(q) ||
-      simDisplayId(s.id).toLowerCase().includes(q)
+    displayed = displayed.filter(
+      (s) =>
+        s.client_name.toLowerCase().includes(q) ||
+        (s.client_email ?? '').toLowerCase().includes(q) ||
+        simDisplayId(s.id).toLowerCase().includes(q),
     )
   }
 
-  // Paginação
   const totalPages = Math.max(1, Math.ceil(displayed.length / PAGE_SIZE))
   const pageData = displayed.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
 
   function toggleSelect(id: string) {
-    setSelected(prev => {
+    setSelected((prev) => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
@@ -171,7 +174,7 @@ export function SimulationsList({ simulations }: Props) {
     if (selected.size === pageData.length) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(pageData.map(s => s.id)))
+      setSelected(new Set(pageData.map((s) => s.id)))
     }
   }
 
@@ -184,56 +187,32 @@ export function SimulationsList({ simulations }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {/* Toolbar */}
-      <div style={{
-        background: 'var(--color-card)',
-        border: '1px solid rgba(233,199,123,.10)',
-        borderRadius: 14,
-        padding: '14px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 12,
-        flexWrap: 'wrap' as const,
-        marginBottom: 16,
-      }}>
-        {/* Segmented control */}
-        <div style={{
-          display: 'flex',
-          background: 'rgba(246,239,228,.04)',
-          border: '1px solid rgba(233,199,123,.10)',
-          borderRadius: 9,
-          padding: 3,
-        }}>
-          {TABS.map(tab => {
+      <div className="mb-4 flex flex-wrap items-center gap-3 rounded-[14px] border border-primary/10 bg-card px-4 py-3.5">
+        {/* Segmented tabs */}
+        <div className="flex rounded-[9px] border border-primary/10 bg-foreground/4 p-0.5">
+          {TABS.map((tab) => {
             const count = counts[tab.key]
             const isActive = activeTab === tab.key
             return (
               <button
                 key={tab.key}
+                type="button"
                 onClick={() => handleTabChange(tab.key)}
-                style={{
-                  padding: '7px 14px',
-                  borderRadius: 7,
-                  fontSize: 12.5,
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 7,
-                  transition: 'all .12s',
-                  background: isActive ? GOLD : 'transparent',
-                  color: isActive ? BROWN_DEEP : 'rgba(246,239,228,.55)',
-                  cursor: 'pointer',
-                  border: 'none',
-                }}
+                className={cn(
+                  'flex cursor-pointer items-center gap-1.5 rounded-[7px] px-3.5 py-[7px] text-[12.5px] font-medium transition-all',
+                  isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-transparent text-foreground/55',
+                )}
               >
                 {tab.label}
                 {count > 0 && (
-                  <span style={{
-                    fontSize: 10.5,
-                    background: isActive ? 'rgba(13,10,7,.18)' : 'rgba(246,239,228,.08)',
-                    padding: '1px 6px',
-                    borderRadius: 999,
-                    fontWeight: 600,
-                  }}>
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 py-px text-[10.5px] font-semibold',
+                      isActive ? 'bg-primary-foreground/18 text-primary-foreground' : 'bg-foreground/8',
+                    )}
+                  >
                     {count}
                   </span>
                 )}
@@ -243,271 +222,218 @@ export function SimulationsList({ simulations }: Props) {
         </div>
 
         {/* Search */}
-        <div style={{
-          flex: 1,
-          minWidth: 240,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          background: 'rgba(246,239,228,.04)',
-          border: '1px solid rgba(233,199,123,.10)',
-          borderRadius: 9,
-          padding: '8px 14px',
-        }}>
-          <Search className="size-3.5 shrink-0" style={{ color: 'rgba(246,239,228,.55)' }} />
+        <div className="flex min-w-[240px] flex-1 items-center gap-2.5 rounded-[9px] border border-primary/10 bg-foreground/4 px-3.5 py-2">
+          <Search className="size-3.5 shrink-0 text-foreground/55" />
           <input
             value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1) }}
+            onChange={(e) => { setSearch(e.target.value); setPage(1) }}
             placeholder="Buscar por nome, CPF, ID…"
-            style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: '#f6efe4', fontSize: 13 }}
+            className="flex-1 bg-transparent text-[13px] text-foreground outline-none placeholder:text-foreground/40"
           />
         </div>
 
-        {/* Dropdowns */}
-        <button style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(246,239,228,.04)',
-          border: '1px solid rgba(233,199,123,.10)',
-          borderRadius: 9, padding: '8px 12px', fontSize: 12.5, color: '#f6efe4', cursor: 'pointer',
-        }}>
-          <span style={{ color: 'rgba(246,239,228,.55)' }}>Período:</span>
+        {/* Filters */}
+        <button
+          type="button"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-[9px] border border-primary/10 bg-foreground/4 px-3 py-2 text-[12.5px] text-foreground"
+        >
+          <span className="text-foreground/55">Período:</span>
           <b>Últimos 30d</b>
-          <span style={{ fontSize: 10 }}>▾</span>
+          <span className="text-[10px]">▾</span>
         </button>
-        <button style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(246,239,228,.04)',
-          border: '1px solid rgba(233,199,123,.10)',
-          borderRadius: 9, padding: '8px 12px', fontSize: 12.5, color: 'rgba(246,239,228,.55)', cursor: 'pointer',
-        }}>
+        <button
+          type="button"
+          className="inline-flex cursor-pointer items-center rounded-[9px] border border-primary/10 bg-foreground/4 px-3 py-2 text-[12.5px] text-foreground/55"
+        >
           Mais filtros
         </button>
       </div>
 
-      {/* Tabela — sem Card shadcn */}
-      <div style={{
-        background: 'var(--color-card)',
-        border: '1px solid rgba(233,199,123,.10)',
-        borderRadius: 14,
-        overflow: 'hidden',
-      }}>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      {/* Tabela */}
+      <div className="overflow-hidden rounded-[14px] border border-primary/10 bg-card">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
             <thead>
               <tr>
-                {/* Checkbox header */}
-                <th style={{
-                  fontSize: 10.5, letterSpacing: '.16em', textTransform: 'uppercase' as const,
-                  color: 'rgba(246,239,228,.55)', fontWeight: 500, padding: '14px 18px',
-                  textAlign: 'left' as const, background: 'rgba(246,239,228,.02)',
-                  borderBottom: '1px solid rgba(233,199,123,.10)', width: 46,
-                }}>
+                <th className="w-[46px] border-b border-primary/10 bg-foreground/2 p-[14px_18px] text-left text-[10.5px] font-medium uppercase tracking-[.16em] text-foreground/55">
                   <Checkbox
                     checked={selected.size === pageData.length && pageData.length > 0}
                     onClick={() => toggleAll()}
                   />
                 </th>
-                {['ID', 'LEAD', 'PRODUTO', 'VALOR / CONDIÇÕES', 'STATUS', 'ORIGEM', 'RECEBIDA', ''].map(h => (
-                  <th key={h} style={{
-                    fontSize: 10.5, letterSpacing: '.16em', textTransform: 'uppercase' as const,
-                    color: 'rgba(246,239,228,.55)', fontWeight: 500, padding: '14px 18px',
-                    textAlign: 'left' as const, background: 'rgba(246,239,228,.02)',
-                    borderBottom: '1px solid rgba(233,199,123,.10)', whiteSpace: 'nowrap' as const,
-                  }}>
-                    {h}
-                  </th>
-                ))}
+                {['ID', 'LEAD', 'PRODUTO', 'VALOR / CONDIÇÕES', 'STATUS', 'ORIGEM', 'RECEBIDA', ''].map(
+                  (h) => (
+                    <th
+                      key={h}
+                      className="whitespace-nowrap border-b border-primary/10 bg-foreground/2 p-[14px_18px] text-left text-[10.5px] font-medium uppercase tracking-[.16em] text-foreground/55"
+                    >
+                      {h}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>
               {pageData.length === 0 ? (
                 <tr>
-                  <td colSpan={9} style={{
-                    padding: '48px 18px', textAlign: 'center' as const,
-                    fontSize: 13.5, color: 'rgba(246,239,228,.4)',
-                  }}>
+                  <td
+                    colSpan={9}
+                    className="p-[48px_18px] text-center text-[13.5px] text-foreground/40"
+                  >
                     Nenhuma simulação encontrada.
                   </td>
                 </tr>
-              ) : pageData.map((sim, idx) => {
-                const pName = productName(sim)
-                const isLast = idx === pageData.length - 1
-                return (
-                  <tr
-                    key={sim.id}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(246,239,228,.025)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-                    style={{ transition: 'background .1s' }}
-                  >
-                    {/* Checkbox */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <Checkbox
-                        checked={selected.has(sim.id)}
-                        onClick={e => { e.stopPropagation(); toggleSelect(sim.id) }}
-                      />
-                    </td>
+              ) : (
+                pageData.map((sim, idx) => {
+                  const pName = productName(sim)
+                  const isLast = idx === pageData.length - 1
+                  const token = nameToToken(sim.client_name)
+                  return (
+                    <tr
+                      key={sim.id}
+                      className="transition-colors hover:bg-foreground/[2.5%]"
+                    >
+                      {/* Checkbox */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <Checkbox
+                          checked={selected.has(sim.id)}
+                          onClick={(e) => { e.stopPropagation(); toggleSelect(sim.id) }}
+                        />
+                      </td>
 
-                    {/* ID */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(246,239,228,.55)' }}>
-                        {simDisplayId(sim.id)}
-                      </span>
-                    </td>
+                      {/* ID */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <span className="font-mono text-xs text-foreground/55">
+                          {simDisplayId(sim.id)}
+                        </span>
+                      </td>
 
-                    {/* Lead */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{
-                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                          display: 'grid', placeItems: 'center',
-                          fontSize: 13, fontWeight: 600, color: '#f0d9b5',
-                          background: avatarGradient(sim.client_name),
-                        }}>
-                          {initials(sim.client_name)}
+                      {/* Lead */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="grid size-9 shrink-0 place-items-center rounded-full text-[13px] font-semibold"
+                            style={{
+                              background: `color-mix(in oklch, ${token} 20%, var(--card))`,
+                              color: token,
+                            }}
+                          >
+                            {initials(sim.client_name)}
+                          </div>
+                          <div>
+                            <div className="text-[13.5px] font-semibold tracking-[-0.005em] text-foreground">
+                              {sim.client_name}
+                            </div>
+                            {sim.client_email && (
+                              <div className="mt-px text-[11.5px] text-foreground/55">
+                                {sim.client_email}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <div style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: '-.005em' }}>{sim.client_name}</div>
-                          {sim.client_email && (
-                            <div style={{ fontSize: 11.5, color: 'rgba(246,239,228,.55)', marginTop: 1 }}>{sim.client_email}</div>
-                          )}
+                      </td>
+
+                      {/* Produto */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+                          <span
+                            className="size-[7px] shrink-0 rounded-sm"
+                            style={{ background: nameToToken(pName) }}
+                          />
+                          {pName}
+                        </span>
+                      </td>
+
+                      {/* Valor / Condições */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <div className="text-[14px] font-semibold tracking-[-0.01em] text-foreground">
+                          {Number(sim.desired_amount).toLocaleString('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          })}
                         </div>
-                      </div>
-                    </td>
-
-                    {/* Produto */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#f6efe4' }}>
-                        <span style={{ width: 7, height: 7, borderRadius: 2, background: productDotColor(pName), flexShrink: 0 }} />
-                        {pName}
-                      </span>
-                    </td>
-
-                    {/* Valor / Condições */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <div>
-                        <div style={{ fontWeight: 600, fontSize: 14, letterSpacing: '-.01em' }}>
-                          {Number(sim.desired_amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        <div className="mt-0.5 text-[11.5px] text-foreground/55">
+                          {sim.desired_term_months}m ·{' '}
+                          {sim.estimated_rate
+                            ? `${Number(sim.estimated_rate).toFixed(2)}% a.m.`
+                            : '—'}
                         </div>
-                        <div style={{ fontSize: 11.5, color: 'rgba(246,239,228,.55)', marginTop: 2, fontWeight: 400 }}>
-                          {sim.desired_term_months}m · {sim.estimated_rate ? `${Number(sim.estimated_rate).toFixed(2)}% a.m.` : '—'}
+                      </td>
+
+                      {/* Status */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <StatusPill status={sim.status} />
+                      </td>
+
+                      {/* Origem */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <span className="text-[12.5px] text-foreground/55">
+                          Landing · Simulador
+                        </span>
+                      </td>
+
+                      {/* Recebida */}
+                      <td
+                        className={cn(
+                          'whitespace-nowrap p-[18px] align-middle',
+                          !isLast && 'border-b border-primary/8',
+                        )}
+                      >
+                        <span className="text-[12.5px] text-foreground/55">
+                          {relativeTime(sim.created_at)}
+                        </span>
+                      </td>
+
+                      {/* Ações */}
+                      <td className={cn('p-[18px] align-middle', !isLast && 'border-b border-primary/8')}>
+                        <div className="flex justify-end gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setDetailSim(sim)}
+                            title="Ver detalhes"
+                            className="grid size-[30px] cursor-pointer place-items-center rounded-[7px] border-none bg-transparent text-foreground/40 hover:text-foreground"
+                          >
+                            <Eye size={14} />
+                          </button>
+                          <a
+                            href={`tel:${sim.client_phone}`}
+                            title="Ligar"
+                            className="grid size-[30px] place-items-center rounded-[7px] text-foreground/40 no-underline hover:text-foreground"
+                          >
+                            <Phone size={14} />
+                          </a>
+                          <button
+                            type="button"
+                            title="Mais opções"
+                            className="grid size-[30px] cursor-pointer place-items-center rounded-[7px] border-none bg-transparent text-foreground/40 hover:text-foreground"
+                          >
+                            <MoreHorizontal size={14} />
+                          </button>
                         </div>
-                      </div>
-                    </td>
-
-                    {/* Status */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <StatusPill status={sim.status} />
-                    </td>
-
-                    {/* Origem */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <span style={{ color: 'rgba(246,239,228,.55)', fontSize: 12.5 }}>Landing · Simulador</span>
-                    </td>
-
-                    {/* Recebida */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                      whiteSpace: 'nowrap' as const,
-                    }}>
-                      <span style={{ color: 'rgba(246,239,228,.55)', fontSize: 12.5 }}>{relativeTime(sim.created_at)}</span>
-                    </td>
-
-                    {/* Ações */}
-                    <td style={{
-                      padding: '18px', verticalAlign: 'middle' as const,
-                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
-                    }}>
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
-                        <button
-                          onClick={() => setDetailSim(sim)}
-                          title="Ver detalhes"
-                          style={{
-                            width: 30, height: 30, borderRadius: 7,
-                            color: 'rgba(246,239,228,.4)',
-                            display: 'grid', placeItems: 'center',
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                          }}
-                        >
-                          <Eye size={14} />
-                        </button>
-                        <a
-                          href={`tel:${sim.client_phone}`}
-                          title="Ligar"
-                          style={{
-                            width: 30, height: 30, borderRadius: 7,
-                            color: 'rgba(246,239,228,.4)',
-                            display: 'grid', placeItems: 'center',
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                            textDecoration: 'none',
-                          }}
-                        >
-                          <Phone size={14} />
-                        </a>
-                        <button
-                          title="Mais opções"
-                          style={{
-                            width: 30, height: 30, borderRadius: 7,
-                            color: 'rgba(246,239,228,.4)',
-                            display: 'grid', placeItems: 'center',
-                            background: 'transparent', border: 'none', cursor: 'pointer',
-                          }}
-                        >
-                          <MoreHorizontal size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              })}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination footer */}
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '16px 18px', background: 'rgba(246,239,228,.02)',
-          borderTop: '1px solid rgba(233,199,123,.10)', fontSize: 12.5, color: 'rgba(246,239,228,.55)',
-        }}>
+        {/* Pagination */}
+        <div className="flex items-center justify-between border-t border-primary/10 bg-foreground/2 px-[18px] py-4 text-[12.5px] text-foreground/55">
           <span>
             Mostrando{' '}
-            <span style={{ color: '#f6efe4', fontWeight: 500 }}>{pageData.length}</span>
+            <span className="font-medium text-foreground">{pageData.length}</span>
             {' '}de{' '}
-            <span style={{ color: '#f6efe4', fontWeight: 500 }}>{displayed.length}</span>
+            <span className="font-medium text-foreground">{displayed.length}</span>
             {' '}simulações
           </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <div className="flex items-center gap-0.5">
             <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              type="button"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              style={{
-                width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
-                background: 'transparent', color: 'rgba(246,239,228,.55)',
-                border: '1px solid transparent', cursor: page === 1 ? 'default' : 'pointer',
-                opacity: page === 1 ? 0.3 : 1, display: 'grid', placeItems: 'center',
-              }}
+              className="grid size-[30px] place-items-center rounded-[7px] text-[12px] font-medium text-foreground/55 transition-opacity disabled:opacity-30"
             >
               ←
             </button>
@@ -517,15 +443,14 @@ export function SimulationsList({ simulations }: Props) {
               return (
                 <button
                   key={p}
+                  type="button"
                   onClick={() => setPage(p)}
-                  style={{
-                    width: 30, height: 30, borderRadius: 7, fontSize: 12,
-                    fontWeight: isActive ? 600 : 500,
-                    background: isActive ? GOLD : 'transparent',
-                    color: isActive ? BROWN_DEEP : 'rgba(246,239,228,.55)',
-                    border: isActive ? 'none' : '1px solid transparent',
-                    cursor: 'pointer', display: 'grid', placeItems: 'center',
-                  }}
+                  className={cn(
+                    'grid size-[30px] place-items-center rounded-[7px] text-[12px] transition-all',
+                    isActive
+                      ? 'bg-primary font-semibold text-primary-foreground'
+                      : 'font-medium text-foreground/55',
+                  )}
                 >
                   {p}
                 </button>
@@ -533,28 +458,21 @@ export function SimulationsList({ simulations }: Props) {
             })}
             {totalPages > 5 && (
               <>
-                <span style={{ fontSize: 12, color: 'rgba(246,239,228,.4)', padding: '0 2px' }}>…</span>
+                <span className="px-0.5 text-xs text-foreground/40">…</span>
                 <button
+                  type="button"
                   onClick={() => setPage(totalPages)}
-                  style={{
-                    width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
-                    background: 'transparent', color: 'rgba(246,239,228,.55)',
-                    border: '1px solid transparent', cursor: 'pointer', display: 'grid', placeItems: 'center',
-                  }}
+                  className="grid size-[30px] place-items-center rounded-[7px] text-[12px] font-medium text-foreground/55"
                 >
                   {totalPages}
                 </button>
               </>
             )}
             <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              type="button"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              style={{
-                width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
-                background: 'transparent', color: 'rgba(246,239,228,.55)',
-                border: '1px solid transparent', cursor: page === totalPages ? 'default' : 'pointer',
-                opacity: page === totalPages ? 0.3 : 1, display: 'grid', placeItems: 'center',
-              }}
+              className="grid size-[30px] place-items-center rounded-[7px] text-[12px] font-medium text-foreground/55 transition-opacity disabled:opacity-30"
             >
               →
             </button>
@@ -562,7 +480,6 @@ export function SimulationsList({ simulations }: Props) {
         </div>
       </div>
 
-      {/* Sheet de detalhes */}
       <SimulationDetailSheet simulation={detailSim} onClose={() => setDetailSim(null)} />
     </div>
   )

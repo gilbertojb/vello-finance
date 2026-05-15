@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
 import { Download, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
-import { SimulationsList } from './_components/simulations-list'
-import { KpiCards } from './_components/kpi-cards'
 import { FunnelChart } from './_components/funnel-chart'
+import { KpiCards } from './_components/kpi-cards'
 import { ProductMixChart } from './_components/product-mix-chart'
+import { SimulationsList } from './_components/simulations-list'
 import {
-  listSimulations,
+  getProductMix,
+  getSimulationFunnel,
   getSimulationKpis,
   getSimulationSparklines,
-  getSimulationFunnel,
-  getProductMix,
+  listSimulations,
 } from './queries'
 
 export const metadata: Metadata = { title: 'Simulações' }
@@ -26,27 +25,34 @@ export default async function SimulationsPage() {
   ])
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      {/* Breadcrumb + Header */}
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-10/12 w-full p-8">
+      {/* Page header */}
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-1">
+          <span className="text-[11px] font-medium uppercase tracking-[.18em] text-foreground/45">
             Originação · Pré-qualificados
-          </p>
-          <h1 className="font-heading text-4xl italic font-medium tracking-tight">Simulações.</h1>
-          <p className="mt-2 max-w-lg text-sm text-muted-foreground">
-            Leads que iniciaram ou concluíram uma simulação na landing. Cada lead recebe um score de 0–100 estimando a probabilidade de conversão em proposta.
+          </span>
+          <h1 className="mb-2 mt-1 text-[42px] font-semibold leading-none tracking-tight text-foreground">
+            Simulações<span className="text-primary">.</span>
+          </h1>
+          <p className="m-0 max-w-[520px] text-sm leading-normal text-foreground/55">
+            Leads que iniciaram ou concluíram uma simulação na landing. Cada lead recebe um score
+            de 0–100 estimando a probabilidade de conversão em proposta.
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2 pt-1">
-          <Button variant="outline" size="sm" className="gap-2">
-            <Download className="size-4" />
-            Exportar CSV
-          </Button>
-          <Button size="sm" className="gap-2">
-            <Plus className="size-4" />
-            Nova simulação
-          </Button>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-[10px] text-[13px] font-medium text-foreground"
+          >
+            <Download size={14} /> Exportar CSV
+          </button>
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-none bg-primary px-4 py-[10px] text-[13px] font-semibold text-primary-foreground"
+          >
+            <Plus size={14} /> Nova simulação
+          </button>
         </div>
       </div>
 
@@ -54,10 +60,12 @@ export default async function SimulationsPage() {
       <KpiCards kpis={kpis} sparklines={sparklines} />
 
       {/* Simulations Table */}
-      <SimulationsList simulations={simulations} />
+      <div className="mt-[14px]">
+        <SimulationsList simulations={simulations} />
+      </div>
 
       {/* Bottom charts */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_380px]">
+      <div className="mt-[14px] grid gap-[14px] lg:grid-cols-[1fr_380px]">
         <FunnelChart data={funnel} />
         <ProductMixChart data={productMix} />
       </div>

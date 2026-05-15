@@ -1,41 +1,52 @@
-import { Card } from '@/components/ui/card'
 import type { ProductMixRow } from '../queries'
 
-const COLORS = ['#F59E0B','#10B981','#3B82F6','#8B5CF6','#EF4444','#F97316','#14B8A6']
+const CHART_TOKENS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+]
 
-interface Props { data: ProductMixRow[] }
+interface Props {
+  data: ProductMixRow[]
+}
 
 export function ProductMixChart({ data }: Props) {
   return (
-    <Card className="p-5">
-      <h2 className="font-heading text-lg font-medium">Mix por produto</h2>
-      <p className="mb-4 text-xs text-muted-foreground">Distribuição das simulações</p>
+    <div className="rounded-[14px] border border-primary/10 bg-card p-5">
+      <h2 className="text-[15px] font-semibold tracking-tight text-foreground">
+        Mix por produto
+      </h2>
+      <p className="mb-5 mt-0.5 text-xs text-foreground/45">Distribuição das simulações</p>
 
       <div className="flex flex-col gap-3">
-        {data.map((item, i) => (
-          <div key={item.name}>
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <span
-                  className="inline-block size-2 rounded-full shrink-0"
-                  style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                />
-                <span className="text-sm">{item.name}</span>
+        {data.map((item, i) => {
+          const color = CHART_TOKENS[i % CHART_TOKENS.length]!
+          return (
+            <div key={item.name}>
+              <div className="mb-1 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="inline-block size-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: color }}
+                  />
+                  <span className="text-[13px] text-foreground/70">{item.name}</span>
+                </div>
+                <span className="text-[13px] font-semibold tabular-nums text-foreground">
+                  {item.pct}%
+                </span>
               </div>
-              <span className="text-sm font-semibold tabular-nums">{item.pct}%</span>
+              <div className="h-1.5 overflow-hidden rounded-full bg-foreground/6">
+                <div
+                  className="h-full rounded-full"
+                  style={{ width: `${item.pct}%`, backgroundColor: color }}
+                />
+              </div>
             </div>
-            <div className="h-1.5 rounded-full bg-muted/30">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${item.pct}%`,
-                  backgroundColor: COLORS[i % COLORS.length],
-                }}
-              />
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
-    </Card>
+    </div>
   )
 }
