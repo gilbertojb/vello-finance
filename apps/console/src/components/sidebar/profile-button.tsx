@@ -3,6 +3,7 @@
 import { EllipsisVertical, LogOut } from 'lucide-react'
 import { useTransition } from 'react'
 
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,22 +14,26 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
+
 import { signOut } from '@/http/sign-out'
+import { ThemeSwitcher } from './theme-switcher'
 
 interface ProfileButtonProps {
-  user: { name: string; email: string }
-  initials?: string
+  user: {
+    name: string
+    email: string
+  }
 }
 
-export function ProfileButton({ user, initials: initialsOverride }: ProfileButtonProps) {
-  function computeInitials(name: string) {
-    return name
-      .split(' ')
-      .slice(0, 2)
-      .map((part: string) => part[0]?.toUpperCase() ?? '')
-      .join('')
-  }
-  const avatarInitials = initialsOverride ?? computeInitials(user.name)
+function initials(name: string) {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part: string) => part[0]?.toUpperCase() ?? '')
+    .join('')
+}
+
+export function ProfileButton({ user }: ProfileButtonProps) {
   const { isMobile } = useSidebar()
   const [isPending, startTransition] = useTransition()
 
@@ -43,9 +48,11 @@ export function ProfileButton({ user, initials: initialsOverride }: ProfileButto
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
-            {avatarInitials}
-          </div>
+          <Avatar className="h-8 w-8 rounded-lg grayscale">
+            <AvatarFallback className="rounded-lg">
+              {initials(user.name)}
+            </AvatarFallback>
+          </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">{user.name}</span>
             <span className="text-muted-foreground truncate text-xs">
@@ -64,9 +71,11 @@ export function ProfileButton({ user, initials: initialsOverride }: ProfileButto
       >
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground text-xs font-bold">
-              {avatarInitials}
-            </div>
+            <Avatar className="h-8 w-8 rounded-lg">
+              <AvatarFallback className="rounded-lg">
+                {initials(user.name)}
+              </AvatarFallback>
+            </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{user.name}</span>
               <span className="text-muted-foreground truncate text-xs">
@@ -75,6 +84,10 @@ export function ProfileButton({ user, initials: initialsOverride }: ProfileButto
             </div>
           </div>
         </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <ThemeSwitcher />
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem

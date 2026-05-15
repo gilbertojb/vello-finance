@@ -1,10 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { ProfileButton } from './profile-button'
 
-function initials(name: string): string {
-  return name.split(' ').slice(0, 2).map(n => n[0] ?? '').join('').toUpperCase()
-}
-
 export async function NavUser() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -24,7 +20,7 @@ export async function NavUser() {
 
   return (
     <div className="border-t border-sidebar-border pt-3">
-      <ProfileButton user={{ name, email }} initials={initials(name)} />
+      <ProfileButton user={{ name, email }} />
     </div>
   )
 }
