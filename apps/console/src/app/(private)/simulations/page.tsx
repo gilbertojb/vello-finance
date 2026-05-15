@@ -29,13 +29,13 @@ export default async function SimulationsPage() {
       {/* Page header */}
       <div className="mb-7 flex flex-wrap items-end justify-between gap-6">
         <div>
-          <span className="text-[11px] font-medium uppercase tracking-[.18em] text-foreground/45">
+          <span className="text-xs font-medium uppercase tracking-widest text-foreground/45">
             Originação · Pré-qualificados
           </span>
-          <h1 className="mb-2 mt-1 text-[42px] font-semibold leading-none tracking-tight text-foreground">
+          <h1 className="mb-2 mt-1 text-4xl font-semibold leading-none tracking-tight text-foreground">
             Simulações<span className="text-primary">.</span>
           </h1>
-          <p className="m-0 max-w-[520px] text-sm leading-normal text-foreground/55">
+          <p className="m-0 max-w-xl text-sm leading-normal text-foreground/55">
             Leads que iniciaram ou concluíram uma simulação na landing. Cada lead recebe um score
             de 0–100 estimando a probabilidade de conversão em proposta.
           </p>
@@ -43,13 +43,13 @@ export default async function SimulationsPage() {
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-[10px] text-[13px] font-medium text-foreground"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
           >
             <Download size={14} /> Exportar CSV
           </button>
           <button
             type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-none bg-primary px-4 py-[10px] text-[13px] font-semibold text-primary-foreground"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-none bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             <Plus size={14} /> Nova simulação
           </button>
@@ -60,14 +60,18 @@ export default async function SimulationsPage() {
       <KpiCards kpis={kpis} sparklines={sparklines} />
 
       {/* Simulations Table */}
-      <div className="mt-[14px]">
+      <div className="mt-3.5">
         <SimulationsList simulations={simulations} />
       </div>
 
-      {/* Bottom charts */}
-      <div className="mt-[14px] grid gap-[14px] lg:grid-cols-[1fr_380px]">
-        <FunnelChart data={funnel} />
-        <ProductMixChart data={productMix} />
+      {/* Bottom charts: Funnel (2/3) + Mix (1/3) */}
+      <div className="mt-3.5 grid grid-cols-3 gap-3.5">
+        <div className="col-span-2">
+          <FunnelChart data={funnel} />
+        </div>
+        <div>
+          <ProductMixChart data={productMix} />
+        </div>
       </div>
     </div>
   )

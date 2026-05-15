@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Download } from 'lucide-react'
 
 import { ProposalsList } from './_components/proposals-list'
 import { listProposals } from './queries'
@@ -14,12 +15,29 @@ export default async function ProposalsPage({
   const proposals = await listProposals()
 
   return (
-    <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Propostas</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Pipeline de propostas enviadas pelos clientes da sua loja.
-        </p>
+    <div className="mx-auto max-w-10/12 w-full p-8">
+      {/* Page header */}
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-6">
+        <div>
+          <span className="text-xs font-medium uppercase tracking-widest text-foreground/45">
+            Originação · Pipeline
+          </span>
+          <h1 className="mb-2 mt-1 text-4xl font-semibold leading-none tracking-tight text-foreground">
+            Propostas<span className="text-primary">.</span>
+          </h1>
+          <p className="m-0 max-w-xl text-sm leading-normal text-foreground/55">
+            Pipeline de propostas enviadas pelos clientes da sua loja. Acompanhe o status e a
+            etapa de cada operação em tempo real.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
+          >
+            <Download size={14} /> Exportar CSV
+          </button>
+        </div>
       </div>
 
       <ProposalsList proposals={proposals} activeStatus={status} />

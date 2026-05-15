@@ -2,10 +2,7 @@
 
 import { CheckCircle2, FileText, Layers, TrendingUp } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
-
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-
+import { cn } from '@/lib/utils'
 import type { ProposalRow } from '../queries'
 
 function brl(value: number): string {
@@ -13,11 +10,7 @@ function brl(value: number): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-  })
+  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
 function formatPhone(phone: string): string {
@@ -38,33 +31,59 @@ const STATUS_LABELS: Record<string, string> = {
 function StatusBadge({ status }: { status: string }) {
   if (status === 'approved') {
     return (
-      <Badge className="border-emerald-500/20 bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+        style={{ background: 'color-mix(in oklch, var(--success) 15%, transparent)', color: 'var(--success)' }}
+      >
+        <span className="size-1.5 rounded-full" style={{ background: 'var(--success)' }} />
         Aprovada
-      </Badge>
+      </span>
     )
   }
   if (status === 'in_pipeline') {
     return (
-      <Badge className="border-primary/20 bg-primary/10 text-primary hover:bg-primary/20">
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+        style={{ background: 'color-mix(in oklch, var(--primary) 12%, transparent)', color: 'var(--primary)' }}
+      >
+        <span className="size-1.5 rounded-full" style={{ background: 'var(--primary)' }} />
         Em análise
-      </Badge>
+      </span>
     )
   }
   if (status === 'rejected') {
-    return <Badge variant="destructive">Reprovada</Badge>
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+        style={{ background: 'color-mix(in oklch, var(--destructive) 14%, transparent)', color: 'var(--destructive)' }}
+      >
+        <span className="size-1.5 rounded-full" style={{ background: 'var(--destructive)' }} />
+        Reprovada
+      </span>
+    )
   }
   if (status === 'cancelled') {
-    return <Badge variant="outline">Cancelada</Badge>
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-semibold text-muted-foreground">
+        <span className="size-1.5 rounded-full bg-muted-foreground" />
+        Cancelada
+      </span>
+    )
   }
-  return <Badge variant="secondary">Simulação</Badge>
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-muted-foreground">
+      <span className="size-1.5 rounded-full bg-muted-foreground" />
+      Simulação
+    </span>
+  )
 }
 
 const STATUS_FILTERS = [
-  { label: 'Todas',       value: undefined },
-  { label: 'Em análise',  value: 'in_pipeline' },
-  { label: 'Aprovadas',   value: 'approved' },
-  { label: 'Reprovadas',  value: 'rejected' },
-  { label: 'Simulações',  value: 'simulation' },
+  { label: 'Todas',      value: undefined },
+  { label: 'Em análise', value: 'in_pipeline' },
+  { label: 'Aprovadas',  value: 'approved' },
+  { label: 'Reprovadas', value: 'rejected' },
+  { label: 'Simulações', value: 'simulation' },
 ] as const
 
 interface Props {
@@ -79,14 +98,11 @@ export function ProposalsList({ proposals, activeStatus }: Props) {
   const total       = proposals.length
   const inPipeline  = proposals.filter((p) => p.status === 'in_pipeline').length
   const approved    = proposals.filter((p) => p.status === 'approved').length
-  const pipelineVol = proposals
-    .filter((p) => p.status === 'in_pipeline')
-    .reduce((sum, p) => sum + Number(p.desired_amount), 0)
+  const pipelineVol = proposals.filter((p) => p.status === 'in_pipeline').reduce((sum, p) => sum + Number(p.desired_amount), 0)
 
-  const displayed =
-    activeStatus && STATUS_LABELS[activeStatus]
-      ? proposals.filter((p) => p.status === activeStatus)
-      : proposals
+  const displayed = activeStatus && STATUS_LABELS[activeStatus]
+    ? proposals.filter((p) => p.status === activeStatus)
+    : proposals
 
   function setFilter(status: string | undefined) {
     const params = new URLSearchParams()
@@ -98,46 +114,46 @@ export function ProposalsList({ proposals, activeStatus }: Props) {
   return (
     <div className="flex flex-col gap-6">
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="flex items-center gap-4 rounded-2xl border border-primary/10 bg-card p-4">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
             <FileText className="size-5" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Total de propostas</p>
             <p className="text-2xl font-bold">{total}</p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="flex items-center gap-4 rounded-2xl border border-primary/10 bg-card p-4">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
             <Layers className="size-5" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Em análise</p>
             <p className="text-2xl font-bold">{inPipeline}</p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+        <div className="flex items-center gap-4 rounded-2xl border border-primary/10 bg-card p-4">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-success/10 text-success">
             <CheckCircle2 className="size-5" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Aprovadas</p>
             <p className="text-2xl font-bold">{approved}</p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="flex items-center gap-4 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="flex items-center gap-4 rounded-2xl border border-primary/10 bg-card p-4">
+          <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
             <TrendingUp className="size-5" />
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Volume em análise</p>
             <p className="truncate text-2xl font-bold">{brl(pipelineVol)}</p>
           </div>
-        </Card>
+        </div>
       </div>
 
       {/* Filters */}
@@ -147,11 +163,12 @@ export function ProposalsList({ proposals, activeStatus }: Props) {
             key={tab.label}
             type="button"
             onClick={() => setFilter(tab.value)}
-            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+            className={cn(
+              'rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
               activeStatus === tab.value
-                ? 'bg-foreground text-background'
-                : 'bg-muted text-muted-foreground hover:bg-muted/80'
-            }`}
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:bg-muted/80',
+            )}
           >
             {tab.label}
           </button>
@@ -162,80 +179,48 @@ export function ProposalsList({ proposals, activeStatus }: Props) {
       {displayed.length === 0 ? (
         <EmptyState />
       ) : (
-        <Card className="overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-primary/10 bg-card">
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/30 text-left">
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Data</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">ID</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Produto</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Cliente</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">E-mail</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Telefone</th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
-                    Crédito
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground">
-                    Parcela
-                  </th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Prazo</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Etapa</th>
-                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground">Status</th>
+                <tr className="border-b border-primary/10 bg-foreground/2 text-left">
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Data</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">ID</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Produto</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Cliente</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">E-mail</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Telefone</th>
+                  <th className="p-4 text-right text-xs font-medium uppercase tracking-widest text-foreground/55">Crédito</th>
+                  <th className="p-4 text-right text-xs font-medium uppercase tracking-widest text-foreground/55">Parcela</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Prazo</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Etapa</th>
+                  <th className="p-4 text-xs font-medium uppercase tracking-widest text-foreground/55">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {displayed.map((proposal) => {
-                  const product = Array.isArray(proposal.products)
-                    ? proposal.products[0]
-                    : proposal.products
-                  const stage = Array.isArray(proposal.proposal_stages)
-                    ? proposal.proposal_stages[0]
-                    : proposal.proposal_stages
-
+                  const product = Array.isArray(proposal.products) ? proposal.products[0] : proposal.products
+                  const stage   = Array.isArray(proposal.proposal_stages) ? proposal.proposal_stages[0] : proposal.proposal_stages
                   return (
-                    <tr
-                      key={proposal.id}
-                      className="border-b border-border/50 transition-colors last:border-0 hover:bg-muted/30"
-                    >
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        {formatDate(proposal.created_at)}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        #{proposal.id.slice(0, 8)}
-                      </td>
-                      <td className="px-4 py-3 font-medium">{product?.name ?? '—'}</td>
-                      <td className="px-4 py-3">{proposal.client_name}</td>
-                      <td className="max-w-[180px] truncate px-4 py-3 text-xs text-muted-foreground">
-                        {proposal.client_email}
-                      </td>
-                      <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                        {formatPhone(proposal.client_phone)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono font-medium">
-                        {brl(Number(proposal.desired_amount))}
-                      </td>
-                      <td className="px-4 py-3 text-right font-mono text-muted-foreground">
-                        {proposal.estimated_payment
-                          ? brl(Number(proposal.estimated_payment))
-                          : '—'}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {proposal.desired_term_months}x
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {stage?.name ?? '—'}
-                      </td>
-                      <td className="px-4 py-3">
-                        <StatusBadge status={proposal.status} />
-                      </td>
+                    <tr key={proposal.id} className="border-b border-primary/8 transition-colors last:border-0 hover:bg-foreground/[2.5%]">
+                      <td className="p-4 font-mono text-xs text-foreground/55">{formatDate(proposal.created_at)}</td>
+                      <td className="p-4 font-mono text-xs text-foreground/55">#{proposal.id.slice(0, 8)}</td>
+                      <td className="p-4 font-medium text-foreground">{product?.name ?? '—'}</td>
+                      <td className="p-4 text-foreground">{proposal.client_name}</td>
+                      <td className="max-w-44 truncate p-4 text-xs text-foreground/55">{proposal.client_email}</td>
+                      <td className="p-4 font-mono text-xs text-foreground/55">{formatPhone(proposal.client_phone)}</td>
+                      <td className="p-4 text-right font-mono font-medium text-foreground">{brl(Number(proposal.desired_amount))}</td>
+                      <td className="p-4 text-right font-mono text-foreground/55">{proposal.estimated_payment ? brl(Number(proposal.estimated_payment)) : '—'}</td>
+                      <td className="p-4 text-xs text-foreground/55">{proposal.desired_term_months}x</td>
+                      <td className="p-4 text-xs text-foreground/55">{stage?.name ?? '—'}</td>
+                      <td className="p-4"><StatusBadge status={proposal.status} /></td>
                     </tr>
                   )
                 })}
               </tbody>
             </table>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   )
@@ -244,13 +229,12 @@ export function ProposalsList({ proposals, activeStatus }: Props) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-        <FileText className="h-6 w-6 text-muted-foreground" />
+      <div className="grid size-12 place-items-center rounded-full bg-muted">
+        <FileText className="size-6 text-muted-foreground" />
       </div>
-      <h3 className="mt-4 text-lg font-medium text-foreground">Nenhuma proposta ainda</h3>
-      <p className="mt-2 max-w-[380px] text-sm text-muted-foreground">
-        Quando clientes enviarem propostas pela sua loja, elas aparecerão aqui com status e etapa
-        do pipeline.
+      <h3 className="mt-4 text-base font-medium text-foreground">Nenhuma proposta ainda</h3>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        Quando clientes enviarem propostas pela sua loja, elas aparecerão aqui com status e etapa do pipeline.
       </p>
     </div>
   )

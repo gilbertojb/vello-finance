@@ -10,12 +10,17 @@ export function Header() {
         <Separator orientation="vertical" className="my-2 h-4" />
       </div>
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground w-52">
+        <div className="flex items-center gap-2 rounded-md border border-border bg-muted/30 px-3 py-1.5 text-xs text-muted-foreground w-82">
           <Search className="size-3.5 shrink-0" />
           <span>Buscar simulações, CPF, e-m...</span>
-          <span className="ml-auto rounded border border-border px-1 text-[10px]">⌘K</span>
+          <span className="ml-auto rounded border border-border px-1 text-[10px]">
+            ⌘K
+          </span>
         </div>
-        <button className="relative flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
+        <button
+          type="button"
+          className="relative flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+        >
           <Bell className="size-4" />
           <span className="absolute right-1 top-1 flex size-2 items-center justify-center rounded-full bg-primary" />
         </button>
