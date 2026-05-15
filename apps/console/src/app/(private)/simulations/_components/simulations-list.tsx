@@ -2,16 +2,39 @@
 
 import { useState } from 'react'
 import { Eye, Phone, MoreHorizontal, Search } from 'lucide-react'
-import { Card } from '@/components/ui/card'
 import type { SimulationRow } from '../queries'
 import { SimulationDetailSheet } from './simulation-detail-sheet'
 
-// ── Utilitários ──────────────────────────────────────────────────────────────
-function brl(v: number | null): string {
-  if (!v) return '—'
-  return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const GOLD = '#e9c77b'
+const BROWN_DEEP = '#3b2418'
+
+// ── Avatar gradient ───────────────────────────────────────────────────────────
+const AVATAR_PAIRS: [string, string][] = [
+  ['#3b2418', '#8b5e3c'],
+  ['#5a1d10', '#c45947'],
+  ['#1a3a2e', '#5a8a4c'],
+  ['#2d2418', '#a87f3a'],
+  ['#3b1a18', '#8b5e3c'],
+  ['#1d2638', '#476285'],
+  ['#3b2820', '#c9a47a'],
+]
+function avatarGradient(name: string): string {
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  const pair = AVATAR_PAIRS[h % AVATAR_PAIRS.length]!
+  return `linear-gradient(135deg,${pair[0]},${pair[1]})`
 }
 
+// ── Product colors ────────────────────────────────────────────────────────────
+const PRODUCT_COLORS = ['#e9c77b', '#5a8a4c', '#c9a47a', '#8b5e3c', '#c45947', '#a87f3a', '#3b5e34']
+function productDotColor(name: string): string {
+  let h = 0
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
+  return PRODUCT_COLORS[h % PRODUCT_COLORS.length]!
+}
+
+// ── Utilitários ───────────────────────────────────────────────────────────────
 function relativeTime(iso: string): string {
   const m = Math.floor((Date.now() - new Date(iso).getTime()) / 60000)
   if (m < 1) return 'agora'
@@ -31,29 +54,53 @@ function productName(sim: SimulationRow): string {
   return Array.isArray(p) ? (p[0]?.name ?? '—') : (p as { name: string }).name
 }
 
-const AVATAR_COLORS = [
-  'bg-emerald-700 text-emerald-100',
-  'bg-blue-700 text-blue-100',
-  'bg-violet-700 text-violet-100',
-  'bg-amber-700 text-amber-100',
-  'bg-rose-700 text-rose-100',
-  'bg-teal-700 text-teal-100',
-]
-function avatarColor(name: string): string {
-  let h = 0
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  return AVATAR_COLORS[h % AVATAR_COLORS.length]
-}
-
-const PRODUCT_COLORS = ['#F59E0B','#10B981','#3B82F6','#8B5CF6','#EF4444','#F97316','#14B8A6']
-function productDotColor(name: string): string {
-  let h = 0
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0
-  return PRODUCT_COLORS[h % PRODUCT_COLORS.length]
-}
-
 function simDisplayId(id: string): string {
   return 'SIM-' + id.replace(/-/g, '').slice(-5).toUpperCase()
+}
+
+// ── StatusPill ────────────────────────────────────────────────────────────────
+export function StatusPill({ status }: { status: string }) {
+  const MAP: Record<string, { label: string; bg: string; color: string; dot: string }> = {
+    rascunho:        { label: 'Novo lead',   bg: 'rgba(90,138,76,.14)',   color: '#a8d490', dot: '#5a8a4c' },
+    pre_qualificado: { label: 'Qualificado', bg: 'rgba(180,130,60,.14)',  color: '#e0a76b', dot: '#c98e3f' },
+    em_contato:      { label: 'Em contato',  bg: 'rgba(233,199,123,.10)', color: '#e9c77b', dot: '#e9c77b' },
+    convertido:      { label: 'Convertido',  bg: 'rgba(74,140,90,.18)',   color: '#9bd2a8', dot: '#5fa86c' },
+    perdido:         { label: 'Perdido',     bg: 'rgba(196,89,71,.14)',   color: '#e8a092', dot: '#c45947' },
+  }
+  const s = MAP[status] ?? MAP['rascunho']!
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: 7,
+      fontSize: 11.5, fontWeight: 600, padding: '5px 11px',
+      borderRadius: 999, letterSpacing: '.02em',
+      background: s.bg, color: s.color,
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: s.dot }} />
+      {s.label}
+    </span>
+  )
+}
+
+// ── Checkbox customizado ───────────────────────────────────────────────────────
+function Checkbox({ checked, onClick }: { checked: boolean; onClick?: (e: React.MouseEvent) => void }) {
+  return (
+    <span
+      onClick={onClick}
+      style={{
+        width: 16, height: 16, borderRadius: 4, flexShrink: 0,
+        border: checked ? 'none' : '1.5px solid rgba(246,239,228,.25)',
+        background: checked ? GOLD : 'transparent',
+        color: checked ? BROWN_DEEP : 'transparent',
+        display: 'grid', placeItems: 'center', cursor: 'pointer',
+      }}
+    >
+      {checked && (
+        <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 12l5 5 9-11" />
+        </svg>
+      )}
+    </span>
+  )
 }
 
 // ── Tipos de aba ──────────────────────────────────────────────────────────────
@@ -136,7 +183,7 @@ export function SimulationsList({ simulations }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Toolbar card — igual ao design */}
+      {/* Toolbar */}
       <div style={{
         background: 'var(--color-card)',
         border: '1px solid rgba(233,199,123,.10)',
@@ -172,8 +219,8 @@ export function SimulationsList({ simulations }: Props) {
                   alignItems: 'center',
                   gap: 7,
                   transition: 'all .12s',
-                  background: isActive ? '#e9c77b' : 'transparent',
-                  color: isActive ? '#3b2418' : 'rgba(246,239,228,.55)',
+                  background: isActive ? GOLD : 'transparent',
+                  color: isActive ? BROWN_DEEP : 'rgba(246,239,228,.55)',
                   cursor: 'pointer',
                   border: 'none',
                 }}
@@ -237,22 +284,36 @@ export function SimulationsList({ simulations }: Props) {
         </button>
       </div>
 
-      {/* Tabela */}
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      {/* Tabela — sem Card shadcn */}
+      <div style={{
+        background: 'var(--color-card)',
+        border: '1px solid rgba(233,199,123,.10)',
+        borderRadius: 14,
+        overflow: 'hidden',
+      }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
-              <tr className="border-b border-border">
-                <th className="w-10 px-4 py-3">
-                  <input
-                    type="checkbox"
-                    className="rounded border-border"
+              <tr>
+                {/* Checkbox header */}
+                <th style={{
+                  fontSize: 10.5, letterSpacing: '.16em', textTransform: 'uppercase' as const,
+                  color: 'rgba(246,239,228,.55)', fontWeight: 500, padding: '14px 18px',
+                  textAlign: 'left' as const, background: 'rgba(246,239,228,.02)',
+                  borderBottom: '1px solid rgba(233,199,123,.10)', width: 46,
+                }}>
+                  <Checkbox
                     checked={selected.size === pageData.length && pageData.length > 0}
-                    onChange={toggleAll}
+                    onClick={() => toggleAll()}
                   />
                 </th>
-                {['ID','LEAD','PRODUTO','VALOR / CONDIÇÕES','STATUS','ORIGEM','RECEBIDA',''].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-[10px] font-semibold tracking-wider uppercase text-muted-foreground whitespace-nowrap">
+                {['ID', 'LEAD', 'PRODUTO', 'VALOR / CONDIÇÕES', 'STATUS', 'ORIGEM', 'RECEBIDA', ''].map(h => (
+                  <th key={h} style={{
+                    fontSize: 10.5, letterSpacing: '.16em', textTransform: 'uppercase' as const,
+                    color: 'rgba(246,239,228,.55)', fontWeight: 500, padding: '14px 18px',
+                    textAlign: 'left' as const, background: 'rgba(246,239,228,.02)',
+                    borderBottom: '1px solid rgba(233,199,123,.10)', whiteSpace: 'nowrap' as const,
+                  }}>
                     {h}
                   </th>
                 ))}
@@ -261,105 +322,159 @@ export function SimulationsList({ simulations }: Props) {
             <tbody>
               {pageData.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-muted-foreground">
+                  <td colSpan={9} style={{
+                    padding: '48px 18px', textAlign: 'center' as const,
+                    fontSize: 13.5, color: 'rgba(246,239,228,.4)',
+                  }}>
                     Nenhuma simulação encontrada.
                   </td>
                 </tr>
-              ) : pageData.map(sim => {
+              ) : pageData.map((sim, idx) => {
                 const pName = productName(sim)
-                const dotColor = productDotColor(pName)
-                const isPreQ = sim.status === 'pre_qualificado'
+                const isLast = idx === pageData.length - 1
                 return (
                   <tr
                     key={sim.id}
-                    className="border-b border-border/40 hover:bg-muted/20 transition-colors last:border-0"
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(246,239,228,.025)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                    style={{ transition: 'background .1s' }}
                   >
                     {/* Checkbox */}
-                    <td className="px-4 py-3.5">
-                      <input
-                        type="checkbox"
-                        className="rounded border-border"
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <Checkbox
                         checked={selected.has(sim.id)}
-                        onChange={() => toggleSelect(sim.id)}
+                        onClick={e => { e.stopPropagation(); toggleSelect(sim.id) }}
                       />
                     </td>
+
                     {/* ID */}
-                    <td className="px-4 py-3.5">
-                      <span style={{ color: 'rgba(246,239,228,.55)', fontFamily: 'monospace', fontSize: 12 }}>
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <span style={{ fontFamily: 'monospace', fontSize: 12, color: 'rgba(246,239,228,.55)' }}>
                         {simDisplayId(sim.id)}
                       </span>
                     </td>
+
                     {/* Lead */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${avatarColor(sim.client_name)}`}>
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                          display: 'grid', placeItems: 'center',
+                          fontSize: 13, fontWeight: 600, color: '#f0d9b5',
+                          background: avatarGradient(sim.client_name),
+                        }}>
                           {initials(sim.client_name)}
                         </div>
                         <div>
-                          <p className="font-medium text-sm leading-tight">{sim.client_name}</p>
+                          <div style={{ fontWeight: 600, fontSize: 13.5, letterSpacing: '-.005em' }}>{sim.client_name}</div>
                           {sim.client_email && (
-                            <p className="text-[11px] text-muted-foreground leading-tight">{sim.client_email}</p>
+                            <div style={{ fontSize: 11.5, color: 'rgba(246,239,228,.55)', marginTop: 1 }}>{sim.client_email}</div>
                           )}
                         </div>
                       </div>
                     </td>
+
                     {/* Produto */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="inline-block size-2 shrink-0 rounded-full"
-                          style={{ backgroundColor: dotColor }}
-                        />
-                        <span className="text-sm whitespace-nowrap">{pName}</span>
-                      </div>
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#f6efe4' }}>
+                        <span style={{ width: 7, height: 7, borderRadius: 2, background: productDotColor(pName), flexShrink: 0 }} />
+                        {pName}
+                      </span>
                     </td>
+
                     {/* Valor / Condições */}
-                    <td className="px-4 py-3.5">
-                      <p className="font-mono font-medium text-sm">
-                        {Number(sim.desired_amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                      </p>
-                      <p className="text-[11px] text-muted-foreground">
-                        {sim.desired_term_months}m · {sim.estimated_rate ? `${Number(sim.estimated_rate).toFixed(2)}% a.m.` : '—'}
-                      </p>
-                    </td>
-                    {/* Status */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-1.5">
-                        <span
-                          className={`size-2 rounded-full shrink-0 ${isPreQ ? 'bg-emerald-400' : 'bg-primary'}`}
-                        />
-                        <span className="text-xs font-medium">
-                          {isPreQ ? 'Qualificado' : 'Novo'}
-                        </span>
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14, letterSpacing: '-.01em' }}>
+                          {Number(sim.desired_amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                        </div>
+                        <div style={{ fontSize: 11.5, color: 'rgba(246,239,228,.55)', marginTop: 2, fontWeight: 400 }}>
+                          {sim.desired_term_months}m · {sim.estimated_rate ? `${Number(sim.estimated_rate).toFixed(2)}% a.m.` : '—'}
+                        </div>
                       </div>
                     </td>
+
+                    {/* Status */}
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <StatusPill status={sim.status} />
+                    </td>
+
                     {/* Origem */}
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground whitespace-nowrap">
-                      Landing · Simulador
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <span style={{ color: 'rgba(246,239,228,.55)', fontSize: 12.5 }}>Landing · Simulador</span>
                     </td>
+
                     {/* Recebida */}
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground whitespace-nowrap">
-                      {relativeTime(sim.created_at)}
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                      whiteSpace: 'nowrap' as const,
+                    }}>
+                      <span style={{ color: 'rgba(246,239,228,.55)', fontSize: 12.5 }}>{relativeTime(sim.created_at)}</span>
                     </td>
+
                     {/* Ações */}
-                    <td className="px-4 py-3.5">
-                      <div className="flex items-center gap-2 text-muted-foreground">
+                    <td style={{
+                      padding: '18px', verticalAlign: 'middle' as const,
+                      borderBottom: isLast ? 'none' : '1px solid rgba(233,199,123,.08)',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
                         <button
                           onClick={() => setDetailSim(sim)}
-                          className="hover:text-foreground transition-colors"
                           title="Ver detalhes"
+                          style={{
+                            width: 30, height: 30, borderRadius: 7,
+                            color: 'rgba(246,239,228,.4)',
+                            display: 'grid', placeItems: 'center',
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                          }}
                         >
-                          <Eye className="size-3.5" />
+                          <Eye size={14} />
                         </button>
                         <a
                           href={`tel:${sim.client_phone}`}
-                          className="hover:text-foreground transition-colors"
                           title="Ligar"
+                          style={{
+                            width: 30, height: 30, borderRadius: 7,
+                            color: 'rgba(246,239,228,.4)',
+                            display: 'grid', placeItems: 'center',
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                            textDecoration: 'none',
+                          }}
                         >
-                          <Phone className="size-3.5" />
+                          <Phone size={14} />
                         </a>
-                        <button className="hover:text-foreground transition-colors" title="Mais opções">
-                          <MoreHorizontal className="size-3.5" />
+                        <button
+                          title="Mais opções"
+                          style={{
+                            width: 30, height: 30, borderRadius: 7,
+                            color: 'rgba(246,239,228,.4)',
+                            display: 'grid', placeItems: 'center',
+                            background: 'transparent', border: 'none', cursor: 'pointer',
+                          }}
+                        >
+                          <MoreHorizontal size={14} />
                         </button>
                       </div>
                     </td>
@@ -370,31 +485,47 @@ export function SimulationsList({ simulations }: Props) {
           </table>
         </div>
 
-        {/* Paginação */}
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
-          <p className="text-xs text-muted-foreground">
-            Mostrando <span className="font-medium text-foreground">{pageData.length}</span> de{' '}
-            <span className="font-medium text-foreground">{displayed.length}</span> simulações
-          </p>
-          <div className="flex items-center gap-1">
+        {/* Pagination footer */}
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '16px 18px', background: 'rgba(246,239,228,.02)',
+          borderTop: '1px solid rgba(233,199,123,.10)', fontSize: 12.5, color: 'rgba(246,239,228,.55)',
+        }}>
+          <span>
+            Mostrando{' '}
+            <span style={{ color: '#f6efe4', fontWeight: 500 }}>{pageData.length}</span>
+            {' '}de{' '}
+            <span style={{ color: '#f6efe4', fontWeight: 500 }}>{displayed.length}</span>
+            {' '}simulações
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="flex size-7 items-center justify-center rounded text-xs text-muted-foreground hover:bg-muted disabled:opacity-30"
+              style={{
+                width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
+                background: 'transparent', color: 'rgba(246,239,228,.55)',
+                border: '1px solid transparent', cursor: page === 1 ? 'default' : 'pointer',
+                opacity: page === 1 ? 0.3 : 1, display: 'grid', placeItems: 'center',
+              }}
             >
               ←
             </button>
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
               const p = i + 1
+              const isActive = page === p
               return (
                 <button
                   key={p}
                   onClick={() => setPage(p)}
-                  className={`flex size-7 items-center justify-center rounded text-xs font-medium transition-colors ${
-                    page === p
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted'
-                  }`}
+                  style={{
+                    width: 30, height: 30, borderRadius: 7, fontSize: 12,
+                    fontWeight: isActive ? 600 : 500,
+                    background: isActive ? GOLD : 'transparent',
+                    color: isActive ? BROWN_DEEP : 'rgba(246,239,228,.55)',
+                    border: isActive ? 'none' : '1px solid transparent',
+                    cursor: 'pointer', display: 'grid', placeItems: 'center',
+                  }}
                 >
                   {p}
                 </button>
@@ -402,10 +533,14 @@ export function SimulationsList({ simulations }: Props) {
             })}
             {totalPages > 5 && (
               <>
-                <span className="text-xs text-muted-foreground px-1">…</span>
+                <span style={{ fontSize: 12, color: 'rgba(246,239,228,.4)', padding: '0 2px' }}>…</span>
                 <button
                   onClick={() => setPage(totalPages)}
-                  className="flex size-7 items-center justify-center rounded text-xs text-muted-foreground hover:bg-muted"
+                  style={{
+                    width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
+                    background: 'transparent', color: 'rgba(246,239,228,.55)',
+                    border: '1px solid transparent', cursor: 'pointer', display: 'grid', placeItems: 'center',
+                  }}
                 >
                   {totalPages}
                 </button>
@@ -414,13 +549,18 @@ export function SimulationsList({ simulations }: Props) {
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="flex size-7 items-center justify-center rounded text-xs text-muted-foreground hover:bg-muted disabled:opacity-30"
+              style={{
+                width: 30, height: 30, borderRadius: 7, fontSize: 12, fontWeight: 500,
+                background: 'transparent', color: 'rgba(246,239,228,.55)',
+                border: '1px solid transparent', cursor: page === totalPages ? 'default' : 'pointer',
+                opacity: page === totalPages ? 0.3 : 1, display: 'grid', placeItems: 'center',
+              }}
             >
               →
             </button>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Sheet de detalhes */}
       <SimulationDetailSheet simulation={detailSim} onClose={() => setDetailSim(null)} />
