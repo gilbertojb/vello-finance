@@ -12,10 +12,6 @@ import {
 
 import type { TrendData } from '../queries'
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const GOLD = '#e9c77b'
-const GREEN_ACC = '#a8d490'
-
 interface Props {
   data: TrendData
 }
@@ -33,14 +29,22 @@ function CustomTooltip({
   return (
     <div
       style={{
-        background: '#0e0a08',
-        border: '1px solid rgba(233,199,123,.15)',
+        background: 'var(--card)',
+        border: '1px solid color-mix(in oklch, var(--primary) 15%, transparent)',
         borderRadius: 8,
         padding: '8px 12px',
         fontSize: 12,
       }}
     >
-      <p style={{ marginBottom: 6, color: 'rgba(246,239,228,.55)', fontWeight: 500 }}>{label}</p>
+      <p
+        style={{
+          marginBottom: 6,
+          color: 'color-mix(in oklch, var(--foreground) 55%, transparent)',
+          fontWeight: 500,
+        }}
+      >
+        {label}
+      </p>
       {payload.map((entry) => (
         <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span
@@ -52,7 +56,7 @@ function CustomTooltip({
               backgroundColor: entry.color,
             }}
           />
-          <span style={{ color: '#f6efe4' }}>
+          <span style={{ color: 'var(--foreground)' }}>
             {entry.name}: <span style={{ fontWeight: 600 }}>{entry.value}</span>
           </span>
         </div>
@@ -63,65 +67,26 @@ function CustomTooltip({
 
 export function TrendChart({ data }: Props) {
   return (
-    <div
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid rgba(233,199,123,.10)',
-        borderRadius: 14,
-        padding: '20px 22px',
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          justifyContent: 'space-between',
-          marginBottom: 20,
-        }}
-      >
+    <div className="rounded-[14px] border border-primary/10 bg-card p-5">
+      <div className="mb-5 flex items-start justify-between">
         <div>
-          <h3
-            style={{
-              fontWeight: 600,
-              fontSize: 15,
-              color: '#f6efe4',
-              margin: '0 0 3px',
-              letterSpacing: '-.005em',
-            }}
-          >
+          <h3 className="mb-0.5 text-[15px] font-semibold tracking-tight text-foreground">
             Simulações × Propostas
           </h3>
-          <p style={{ fontSize: 12, color: 'rgba(246,239,228,.45)', margin: 0 }}>
-            Volume diário · Últimos 30 dias
-          </p>
+          <p className="text-xs text-foreground/45">Volume diário · Últimos 30 dias</p>
         </div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              color: 'rgba(246,239,228,.55)',
-            }}
-          >
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-xs text-foreground/55">
             <span
-              style={{ width: 8, height: 8, borderRadius: '50%', background: GOLD, display: 'inline-block' }}
+              className="inline-block size-2 rounded-full"
+              style={{ background: 'var(--primary)' }}
             />
             Simulações
           </span>
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              fontSize: 12,
-              color: 'rgba(246,239,228,.55)',
-            }}
-          >
+          <span className="flex items-center gap-1.5 text-xs text-foreground/55">
             <span
-              style={{ width: 8, height: 8, borderRadius: '50%', background: GREEN_ACC, display: 'inline-block' }}
+              className="inline-block size-2 rounded-full"
+              style={{ background: 'var(--success)' }}
             />
             Propostas
           </span>
@@ -132,7 +97,8 @@ export function TrendChart({ data }: Props) {
         <LineChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(233,199,123,.06)"
+            stroke="var(--primary)"
+            strokeOpacity={0.06}
             vertical={false}
           />
           <XAxis
@@ -150,7 +116,7 @@ export function TrendChart({ data }: Props) {
                   x={x}
                   y={y + 12}
                   textAnchor="middle"
-                  fill="rgba(246,239,228,.3)"
+                  fill="color-mix(in oklch, var(--foreground) 30%, transparent)"
                   fontSize={10}
                 >
                   {payload.value}
@@ -161,7 +127,7 @@ export function TrendChart({ data }: Props) {
             tickLine={false}
           />
           <YAxis
-            tick={{ fill: 'rgba(246,239,228,.3)', fontSize: 10 }}
+            tick={{ fill: 'color-mix(in oklch, var(--foreground) 30%, transparent)', fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             allowDecimals={false}
@@ -171,19 +137,19 @@ export function TrendChart({ data }: Props) {
             type="monotone"
             dataKey="simulations"
             name="Simulações"
-            stroke={GOLD}
+            stroke="var(--primary)"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: GOLD }}
+            activeDot={{ r: 4, fill: 'var(--primary)' }}
           />
           <Line
             type="monotone"
             dataKey="proposals"
             name="Propostas"
-            stroke={GREEN_ACC}
+            stroke="var(--success)"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: GREEN_ACC }}
+            activeDot={{ r: 4, fill: 'var(--success)' }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -1,26 +1,15 @@
 import { Activity, CheckCircle, TrendingUp, Wallet } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 import type { DashboardKpis } from '../queries'
 
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const GOLD = '#e9c77b'
-const GREEN_ACC = '#a8d490'
-const RED_ACC = '#e8a092'
-const TAN = '#c9a47a'
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
 function brl(v: number): string {
   if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`
   if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(1)}k`
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
-function brlM(v: number): string {
-  return brl(v)
-}
-
-// ── Sparkline ─────────────────────────────────────────────────────────────────
-function Spark({ data, color = GOLD }: { data: number[]; color?: string }) {
+function Spark({ data, color = 'var(--primary)' }: { data: number[]; color?: string }) {
   if (data.length < 2) return null
   const w = 80, h = 28
   const max = Math.max(...data)
@@ -52,30 +41,24 @@ function Spark({ data, color = GOLD }: { data: number[]; color?: string }) {
   )
 }
 
-// ── Delta ─────────────────────────────────────────────────────────────────────
 function Delta({ value, suffix = '%' }: { value: number; suffix?: string }) {
   const up = value >= 0
   return (
     <span
-      style={{
-        color: up ? '#a8d490' : '#e8a092',
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        fontWeight: 600,
-        fontSize: 11.5,
-      }}
+      className={cn(
+        'inline-flex items-center gap-1 text-[11.5px] font-semibold',
+        up ? 'text-success' : 'text-destructive',
+      )}
     >
       {up ? '▲' : '▼'} {Math.abs(value).toFixed(1)}{suffix}
     </span>
   )
 }
 
-// ── KPI Card ───────────────────────────────────────────────────────────────────
 interface CardProps {
   label: string
   value: string
-  goldVal?: boolean
+  primaryVal?: boolean
   featured?: boolean
   icon: React.ReactNode
   spark: number[]
@@ -87,87 +70,46 @@ interface CardProps {
 function KpiCard({
   label,
   value,
-  goldVal,
+  primaryVal,
   featured,
   icon,
   spark,
-  sparkColor = GOLD,
+  sparkColor = 'var(--primary)',
   delta,
   foot,
 }: CardProps) {
   return (
     <div
-      style={{
-        background: featured
-          ? 'linear-gradient(140deg,#1d150f 0%,#0d0a07 80%)'
-          : 'var(--color-card)',
-        border: `1px solid ${featured ? 'rgba(233,199,123,.2)' : 'rgba(233,199,123,.10)'}`,
-        borderRadius: 14,
-        padding: '20px 22px',
-      }}
+      className={cn(
+        'rounded-[14px] border p-5',
+        featured
+          ? 'border-primary/20 bg-primary/8'
+          : 'border-primary/10 bg-card',
+      )}
     >
-      {/* Head */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 14,
-        }}
-      >
-        <span
-          style={{
-            fontSize: 11,
-            letterSpacing: '.18em',
-            textTransform: 'uppercase',
-            color: 'rgba(246,239,228,.55)',
-            fontWeight: 500,
-          }}
-        >
+      <div className="mb-3.5 flex items-center justify-between">
+        <span className="text-[11px] font-medium uppercase tracking-[.18em] text-foreground/55">
           {label}
         </span>
-        <span
-          style={{
-            width: 30,
-            height: 30,
-            borderRadius: 8,
-            background: 'rgba(233,199,123,.08)',
-            color: GOLD,
-            display: 'grid',
-            placeItems: 'center',
-          }}
-        >
+        <span className="grid size-[30px] place-items-center rounded-lg bg-primary/8 text-primary">
           {icon}
         </span>
       </div>
 
-      {/* Value */}
       <div
-        style={{
-          fontSize: 30,
-          fontWeight: 600,
-          letterSpacing: '-.025em',
-          lineHeight: 1,
-          color: goldVal ? GOLD : '#f6efe4',
-        }}
+        className={cn(
+          'text-[30px] font-semibold leading-none tracking-[-0.025em]',
+          primaryVal ? 'text-primary' : 'text-foreground',
+        )}
       >
         {value}
       </div>
 
-      {/* Footer */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 14,
-          fontSize: 11.5,
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <div className="mt-3.5 flex items-center justify-between text-[11.5px]">
+        <div className="flex flex-col gap-0.5">
           {delta}
           {foot && (
-            <span style={{ fontSize: 10.5, color: 'rgba(246,239,228,.38)' }}>{foot}</span>
+            <span className="text-[10.5px] text-foreground/38">{foot}</span>
           )}
         </div>
         <Spark data={spark} color={sparkColor} />
@@ -176,62 +118,50 @@ function KpiCard({
   )
 }
 
-// ── Props ──────────────────────────────────────────────────────────────────────
 interface Props {
   kpis: DashboardKpis
 }
 
 export function KpiCards({ kpis }: Props) {
   return (
-    <div
-      style={{
-        display: 'grid',
-        gap: 12,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-      }}
-    >
-      {/* Card 1 — Volume Contratado (featured) */}
+    <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
       <KpiCard
         featured
-        goldVal
+        primaryVal
         label="Volume Contratado"
         value={brl(kpis.volumeContratado)}
         icon={<Wallet size={15} />}
         spark={[38, 42, 40, 45, 48, 52, 50, 55, 60, 58, 62, 65]}
-        sparkColor={GOLD}
         delta={<Delta value={kpis.simsGrowth} />}
         foot={`${kpis.activeProposals} propostas ativas`}
       />
 
-      {/* Card 2 — Simulações (30d) */}
       <KpiCard
         label="Simulações (30d)"
         value={kpis.sims30Count.toLocaleString('pt-BR')}
         icon={<Activity size={15} />}
         spark={[12, 14, 11, 18, 16, 22, 28, 26, 31, 29, 34, 38]}
-        sparkColor={GREEN_ACC}
+        sparkColor="var(--success)"
         delta={<Delta value={kpis.simsGrowth} />}
-        foot={`${brlM(kpis.sims30Volume)} simulados`}
+        foot={`${brl(kpis.sims30Volume)} simulados`}
       />
 
-      {/* Card 3 — Taxa de Conversão */}
       <KpiCard
         label="Taxa de Conversão"
         value={`${kpis.conversionRate.toFixed(1)}%`}
         icon={<TrendingUp size={15} />}
         spark={[8, 9, 10, 9, 10, 11, 10, 11, 12, 11, 12, 12]}
-        sparkColor={TAN}
+        sparkColor="var(--muted-foreground)"
         delta={<Delta value={0.0} />}
         foot="simulação → proposta"
       />
 
-      {/* Card 4 — Desembolsado */}
       <KpiCard
         label="Desembolsado"
         value={brl(kpis.disbursed)}
         icon={<CheckCircle size={15} />}
         spark={[5, 8, 6, 9, 11, 10, 13, 12, 11, 14, 13, 15]}
-        sparkColor={RED_ACC}
+        sparkColor="var(--destructive)"
         delta={<Delta value={kpis.disbursedGrowth} />}
         foot="esta semana"
       />

@@ -1,11 +1,7 @@
 import { CheckCircle2, FileCheck, FileText, XCircle } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 import type { RecentActivity } from '../queries'
-
-// ── Design tokens ──────────────────────────────────────────────────────────────
-const GREEN_ACC = '#a8d490'
-const RED_ACC = '#e8a092'
-const GOLD = '#e9c77b'
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
@@ -19,15 +15,15 @@ function relativeTime(iso: string): string {
 
 function ActivityIcon({ type, status }: { type: 'simulation' | 'proposal'; status: string }) {
   if (status === 'approved') {
-    return <CheckCircle2 size={16} style={{ color: GREEN_ACC, flexShrink: 0 }} />
+    return <CheckCircle2 size={16} className="shrink-0 text-success" />
   }
   if (status === 'rejected') {
-    return <XCircle size={16} style={{ color: RED_ACC, flexShrink: 0 }} />
+    return <XCircle size={16} className="shrink-0 text-destructive" />
   }
   if (type === 'proposal') {
-    return <FileCheck size={16} style={{ color: GOLD, flexShrink: 0 }} />
+    return <FileCheck size={16} className="shrink-0 text-primary" />
   }
-  return <FileText size={16} style={{ color: 'rgba(246,239,228,.4)', flexShrink: 0 }} />
+  return <FileText size={16} className="shrink-0 text-foreground/40" />
 }
 
 interface Props {
@@ -36,101 +32,46 @@ interface Props {
 
 export function ActivityFeed({ activities }: Props) {
   return (
-    <div
-      style={{
-        background: 'var(--color-card)',
-        border: '1px solid rgba(233,199,123,.10)',
-        borderRadius: 14,
-        padding: '20px 22px',
-      }}
-    >
-      {/* Header */}
-      <div style={{ marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <h3
-            style={{
-              fontWeight: 600,
-              fontSize: 15,
-              color: '#f6efe4',
-              margin: 0,
-              letterSpacing: '-.005em',
-            }}
-          >
+    <div className="rounded-[14px] border border-primary/10 bg-card p-5">
+      <div className="mb-4">
+        <div className="mb-0.5 flex items-center gap-2">
+          <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
             Últimos eventos
           </h3>
-          {/* Live dot */}
-          <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
-            <span
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: '50%',
-                background: '#5a8a4c',
-                opacity: 0.75,
-                animation: 'ping 1s cubic-bezier(0,0,.2,1) infinite',
-              }}
-            />
-            <span
-              style={{
-                position: 'relative',
-                display: 'inline-flex',
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: '#5a8a4c',
-              }}
-            />
+          <span className="relative inline-flex size-2">
+            <span className="absolute inset-0 animate-ping rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-success" />
           </span>
-          <span style={{ fontSize: 11, color: 'rgba(246,239,228,.38)' }}>ao vivo</span>
+          <span className="text-[11px] text-foreground/38">ao vivo</span>
         </div>
-        <p style={{ fontSize: 12, color: 'rgba(246,239,228,.45)', margin: 0 }}>Em tempo real</p>
+        <p className="text-xs text-foreground/45">Em tempo real</p>
       </div>
 
       <div>
         {activities.map((activity, idx) => (
           <div
             key={activity.id}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 10,
-              padding: '10px 0',
-              borderBottom:
-                idx < activities.length - 1 ? '1px solid rgba(233,199,123,.06)' : 'none',
-            }}
+            className={cn(
+              'flex items-start gap-2.5 py-2.5',
+              idx < activities.length - 1 && 'border-b border-primary/6',
+            )}
           >
             <ActivityIcon type={activity.type} status={activity.status} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ margin: '0 0 2px', fontSize: 12.5, lineHeight: 1.4 }}>
-                <span style={{ fontWeight: 600, color: '#f6efe4' }}>{activity.client_name}</span>{' '}
-                <span style={{ color: 'rgba(246,239,228,.55)' }}>{activity.action}</span>{' '}
-                <span style={{ fontSize: 11, color: 'rgba(246,239,228,.35)' }}>
-                  em {activity.product}
-                </span>
+            <div className="min-w-0 flex-1">
+              <p className="m-0 mb-0.5 text-[12.5px] leading-snug">
+                <span className="font-semibold text-foreground">{activity.client_name}</span>{' '}
+                <span className="text-foreground/55">{activity.action}</span>{' '}
+                <span className="text-[11px] text-foreground/35">em {activity.product}</span>
               </p>
             </div>
-            <span
-              style={{
-                fontSize: 11,
-                color: 'rgba(246,239,228,.35)',
-                flexShrink: 0,
-                paddingTop: 1,
-              }}
-            >
+            <span className="shrink-0 pt-px text-[11px] text-foreground/35">
               {relativeTime(activity.time)}
             </span>
           </div>
         ))}
 
         {activities.length === 0 && (
-          <p
-            style={{
-              padding: '16px 0',
-              textAlign: 'center',
-              fontSize: 12,
-              color: 'rgba(246,239,228,.38)',
-            }}
-          >
+          <p className="py-4 text-center text-xs text-foreground/38">
             Nenhuma atividade recente.
           </p>
         )}
