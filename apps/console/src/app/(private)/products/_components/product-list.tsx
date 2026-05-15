@@ -13,9 +13,6 @@ import Image from 'next/image'
 import { useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 
 import { toggleTenantProduct, uploadProductCover } from '../actions'
@@ -59,13 +56,11 @@ export function ProductList({ products }: ProductListProps) {
 
     startUploadTransition(async () => {
       const result = await uploadProductCover(uploadId, formData)
-
       if (!result.success) {
         toast.error(result.message ?? 'Falha no upload da capa.')
       } else {
         toast.success(result.message)
       }
-
       setUploadingId(null)
       setTargetUploadId(null)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -74,14 +69,12 @@ export function ProductList({ products }: ProductListProps) {
 
   if (products.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-          <Box className="h-6 w-6 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-card/50 px-6 py-14 text-center">
+        <div className="grid size-12 place-items-center rounded-full bg-muted">
+          <Box className="size-6 text-muted-foreground" />
         </div>
-        <h3 className="mt-4 text-lg font-medium text-foreground">
-          Nenhum produto alocado
-        </h3>
-        <p className="mt-2 text-sm text-muted-foreground w-full max-w-[380px]">
+        <h3 className="mt-4 text-base font-medium text-foreground">Nenhum produto alocado</h3>
+        <p className="mt-2 max-w-sm text-sm text-foreground/55">
           Sua loja ainda não possui produtos alocados pelo Backoffice. Assim que
           eles forem liberados, aparecerão aqui.
         </p>
@@ -91,7 +84,6 @@ export function ProductList({ products }: ProductListProps) {
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Hidden file input for cover upload */}
       <input
         type="file"
         accept="image/*"
@@ -108,17 +100,17 @@ export function ProductList({ products }: ProductListProps) {
         const isUploading = uploadingId === tp.id
 
         return (
-          <Card
+          <div
             key={tp.id}
-            className={`group relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg ${
+            className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-lg ${
               !isFullyActive
-                ? 'opacity-80 saturate-50'
-                : 'ring-1 ring-border/50'
+                ? 'border-border/50 opacity-80 saturate-50'
+                : 'border-primary/10 ring-1 ring-border/50'
             }`}
           >
-            {/* Visual Cover Area */}
+            {/* Cover */}
             <div
-              className={`relative h-40 w-full shrink-0 overflow-hidden bg-muted flex items-center justify-center ${!tp.cover_url && 'bg-linear-to-br from-primary/5 to-muted'}`}
+              className={`relative flex h-40 w-full shrink-0 items-center justify-center overflow-hidden bg-muted ${!tp.cover_url ? 'bg-linear-to-br from-primary/5 to-muted' : ''}`}
             >
               {tp.cover_url ? (
                 <Image
@@ -128,45 +120,38 @@ export function ProductList({ products }: ProductListProps) {
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
-                <div className="text-muted-foreground/30 flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-2 text-foreground/30">
                   <ImagePlus className="size-10" strokeWidth={1} />
                 </div>
               )}
 
-              {/* Status Badge Overlays */}
-              <div className="absolute top-4 left-4 flex gap-2">
+              {/* Status badges */}
+              <div className="absolute left-4 top-4 flex gap-2">
                 {isFullyActive ? (
-                  <Badge className="bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-500/20 gap-1 backdrop-blur-md">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-success/20 bg-success/15 px-2.5 py-1 text-xs font-semibold text-success backdrop-blur-md">
                     <Activity className="size-3" />
                     Ativado
-                  </Badge>
+                  </span>
                 ) : (
-                  <Badge
-                    variant="secondary"
-                    className="backdrop-blur-md bg-secondary/80"
-                  >
+                  <span className="inline-flex items-center rounded-full border border-border bg-secondary/80 px-2.5 py-1 text-xs font-semibold text-foreground/70 backdrop-blur-md">
                     Oculto
-                  </Badge>
+                  </span>
                 )}
 
                 {!product.is_active && (
-                  <Badge
-                    variant="destructive"
-                    className="backdrop-blur-md gap-1"
-                  >
+                  <span className="inline-flex items-center gap-1 rounded-full border border-destructive/20 bg-destructive/15 px-2.5 py-1 text-xs font-semibold text-destructive backdrop-blur-md">
                     <HelpCircle className="size-3" />
                     Indisponível (IF)
-                  </Badge>
+                  </span>
                 )}
               </div>
 
-              {/* Hover Actions (Upload Custom Cover) */}
+              {/* Upload hover overlay */}
               {isFullyActive && (
-                <div className="absolute inset-0 bg-background/40 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    className="shadow-xl font-medium gap-2"
+                <div className="absolute inset-0 flex items-center justify-center bg-background/40 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100">
+                  <button
+                    type="button"
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground shadow-xl"
                     onClick={() => handleUploadInitiate(tp.id)}
                     disabled={isUploading}
                   >
@@ -176,46 +161,43 @@ export function ProductList({ products }: ProductListProps) {
                       <Camera className="size-4" />
                     )}
                     {tp.cover_url ? 'Alterar Capa' : 'Adicionar Capa'}
-                  </Button>
+                  </button>
                 </div>
               )}
             </div>
 
-            <CardHeader className="p-5 pb-0">
+            {/* Header */}
+            <div className="p-5 pb-0">
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-lg leading-tight tracking-tight">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-lg font-semibold leading-tight tracking-tight text-foreground">
                     {product.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 min-h-[32px]">
-                    {product.description ??
-                      'Produto financeiro base operado pela Vello.'}
+                  <p className="min-h-8 text-xs text-foreground/55 line-clamp-2">
+                    {product.description ?? 'Produto financeiro base operado pela Vello.'}
                   </p>
                 </div>
-                {/* Visual indicator of partnership */}
-                <div className="rounded-full bg-primary/10 p-2 text-primary shrink-0">
+                <div className="shrink-0 rounded-full bg-primary/10 p-2 text-primary">
                   <ShieldCheck className="size-4" />
                 </div>
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="p-5 pt-4 flex-1">
-              <div className="flex items-center gap-2 rounded-lg bg-muted/40 p-3 border border-border/40">
-                <div className="text-xs text-muted-foreground flex-1">
-                  Comissão acordada
-                </div>
+            {/* Commission */}
+            <div className="flex-1 p-5 pt-4">
+              <div className="flex items-center gap-2 rounded-lg border border-border/40 bg-muted/40 p-3">
+                <div className="flex-1 text-xs text-foreground/55">Comissão acordada</div>
                 <div className="font-mono text-sm font-semibold text-foreground">
                   {Number(tp.tenant_commission_pct).toFixed(2)}%
                 </div>
               </div>
-            </CardContent>
+            </div>
 
-            <CardFooter className="p-5 pt-0 flex items-center justify-between border-t border-border/40 bg-card mt-auto gap-4">
+            {/* Footer */}
+            <div className="mt-auto flex items-center justify-between gap-4 border-t border-border/40 bg-card p-5 pt-4">
               <div className="flex flex-col">
-                <span className="text-xs font-medium text-foreground">
-                  Visibilidade na Loja
-                </span>
-                <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-wider">
+                <span className="text-xs font-medium text-foreground">Visibilidade na Loja</span>
+                <span className="font-mono text-xs uppercase tracking-wider text-foreground/55">
                   {tp.is_active ? 'Catálogo aberto' : 'Oculto aos clientes'}
                 </span>
               </div>
@@ -228,10 +210,10 @@ export function ProductList({ products }: ProductListProps) {
                     ? 'Produto desativado pelo Backoffice'
                     : 'Alternar disponibilidade na loja'
                 }
-                className="data-[state=checked]:bg-emerald-500"
+                className="data-[state=checked]:bg-success"
               />
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         )
       })}
     </div>

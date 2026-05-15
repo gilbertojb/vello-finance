@@ -4,9 +4,6 @@ import { Package, PlusCircle } from 'lucide-react'
 import { useTransition } from 'react'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-
 import { addTenantProduct } from '../actions'
 import type { ProductRow, TenantProductRow } from '../queries'
 
@@ -15,13 +12,9 @@ interface AvailableProductsProps {
   tenantProducts: TenantProductRow[]
 }
 
-export function AvailableProducts({
-  products,
-  tenantProducts,
-}: AvailableProductsProps) {
+export function AvailableProducts({ products, tenantProducts }: AvailableProductsProps) {
   const [isPending, startTransition] = useTransition()
 
-  // Filtra produtos que ainda não foram adicionados pelo tenant
   const availableProducts = products.filter(
     (product) => !tenantProducts.some((tp) => tp.products?.id === product.id),
   )
@@ -37,58 +30,53 @@ export function AvailableProducts({
     })
   }
 
-  if (availableProducts.length === 0) {
-    return null // Retorna null se não houver produtos disponíveis para adicionar
-  }
+  if (availableProducts.length === 0) return null
 
   return (
-    <div className="space-y-4 mb-8">
+    <div className="mb-8 flex flex-col gap-4">
       <div>
-        <h2 className="text-lg font-medium tracking-tight">
-          Produtos Disponíveis
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Catálogo Vello de produtos prontos para você oferecer aos seus
-          clientes.
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Produtos Disponíveis</h2>
+        <p className="mt-0.5 text-sm text-foreground/55">
+          Catálogo Vello de produtos prontos para você oferecer aos seus clientes.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {availableProducts.map((product) => (
-          <Card
+          <div
             key={product.id}
-            className="flex flex-col border-dashed bg-muted/30"
+            className="flex flex-col rounded-2xl border border-dashed border-border bg-muted/30"
           >
-            <CardHeader className="p-4 pb-2">
+            <div className="p-4 pb-2">
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <h3 className="font-medium text-base leading-tight">
+                <div className="flex flex-col gap-1">
+                  <h3 className="text-base font-medium leading-tight text-foreground">
                     {product.name}
                   </h3>
                   {product.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2 min-h-[32px]">
+                    <p className="min-h-8 text-xs text-foreground/55 line-clamp-2">
                       {product.description}
                     </p>
                   )}
                 </div>
-                <div className="rounded-full bg-primary/10 p-2 text-primary shrink-0 opacity-50">
+                <div className="shrink-0 rounded-full bg-primary/10 p-2 text-primary opacity-50">
                   <Package className="size-4" />
                 </div>
               </div>
-            </CardHeader>
+            </div>
 
-            <CardContent className="p-4 pt-4 mt-auto border-t border-border/40">
-              <Button
-                variant="outline"
-                className="w-full gap-2 border-primary/20 bg-background hover:bg-primary/5 hover:text-primary transition-colors"
+            <div className="mt-auto border-t border-border/40 p-4">
+              <button
+                type="button"
                 onClick={() => handleAddProduct(product.id)}
                 disabled={isPending}
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary/20 bg-transparent px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-primary/5 hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <PlusCircle className="size-4" />
                 Adicionar ao meu portfólio
-              </Button>
-            </CardContent>
-          </Card>
+              </button>
+            </div>
+          </div>
         ))}
       </div>
     </div>

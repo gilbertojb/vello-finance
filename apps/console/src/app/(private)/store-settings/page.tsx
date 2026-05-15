@@ -8,11 +8,17 @@ export default async function StoreSettingsPage() {
   const branding = await getTenantBrandingSettings()
 
   return (
-    <div className="flex flex-col gap-6 px-4 lg:px-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Configuração da Loja</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Personalize a aparência do seu espaço.
+    <div className="mx-auto max-w-10/12 w-full p-8">
+      {/* Page header */}
+      <div className="mb-7">
+        <span className="text-xs font-medium uppercase tracking-widest text-foreground/45">
+          Loja · Configurações
+        </span>
+        <h1 className="mb-2 mt-1 text-4xl font-semibold leading-none tracking-tight text-foreground">
+          Configurações<span className="text-primary">.</span>
+        </h1>
+        <p className="m-0 max-w-xl text-sm leading-normal text-foreground/55">
+          Personalize a aparência e a identidade visual do seu espaço.
         </p>
       </div>
 
