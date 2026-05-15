@@ -13,29 +13,18 @@ export function ThemeSwitcher() {
       type="single"
       aria-label="Toggle theme"
       size="sm"
-      defaultValue={theme}
+      value={theme ?? 'system'}
+      onValueChange={(v) => v && setTheme(v)}
       variant="outline"
       className="w-full"
     >
-      <ToggleGroupItem
-        value="light"
-        onClick={() => setTheme('light')}
-        className="flex-1"
-      >
+      <ToggleGroupItem value="light" className="flex-1">
         <Sun className="size-4" />
       </ToggleGroupItem>
-      <ToggleGroupItem
-        value="dark"
-        onClick={() => setTheme('dark')}
-        className="flex-1"
-      >
+      <ToggleGroupItem value="dark" className="flex-1">
         <Moon className="size-4" />
       </ToggleGroupItem>
-      <ToggleGroupItem
-        value="system"
-        onClick={() => setTheme('system')}
-        className="flex-1"
-      >
+      <ToggleGroupItem value="system" className="flex-1">
         <Monitor className="size-4" />
       </ToggleGroupItem>
     </ToggleGroup>
