@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
-import { TenantLogo } from '@/components/tenant-logo'
 import { cn } from '@/lib/utils'
 
 type Props = {
-  logoUrl:     string | null
+  logoSlot:    ReactNode
   displayName: string | null
 }
 
@@ -16,7 +16,7 @@ const NAV_LINKS = [
   { href: '#como-funciona',  label: 'Como funciona' },
 ]
 
-export function ZpHeader({ logoUrl, displayName }: Props) {
+export function ZpHeader({ logoSlot, displayName }: Props) {
   const name = displayName ?? 'ZP Pay'
   const [open, setOpen] = useState(false)
 
@@ -28,9 +28,7 @@ export function ZpHeader({ logoUrl, displayName }: Props) {
             href="/"
             className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
           >
-            {logoUrl ? (
-              <TenantLogo url={logoUrl} alt={name} width={140} height={40} className="h-10 w-auto" />
-            ) : (
+            {logoSlot ?? (
               <span className="text-xl font-bold tracking-tight text-foreground">{name}</span>
             )}
           </Link>

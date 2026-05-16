@@ -1,6 +1,8 @@
+import { cache } from 'react'
+
 import { createServiceClient } from '@/lib/supabase/service'
 
-export async function getTenantBranding(tenantId: string | null) {
+export const getTenantBranding = cache(async (tenantId: string | null) => {
   if (!tenantId) return null
 
   const supabase = createServiceClient()
@@ -12,4 +14,4 @@ export async function getTenantBranding(tenantId: string | null) {
     .single()
 
   return data
-}
+})
