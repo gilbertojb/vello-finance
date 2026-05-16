@@ -11,6 +11,9 @@
   --font-serif: var(--font-serif);
   --color-surface: var(--surface);
   --color-surface-foreground: var(--surface-foreground);
+  --color-accent-olive: oklch(0.48 0.07 50);
+  --letter-spacing-label: 0.22em;
+  --letter-spacing-data: 0.16em;
   --font-mono: var(--font-geist-mono);
 
   /* shadcn tokens → Tailwind utilities */
@@ -98,4 +101,43 @@ html,
 body {
   background-color: oklch(0.08 0.008 55);
   color: oklch(0.96 0.015 88);
+}
+
+/* ─── Keyframes ─────────────────────────────────────────────── */
+@keyframes zp-fade-up {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes zp-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes zp-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ─── On-load entrance utilities ────────────────────────────── */
+.anim-fade-up { animation: zp-fade-up 0.65s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-fade-in { animation: zp-fade-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.anim-float   { animation: zp-float   4s    ease-in-out infinite; }
+
+/* Stagger delays */
+.anim-d1 { animation-delay: 80ms; }
+.anim-d2 { animation-delay: 170ms; }
+.anim-d3 { animation-delay: 260ms; }
+.anim-d4 { animation-delay: 350ms; }
+.anim-d5 { animation-delay: 440ms; }
+.anim-d6 { animation-delay: 530ms; }
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-fade-in {
+    animation-duration: 0.01ms !important;
+    animation-delay:    0ms   !important;
+  }
+  .anim-float {
+    animation: none !important;
+  }
 }

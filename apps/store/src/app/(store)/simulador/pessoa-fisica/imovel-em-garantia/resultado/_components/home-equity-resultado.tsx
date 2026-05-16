@@ -203,8 +203,8 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
       </div>
 
       {/* Aviso */}
-      <div className="flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
-        <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.55_0.10_60)]" />
+      <div className="flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+        <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
         <p className="text-xs text-surface-foreground/65">
           Simulação estimada. A taxa e condições definitivas são apresentadas após a análise do seu perfil de crédito.
         </p>

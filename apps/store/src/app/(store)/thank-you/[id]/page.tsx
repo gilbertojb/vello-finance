@@ -23,7 +23,7 @@ export default async function AgradecimentoPage({ params }: Props) {
           <div className="mb-6 flex justify-center">
             <CheckCircle className="h-14 w-14 text-green-500" />
           </div>
-          <span className="inline-flex items-center rounded-full bg-[oklch(0.96_0.03_85)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-[oklch(0.48_0.07_50)]">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
             {productName}
           </span>
           <h2 className="mb-3 mt-5 text-[26px] font-bold leading-tight tracking-tight text-surface-foreground">

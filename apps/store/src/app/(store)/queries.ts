@@ -12,6 +12,7 @@ export async function listActiveProducts(tenantId: string) {
         id,
         name,
         description,
+        category,
         min_amount,
         max_amount,
         min_term_months,

@@ -15,7 +15,7 @@ export function CtaBanner({ featuredProductId }: Props) {
             <h2 className="mb-5 mt-4 text-5xl font-light leading-none tracking-tight text-surface-foreground max-lg:text-5xl max-sm:text-4xl">
               Simule sem
               <br />
-              <em className="font-serif text-6xl italic font-normal text-[oklch(0.48_0.07_50)]">
+              <em className="font-serif text-6xl italic font-normal text-accent-olive">
                 compromisso.
               </em>
             </h2>
@@ -52,7 +52,7 @@ export function CtaBanner({ featuredProductId }: Props) {
               constrangimento.
             </blockquote>
             <div className="mt-6 flex items-center gap-3.5">
-              <div className="grid h-[46px] w-[46px] flex-shrink-0 place-items-center rounded-full bg-gradient-to-br from-[oklch(0.48_0.07_50)] to-[oklch(0.25_0.04_45)] text-base font-semibold text-surface">
+              <div className="grid h-[46px] w-[46px] flex-shrink-0 place-items-center rounded-full bg-linear-to-br from-accent-olive to-primary-foreground text-base font-semibold text-surface">
                 MR
               </div>
               <div>

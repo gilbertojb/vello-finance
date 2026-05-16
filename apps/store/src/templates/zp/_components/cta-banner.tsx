@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 type Props = { featuredProductId: string | null }
 
-export function CtaBanner({ featuredProductId }: Props) {
+export function CtaBanner({ featuredProductId: _ }: Props) {
   return (
     <section className="relative overflow-hidden bg-surface py-20">
       <div className="mx-auto max-w-7xl px-8">
@@ -15,7 +15,7 @@ export function CtaBanner({ featuredProductId }: Props) {
             <h2 className="mb-5 mt-3 text-5xl font-light leading-none tracking-tight text-surface-foreground max-lg:text-5xl max-sm:text-4xl">
               Simule sem
               <br />
-              <em className="font-serif italic text-6xl font-normal text-[oklch(0.48_0.07_50)]">
+              <em className="font-serif italic text-6xl font-normal text-accent-olive">
                 compromisso.
               </em>
             </h2>
@@ -26,13 +26,13 @@ export function CtaBanner({ featuredProductId }: Props) {
             <div className="flex gap-3.5">
               <Link
                 href="/simulador"
-                className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90"
+                className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
               >
                 Iniciar simulação
               </Link>
               <Link
                 href="#"
-                className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground"
+                className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
               >
                 Falar com consultor
               </Link>
@@ -52,7 +52,7 @@ export function CtaBanner({ featuredProductId }: Props) {
               constrangimento.
             </blockquote>
             <div className="mt-6 flex items-center gap-3.5">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-linear-to-br from-[oklch(0.48_0.07_50)] to-[oklch(0.25_0.04_45)] text-base font-semibold text-surface">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-linear-to-br from-accent-olive to-primary-foreground text-base font-semibold text-surface">
                 MR
               </div>
               <div>

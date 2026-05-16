@@ -37,7 +37,7 @@ export function StoreHeader({ logoUrl, displayName }: Props) {
 
         <Link
           href="#produtos"
-          className="ml-auto rounded-full bg-gradient-to-b from-primary to-primary/80 px-[22px] py-3 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_var(--primary)] transition-all hover:brightness-110 md:ml-0"
+          className="ml-auto rounded-full bg-linear-to-b from-primary to-primary/80 px-[22px] py-3 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_var(--primary)] transition-all hover:brightness-110 md:ml-0"
         >
           Simular agora
         </Link>

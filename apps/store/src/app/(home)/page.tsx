@@ -22,6 +22,7 @@ export default async function HomePage() {
       description: tp.products!.description ?? null,
       productTypeSlug:
         (tp.products!.product_type as { slug: string } | null)?.slug ?? null,
+      category: (tp.products! as { category?: string | null }).category ?? null,
       minAmount: tp.products!.min_amount ?? null,
       maxAmount: tp.products!.max_amount ?? null,
       minTermMonths: tp.products!.min_term_months ?? null,

@@ -19,9 +19,10 @@ export function ProdutoSelector({ options }: { options: ProdutoOption[] }) {
 
   if (options.length === 0) {
     return (
-      <p className="text-sm text-surface-foreground/50">
-        Nenhum produto disponível no momento.
-      </p>
+      <div className="rounded-2xl border border-surface-foreground/10 bg-surface-foreground/5 px-5 py-6 text-center">
+        <p className="text-sm text-surface-foreground/50">Nenhum produto disponível no momento.</p>
+        <p className="mt-1 text-xs text-surface-foreground/35">Entre em contato para saber mais.</p>
+      </div>
     )
   }
 
@@ -49,7 +50,7 @@ export function ProdutoSelector({ options }: { options: ProdutoOption[] }) {
       </div>
 
       {selectedOption && (
-        <div className="rounded-2xl border border-[oklch(0.90_0.04_85)] bg-[oklch(0.97_0.02_85)] px-5 py-4 text-[15px] font-medium text-surface-foreground">
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-[15px] font-medium text-surface-foreground">
           {selectedOption.productName}
         </div>
       )}
@@ -58,7 +59,7 @@ export function ProdutoSelector({ options }: { options: ProdutoOption[] }) {
         type="button"
         disabled={!selected}
         onClick={() => selectedOption && router.push(selectedOption.href)}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity disabled:opacity-40"
+        className="w-full rounded-2xl bg-background px-5 py-4 text-base font-semibold text-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Continuar →
       </button>

@@ -128,9 +128,9 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
       </div>
 
       {/* Aviso estimativa */}
-      <div className="flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
-        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
-        <p className="text-xs leading-relaxed text-[oklch(0.48_0.07_50)]">
+      <div className="flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
+        <p className="text-xs leading-relaxed text-surface-foreground/80">
           Valor estimado sujeito a análise e saldo verificado na CEF. Consulte o extrato atualizado no
           aplicativo FGTS ou nas agências da Caixa Econômica Federal.
         </p>

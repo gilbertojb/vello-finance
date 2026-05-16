@@ -75,7 +75,7 @@ export function AutoEquityForm({
     <div className="space-y-5">
       {/* Chip Pessoa */}
       <div className="mb-6 flex justify-center">
-        <span className="inline-flex items-center rounded-full bg-[oklch(0.96_0.03_85)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-[oklch(0.48_0.07_50)]">
+        <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
           {isPj ? 'Pessoa Jurídica' : 'Pessoa Física'}
         </span>
       </div>
@@ -83,7 +83,7 @@ export function AutoEquityForm({
       {/* Nome */}
       <div>
         <label htmlFor="nome" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Seu nome completo <span className="text-red-400">*</span>
+          Seu nome completo <span className="text-destructive">*</span>
         </label>
         <input
           type="text"
@@ -98,7 +98,7 @@ export function AutoEquityForm({
       {/* WhatsApp */}
       <div>
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          WhatsApp para contato <span className="text-red-400">*</span>
+          WhatsApp para contato <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-[15px] font-medium text-surface-foreground/40">+55</span>
@@ -118,7 +118,7 @@ export function AutoEquityForm({
         {/* Marca */}
         <div>
           <label htmlFor="marca" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-            Marca do veículo <span className="text-red-400">*</span>
+            Marca do veículo <span className="text-destructive">*</span>
           </label>
           <input
             type="text"
@@ -133,7 +133,7 @@ export function AutoEquityForm({
         {/* Ano */}
         <div>
           <label htmlFor="ano" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-            Ano do veículo <span className="text-red-400">*</span>
+            Ano do veículo <span className="text-destructive">*</span>
           </label>
           <input
             type="text"
@@ -151,7 +151,7 @@ export function AutoEquityForm({
       {/* Valor da FIPE */}
       <div>
         <label htmlFor="valorFipe" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Valor aproximado da Tabela FIPE <span className="text-red-400">*</span>
+          Valor aproximado da Tabela FIPE <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>
@@ -172,7 +172,7 @@ export function AutoEquityForm({
       {/* Valor do crédito */}
       <div>
         <label htmlFor="valorCredito" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Quanto você precisa de crédito? <span className="text-red-400">*</span>
+          Quanto você precisa de crédito? <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>
@@ -191,9 +191,9 @@ export function AutoEquityForm({
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">Liberamos até 70% do valor da FIPE</p>
         {showWarning && (
-          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
-            <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
+          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
+            <p className="text-xs font-medium text-surface-foreground/80">
               Valor ajustado ao limite de 70% ({formatCurrency(limite)})
             </p>
           </div>

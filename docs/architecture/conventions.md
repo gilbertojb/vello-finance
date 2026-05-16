@@ -698,3 +698,67 @@ createServerClient(url, key, {
 Além disso, o middleware de cada app valida o `user_role` do JWT via `@vello/auth`:
 - **Console:** rejeita roles de backoffice → signOut + redirect `/sign-in`
 - **Admin:** rejeita roles de tenant → signOut + redirect `/sign-in` *(pendente de implementação)*
+
+## Regras de Estruturação e Importação
+
+### Um Componente por Arquivo
+
+É **errado** declarar múltiplos componentes React exportados no mesmo arquivo. A convenção estrita é: **um arquivo para cada componente**.
+
+**❌ Errado — múltiplos componentes no mesmo arquivo:**
+```tsx
+// _components/dashboard-cards.tsx
+export function CardA() { return <div /> }
+export function CardB() { return <div /> }
+
+export function DashboardCards() {
+  return (
+    <>
+      <CardA />
+      <CardB />
+    </>
+  )
+}
+```
+
+**✅ Correto — arquivos separados:**
+```tsx
+// _components/card-a.tsx
+export function CardA() { return <div /> }
+
+// _components/card-b.tsx
+export function CardB() { return <div /> }
+
+// _components/dashboard-cards.tsx
+import { CardA } from './card-a'
+import { CardB } from './card-b'
+
+export function DashboardCards() {
+  return (
+    <>
+      <CardA />
+      <CardB />
+    </>
+  )
+}
+```
+
+### Funções e Helpers
+
+Ao ter funções ou lógicas utilitárias (helpers), crie um arquivo único para elas. Se uma função ou helper for utilizada em mais de um lugar, você deve extrai-la para um helper padrão/compartilhado (por exemplo, na pasta `src/lib/` ou um diretório `utils`).
+
+### Importações Absolutas (`@/`)
+
+**Nunca** utilize navegação de caminhos relativos voltando múltiplos diretórios (`../../../`) na importação de arquivos. Sempre use o atalho de importação absoluta do projeto `@/`.
+
+**❌ Errado:**
+```tsx
+import { Button } from '../../../../components/ui/button'
+import { cn } from '../../../lib/utils'
+```
+
+**✅ Correto:**
+```tsx
+import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+```

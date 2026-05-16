@@ -34,7 +34,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
       {/* Nome */}
       <div>
         <label htmlFor="nome" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Seu nome completo <span className="text-red-400">*</span>
+          Seu nome completo <span className="text-destructive">*</span>
         </label>
         <input
           type="text"
@@ -49,7 +49,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
       {/* WhatsApp */}
       <div>
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          WhatsApp para contato <span className="text-red-400">*</span>
+          WhatsApp para contato <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-[15px] font-medium text-surface-foreground/40">+55</span>
@@ -68,7 +68,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
       {/* Saldo FGTS */}
       <div>
         <label htmlFor="saldoFgts" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Saldo aproximado do FGTS <span className="text-red-400">*</span>
+          Saldo aproximado do FGTS <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>

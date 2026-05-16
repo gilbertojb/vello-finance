@@ -37,7 +37,7 @@ export default async function FgtsResultadoPage({ searchParams }: Props) {
         </div>
 
         <div className="rounded-[22px] border border-black/[0.06] bg-white p-10 max-sm:p-6">
-          <span className="inline-flex items-center rounded-full bg-[oklch(0.96_0.03_85)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-[oklch(0.48_0.07_50)]">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
             Simulação Concluída
           </span>
 

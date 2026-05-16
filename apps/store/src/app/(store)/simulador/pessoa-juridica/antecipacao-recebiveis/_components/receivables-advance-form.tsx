@@ -72,7 +72,7 @@ export function AntecipacaoReceiveisForm({
     <div className="space-y-5">
       {/* Chip Pessoa Jurídica */}
       <div className="mb-6 flex justify-center">
-        <span className="inline-flex items-center rounded-full bg-[oklch(0.96_0.03_85)] px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-[oklch(0.48_0.07_50)]">
+        <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
           Pessoa Jurídica
         </span>
       </div>
@@ -80,7 +80,7 @@ export function AntecipacaoReceiveisForm({
       {/* Nome */}
       <div>
         <label htmlFor="nome" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Nome completo <span className="text-red-400">*</span>
+          Nome completo <span className="text-destructive">*</span>
         </label>
         <input
           type="text"
@@ -95,7 +95,7 @@ export function AntecipacaoReceiveisForm({
       {/* WhatsApp */}
       <div>
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          WhatsApp para contato <span className="text-red-400">*</span>
+          WhatsApp para contato <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-[15px] font-medium text-surface-foreground/40">+55</span>
@@ -114,7 +114,7 @@ export function AntecipacaoReceiveisForm({
       {/* Valor total de recebíveis */}
       <div>
         <label htmlFor="valorRecebiveis" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Valor total de recebíveis <span className="text-red-400">*</span>
+          Valor total de recebíveis <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>
@@ -137,7 +137,7 @@ export function AntecipacaoReceiveisForm({
       {/* Tipo de recebível */}
       <div>
         <label htmlFor="tipoRecebivel" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Tipo de recebível <span className="text-red-400">*</span>
+          Tipo de recebível <span className="text-destructive">*</span>
         </label>
         <div className="relative">
           <select
@@ -160,7 +160,7 @@ export function AntecipacaoReceiveisForm({
       {/* Valor de crédito desejado */}
       <div>
         <label htmlFor="valorCredito" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Valor de crédito desejado <span className="text-red-400">*</span>
+          Valor de crédito desejado <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>
@@ -179,9 +179,9 @@ export function AntecipacaoReceiveisForm({
           />
         </div>
         {showAjusteWarning && (
-          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
-            <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
+          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
+            <p className="text-xs font-medium text-surface-foreground/80">
               Valor ajustado ao limite de 100% dos seus recebíveis
             </p>
           </div>
@@ -191,7 +191,7 @@ export function AntecipacaoReceiveisForm({
       {/* Parcelas */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Número de parcelas <span className="text-red-400">*</span>
+          Número de parcelas <span className="text-destructive">*</span>
         </label>
         <div className="flex gap-2">
           {PARCELAS_OPTIONS.map((p) => (

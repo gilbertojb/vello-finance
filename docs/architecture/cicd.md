@@ -7,8 +7,8 @@ Três projetos distintos no painel da Vercel, todos apontando para o mesmo repos
 | Projeto Vercel | Root Directory | Domínio |
 |---|---|---|
 | `vello-admin` | `apps/admin` | `admin.vellofinance.com.br` |
-| `vello-console` | `apps/console` | `*.vellofinance.com.br` (wildcard) |
-| `vello-store` | `apps/store` | Gerenciado via Vercel API (white-labels) |
+| `vello-console` | `apps/console` | `*.app.vellofinance.com.br` |
+| `vello-store` | `apps/store` | `*.vellofinance.com.br` |
 
 ## Ambientes
 

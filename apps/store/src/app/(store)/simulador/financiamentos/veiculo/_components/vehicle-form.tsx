@@ -75,7 +75,7 @@ export function VehicleForm({
           htmlFor="nome"
           className="mb-1.5 block text-sm font-semibold text-surface-foreground"
         >
-          Seu nome completo <span className="text-red-400">*</span>
+          Seu nome completo <span className="text-destructive">*</span>
         </label>
         <input
           type="text"
@@ -93,7 +93,7 @@ export function VehicleForm({
           htmlFor="whatsapp"
           className="mb-1.5 block text-sm font-semibold text-surface-foreground"
         >
-          WhatsApp para contato <span className="text-red-400">*</span>
+          WhatsApp para contato <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-[15px] font-medium text-surface-foreground/40">
@@ -117,7 +117,7 @@ export function VehicleForm({
           htmlFor="valorVeiculo"
           className="mb-1.5 block text-sm font-semibold text-surface-foreground"
         >
-          Valor do veículo (FIPE) <span className="text-red-400">*</span>
+          Valor do veículo (FIPE) <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">
@@ -148,7 +148,7 @@ export function VehicleForm({
           htmlFor="entrada"
           className="mb-1.5 block text-sm font-semibold text-surface-foreground"
         >
-          Valor de entrada <span className="text-red-400">*</span>
+          Valor de entrada <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">
@@ -169,9 +169,9 @@ export function VehicleForm({
           />
         </div>
         {showEntradaWarning && (
-          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-[oklch(0.83_0.10_85)/30%] bg-[oklch(0.97_0.03_85)] px-4 py-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-[oklch(0.65_0.12_60)]" />
-            <p className="text-xs font-medium text-[oklch(0.48_0.07_50)]">
+          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
+            <p className="text-xs font-medium text-surface-foreground/80">
               Entrada mínima de 30% do valor do veículo
             </p>
           </div>
@@ -193,7 +193,7 @@ export function VehicleForm({
       {/* Parcelas */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Prazo <span className="text-red-400">*</span>
+          Prazo <span className="text-destructive">*</span>
         </label>
         <div className="flex gap-2 max-sm:grid max-sm:grid-cols-3">
           {PARCELAS_OPTIONS.map((p) => (

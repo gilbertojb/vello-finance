@@ -21,6 +21,7 @@ export type TemplateHomeProduct = {
   productName:     string
   description:     string | null
   productTypeSlug: string | null
+  category:        string | null
   minAmount:       number | null
   maxAmount:       number | null
   minTermMonths:   number | null
