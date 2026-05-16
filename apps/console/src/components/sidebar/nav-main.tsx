@@ -1,10 +1,10 @@
 import {
   BarChart2,
-  Bell,
   LayoutDashboard,
   ClipboardList,
   FileText,
   Users,
+  UserCog,
   Package,
   Megaphone,
   Settings,
@@ -54,6 +54,7 @@ export async function NavMain() {
     {
       label: 'Sistema',
       items: [
+        { href: '/usuarios', icon: <UserCog className="size-4" />, label: 'Usuários' },
         { href: '/store-settings', icon: <Settings className="size-4" />, label: 'Configurações' },
       ],
     },
