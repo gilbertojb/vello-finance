@@ -2,13 +2,13 @@ import Link from 'next/link'
 
 type Props = {
   displayName: string | null
-  featuredProductId: string | null
   minRate: number | null
 }
 
-export function HeroSection({ displayName, featuredProductId, minRate }: Props) {
+export function HeroSection({ displayName, minRate }: Props) {
   const name = displayName ?? 'Vello Store'
-  const rateDisplay = minRate != null ? minRate.toFixed(2).replace('.', ',') : '--'
+  const rateDisplay =
+    minRate != null ? minRate.toFixed(2).replace('.', ',') : '--'
 
   return (
     <section className="relative overflow-hidden border-b border-primary/8">
@@ -37,28 +37,28 @@ export function HeroSection({ displayName, featuredProductId, minRate }: Props) 
 
             <div className="flex flex-col gap-2.5">
               <Link
-                href="/simulator/individual"
+                href="/simulador/pessoa-fisica"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Crédito Pessoa Física</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href="/simulator/business"
+                href="/simulador/pessoa-juridica"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Crédito Pessoa Jurídica</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href="/simulator/financing"
+                href="/simulador/financiamentos"
                 className="flex items-center justify-between rounded-2xl border border-primary/20 bg-primary/6 px-6 py-4 text-sm font-semibold text-foreground/80 transition-all hover:border-primary/40 hover:bg-primary/10"
               >
                 <span>Financiamentos</span>
                 <span className="text-foreground/40">→</span>
               </Link>
               <Link
-                href={featuredProductId ? `/product/${featuredProductId}` : '#produtos'}
+                href="/simulador"
                 className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/18 px-6 py-4 text-sm font-semibold text-primary transition-all hover:bg-primary/25"
               >
                 <span>Fazer Simulação Gratuita</span>
@@ -79,11 +79,16 @@ export function HeroSection({ displayName, featuredProductId, minRate }: Props) 
             <div className="absolute left-[50px] top-[60px] w-[280px] rounded-[18px] border border-primary/18 bg-card p-[22px] shadow-[0_30px_60px_-20px_black/50]">
               <div className="mb-3.5 flex items-center justify-between text-[11px] font-medium uppercase tracking-[.18em] text-primary">
                 <span>Pré-aprovado</span>
-                <span className="rounded-full bg-green-500/18 px-2.5 py-1 text-[10px] text-green-400">ATIVO</span>
+                <span className="rounded-full bg-green-500/18 px-2.5 py-1 text-[10px] text-green-400">
+                  ATIVO
+                </span>
               </div>
               <div className="text-[36px] font-semibold leading-none tracking-tight text-foreground">
                 R$ 38.500
-                <span className="text-base font-normal text-foreground/50"> /50k</span>
+                <span className="text-base font-normal text-foreground/50">
+                  {' '}
+                  /50k
+                </span>
               </div>
               <div className="my-[18px] h-1.5 overflow-hidden rounded-full bg-foreground/8">
                 <div className="h-full w-[64%] rounded-full bg-linear-to-r from-primary/60 to-primary" />
@@ -95,21 +100,33 @@ export function HeroSection({ displayName, featuredProductId, minRate }: Props) 
             </div>
 
             <div className="absolute left-1/2 top-1/2 grid h-[260px] w-[260px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-primary/18">
-              <div className="absolute inset-[14px] rounded-full border border-dashed border-primary/22" aria-hidden="true" />
+              <div
+                className="absolute inset-[14px] rounded-full border border-dashed border-primary/22"
+                aria-hidden="true"
+              />
               <div className="text-center">
                 <div className="font-serif italic text-[64px] font-normal leading-none tracking-tight text-primary">
                   {rateDisplay}
                   <span className="text-2xl">%</span>
                 </div>
-                <div className="mt-1.5 text-[11px] uppercase tracking-[.22em] text-foreground/55">a.m. · taxa fixa</div>
+                <div className="mt-1.5 text-[11px] uppercase tracking-[.22em] text-foreground/55">
+                  a.m. · taxa fixa
+                </div>
               </div>
             </div>
 
             <div className="absolute bottom-[80px] right-[40px] w-[280px] rounded-[18px] bg-surface p-[22px] shadow-[0_30px_60px_-20px_black/50]">
-              <div className="text-[11px] font-semibold uppercase tracking-[.18em] text-surface-foreground/60">Parcela mensal</div>
-              <div className="mt-1 text-lg font-semibold text-surface-foreground">Crédito Pessoal</div>
+              <div className="text-[11px] font-semibold uppercase tracking-[.18em] text-surface-foreground/60">
+                Parcela mensal
+              </div>
+              <div className="mt-1 text-lg font-semibold text-surface-foreground">
+                Crédito Pessoal
+              </div>
               <div className="mt-3.5 text-[36px] font-semibold leading-none tracking-tight text-surface-foreground">
-                R$ 312<span className="text-base font-normal text-surface-foreground/45">,40</span>
+                R$ 312
+                <span className="text-base font-normal text-surface-foreground/45">
+                  ,40
+                </span>
               </div>
               <div className="my-[18px] h-1.5 overflow-hidden rounded-full bg-surface-foreground/8">
                 <div className="h-full w-[38%] rounded-full bg-primary-foreground" />

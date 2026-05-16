@@ -418,6 +418,11 @@ export type Database = {
       }
       simulations: {
         Row: {
+          client_birthdate: string | null
+          client_city: string | null
+          client_cpf: string | null
+          client_email: string | null
+          client_income: number | null
           client_name: string
           client_phone: string
           created_at: string
@@ -433,6 +438,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_birthdate?: string | null
+          client_city?: string | null
+          client_cpf?: string | null
+          client_email?: string | null
+          client_income?: number | null
           client_name: string
           client_phone: string
           created_at?: string
@@ -448,6 +458,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_birthdate?: string | null
+          client_city?: string | null
+          client_cpf?: string | null
+          client_email?: string | null
+          client_income?: number | null
           client_name?: string
           client_phone?: string
           created_at?: string
@@ -582,6 +597,7 @@ export type Database = {
           created_at: string
           id: string
           is_active: boolean
+          is_popular: boolean
           product_id: string
           tenant_commission_pct: number
           tenant_id: string
@@ -593,6 +609,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_popular?: boolean
           product_id: string
           tenant_commission_pct: number
           tenant_id: string
@@ -604,6 +621,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean
+          is_popular?: boolean
           product_id?: string
           tenant_commission_pct?: number
           tenant_id?: string

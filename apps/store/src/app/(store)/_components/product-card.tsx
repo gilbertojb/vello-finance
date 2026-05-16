@@ -1,26 +1,67 @@
 import Link from 'next/link'
-import { Wallet, Shield, Home, Car, Zap, Briefcase, ArrowRight } from 'lucide-react'
+import { Wallet, Shield, Home, Car, Zap, Briefcase, Building, TrendingUp, ArrowRight, Sun } from 'lucide-react'
 import type { ElementType } from 'react'
 import { formatCurrency } from '@/lib/utils/simulator'
 import { cn } from '@/lib/utils'
 
-const PRODUCT_TYPE_LABELS: Record<string, string> = {
-  fgts: 'FGTS',
-  consignado_publico: 'Consignado Público',
-  consignado_privado: 'Consignado Privado',
-  home_equity: 'Home Equity',
-  auto_equity: 'Auto Equity',
-  outros: 'Outros',
+export const PRODUCT_TYPE_LABELS: Record<string, string> = {
+  fgts:                   'FGTS',
+  consignado_publico:     'Consignado Público',
+  consignado_privado:     'Consignado CLT',
+  home_equity:            'Imóvel em Garantia',
+  auto_equity:            'Veículo em Garantia',
+  home_equity_pj:         'Imóvel em Garantia PJ',
+  auto_equity_pj:         'Veículo em Garantia PJ',
+  capital_giro:           'Capital de Giro',
+  antecipacao_recebiveis: 'Antecipação de Recebíveis',
+  financiamento_imovel:   'Financiamento Imobiliário',
+  financiamento_veiculo:  'Financiamento de Veículos',
+  emprestimo_pessoal:     'Empréstimo Pessoal',
+  conta_luz:              'Conta de Luz',
+  outros:                 'Outros',
 }
 
-const TYPE_ICONS: Record<string, ElementType> = {
-  fgts: Shield,
-  consignado_publico: Briefcase,
-  consignado_privado: Wallet,
-  home_equity: Home,
-  auto_equity: Car,
-  outros: Zap,
+export const TYPE_ICONS: Record<string, ElementType> = {
+  fgts:                   Shield,
+  consignado_publico:     Briefcase,
+  consignado_privado:     Wallet,
+  home_equity:            Home,
+  auto_equity:            Car,
+  home_equity_pj:         Building,
+  auto_equity_pj:         Car,
+  capital_giro:           TrendingUp,
+  antecipacao_recebiveis: TrendingUp,
+  financiamento_imovel:   Home,
+  financiamento_veiculo:  Car,
+  emprestimo_pessoal:     Wallet,
+  conta_luz:              Sun,
+  outros:                 Zap,
 }
+
+// Slug do product_type → rota direta para o simulador (etapa 2)
+const SLUG_TO_SIMULATOR: Record<string, string> = {
+  fgts:                   '/simulador/pessoa-fisica/fgts',
+  consignado_privado:     '/simulador/pessoa-fisica/consignado',
+  consignado_publico:     '/simulador/pessoa-fisica/consignado',
+  home_equity:            '/simulador/pessoa-fisica/imovel-em-garantia',
+  auto_equity:            '/simulador/pessoa-fisica/veiculo-em-garantia',
+  emprestimo_pessoal:     '/simulador/pessoa-fisica/emprestimo-pessoal',
+  conta_luz:              '/simulador/pessoa-fisica/conta-de-luz',
+  home_equity_pj:         '/simulador/pessoa-juridica/imovel-em-garantia',
+  auto_equity_pj:         '/simulador/pessoa-juridica/veiculo-em-garantia',
+  capital_giro:           '/simulador/pessoa-juridica/capital-de-giro',
+  antecipacao_recebiveis: '/simulador/pessoa-juridica/antecipacao-recebiveis',
+  financiamento_imovel:   '/simulador/financiamentos/imovel',
+  financiamento_veiculo:  '/simulador/financiamentos/veiculo',
+}
+
+// Slugs que têm simulador próprio com ?productId (etapa 2 direta)
+const HAS_DEDICATED_SIMULATOR = new Set([
+  'fgts', 'consignado_privado', 'consignado_publico',
+  'home_equity', 'auto_equity', 'emprestimo_pessoal', 'conta_luz',
+  'home_equity_pj', 'auto_equity_pj', 'capital_giro', 'antecipacao_recebiveis',
+  'financiamento_imovel', 'financiamento_veiculo',
+])
 
 type Props = {
   tenantProductId: string
@@ -31,6 +72,7 @@ type Props = {
   maxAmount: number | null
   minTermMonths: number | null
   maxTermMonths: number | null
+  minRate: number | null
   featured?: boolean
 }
 
@@ -42,29 +84,35 @@ export function ProductCard({
   maxAmount,
   minTermMonths,
   maxTermMonths,
+  minRate,
   featured = false,
 }: Props) {
   const slug = productTypeSlug ?? 'outros'
   const typeLabel = PRODUCT_TYPE_LABELS[slug] ?? slug
   const Icon = TYPE_ICONS[slug] ?? Zap
 
+  const basePath = SLUG_TO_SIMULATOR[slug] ?? '/simulador'
+  const href = HAS_DEDICATED_SIMULATOR.has(slug)
+    ? `${basePath}?productId=${tenantProductId}`
+    : basePath
+
   return (
     <Link
-      href={`/product/${tenantProductId}`}
+      href={href}
       className={cn(
         'group flex h-full cursor-pointer flex-col overflow-hidden rounded-[20px] border transition-all duration-200 hover:-translate-y-[3px]',
         featured
           ? 'border-primary/18 bg-gradient-to-b from-card to-background text-foreground hover:shadow-[0_30px_50px_-25px_oklch(0.83_0.10_85/20%)]'
-          : 'border-black/[0.06] bg-surface text-surface-foreground hover:shadow-[0_30px_50px_-25px_oklch(0.12_0.01_50/15%)]',
+          : 'border-border/50 bg-card/60 text-foreground hover:border-border hover:shadow-[0_20px_40px_-15px_oklch(0.12_0.01_50/8%)]',
       )}
     >
       <div className="flex items-start justify-between px-[26px] pt-6">
-        <span className={cn('text-[10px] font-semibold uppercase tracking-[.22em]', featured ? 'text-primary' : 'text-surface-foreground/50')}>
+        <span className={cn('text-[10px] font-semibold uppercase tracking-[.22em]', featured ? 'text-primary' : 'text-foreground/40')}>
           {typeLabel}
         </span>
       </div>
 
-      <div className={cn('mx-[26px] mt-6 grid h-12 w-12 place-items-center rounded-[12px]', featured ? 'bg-primary/12 text-primary' : 'bg-surface-foreground/[0.08] text-surface-foreground/60')}>
+      <div className={cn('mx-[26px] mt-6 grid h-12 w-12 place-items-center rounded-[12px]', featured ? 'bg-primary/12 text-primary' : 'bg-foreground/[0.06] text-foreground/50')}>
         <Icon className="h-5 w-5" />
       </div>
 
@@ -90,23 +138,29 @@ export function ProductCard({
           ) : productName}
         </h3>
 
-        <div className={cn('mt-auto grid grid-cols-2 gap-3.5 border-t pt-[18px]', featured ? 'border-primary/14' : 'border-black/[0.08]')}>
-          {minAmount != null && maxAmount != null && (
+        <div className={cn('mt-auto grid grid-cols-2 gap-3.5 border-t pt-[18px]', featured ? 'border-primary/14' : 'border-foreground/[0.08]')}>
+          {minRate != null && (
             <div>
-              <div className={cn('text-[10px] font-medium uppercase tracking-[.16em]', featured ? 'text-foreground/45' : 'text-surface-foreground/45')}>Valor até</div>
-              <div className={cn('mt-1 text-lg font-semibold tracking-tight', featured ? 'text-primary' : 'text-surface-foreground')}>{formatCurrency(maxAmount)}</div>
+              <div className={cn('text-[10px] font-medium uppercase tracking-[.16em]', featured ? 'text-foreground/45' : 'text-foreground/40')}>A.M. a partir de</div>
+              <div className={cn('mt-1 text-lg font-semibold tracking-tight text-primary')}>{minRate.toFixed(2).replace('.', ',')}%</div>
             </div>
           )}
-          {minTermMonths != null && maxTermMonths != null && (
+          {minAmount != null && maxAmount != null && (
             <div>
-              <div className={cn('text-[10px] font-medium uppercase tracking-[.16em]', featured ? 'text-foreground/45' : 'text-surface-foreground/45')}>Prazo até</div>
-              <div className={cn('mt-1 text-lg font-semibold tracking-tight', featured ? 'text-foreground' : 'text-surface-foreground')}>{maxTermMonths} meses</div>
+              <div className={cn('text-[10px] font-medium uppercase tracking-[.16em]', featured ? 'text-foreground/45' : 'text-foreground/40')}>Valor até</div>
+              <div className={cn('mt-1 text-lg font-semibold tracking-tight', featured ? 'text-primary' : 'text-foreground')}>{formatCurrency(maxAmount)}</div>
+            </div>
+          )}
+          {minTermMonths != null && maxTermMonths != null && maxAmount == null && (
+            <div>
+              <div className={cn('text-[10px] font-medium uppercase tracking-[.16em]', featured ? 'text-foreground/45' : 'text-foreground/40')}>Prazo até</div>
+              <div className={cn('mt-1 text-lg font-semibold tracking-tight', featured ? 'text-foreground' : 'text-foreground')}>{maxTermMonths} meses</div>
             </div>
           )}
         </div>
       </div>
 
-      <div className={cn('flex items-center justify-between border-t px-[26px] py-4 text-sm font-semibold', featured ? 'border-primary/14 bg-primary/[0.04] text-primary' : 'border-black/[0.06] bg-black/[0.02] text-surface-foreground/70')}>
+      <div className={cn('flex items-center justify-between border-t px-[26px] py-4 text-sm font-semibold', featured ? 'border-primary/14 bg-primary/[0.04] text-primary' : 'border-foreground/[0.06] bg-foreground/[0.02] text-foreground/60')}>
         <span>Simular condições</span>
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
       </div>

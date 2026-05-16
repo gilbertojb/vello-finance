@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
-import { AvailableProducts } from './_components/available-products'
-import { ProductList } from './_components/product-list'
+import { ProductPageTabs } from './_components/product-page-tabs'
 import { listActiveProducts, listTenantProducts } from './queries'
 
 export const metadata: Metadata = { title: 'Produtos' }
@@ -27,17 +26,10 @@ export default async function ProductsPage() {
         </p>
       </div>
 
-      <AvailableProducts products={activeProducts} tenantProducts={tenantProducts} />
-
-      <div className="mt-6 flex flex-col gap-4">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight text-foreground">Meus Produtos</h2>
-          <p className="mt-0.5 text-sm text-foreground/55">
-            Gerencie itens adicionados ao seu portfólio.
-          </p>
-        </div>
-        <ProductList products={tenantProducts} />
-      </div>
+      <ProductPageTabs
+        tenantProducts={tenantProducts}
+        availableProducts={activeProducts}
+      />
     </div>
   )
 }

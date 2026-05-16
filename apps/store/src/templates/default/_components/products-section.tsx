@@ -3,16 +3,8 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { ProductCard } from '@/app/(store)/_components/product-card'
+import { PRODUCT_TYPE_LABELS } from '@/app/(store)/_components/product-card'
 import type { TemplateHomeProduct } from '@/templates/_types'
-
-const TYPE_LABELS: Record<string, string> = {
-  fgts:               'FGTS',
-  consignado_publico: 'Consignado Público',
-  consignado_privado: 'Consignado Privado',
-  home_equity:        'Home Equity',
-  auto_equity:        'Auto Equity',
-  outros:             'Outros',
-}
 
 type Props = { products: TemplateHomeProduct[] }
 
@@ -51,7 +43,7 @@ export function ProductsSection({ products }: Props) {
             </h2>
           </div>
           <p className="max-w-[420px] text-[15px] leading-relaxed text-surface-foreground/62">
-            Linhas distintas, do consignado ao home equity. Toque em qualquer
+            Linhas distintas, do consignado ao crédito com garantia. Toque em qualquer
             produto para simular e ver sua parcela em tempo real.
           </p>
         </div>
@@ -65,7 +57,7 @@ export function ProductsSection({ products }: Props) {
           </button>
           {types.map((type) => (
             <button key={type} type="button" onClick={() => setActiveFilter(type)} className={tabClass(activeFilter === type)}>
-              {TYPE_LABELS[type] ?? type}
+              {PRODUCT_TYPE_LABELS[type] ?? type}
               <span className={cn('ml-2 text-[11px]', activeFilter === type ? 'opacity-50' : 'opacity-40')}>
                 {products.filter((p) => (p.productTypeSlug ?? 'outros') === type).length}
               </span>
@@ -77,24 +69,28 @@ export function ProductsSection({ products }: Props) {
           <p className="py-16 text-center text-surface-foreground/50">Nenhum produto disponível no momento.</p>
         ) : (
           <div className="grid grid-cols-3 gap-[18px] max-lg:grid-cols-2 max-sm:grid-cols-1">
-            {filtered.map((p, index) => (
-              <div
-                key={p.tenantProductId}
-                className={cn(index === 0 && filtered.length > 1 ? 'row-span-2 max-lg:row-span-1' : '')}
-              >
-                <ProductCard
-                  tenantProductId={p.tenantProductId}
-                  coverUrl={p.coverUrl}
-                  productName={p.productName}
-                  productTypeSlug={p.productTypeSlug}
-                  minAmount={p.minAmount}
-                  maxAmount={p.maxAmount}
-                  minTermMonths={p.minTermMonths}
-                  maxTermMonths={p.maxTermMonths}
-                  featured={index === 0 && filtered.length > 1}
-                />
-              </div>
-            ))}
+            {filtered.map((p, index) => {
+              const isFeatured = p.isPopular && index === 0
+              return (
+                <div
+                  key={p.tenantProductId}
+                  className={cn(isFeatured && filtered.length > 1 ? 'row-span-2 max-lg:row-span-1' : '')}
+                >
+                  <ProductCard
+                    tenantProductId={p.tenantProductId}
+                    coverUrl={p.coverUrl}
+                    productName={p.productName}
+                    productTypeSlug={p.productTypeSlug}
+                    minAmount={p.minAmount}
+                    maxAmount={p.maxAmount}
+                    minTermMonths={p.minTermMonths}
+                    maxTermMonths={p.maxTermMonths}
+                    minRate={p.minRate}
+                    featured={isFeatured && filtered.length > 1}
+                  />
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

@@ -98,6 +98,20 @@ export async function uploadProductCover(id: string, formData: FormData) {
   }
 }
 
+export async function toggleTenantProductPopular(id: string, isPopular: boolean) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('tenant_products')
+    .update({ is_popular: isPopular })
+    .eq('id', id)
+
+  if (error) return { success: false, message: error.message, errors: null }
+
+  revalidatePath('/products')
+  return { success: true, message: null, errors: null }
+}
+
 export async function addTenantProduct(productId: string) {
   const supabase = await createClient()
 

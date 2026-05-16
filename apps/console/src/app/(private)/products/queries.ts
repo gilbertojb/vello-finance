@@ -9,6 +9,7 @@ export async function listTenantProducts() {
     .select(`
       id,
       is_active,
+      is_popular,
       cover_url,
       tenant_commission_pct,
       products (

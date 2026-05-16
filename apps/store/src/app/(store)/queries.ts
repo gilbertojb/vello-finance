@@ -7,6 +7,7 @@ export async function listActiveProducts(tenantId: string) {
     .select(`
       id,
       cover_url,
+      is_popular,
       products (
         id,
         name,
@@ -22,6 +23,7 @@ export async function listActiveProducts(tenantId: string) {
     `)
     .eq('tenant_id', tenantId)
     .eq('is_active', true)
+    .order('is_popular', { ascending: false })
     .order('created_at')
   return data ?? []
 }
@@ -67,20 +69,21 @@ export async function listActiveProductsByCategory(
         id,
         name,
         description,
+        category,
         min_amount,
         max_amount,
         min_term_months,
         max_term_months,
         min_rate_monthly,
         max_rate_monthly,
-        product_type:product_types ( slug, category )
+        product_type:product_types ( slug )
       )
     `)
     .eq('tenant_id', tenantId)
     .eq('is_active', true)
-    .eq('products.product_types.category', category)
+    .eq('products.category', category)
     .order('created_at')
-  return (data ?? []).filter((tp) => tp.products !== null)
+  return (data ?? []).filter((tp) => tp.products !== null && (tp.products as { category?: string }).category === category)
 }
 
 export async function getSimulation(simulationId: string, tenantId: string) {

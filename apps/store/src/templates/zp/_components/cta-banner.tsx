@@ -24,14 +24,12 @@ export function CtaBanner({ featuredProductId }: Props) {
               qual taxa — antes de qualquer assinatura. Não afeta seu score.
             </p>
             <div className="flex gap-3.5">
-              {featuredProductId && (
-                <Link
-                  href={`/product/${featuredProductId}`}
-                  className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90"
-                >
-                  Iniciar simulação
-                </Link>
-              )}
+              <Link
+                href="/simulador"
+                className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90"
+              >
+                Iniciar simulação
+              </Link>
               <Link
                 href="#"
                 className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground"

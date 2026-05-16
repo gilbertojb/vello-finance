@@ -7,6 +7,7 @@ import {
   HelpCircle,
   ImagePlus,
   ShieldCheck,
+  Star,
 } from 'lucide-react'
 
 import Image from 'next/image'
@@ -15,7 +16,7 @@ import { toast } from 'sonner'
 
 import { Switch } from '@/components/ui/switch'
 
-import { toggleTenantProduct, uploadProductCover } from '../actions'
+import { toggleTenantProduct, toggleTenantProductPopular, uploadProductCover } from '../actions'
 import type { TenantProductRow } from '../queries'
 
 interface ProductListProps {
@@ -36,6 +37,17 @@ export function ProductList({ products }: ProductListProps) {
         toast.error(result.message ?? 'Erro ao atualizar produto.')
       } else {
         toast.success(isActive ? 'Produto ativado!' : 'Produto desativado.')
+      }
+    })
+  }
+
+  function handleTogglePopular(id: string, isPopular: boolean) {
+    startTransition(async () => {
+      const result = await toggleTenantProductPopular(id, isPopular)
+      if (!result.success) {
+        toast.error(result.message ?? 'Erro ao atualizar destaque.')
+      } else {
+        toast.success(isPopular ? 'Produto marcado como popular!' : 'Destaque removido.')
       }
     })
   }
@@ -194,24 +206,42 @@ export function ProductList({ products }: ProductListProps) {
             </div>
 
             {/* Footer */}
-            <div className="mt-auto flex items-center justify-between gap-4 border-t border-border/40 bg-card p-5 pt-4">
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-foreground">Visibilidade na Loja</span>
-                <span className="font-mono text-xs uppercase tracking-wider text-foreground/55">
-                  {tp.is_active ? 'Catálogo aberto' : 'Oculto aos clientes'}
-                </span>
+            <div className="mt-auto border-t border-border/40 bg-card">
+              <div className="flex items-center justify-between gap-4 px-5 pb-3 pt-4">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium text-foreground">Visibilidade na Loja</span>
+                  <span className="font-mono text-xs uppercase tracking-wider text-foreground/55">
+                    {tp.is_active ? 'Catálogo aberto' : 'Oculto aos clientes'}
+                  </span>
+                </div>
+                <Switch
+                  checked={tp.is_active}
+                  onCheckedChange={(checked) => handleToggle(tp.id, checked)}
+                  disabled={isPending || !product.is_active}
+                  title={
+                    !product.is_active
+                      ? 'Produto desativado pelo Backoffice'
+                      : 'Alternar disponibilidade na loja'
+                  }
+                />
               </div>
-              <Switch
-                checked={tp.is_active}
-                onCheckedChange={(checked) => handleToggle(tp.id, checked)}
-                disabled={isPending || !product.is_active}
-                title={
-                  !product.is_active
-                    ? 'Produto desativado pelo Backoffice'
-                    : 'Alternar disponibilidade na loja'
-                }
-                className="data-[state=checked]:bg-success"
-              />
+              <div className="flex items-center justify-between gap-4 border-t border-border/30 px-5 pb-5 pt-3">
+                <div className="flex items-center gap-2">
+                  <Star className="size-3.5 text-foreground/40" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium text-foreground">Destaque na Loja</span>
+                    <span className="font-mono text-xs uppercase tracking-wider text-foreground/55">
+                      {tp.is_popular ? 'Em destaque' : 'Produto padrão'}
+                    </span>
+                  </div>
+                </div>
+                <Switch
+                  checked={tp.is_popular}
+                  onCheckedChange={(checked) => handleTogglePopular(tp.id, checked)}
+                  disabled={isPending || !tp.is_active}
+                  title="Marcar como produto popular na loja"
+                />
+              </div>
             </div>
           </div>
         )
