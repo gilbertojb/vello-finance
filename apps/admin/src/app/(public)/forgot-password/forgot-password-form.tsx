@@ -33,17 +33,15 @@ export function ForgotPasswordForm({ ...props }: React.ComponentProps<'form'>) {
         </div>
 
         {success && message && (
-          <Alert className="border-green-200 bg-green-50">
-            <CheckCircle2 className="text-green-600" />
-            <AlertTitle className="text-green-800">E-mail enviado</AlertTitle>
-            <AlertDescription className="text-xs text-green-700">
-              {message}
-            </AlertDescription>
+          <Alert variant="success">
+            <CheckCircle2 />
+            <AlertTitle>E-mail enviado</AlertTitle>
+            <AlertDescription className="text-xs">{message}</AlertDescription>
           </Alert>
         )}
 
         {success === false && message && (
-          <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <Alert variant="destructive">
             <AlertCircleIcon />
             <AlertTitle>Erro</AlertTitle>
             <AlertDescription className="text-xs">{message}</AlertDescription>

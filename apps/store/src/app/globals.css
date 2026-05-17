@@ -53,9 +53,18 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Layout tokens */
+  --height-store-header: 4.875rem;  /* 78px */
+  --size-logo-avatar:    2.125rem;  /* 34px */
+  --height-hero-image:   35rem;
+
+  /* Semantic color tokens */
+  --color-success: var(--success);
 }
 
 :root {
+  --success:             oklch(0.627 0.194 142.5);
   --background:          oklch(0.08 0.008 55);
   --foreground:          oklch(0.96 0.015 88);
   --card:                oklch(0.12 0.008 52);

@@ -33,14 +33,14 @@ export function CommissionCascade({
   return (
     <div className="flex flex-col border border-border rounded-xl overflow-hidden shadow-sm bg-card w-full max-w-sm mx-auto md:mx-0">
       {/* Header */}
-      <div className="bg-primary px-6 py-6 text-white w-full">
-        <div className="text-[10px] font-bold tracking-widest text-white/80 uppercase mb-1.5">
+      <div className="bg-primary px-6 py-6 text-primary-foreground w-full">
+        <div className="text-2xs font-bold tracking-widest text-primary-foreground/80 uppercase mb-1.5">
           Simulação de Repasse
         </div>
-        <div className="text-[32px] leading-tight font-extrabold mb-1.5">
+        <div className="text-3xl leading-tight font-extrabold mb-1.5">
           {formatCurrency(ifPct)}
         </div>
-        <div className="text-xs text-white/70">
+        <div className="text-xs text-primary-foreground/70">
           Estimativa baseada em ticket médio de {formatCompact(baseValue)}
         </div>
       </div>
@@ -48,29 +48,29 @@ export function CommissionCascade({
       {/* Body */}
       <div className="px-6 py-6 flex flex-col space-y-5">
         <div className="flex justify-between items-center">
-          <span className="text-[15px] text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Comissão Vello ({(velloPct || 0).toFixed(3)}%)
           </span>
-          <span className="text-[15px] font-bold text-foreground">
+          <span className="text-sm font-bold text-foreground">
             {formatCurrency(velloPct || 0)}
           </span>
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-[15px] text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             Comissão Parceiro ({tenantAvailable.toFixed(3)}%)
           </span>
-          <span className="text-[15px] font-bold text-foreground">
+          <span className="text-sm font-bold text-foreground">
             {formatCurrency(tenantAvailable)}
           </span>
         </div>
 
         {tenantPct !== undefined && (
           <div className="flex justify-between items-center">
-            <span className="text-[15px] text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               Comissão do Parceiro ({tenantPct.toFixed(3)}%)
             </span>
-            <span className="text-[15px] font-bold text-foreground">
+            <span className="text-sm font-bold text-foreground">
               {formatCurrency(tenantPct)}
             </span>
           </div>
@@ -78,10 +78,10 @@ export function CommissionCascade({
 
         {velloSpreadPct !== undefined && (
           <div className="flex justify-between items-center">
-            <span className="text-[15px] text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               Vello Spread Extra ({velloSpreadPct.toFixed(3)}%)
             </span>
-            <span className="text-[15px] font-bold text-foreground">
+            <span className="text-sm font-bold text-foreground">
               {formatCurrency(velloSpreadPct)}
             </span>
           </div>
@@ -94,10 +94,10 @@ export function CommissionCascade({
             <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               Taxa de Conversão Est.
             </span>
-            <span className="text-xs font-bold text-[#10b981]">Alta (68%)</span>
+            <span className="text-xs font-bold text-success">Alta (68%)</span>
           </div>
           <div className="flex gap-1 h-1.5">
-            <div className="bg-[#10b981] h-full rounded-full w-[68%]" />
+            <div className="bg-success h-full rounded-full" style={{ width: '68%' }} />
             <div className="bg-muted h-full rounded-full flex-1" />
           </div>
         </div>

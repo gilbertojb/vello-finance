@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '../../../../queries'
-import { SimulatorStepIndicator } from '../../../../_components/simulator-step-indicator'
+import { getTenantProduct } from '@/app/(store)/simulador/queries'
+import { SimulatorStepIndicator } from '@/app/(store)/simulador/_components/simulator-step-indicator'
 import { AutoEquityResultado } from './_components/auto-equity-resultado'
 
 export const metadata: Metadata = { title: 'Sua simulação está pronta' }
@@ -41,8 +41,8 @@ export default async function AutoEquityResultadoPage({ searchParams }: Props) {
           <SimulatorStepIndicator currentStep={3} />
         </div>
 
-        <div className="rounded-[22px] border border-black/[0.06] bg-white p-10 max-sm:p-6">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
+        <div className="rounded-2xl border border-foreground/[0.06] bg-background p-10 max-sm:p-6">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
             Simulação Concluída
           </span>
 

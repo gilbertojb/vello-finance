@@ -56,6 +56,9 @@
   /* Cor de fundo da página (cinza atrás dos painéis) */
   --color-page-bg: var(--page-bg);
 
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+
   /* Dimensões de layout → Tailwind utilities (w-sidebar, h-header) */
   --width-sidebar: var(--sidebar-width);
   --height-header: var(--header-height);
@@ -99,6 +102,9 @@
   --border:             oklch(0.910 0.012 264.0);   /* hsl(220 13% 90%) */
   --input:              oklch(0.910 0.012 264.0);
   --ring:               oklch(0.478 0.152 260.5);   /* Azul Vello */
+
+  --success: oklch(0.627 0.194 142.5);    /* verde semântico */
+  --warning: oklch(0.769 0.145 78.5);     /* âmbar semântico */
 
   --radius: 0.5rem;
 
@@ -146,6 +152,9 @@
   --border:             oklch(0.240 0.005 264.0);   /* zinc-800 */
   --input:              oklch(0.240 0.005 264.0);
   --ring:               oklch(0.570 0.141 258.8);
+
+  --success: oklch(0.696 0.170 142.5);
+  --warning: oklch(0.828 0.119 78.5);
 
   /* ─── Sidebar (dark) ──────────────────────────────── */
   --sidebar:                    oklch(0.170 0.006 264.0);  /* zinc-900 */

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info, AlertTriangle, RefreshCw, Download } from 'lucide-react'
 import { formatCurrency, formatRate } from '@/lib/utils/simulator'
-import { saveSimulation, qualifySimulation } from '../../../../actions'
+import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 
 type Props = {
   productId: string
@@ -48,10 +48,10 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
           estimatedRate: rateMonthly,
           estimatedPayment: 0,
           simulationData: parsed as Record<string, unknown>,
-        }).then((id: string | null) => {
-          if (id) {
-            sessionStorage.setItem(SIM_ID_KEY, id)
-            setSimulationId(id)
+        }).then((result) => {
+          if (result.success) {
+            setSimulationId(result.data.id)
+            sessionStorage.setItem(SIM_ID_KEY, result.data.id)
           }
         })
       }
@@ -73,7 +73,7 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
   return (
     <div className="space-y-5">
       <div className="mb-4">
-        <p className="text-[15px] font-medium text-surface-foreground">Olá, {data.nome}!</p>
+        <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
       </div>
 
       {/* Dados do saldo */}
@@ -82,7 +82,7 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Saldo informado
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
+          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             {formatCurrency(data.saldoFgts)}
           </div>
         </div>
@@ -90,38 +90,38 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Prazo máximo
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
+          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             120 meses
           </div>
         </div>
       </div>
 
       {/* Card de resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-6 text-white max-sm:p-5">
+      <div className="rounded-2xl bg-surface-foreground p-6 text-primary-foreground max-sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-[15px] font-medium text-white/70">Valor estimado de antecipação</h3>
-            <p className="text-[11px] text-white/40">75% do saldo informado</p>
+            <h3 className="text-sm font-medium text-primary-foreground/70">Valor estimado de antecipação</h3>
+            <p className="text-xs text-primary-foreground/40">75% do saldo informado</p>
           </div>
-          <p className="text-[28px] font-bold leading-none tracking-tight text-white">
-            <span className="text-[15px] font-medium text-white/50">R$</span>{' '}
+          <p className="text-2xl font-bold leading-none tracking-tight text-primary-foreground">
+            <span className="text-sm font-medium text-primary-foreground/50">R$</span>{' '}
             {estimativa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
 
-        <div className="mt-5 border-t border-white/10 pt-4">
+        <div className="mt-5 border-t border-primary-foreground/10 pt-4">
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
-              <p className="mb-0.5 text-white/40">Saldo FGTS</p>
-              <p className="font-medium text-white/90">{formatCurrency(data.saldoFgts)}</p>
+              <p className="mb-0.5 text-primary-foreground/40">Saldo FGTS</p>
+              <p className="font-medium text-primary-foreground/90">{formatCurrency(data.saldoFgts)}</p>
             </div>
             <div>
-              <p className="mb-0.5 text-white/40">Taxa ref.</p>
-              <p className="font-medium text-white/90">{formatRate(rateMonthly)}% a.m.</p>
+              <p className="mb-0.5 text-primary-foreground/40">Taxa ref.</p>
+              <p className="font-medium text-primary-foreground/90">{formatRate(rateMonthly)}% a.m.</p>
             </div>
             <div>
-              <p className="mb-0.5 text-white/40">Prazo máx.</p>
-              <p className="font-medium text-white/90">10 anos</p>
+              <p className="mb-0.5 text-primary-foreground/40">Prazo máx.</p>
+              <p className="font-medium text-primary-foreground/90">10 anos</p>
             </div>
           </div>
         </div>
@@ -150,9 +150,13 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
-          await qualifySimulation(simulationId)
+          const result = await qualifySimulation(simulationId)
+          if (result && !result.success) {
+            setIsQualifying(false)
+            return
+          }
         }}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>

@@ -40,7 +40,7 @@ export function ResetPasswordForm({ ...props }: React.ComponentProps<'form'>) {
         </div>
 
         {success === false && message && (
-          <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <Alert variant="destructive">
             <AlertCircleIcon />
             <AlertTitle>Erro</AlertTitle>
             <AlertDescription className="text-xs">{message}</AlertDescription>

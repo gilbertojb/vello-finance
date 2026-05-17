@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info, RefreshCw, Download } from 'lucide-react'
 import { formatCurrency, formatRate, calcPMT, calcCETAnual } from '@/lib/utils/simulator'
-import { saveSimulation, qualifySimulation } from '../../../../actions'
+import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 
 const PARCELAS_OPTIONS = [6, 12, 18, 24, 36, 48]
 
@@ -54,10 +54,10 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
           estimatedRate: rateMonthly,
           estimatedPayment: payment,
           simulationData: parsed as Record<string, unknown>,
-        }).then((id: string | null) => {
-          if (id) {
-            sessionStorage.setItem(SIM_ID_KEY, id)
-            setSimulationId(id)
+        }).then((result) => {
+          if (result.success) {
+            setSimulationId(result.data.id)
+            sessionStorage.setItem(SIM_ID_KEY, result.data.id)
           }
         })
       }
@@ -84,7 +84,7 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
   return (
     <div className="space-y-5">
       <div className="mb-4">
-        <p className="text-[15px] font-medium text-surface-foreground">Olá, {data.nome}!</p>
+        <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
       </div>
 
       {/* Valor solicitado (somente leitura) */}
@@ -92,7 +92,7 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
         <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
           Valor solicitado
         </label>
-        <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
+        <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
           {formatCurrency(data.valorDesejado)}
         </div>
       </div>
@@ -108,10 +108,10 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
               key={p}
               type="button"
               onClick={() => setParcelas(p)}
-              className={`flex-1 rounded-2xl border py-3 text-[15px] font-medium transition-colors ${
+              className={`flex-1 rounded-2xl border py-3 text-sm font-medium transition-colors ${
                 parcelas === p
                   ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-surface-foreground/12 bg-white text-surface-foreground/60 hover:bg-surface'
+                  : 'border-surface-foreground/12 bg-background text-surface-foreground/60 hover:bg-surface'
               }`}
             >
               {p}x
@@ -121,19 +121,19 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
       </div>
 
       {/* Card de resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-6 text-white max-sm:p-5">
+      <div className="rounded-2xl bg-surface-foreground p-6 text-primary-foreground max-sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-[15px] font-medium text-white/70">Parcela mensal</h3>
-            <p className="text-[11px] text-white/40">Sistema PRICE (Fixas)</p>
+            <h3 className="text-sm font-medium text-primary-foreground/70">Parcela mensal</h3>
+            <p className="text-xs text-primary-foreground/40">Sistema PRICE (Fixas)</p>
           </div>
-          <p className="text-[28px] font-bold leading-none tracking-tight text-white">
-            <span className="text-[15px] font-medium text-white/50">R$</span>{' '}
+          <p className="text-2xl font-bold leading-none tracking-tight text-primary-foreground">
+            <span className="text-sm font-medium text-primary-foreground/50">R$</span>{' '}
             {installment.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
 
-        <div className="mt-5 border-t border-white/10 pt-4">
+        <div className="mt-5 border-t border-primary-foreground/10 pt-4">
           <div className="grid grid-cols-4 gap-2 text-xs">
             {[
               { label: 'Solicitado', value: formatCurrency(data.valorDesejado) },
@@ -142,8 +142,8 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
               { label: 'CET anual', value: `${cetAnual.toFixed(1).replace('.', ',')}%` },
             ].map((item) => (
               <div key={item.label}>
-                <p className="mb-0.5 text-white/40">{item.label}</p>
-                <p className="font-medium text-white/90">{item.value}</p>
+                <p className="mb-0.5 text-primary-foreground/40">{item.label}</p>
+                <p className="font-medium text-primary-foreground/90">{item.value}</p>
               </div>
             ))}
           </div>
@@ -166,9 +166,13 @@ export function EmprestimoPessoalResultado({ productId, productName, rateMonthly
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
-          await qualifySimulation(simulationId)
+          const result = await qualifySimulation(simulationId)
+          if (result && !result.success) {
+            setIsQualifying(false)
+            return
+          }
         }}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>

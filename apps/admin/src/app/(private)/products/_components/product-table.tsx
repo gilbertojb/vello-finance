@@ -95,13 +95,9 @@ export function ProductTable({
                 </td>
                 <td className="p-4 align-middle">
                   {product.is_active ? (
-                    <Badge className="bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
-                      Ativo
-                    </Badge>
+                    <Badge variant="success">Ativo</Badge>
                   ) : (
-                    <Badge className="bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300">
-                      Inativo
-                    </Badge>
+                    <Badge variant="destructive">Inativo</Badge>
                   )}
                 </td>
                 <td className="p-4 align-middle text-right">

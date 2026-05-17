@@ -50,7 +50,7 @@ export function PartnerItem({
         className={`w-full rounded-xl border-2 transition-colors ${
           isSelected
             ? 'border-vello-blue/20 bg-vello-subtle'
-            : 'border-transparent bg-zinc-50'
+            : 'border-transparent bg-muted/30'
         }`}
       >
         <Field orientation="horizontal">
@@ -61,14 +61,14 @@ export function PartnerItem({
               value={partner.id}
               checked={isSelected}
               onCheckedChange={() => onToggle(partner.id)}
-              className="h-5 w-5 rounded border-zinc-300 data-[state=checked]:bg-vello-blue data-[state=checked]:border-vello-blue"
+              className="h-5 w-5 rounded border-border data-[state=checked]:bg-vello-blue data-[state=checked]:border-vello-blue"
             />
 
-            <FieldTitle className="text-base font-bold text-zinc-700">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-zinc-100">
+            <FieldTitle className="text-base font-bold text-foreground">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-background shadow-sm ring-1 ring-border">
                 <Building2
                   className={`h-5 w-5 ${
-                    isSelected ? 'text-vello-blue' : 'text-zinc-400'
+                    isSelected ? 'text-vello-blue' : 'text-muted-foreground'
                   }`}
                 />
               </div>
@@ -80,7 +80,7 @@ export function PartnerItem({
               <div className="flex w-32 flex-col gap-1.5">
                 <label
                   htmlFor={`if_commission_${partner.id}`}
-                  className="text-[10px] font-bold uppercase text-zinc-500"
+                  className="text-2xs font-bold uppercase text-muted-foreground"
                 >
                   Comissão (%)
                 </label>
@@ -91,14 +91,14 @@ export function PartnerItem({
                   disabled={!isSelected}
                   defaultValue={toPercentStr(defaultIfCommission)}
                   onChange={handleIfCommissionChange}
-                  className="bg-white"
+                  className="bg-background"
                 />
               </div>
 
               <div className="flex w-32 flex-col gap-1.5">
                 <label
                   htmlFor={`vello_commission_${partner.id}`}
-                  className="text-[10px] font-bold uppercase text-zinc-500"
+                  className="text-2xs font-bold uppercase text-muted-foreground"
                 >
                   Retenção Vello (%)
                 </label>
@@ -109,7 +109,7 @@ export function PartnerItem({
                   disabled={!isSelected}
                   value={velloCommission}
                   onChange={(e) => setVelloCommission(e.target.value)}
-                  className="bg-white"
+                  className="bg-background"
                 />
               </div>
             </div>

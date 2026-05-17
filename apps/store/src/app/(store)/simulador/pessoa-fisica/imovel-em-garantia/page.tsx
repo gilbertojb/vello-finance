@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '../../../queries'
-import { SimulatorStepIndicator } from '../../../_components/simulator-step-indicator'
+import { getTenantProduct } from '@/app/(store)/simulador/queries'
+import { SimulatorStepIndicator } from '@/app/(store)/simulador/_components/simulator-step-indicator'
 import { HomeEquityForm } from './_components/home-equity-form'
 
 export const metadata: Metadata = { title: 'Empréstimo com Garantia de Imóvel' }
@@ -33,8 +33,8 @@ export default async function HomeEquityDadosPage({ searchParams }: Props) {
           <SimulatorStepIndicator currentStep={2} />
         </div>
 
-        <div className="rounded-[22px] border border-black/[0.06] bg-white p-10 max-sm:p-6">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
+        <div className="rounded-2xl border border-foreground/[0.06] bg-background p-10 max-sm:p-6">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
             {tp.products.name}
           </span>
 

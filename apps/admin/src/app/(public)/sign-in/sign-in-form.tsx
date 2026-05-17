@@ -42,7 +42,7 @@ export function SignInForm({ errorMessage, ...props }: SignInFormProps) {
         </div>
 
         {errorMessage && !message && (
-          <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <Alert variant="destructive">
             <AlertCircleIcon />
             <AlertTitle>Atenção</AlertTitle>
             <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
@@ -50,7 +50,7 @@ export function SignInForm({ errorMessage, ...props }: SignInFormProps) {
         )}
 
         {success === false && message && (
-          <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <Alert variant="destructive">
             <AlertCircleIcon />
             <AlertTitle>Houve um erro ao entrar na sua conta!</AlertTitle>
             <AlertDescription className="text-xs">{message}</AlertDescription>

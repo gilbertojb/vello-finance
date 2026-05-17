@@ -23,7 +23,7 @@ export function ZpHeader({ logoSlot, displayName }: Props) {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-primary/8 bg-background/85 backdrop-blur-[14px]">
-        <div className="mx-auto flex h-[78px] max-w-7xl items-center gap-10 px-8">
+        <div className="mx-auto flex h-store-header max-w-7xl items-center gap-10 px-8">
           <Link
             href="/"
             className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
@@ -47,7 +47,7 @@ export function ZpHeader({ logoSlot, displayName }: Props) {
 
           <Link
             href="#produtos"
-            className="ml-auto rounded-full bg-linear-to-b from-primary to-primary/80 px-[22px] py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 md:ml-0"
+            className="ml-auto rounded-full bg-linear-to-b from-primary to-primary/80 px-5 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 md:ml-0"
           >
             Simular agora
           </Link>
@@ -67,7 +67,7 @@ export function ZpHeader({ logoSlot, displayName }: Props) {
       {/* Mobile nav overlay */}
       <div
         className={cn(
-          'fixed inset-x-0 top-[78px] z-40 border-b border-primary/8 bg-background/95 backdrop-blur-[14px] transition-all duration-200 md:hidden',
+          'fixed inset-x-0 top-store-header z-40 border-b border-primary/8 bg-background/95 backdrop-blur-[14px] transition-all duration-200 md:hidden',
           open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
         )}
       >

@@ -146,12 +146,12 @@ export async function deleteUser(id: string) {
     .single()
 
   if (!target) {
-    return { success: false, message: 'Usuário não encontrado.' }
+    return { success: false, message: 'Usuário não encontrado.', errors: null }
   }
 
   const targetUser = userSchema.parse({ id: target.id, user_role: target.user_role })
   if (!ability.can('delete', targetUser)) {
-    return { success: false, message: 'Sem permissão para excluir este usuário.' }
+    return { success: false, message: 'Sem permissão para excluir este usuário.', errors: null }
   }
 
   const { error: deleteError } = await supabase
@@ -160,12 +160,12 @@ export async function deleteUser(id: string) {
     .eq('id', id)
 
   if (deleteError) {
-    return { success: false, message: deleteError.message }
+    return { success: false, message: deleteError.message, errors: null }
   }
 
   const serviceClient = createServiceClient()
   await serviceClient.auth.admin.deleteUser(id)
 
   revalidatePath('/users')
-  return { success: true, message: 'Usuário excluído com sucesso!' }
+  return { success: true, message: 'Usuário excluído com sucesso!', errors: null }
 }

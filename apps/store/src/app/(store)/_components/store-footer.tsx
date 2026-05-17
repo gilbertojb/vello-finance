@@ -21,7 +21,7 @@ export function StoreFooter({ displayName, logoUrl }: Props) {
             ) : (
               <>
                 <span
-                  className="grid h-[34px] w-[34px] place-items-center rounded-[9px] bg-foreground text-sm font-extrabold italic tracking-[-0.04em] text-background"
+                  className="grid h-logo-avatar w-logo-avatar place-items-center rounded-lg bg-foreground text-sm font-extrabold italic tracking-[-0.04em] text-background"
                   style={{ transform: 'skewX(-8deg)' }}
                 >
                   {initials}

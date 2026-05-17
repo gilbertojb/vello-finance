@@ -1,20 +1,10 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const [, payload] = token.split('.')
-    if (!payload) return null
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-    return JSON.parse(json)
-  } catch {
-    return null
-  }
-}
 
 export async function toggleTenantProduct(id: string, isActive: boolean) {
   const supabase = await createClient()
@@ -113,28 +103,12 @@ export async function toggleTenantProductPopular(id: string, isPopular: boolean)
 }
 
 export async function addTenantProduct(productId: string) {
-  const supabase = await createClient()
-
-  // Verificar autenticação (network call — token verificado no servidor)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) {
+  const tenantId = (await headers()).get('x-tenant-id')
+  if (!tenantId) {
     return { success: false, message: 'Não autenticado.', errors: null }
   }
 
-  // Extrair tenant_id das claims JWT (não do header — evita dependência de valor externo)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const jwtClaims = session?.access_token
-    ? decodeJwtPayload(session.access_token)
-    : null
-  const tenantId = jwtClaims?.tenant_id as string | null
-
-  if (!tenantId) {
-    return { success: false, message: 'Conta não identificada.', errors: null }
-  }
+  const supabase = await createClient()
 
   const { error } = await supabase.from('tenant_products').insert({
     tenant_id: tenantId,

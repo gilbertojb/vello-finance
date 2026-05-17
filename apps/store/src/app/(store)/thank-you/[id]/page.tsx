@@ -19,14 +19,14 @@ export default async function AgradecimentoPage({ params }: Props) {
   return (
     <div className="min-h-[calc(100vh-78px)] bg-surface py-12 text-surface-foreground">
       <div className="mx-auto max-w-2xl px-8">
-        <div className="rounded-[22px] border border-black/[0.06] bg-white p-10 text-center max-sm:p-6">
+        <div className="rounded-2xl border border-foreground/[0.06] bg-white p-10 text-center max-sm:p-6">
           <div className="mb-6 flex justify-center">
-            <CheckCircle className="h-14 w-14 text-green-500" />
+            <CheckCircle className="h-14 w-14 text-success" />
           </div>
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-[.18em] text-primary-foreground">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
             {productName}
           </span>
-          <h2 className="mb-3 mt-5 text-[26px] font-bold leading-tight tracking-tight text-surface-foreground">
+          <h2 className="mb-3 mt-5 text-2xl font-bold leading-tight tracking-tight text-surface-foreground">
             Recebemos seu interesse!
           </h2>
           <p className="mb-8 text-sm leading-relaxed text-surface-foreground/60">
@@ -40,7 +40,7 @@ export default async function AgradecimentoPage({ params }: Props) {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center rounded-2xl bg-background px-6 py-3.5 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90"
+            className="inline-flex items-center rounded-2xl bg-background px-6 py-3.5 text-sm font-semibold text-primary transition-opacity hover:opacity-90"
           >
             Voltar ao início
           </Link>

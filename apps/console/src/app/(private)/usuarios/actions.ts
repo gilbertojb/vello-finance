@@ -1,51 +1,57 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 
-type ActionResult = { success: boolean; message: string | null }
+type ActionResult = { success: boolean; message: string | null; errors: Record<string, string[]> | null }
 
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const [, payload] = token.split('.')
-    if (!payload) return null
-    const json = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-    return JSON.parse(json)
-  } catch {
-    return null
-  }
-}
+const createUserSchema = z.object({
+  email: z.string().email('Email inválido.'),
+  full_name: z.string().min(2, 'Mínimo 2 caracteres.').max(100).optional(),
+  role: z.string().min(1, 'Perfil é obrigatório.'),
+  password: z.string().min(8, 'Mínimo 8 caracteres.'),
+})
 
-async function getTenantId(): Promise<string | null> {
-  const supabase = await createClient()
-  const { data: { session } } = await supabase.auth.getSession()
-  const claims = session?.access_token ? decodeJwtPayload(session.access_token) : null
-  return (claims?.tenant_id as string) ?? null
-}
+const updateUserSchema = z.object({
+  full_name: z.string().min(2, 'Mínimo 2 caracteres.').max(100).optional(),
+  role: z.string().min(1, 'Perfil é obrigatório.'),
+  password: z.string().min(8).optional().or(z.literal('')),
+})
 
 export async function createTenantUser(formData: FormData): Promise<ActionResult> {
-  const email    = (formData.get('email') as string).trim()
-  const fullName = (formData.get('full_name') as string).trim()
-  const role     = formData.get('role') as string
-  const password = (formData.get('password') as string).trim()
+  const tenantId = (await headers()).get('x-tenant-id')
+  if (!tenantId) return { success: false, message: 'Conta não identificada.', errors: null }
 
-  if (!email || !password || !role) {
-    return { success: false, message: 'Email, senha e perfil são obrigatórios.' }
+  const raw = {
+    email:     (formData.get('email') as string | null)?.trim() ?? '',
+    full_name: (formData.get('full_name') as string | null)?.trim() ?? '',
+    role:      (formData.get('role') as string | null) ?? '',
+    password:  (formData.get('password') as string | null)?.trim() ?? '',
   }
+
+  const parsed = createUserSchema.safeParse(raw)
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Dados inválidos.',
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    }
+  }
+
+  const { email, full_name, role, password } = parsed.data
 
   const supabase      = await createClient()
   const serviceClient = createServiceClient()
-
-  const tenantId = await getTenantId()
-  if (!tenantId) return { success: false, message: 'Conta não identificada.' }
 
   const { data: authData, error: authError } = await serviceClient.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
   })
-  if (authError) return { success: false, message: authError.message }
+  if (authError) return { success: false, message: authError.message, errors: null }
 
   const userId = authData.user.id
 
@@ -55,45 +61,58 @@ export async function createTenantUser(formData: FormData): Promise<ActionResult
       id:        userId,
       tenant_id: tenantId,
       role:      role as 'tenant_admin' | 'tenant_operator',
-      full_name: fullName || null,
+      full_name: full_name || null,
       email,
       is_active: true,
     })
 
   if (dbError) {
     await serviceClient.auth.admin.deleteUser(userId)
-    return { success: false, message: dbError.message }
+    return { success: false, message: dbError.message, errors: null }
   }
 
   revalidatePath('/usuarios')
-  return { success: true, message: 'Usuário criado com sucesso!' }
+  return { success: true, message: 'Usuário criado com sucesso!', errors: null }
 }
 
 export async function updateTenantUser(userId: string, formData: FormData): Promise<ActionResult> {
-  const fullName = (formData.get('full_name') as string).trim()
-  const role     = formData.get('role') as string
-  const password = (formData.get('password') as string | null)?.trim() ?? ''
+  const raw = {
+    full_name: (formData.get('full_name') as string | null)?.trim() ?? '',
+    role:      (formData.get('role') as string | null) ?? '',
+    password:  (formData.get('password') as string | null)?.trim() ?? '',
+  }
+
+  const parsed = updateUserSchema.safeParse(raw)
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: 'Dados inválidos.',
+      errors: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    }
+  }
+
+  const { full_name, role, password } = parsed.data
 
   const supabase      = await createClient()
   const serviceClient = createServiceClient()
 
   if (password) {
     const { error } = await serviceClient.auth.admin.updateUserById(userId, { password })
-    if (error) return { success: false, message: error.message }
+    if (error) return { success: false, message: error.message, errors: null }
   }
 
   const { error } = await supabase
     .from('tenant_users')
     .update({
-      full_name: fullName || null,
+      full_name: full_name || null,
       role: role as 'tenant_admin' | 'tenant_operator',
     })
     .eq('id', userId)
 
-  if (error) return { success: false, message: error.message }
+  if (error) return { success: false, message: error.message, errors: null }
 
   revalidatePath('/usuarios')
-  return { success: true, message: 'Usuário atualizado.' }
+  return { success: true, message: 'Usuário atualizado.', errors: null }
 }
 
 export async function toggleTenantUser(userId: string, isActive: boolean): Promise<ActionResult> {
@@ -103,10 +122,10 @@ export async function toggleTenantUser(userId: string, isActive: boolean): Promi
     .update({ is_active: isActive })
     .eq('id', userId)
 
-  if (error) return { success: false, message: error.message }
+  if (error) return { success: false, message: error.message, errors: null }
 
   revalidatePath('/usuarios')
-  return { success: true, message: null }
+  return { success: true, message: null, errors: null }
 }
 
 export async function deleteTenantUser(userId: string): Promise<ActionResult> {
@@ -119,11 +138,11 @@ export async function deleteTenantUser(userId: string): Promise<ActionResult> {
     .eq('id', userId)
     .single()
 
-  if (!target) return { success: false, message: 'Usuário não encontrado.' }
+  if (!target) return { success: false, message: 'Usuário não encontrado.', errors: null }
 
   const { error } = await serviceClient.auth.admin.deleteUser(userId)
-  if (error) return { success: false, message: error.message }
+  if (error) return { success: false, message: error.message, errors: null }
 
   revalidatePath('/usuarios')
-  return { success: true, message: null }
+  return { success: true, message: null, errors: null }
 }

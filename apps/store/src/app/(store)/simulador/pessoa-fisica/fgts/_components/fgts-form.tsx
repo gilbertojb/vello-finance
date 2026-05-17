@@ -42,7 +42,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -51,8 +51,8 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           WhatsApp para contato <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
-          <span className="select-none pl-5 pr-3 text-[15px] font-medium text-surface-foreground/40">+55</span>
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+          <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/40">+55</span>
           <div className="h-5 w-px bg-surface-foreground/12" />
           <input
             type="tel"
@@ -60,7 +60,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             placeholder="(11) 99999-9999"
-            className="flex-1 bg-transparent py-4 pl-3 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+            className="flex-1 bg-transparent py-4 pl-3 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
       </div>
@@ -70,8 +70,8 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
         <label htmlFor="saldoFgts" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Saldo aproximado do FGTS <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
-          <span className="select-none pl-5 pr-2 text-[15px] font-medium text-surface-foreground/50">R$</span>
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+          <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
           <input
             type="text"
             id="saldoFgts"
@@ -80,7 +80,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
             onChange={(e) => setRawSaldo(e.target.value.replace(/\D/g, ''))}
             onBlur={() => saldoFgts > 0 && setRawSaldo(new Intl.NumberFormat('pt-BR').format(saldoFgts))}
             placeholder="0,00"
-            className="flex-1 bg-transparent py-4 pr-5 text-[15px] text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+            className="flex-1 bg-transparent py-4 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">
@@ -92,7 +92,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity disabled:opacity-40"
+        className="mt-2 w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity disabled:opacity-40"
       >
         Ver minha simulação →
       </button>

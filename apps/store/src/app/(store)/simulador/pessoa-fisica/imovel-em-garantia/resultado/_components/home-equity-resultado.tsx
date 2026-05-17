@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCw, Info, Download } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
-import { saveSimulation, qualifySimulation } from '../../../../actions'
+import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 
 const PARCELAS_OPTIONS = [60, 120, 180, 240]
 
@@ -68,10 +68,10 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           estimatedRate: rateMonthly,
           estimatedPayment: payment,
           simulationData: parsed as Record<string, unknown>,
-        }).then((id: string | null) => {
-          if (id) {
-            sessionStorage.setItem(SIM_ID_KEY, id)
-            setSimulationId(id)
+        }).then((result) => {
+          if (result.success) {
+            setSimulationId(result.data.id)
+            sessionStorage.setItem(SIM_ID_KEY, result.data.id)
           }
         })
       }
@@ -100,7 +100,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
   return (
     <div className="space-y-5">
       <div className="mb-4">
-        <p className="text-[15px] font-medium text-surface-foreground">Olá, {data.nome}!</p>
+        <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
       </div>
       {/* Valores do imóvel e crédito (somente leitura) */}
       <div className="grid grid-cols-2 gap-3">
@@ -108,7 +108,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor do imóvel
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
+          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             R$ {data.valorImovel.toLocaleString('pt-BR')}
           </div>
         </div>
@@ -116,7 +116,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor do crédito
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-[15px] font-semibold text-surface-foreground">
+          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             R$ {data.valorCredito.toLocaleString('pt-BR')}
           </div>
         </div>
@@ -132,7 +132,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
             <select
               value={parcelas}
               onChange={(e) => setParcelas(Number(e.target.value))}
-              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-white px-4 py-3 text-[15px] font-semibold text-surface-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-background px-4 py-3 text-sm font-semibold text-surface-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {PARCELAS_OPTIONS.map((n) => (
                 <option key={n} value={n}>{n}x</option>
@@ -145,7 +145,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Modalidade
           </label>
-          <div className="flex overflow-hidden rounded-2xl border border-surface-foreground/15 bg-white">
+          <div className="flex overflow-hidden rounded-2xl border border-surface-foreground/15 bg-background">
             {(['SAC', 'PRICE'] as Modalidade[]).map((m) => (
               <button
                 key={m}
@@ -174,7 +174,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         <p className="mb-1 text-sm font-medium text-primary/80">
           {isSAC ? 'Primeira parcela (decrescente)' : 'Parcela fixa (PRICE)'}
         </p>
-        <div className="mb-3 text-[40px] font-bold leading-none tracking-tight text-white">
+        <div className="mb-3 text-4xl font-bold leading-none tracking-tight text-primary-foreground">
           {formatCurrency(calc.firstInstallment)}
         </div>
 
@@ -185,7 +185,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           </div>
         )}
 
-        <div className="mt-5 border-t border-white/10 pt-4">
+        <div className="mt-5 border-t border-primary-foreground/10 pt-4">
           <div className="grid grid-cols-4 gap-2 text-xs">
             {[
               { label: 'Crédito', value: formatCurrency(data.valorCredito) },
@@ -194,8 +194,8 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
               { label: 'LTV', value: `${ltv}%` },
             ].map(({ label, value }) => (
               <div key={label}>
-                <div className="text-white/50">{label}</div>
-                <div className="mt-0.5 font-semibold text-white">{value}</div>
+                <div className="text-primary-foreground/50">{label}</div>
+                <div className="mt-0.5 font-semibold text-primary-foreground">{value}</div>
               </div>
             ))}
           </div>
@@ -217,9 +217,13 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
-          await qualifySimulation(simulationId)
+          const result = await qualifySimulation(simulationId)
+          if (result && !result.success) {
+            setIsQualifying(false)
+            return
+          }
         }}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-[15px] font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>

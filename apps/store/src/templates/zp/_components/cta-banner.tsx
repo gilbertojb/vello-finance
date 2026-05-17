@@ -8,7 +8,7 @@ export function CtaBanner({ featuredProductId: _ }: Props) {
       <div className="mx-auto max-w-7xl px-8">
         <div className="grid grid-cols-[1.2fr_1fr] items-center gap-16 max-lg:grid-cols-1">
           <div>
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-surface-foreground/20 bg-surface-foreground/4 px-3.5 py-2 text-[11px] font-medium uppercase tracking-[.22em] text-surface-foreground/60">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-surface-foreground/20 bg-surface-foreground/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-surface-foreground/60">
               <span className="h-1.5 w-1.5 rounded-full bg-surface-foreground/40" />
               Pronto para começar
             </span>
@@ -26,27 +26,27 @@ export function CtaBanner({ featuredProductId: _ }: Props) {
             <div className="flex gap-3.5">
               <Link
                 href="/simulador"
-                className="rounded-full bg-surface-foreground px-[26px] py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
+                className="rounded-full bg-surface-foreground px-6 py-3.5 text-sm font-semibold text-surface transition-all hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
               >
                 Iniciar simulação
               </Link>
               <Link
                 href="#"
-                className="rounded-full border border-surface-foreground/18 px-[26px] py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
+                className="rounded-full border border-surface-foreground/18 px-6 py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
               >
                 Falar com consultor
               </Link>
             </div>
           </div>
 
-          <div className="relative rounded-[20px] border border-black/6 bg-white p-8">
+          <div className="relative rounded-2xl border border-foreground/[0.06] bg-white p-8">
             <span
               className="absolute -top-2.5 left-6 font-serif text-[90px] leading-none text-primary"
               aria-hidden="true"
             >
               &ldquo;
             </span>
-            <blockquote className="mt-6 font-serif italic text-[17px] leading-relaxed text-surface-foreground">
+            <blockquote className="mt-6 font-serif italic text-base leading-relaxed text-surface-foreground">
               O atendimento me trouxe a primeira linha de crédito que respeitou
               meu tempo e minha história. Aprovado em 4 horas, sem
               constrangimento.

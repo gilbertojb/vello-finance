@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '../../../../queries'
-import { SimulatorStepIndicator } from '../../../../_components/simulator-step-indicator'
+import { getTenantProduct } from '@/app/(store)/simulador/queries'
+import { SimulatorStepIndicator } from '@/app/(store)/simulador/_components/simulator-step-indicator'
 import { HomeEquityResultado } from '../../../pessoa-fisica/imovel-em-garantia/resultado/_components/home-equity-resultado'
 
 export const metadata: Metadata = { title: 'Sua simulação está pronta' }

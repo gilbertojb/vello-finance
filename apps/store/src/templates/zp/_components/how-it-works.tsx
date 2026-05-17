@@ -34,7 +34,7 @@ export function HowItWorks() {
       <div className="mx-auto max-w-7xl px-8">
         <div className="mb-14 flex items-end justify-between gap-12 max-lg:flex-col max-lg:items-start">
           <div>
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-[11px] font-medium uppercase tracking-[.22em] text-primary">
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               Como funciona
             </span>
@@ -45,7 +45,7 @@ export function HowItWorks() {
               </em>
             </h2>
           </div>
-          <p className="max-w-[420px] text-[15px] leading-relaxed text-foreground/62">
+          <p className="max-w-[420px] text-sm leading-relaxed text-foreground/62">
             Processo 100% digital, sem agência, sem fila. Você acompanha cada
             etapa em tempo real.
           </p>
@@ -53,7 +53,7 @@ export function HowItWorks() {
 
         <div className="relative grid grid-cols-4 gap-8 max-lg:grid-cols-2">
           <div
-            className="pointer-events-none absolute left-[60px] right-[60px] top-[30px] hidden h-px lg:block"
+            className="pointer-events-none absolute left-16 right-16 top-8 hidden h-px lg:block"
             style={{
               background:
                 'repeating-linear-gradient(90deg, oklch(0.83 0.10 85 / 0.30) 0 6px, transparent 6px 14px)',
@@ -62,13 +62,13 @@ export function HowItWorks() {
           />
           {STEPS.map((step) => (
             <div key={step.n} className="relative">
-              <div className="relative z-10 mb-6 grid h-[60px] w-[60px] place-items-center rounded-full border border-primary/30 bg-background font-serif italic text-[26px] text-primary">
+              <div className="relative z-10 mb-6 grid h-14 w-14 place-items-center rounded-full border border-primary/30 bg-background font-serif italic text-2xl text-primary">
                 {step.n}
               </div>
               <h4 className="mb-2 text-lg font-semibold leading-tight tracking-tight text-foreground">
                 {step.title}
               </h4>
-              <p className="text-[13px] leading-relaxed text-foreground/62">
+              <p className="text-xs leading-relaxed text-foreground/62">
                 {step.description}
               </p>
             </div>

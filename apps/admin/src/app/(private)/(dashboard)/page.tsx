@@ -23,6 +23,8 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 
+export const metadata = { title: 'Dashboard' }
+
 export default function DashboardPage() {
   return (
     <main className="flex-1 overflow-y-auto bg-background/50 p-6 md:p-10">
@@ -52,12 +54,12 @@ export default function DashboardPage() {
         {/* Global Key Metrics - Grid */}
         <div className="mb-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute inset-0 bg-linear-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Volume Transacionado
               </CardTitle>
-              <div className="rounded-md bg-blue-500/10 p-2 text-blue-500">
+              <div className="rounded-md bg-primary/10 p-2 text-primary">
                 <Wallet className="size-4" />
               </div>
             </CardHeader>
@@ -65,7 +67,7 @@ export default function DashboardPage() {
               <div className="text-3xl font-bold tracking-tighter">
                 R$ 42.5M
               </div>
-              <p className="mt-1 flex items-center text-xs text-emerald-500 font-medium">
+              <p className="mt-1 flex items-center text-xs text-success font-medium">
                 <ArrowUpRight className="mr-1 size-3" />
                 +14.5% no último mês
               </p>
@@ -73,18 +75,18 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute inset-0 bg-linear-to-br from-violet-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-secondary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Tenants Ativos
               </CardTitle>
-              <div className="rounded-md bg-violet-500/10 p-2 text-violet-500">
+              <div className="rounded-md bg-secondary p-2 text-secondary-foreground">
                 <Building className="size-4" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold tracking-tighter">142</div>
-              <p className="mt-1 flex items-center text-xs text-emerald-500 font-medium">
+              <p className="mt-1 flex items-center text-xs text-success font-medium">
                 <ArrowUpRight className="mr-1 size-3" />
                 +12 novas ativações
               </p>
@@ -92,12 +94,12 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute inset-0 bg-linear-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-success/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Contas Conectadas
               </CardTitle>
-              <div className="rounded-md bg-emerald-500/10 p-2 text-emerald-500">
+              <div className="rounded-md bg-success/10 p-2 text-success">
                 <Users className="size-4" />
               </div>
             </CardHeader>
@@ -111,18 +113,18 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-linear-to-br from-warning/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 Take Rate Médio
               </CardTitle>
-              <div className="rounded-md bg-orange-500/10 p-2 text-orange-500">
+              <div className="rounded-md bg-warning/10 p-2 text-warning">
                 <TrendingUp className="size-4" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold tracking-tighter">1.8%</div>
-              <p className="mt-1 flex items-center text-xs text-emerald-500 font-medium">
+              <p className="mt-1 flex items-center text-xs text-success font-medium">
                 <ArrowUpRight className="mr-1 size-3" />
                 +0.2% margem geral
               </p>
@@ -150,7 +152,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="relative h-[300px] w-full rounded-xl border border-dashed border-border/60 bg-muted/20 flex flex-col items-center justify-center text-center p-6 mt-4">
+              <div className="relative h-72 w-full rounded-xl border border-dashed border-border/60 bg-muted/20 flex flex-col items-center justify-center text-center p-6 mt-4">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] rounded-xl mix-blend-overlay"></div>
                 <LineChart
                   className="size-10 text-muted-foreground/40 mb-3"
@@ -159,7 +161,7 @@ export default function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">
                   Área reservada para o Gráfico de Área
                 </p>
-                <p className="text-xs text-muted-foreground/70 mt-1 max-w-[250px]">
+                <p className="text-xs text-muted-foreground/70 mt-1 max-w-64">
                   Requer injeção de bibliotecas como Recharts ou Tremor para
                   visualização de dados reais.
                 </p>
@@ -181,24 +183,24 @@ export default function DashboardPage() {
                     description: 'Acme Corp completou o onboarding.',
                     time: '2h atrás',
                     icon: Building,
-                    color: 'text-violet-500',
-                    bg: 'bg-violet-500/10',
+                    color: 'text-secondary-foreground',
+                    bg: 'bg-secondary',
                   },
                   {
                     title: 'Pico de Transações',
                     description: 'NeoConsig processou R$ 1.2M.',
                     time: '5h atrás',
                     icon: Activity,
-                    color: 'text-blue-500',
-                    bg: 'bg-blue-500/10',
+                    color: 'text-primary',
+                    bg: 'bg-primary/10',
                   },
                   {
                     title: 'Repasse Financeiro',
                     description: 'Liquidação D+1 no parceiro XPTO.',
                     time: '12h atrás',
                     icon: Banknote,
-                    color: 'text-emerald-500',
-                    bg: 'bg-emerald-500/10',
+                    color: 'text-success',
+                    bg: 'bg-success/10',
                   },
                   {
                     title: 'Alerta de Conciliação',
@@ -206,8 +208,8 @@ export default function DashboardPage() {
                       'Falha reportada na integração Banco do Brasil.',
                     time: '1d atrás',
                     icon: CreditCard,
-                    color: 'text-red-500',
-                    bg: 'bg-red-500/10',
+                    color: 'text-destructive',
+                    bg: 'bg-destructive/10',
                   },
                 ].map((item) => (
                   <div key={item.title} className="flex items-start gap-4">
@@ -221,7 +223,7 @@ export default function DashboardPage() {
                       <p className="text-muted-foreground text-xs">
                         {item.description}
                       </p>
-                      <p className="text-muted-foreground/60 text-[10px] font-mono uppercase tracking-wider">
+                      <p className="text-muted-foreground/60 text-2xs font-mono uppercase tracking-wider">
                         {item.time}
                       </p>
                     </div>
@@ -318,12 +320,7 @@ export default function DashboardPage() {
                       </div>
                       <Badge
                         variant={
-                          tenant.status === 'Ativo' ? 'default' : 'secondary'
-                        }
-                        className={
-                          tenant.status === 'Ativo'
-                            ? 'bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 border-emerald-500/20'
-                            : ''
+                          tenant.status === 'Ativo' ? 'success' : 'secondary'
                         }
                       >
                         {tenant.status}

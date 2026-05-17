@@ -32,39 +32,37 @@ type Permissions = {
   userPermissions: Record<string, { canDelete: boolean; canDeactivate: boolean }>
 }
 
-const ROLE_LABELS: Record<string, { label: string; className: string }> = {
+type BadgeVariant = 'default' | 'secondary' | 'success' | 'destructive' | 'outline' | 'ghost'
+
+const ROLE_LABELS: Record<string, { label: string; variant: BadgeVariant }> = {
   super_admin: {
     label: 'Super Admin',
-    className: 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300',
+    variant: 'default',
   },
   admin: {
     label: 'Admin',
-    className: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+    variant: 'default',
   },
   financial: {
     label: 'Financeiro',
-    className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+    variant: 'success',
   },
   support: {
     label: 'Suporte',
-    className: 'bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-300',
+    variant: 'secondary',
   },
 }
 
 function RoleBadge({ role }: { role: string }) {
-  const config = ROLE_LABELS[role] ?? { label: role, className: 'bg-gray-100 text-gray-800' }
-  return <Badge className={config.className}>{config.label}</Badge>
+  const config = ROLE_LABELS[role] ?? { label: role, variant: 'secondary' as BadgeVariant }
+  return <Badge variant={config.variant}>{config.label}</Badge>
 }
 
 function StatusBadge({ isActive }: { isActive: boolean }) {
   return isActive ? (
-    <Badge className="bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300">
-      Ativo
-    </Badge>
+    <Badge variant="success">Ativo</Badge>
   ) : (
-    <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-950 dark:text-gray-300">
-      Inativo
-    </Badge>
+    <Badge variant="secondary">Inativo</Badge>
   )
 }
 
