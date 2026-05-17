@@ -22,6 +22,8 @@ Adicionado ao ENUM `tenant_role` no PostgreSQL. Espelhado em `packages/auth`.
 ALTER TYPE tenant_role ADD VALUE 'tenant_seller';
 ```
 
+> **Ordem obrigatória:** esta migration deve ser a **primeira** da sequência do Sales Team. O `custom_access_token_hook` faz cast de `tenant_users.role` para o ENUM — se o ENUM não incluir `tenant_seller` antes das demais migrations, o hook quebra ao emitir tokens para novos vendedores.
+
 ### 1.2 Tabela `seller_invites`
 
 ```sql
@@ -80,16 +82,66 @@ ALTER TABLE tenant_products
 
 Configurada pelo `tenant_admin` por produto. Representa a fração do `tenant_commission_pct` repassada ao vendedor. A aplicação valida que `seller_commission_pct <= tenant_commission_pct`.
 
-### 1.5 RLS em `simulations` (ajuste)
+### 1.5 RLS em `simulations` (substituição da policy existente)
 
-Adicionar policy para `tenant_seller` acessar apenas as próprias simulações:
+A policy atual `tenant_isolation` é `FOR ALL USING (tenant_id = jwt.tenant_id)` sem distinção de role. Com `tenant_seller` no sistema, ela daria ao vendedor leitura e escrita em **todas** as simulações do tenant. Deve ser substituída por duas policies separadas:
 
 ```sql
-CREATE POLICY "seller_own_simulations" ON simulations
+DROP POLICY "tenant_isolation" ON simulations;
+
+-- Admin/operator: acesso total ao tenant
+CREATE POLICY "tenant_admin_operator_simulations" ON simulations
+  FOR ALL USING (
+    (auth.jwt() ->> 'user_role') = ANY(ARRAY['tenant_admin', 'tenant_operator'])
+    AND tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+  );
+
+-- Seller: somente SELECT nas próprias simulações
+CREATE POLICY "tenant_seller_own_simulations" ON simulations
   FOR SELECT USING (
     (auth.jwt() ->> 'user_role') = 'tenant_seller'
     AND tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
-    AND seller_id = (auth.jwt() ->> 'sub')::uuid
+    AND seller_id = auth.uid()
+  );
+```
+
+### 1.6 RLS em `tenants` (ajuste de policy existente)
+
+A policy `tenant_user_read_own` (migration `20260410100000`) lista explicitamente `('tenant_admin', 'tenant_operator')`, excluindo `tenant_seller`. Isso impede o vendedor de ler o próprio tenant — quebrando a sidebar e qualquer dado de contexto do tenant no console.
+
+```sql
+DROP POLICY "tenant_user_read_own" ON tenants;
+
+CREATE POLICY "tenant_user_read_own" ON tenants
+  FOR SELECT USING (
+    (auth.jwt() ->> 'user_role') IN ('tenant_admin', 'tenant_operator', 'tenant_seller')
+    AND id = (auth.jwt() ->> 'tenant_id')::uuid
+  );
+```
+
+### 1.7 RLS em `tenant_products` (restrição de escrita)
+
+A policy `tenant_isolation` atual é `FOR ALL` com apenas check de `tenant_id`, o que permite a qualquer tenant user (incluindo `tenant_seller` e `tenant_operator`) fazer INSERT/UPDATE/DELETE em `tenant_products` ao nível do banco. A proteção hoje é somente via CASL na aplicação. Esta migration corrige o gap no banco:
+
+```sql
+DROP POLICY "tenant_isolation" ON tenant_products;
+
+-- Leitura: qualquer role de tenant
+CREATE POLICY "tenant_read" ON tenant_products
+  FOR SELECT USING (
+    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+  );
+
+-- Escrita: somente tenant_admin
+CREATE POLICY "tenant_admin_write" ON tenant_products
+  FOR ALL
+  USING (
+    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+    AND (auth.jwt() ->> 'user_role') = 'tenant_admin'
+  )
+  WITH CHECK (
+    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+    AND (auth.jwt() ->> 'user_role') = 'tenant_admin'
   );
 ```
 
@@ -196,9 +248,12 @@ export function isSellerRole(role: Role): boolean {
 5. Se válido → renderiza `AcceptInviteForm` com formulário de criação de senha
 6. Server Action `finalizeSellerOnboarding`:
    - `supabase.auth.updateUser({ password })`
+   - Usa **service client** para ler `seller_invites`, criar `tenant_users` e atualizar o status
+   - Motivo: neste momento o JWT do vendedor foi emitido sem `user_role` nem `tenant_id` (o `custom_access_token_hook` não encontrou o usuário em `tenant_users` ainda). Qualquer policy baseada nesses claims falharia — o service client bypassa o RLS com segurança neste caso controlado
    - Cria registro em `tenant_users` com `role = 'tenant_seller'`, `is_active = true`
    - Atualiza `seller_invites.status = 'accepted'`, `accepted_at = now()`
-   - Redireciona para `/` (dashboard do vendedor)
+   - Chama `supabase.auth.signOut()` para invalidar o JWT incompleto
+   - Redireciona para `/sign-in?welcome=true` — o vendedor faz login limpo, o hook emite o JWT correto com `user_role = 'tenant_seller'` e `tenant_id`
 
 ### 3.3 Revogação de acesso ativo
 
