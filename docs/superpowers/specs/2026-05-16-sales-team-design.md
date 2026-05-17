@@ -246,7 +246,7 @@ export function isSellerRole(role: Role): boolean {
 3. Valida que `seller_invites` para o email tem status `pending` e `expires_at > now()`
 4. Se inválido → exibe erro, não cria usuário
 5. Se válido → renderiza `AcceptInviteForm` com formulário de criação de senha
-6. Server Action `finalizeSellerOnboarding`:
+6. Server Action `completeSellerInvite`:
    - `supabase.auth.updateUser({ password })`
    - Usa **service client** para ler `seller_invites`, criar `tenant_users` e atualizar o status
    - Motivo: neste momento o JWT do vendedor foi emitido sem `user_role` nem `tenant_id` (o `custom_access_token_hook` não encontrou o usuário em `tenant_users` ainda). Qualquer policy baseada nesses claims falharia — o service client bypassa o RLS com segurança neste caso controlado
@@ -268,7 +268,7 @@ export function isSellerRole(role: Role): boolean {
 - Admin cancela convite ainda não aceito
 - Server Action `revokeInvite`:
   - `seller_invites.status = 'revoked'`
-- Se o link do email for clicado após revogação → `finalizeSellerOnboarding` detecta status `revoked` e exibe erro sem criar o usuário
+- Se o link do email for clicado após revogação → `completeSellerInvite` detecta status `revoked` e exibe erro sem criar o usuário
 
 ---
 
@@ -381,7 +381,7 @@ apps/console/src/app/(private)/sales-team/
 apps/console/src/app/(public)/accept-invite/
 ├── page.tsx                    ← troca code, valida invite, renderiza form
 ├── accept-invite-form.tsx      ← form de senha ('use client')
-└── actions.ts                  ← finalizeSellerOnboarding
+└── actions.ts                  ← completeSellerInvite
 ```
 
 ### 6.3 Ajustes em módulos existentes do console
