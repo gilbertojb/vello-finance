@@ -281,6 +281,41 @@ export type Database = {
           },
         ]
       }
+      proposal_documents: {
+        Row: {
+          created_at: string
+          document_type: string
+          file_name: string | null
+          id: string
+          proposal_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          document_type: string
+          file_name?: string | null
+          id?: string
+          proposal_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          document_type?: string
+          file_name?: string | null
+          id?: string
+          proposal_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_documents_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_stages: {
         Row: {
           created_at: string
@@ -324,71 +359,47 @@ export type Database = {
       }
       proposals: {
         Row: {
-          approved_at: string | null
-          client_address: Json
-          client_birthdate: string
-          client_cpf: string
-          client_email: string
-          client_name: string
-          client_phone: string
+          client_name: string | null
+          client_phone: string | null
           created_at: string
-          desired_amount: number
-          desired_term_months: number
-          estimated_payment: number | null
-          estimated_rate: number | null
+          current_step: string
+          documents_submitted: boolean
+          form_data: Json
           id: string
           product_id: string
-          purpose: string | null
-          rejected_at: string | null
-          stage_id: string | null
+          product_type_slug: string
+          simulation_id: string | null
           status: string
-          submitted_at: string
           tenant_id: string
           updated_at: string
         }
         Insert: {
-          approved_at?: string | null
-          client_address: Json
-          client_birthdate: string
-          client_cpf: string
-          client_email: string
-          client_name: string
-          client_phone: string
+          client_name?: string | null
+          client_phone?: string | null
           created_at?: string
-          desired_amount: number
-          desired_term_months: number
-          estimated_payment?: number | null
-          estimated_rate?: number | null
+          current_step?: string
+          documents_submitted?: boolean
+          form_data?: Json
           id?: string
           product_id: string
-          purpose?: string | null
-          rejected_at?: string | null
-          stage_id?: string | null
+          product_type_slug: string
+          simulation_id?: string | null
           status?: string
-          submitted_at?: string
           tenant_id: string
           updated_at?: string
         }
         Update: {
-          approved_at?: string | null
-          client_address?: Json
-          client_birthdate?: string
-          client_cpf?: string
-          client_email?: string
-          client_name?: string
-          client_phone?: string
+          client_name?: string | null
+          client_phone?: string | null
           created_at?: string
-          desired_amount?: number
-          desired_term_months?: number
-          estimated_payment?: number | null
-          estimated_rate?: number | null
+          current_step?: string
+          documents_submitted?: boolean
+          form_data?: Json
           id?: string
           product_id?: string
-          purpose?: string | null
-          rejected_at?: string | null
-          stage_id?: string | null
+          product_type_slug?: string
+          simulation_id?: string | null
           status?: string
-          submitted_at?: string
           tenant_id?: string
           updated_at?: string
         }
@@ -401,10 +412,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "proposals_stage_id_fkey"
-            columns: ["stage_id"]
+            foreignKeyName: "proposals_simulation_id_fkey"
+            columns: ["simulation_id"]
             isOneToOne: false
-            referencedRelation: "proposal_stages"
+            referencedRelation: "simulations"
             referencedColumns: ["id"]
           },
           {
