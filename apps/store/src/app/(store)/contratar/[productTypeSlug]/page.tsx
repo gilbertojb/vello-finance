@@ -29,13 +29,15 @@ export default async function ContratarPage({ params, searchParams }: Props) {
   const defaultStep = PRODUCT_FLOWS[dbSlug]?.etapa1[0]?.slug ?? 'operacao'
 
   return (
-    <WizardContainer
-      productTypeSlug={dbSlug}
-      currentStep={step ?? defaultStep}
-      proposal={proposal ?? null}
-      product={product ?? null}
-      productId={productId ?? null}
-      simulationId={simulationId ?? null}
-    />
+    <div className="min-h-[calc(100vh-78px)] bg-surface text-surface-foreground">
+      <WizardContainer
+        productTypeSlug={dbSlug}
+        currentStep={step ?? defaultStep}
+        proposal={proposal ?? null}
+        product={product ?? null}
+        productId={productId ?? null}
+        simulationId={simulationId ?? null}
+      />
+    </div>
   )
 }
