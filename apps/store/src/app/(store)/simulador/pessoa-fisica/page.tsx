@@ -28,7 +28,6 @@ export default async function PessoaFisicaPage() {
     return {
       tenantProductId: tp.id,
       label: tp.products!.name,
-      productName: tp.products!.name,
       href: `${route}?productId=${tp.id}`,
     }
   })

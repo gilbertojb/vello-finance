@@ -49,7 +49,7 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
           estimatedPayment: 0,
           simulationData: parsed as Record<string, unknown>,
         }).then((result) => {
-          if (result.success) {
+          if (result.success && result.data) {
             setSimulationId(result.data.id)
             sessionStorage.setItem(SIM_ID_KEY, result.data.id)
           }

@@ -7,7 +7,6 @@ import { ChevronDown } from 'lucide-react'
 export type ProdutoOption = {
   tenantProductId: string
   label: string
-  productName: string
   href: string
 }
 
@@ -48,12 +47,6 @@ export function ProdutoSelector({ options }: { options: ProdutoOption[] }) {
           <ChevronDown className="pointer-events-none absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" />
         </div>
       </div>
-
-      {selectedOption && (
-        <div className="rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-[15px] font-medium text-surface-foreground">
-          {selectedOption.productName}
-        </div>
-      )}
 
       <button
         type="button"

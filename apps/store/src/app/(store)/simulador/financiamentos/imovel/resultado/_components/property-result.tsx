@@ -56,7 +56,7 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
           estimatedPayment: payment,
           simulationData: parsed as Record<string, unknown>,
         }).then((result) => {
-          if (result.success) {
+          if (result.success && result.data) {
             sessionStorage.setItem(SIM_ID_KEY, result.data.id)
             setSimulationId(result.data.id)
           }
