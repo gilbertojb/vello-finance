@@ -30,12 +30,6 @@ export function CtaBanner({ featuredProductId: _ }: Props) {
               >
                 Iniciar simulação
               </Link>
-              <Link
-                href="#"
-                className="rounded-full border border-surface-foreground/18 px-6 py-3.5 text-sm font-medium text-surface-foreground transition-all hover:border-surface-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-surface-foreground/50 focus-visible:ring-offset-2"
-              >
-                Falar com consultor
-              </Link>
             </div>
           </div>
 

@@ -23,9 +23,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 const CATEGORY_ORDER = ['pessoa_fisica', 'pessoa_juridica', 'financiamentos']
 
 const SLUG_TO_SIMULATOR: Record<string, string> = {
-  fgts: '/simulador/pessoa-fisica/fgts',
-  consignado_privado: '/simulador/pessoa-fisica/consignado',
-  consignado_publico: '/simulador/pessoa-fisica/consignado',
+  fgts: '/contratar/fgts',
+  consignado_privado: '/contratar/consignado-clt',
+  consignado_publico: '/contratar/consignado-clt',
   home_equity: '/simulador/pessoa-fisica/imovel-em-garantia',
   auto_equity: '/simulador/pessoa-fisica/veiculo-em-garantia',
   emprestimo_pessoal: '/simulador/pessoa-fisica/emprestimo-pessoal',
@@ -208,7 +208,7 @@ function ZpRegularCard({ p }: { p: TemplateHomeProduct }) {
         )}
 
         {/* Metrics */}
-        <div className="mb-0 mt-auto grid grid-cols-2 gap-4 border-t border-surface-foreground/10 pb-0 pt-4 mt-5">
+        <div className="mt-auto grid grid-cols-2 gap-4 border-t border-surface-foreground/10 pt-4 mt-5">
           {p.minRate != null && (
             <div>
               <div className="text-2xs font-semibold uppercase tracking-data text-surface-foreground/40">
