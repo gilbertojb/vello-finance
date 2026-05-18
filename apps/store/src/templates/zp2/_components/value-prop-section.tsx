@@ -47,7 +47,7 @@ export function ValuePropSection() {
               {VALUE_ITEMS.map((item) => (
                 <div
                   key={item.title}
-                  className="flex items-start gap-4 rounded-xl border border-foreground/8 bg-white p-5"
+                  className="flex items-start gap-4 rounded-xl border border-surface-foreground/8 bg-white p-5"
                 >
                   <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/8">
                     <item.icon className="h-5 w-5 text-primary" />
@@ -70,7 +70,7 @@ export function ValuePropSection() {
               className="object-cover"
               alt=""
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-surface/95 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-linear-to-t from-surface/95 via-transparent to-transparent" />
           </div>
 
         </div>

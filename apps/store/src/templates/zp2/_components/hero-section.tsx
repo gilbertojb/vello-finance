@@ -76,7 +76,7 @@ export function HeroSection({ displayName }: Props) {
               priority
               alt=""
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
+            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-background" />
           </div>
 
         </div>
