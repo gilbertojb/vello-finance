@@ -5,6 +5,8 @@ import { createElement, type JSXElementConstructor, type ReactElement } from 're
 import { getSimulationForPdf, getTenantBranding } from '@/app/(store)/queries'
 import { getTemplate } from '@/templates'
 import { SimulationPdf } from '@/lib/pdf/simulation-pdf'
+import { calcPriceSchedule } from '@/lib/calc-installments'
+import type { PriceInstallment } from '@/lib/calc-installments'
 
 export async function GET(
   _req: NextRequest,
@@ -34,15 +36,28 @@ export async function GET(
   const companyName = branding?.company_display_name ?? 'Vello Finance'
   const logoUrl = branding?.logo_url ?? null
 
+  const estimatedAmount = Number(simulation.desired_amount)
+  const estimatedRate = simulation.estimated_rate != null ? Number(simulation.estimated_rate) : null
+  const estimatedPayment = simulation.estimated_payment != null ? Number(simulation.estimated_payment) : null
+  const termMonths = simulation.desired_term_months
+
+  const isFgts = slug === 'fgts'
+  const installments: PriceInstallment[] =
+    !isFgts && estimatedAmount > 0 && estimatedRate !== null && estimatedRate > 0
+      ? calcPriceSchedule(estimatedAmount, estimatedRate, termMonths).slice(0, 12)
+      : []
+
+  const sistema: 'PRICE' | null = isFgts ? null : 'PRICE'
+
   const element = createElement(SimulationPdf, {
     simulationId: simulation.id,
     clientName: simulation.client_name,
     productName: simulation.products.name,
     productSlug: slug,
-    desiredAmount: Number(simulation.desired_amount),
-    desiredTermMonths: simulation.desired_term_months,
-    estimatedRate: simulation.estimated_rate != null ? Number(simulation.estimated_rate) : null,
-    estimatedPayment: simulation.estimated_payment != null ? Number(simulation.estimated_payment) : null,
+    desiredAmount: estimatedAmount,
+    desiredTermMonths: termMonths,
+    estimatedRate,
+    estimatedPayment,
     simulationData: (simulation.simulation_data as Record<string, unknown>) ?? {},
     createdAt,
     companyName,
@@ -50,6 +65,8 @@ export async function GET(
     primaryL: primary.l,
     primaryC: primary.c,
     primaryH: primary.h,
+    sistema,
+    installments,
   }) as ReactElement<DocumentProps, string | JSXElementConstructor<unknown>>
 
   const pdfBuffer = await renderToBuffer(element)
