@@ -1,7 +1,7 @@
 'use client'
 
 import { PRODUCT_FLOWS } from '@/app/(store)/contratar/[productTypeSlug]/_components/flow-config'
-import { StepIndicator } from '@/app/(store)/contratar/[productTypeSlug]/_components/step-indicator'
+import { DotsIndicator } from '@/app/(store)/_components/dots-indicator'
 import { DadosBancariosEtapa2Step } from '@/app/(store)/contratar/[productTypeSlug]/_components/etapa2/dados-bancarios-step'
 import { DocumentosEmpresaStep } from '@/app/(store)/contratar/[productTypeSlug]/_components/etapa2/documentos-empresa-step'
 import { DocumentosPessoaisPFStep } from '@/app/(store)/contratar/[productTypeSlug]/_components/etapa2/documentos-pessoais-pf-step'
@@ -32,7 +32,7 @@ export function Etapa2Container({ proposal, step }: Props) {
   return (
     <div className="mx-auto w-full max-w-lg px-4 py-8">
       {flow && flow.etapa2.length > 0 && (
-        <StepIndicator steps={flow.etapa2} currentStep={step} />
+        <DotsIndicator steps={flow.etapa2} currentStep={step} />
       )}
       <div className="mt-6">
         {renderStep(slug, step, stepProps)}
