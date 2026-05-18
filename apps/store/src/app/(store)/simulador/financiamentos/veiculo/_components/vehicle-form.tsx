@@ -80,7 +80,7 @@ export function VehicleForm({
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="h-11 w-full rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -92,7 +92,7 @@ export function VehicleForm({
         >
           WhatsApp para contato <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/40">
             +55
           </span>
@@ -103,7 +103,7 @@ export function VehicleForm({
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             placeholder="(11) 99999-9999"
-            className="flex-1 bg-transparent py-4 pl-3 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+            className="flex-1 bg-transparent pl-3 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
       </div>
@@ -116,7 +116,7 @@ export function VehicleForm({
         >
           Valor do veículo (FIPE) <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -131,7 +131,7 @@ export function VehicleForm({
               setRawVeiculo(new Intl.NumberFormat('pt-BR').format(valorVeiculo))
             }
             placeholder="0,00"
-            className="flex-1 bg-transparent py-4 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+            className="flex-1 bg-transparent pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">
@@ -147,7 +147,7 @@ export function VehicleForm({
         >
           Valor de entrada <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -162,7 +162,7 @@ export function VehicleForm({
               setRawEntrada(new Intl.NumberFormat('pt-BR').format(entrada))
             }
             placeholder="0,00"
-            className="flex-1 bg-transparent py-4 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+            className="flex-1 bg-transparent pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
           />
         </div>
         {showEntradaWarning && (
@@ -181,7 +181,7 @@ export function VehicleForm({
           <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
             Valor a ser financiado
           </label>
-          <div className="rounded-2xl border border-surface-foreground/15 bg-surface px-5 py-4 text-sm font-semibold text-surface-foreground">
+          <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-surface px-4 text-sm font-semibold text-surface-foreground">
             {formatCurrency(valorFinanciado)}
           </div>
         </div>
@@ -214,7 +214,7 @@ export function VehicleForm({
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity disabled:opacity-40"
+        className="mt-2 w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity disabled:opacity-40"
       >
         Ver minha simulação →
       </button>

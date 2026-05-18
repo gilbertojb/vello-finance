@@ -132,7 +132,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
             <select
               value={parcelas}
               onChange={(e) => setParcelas(Number(e.target.value))}
-              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-white px-4 py-3 text-sm font-semibold text-surface-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="h-11 w-full appearance-none rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm font-semibold text-surface-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               {PARCELAS_OPTIONS.map((n) => (
                 <option key={n} value={n}>{n}x</option>
@@ -223,7 +223,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
             return
           }
         }}
-        className="w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>
