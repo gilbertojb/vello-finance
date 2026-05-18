@@ -8,19 +8,19 @@ import { DefaultHome } from './default/home'
 import { zpTemplate } from './zp/config'
 import { ZpHome } from './zp/home'
 
-import { zp2Template } from './zp2/config'
-import { Zp2Home } from './zp2/home'
+import { zpOldTemplate } from './zp_old/config'
+import { ZpOldHome } from './zp_old/home'
 
 const configRegistry: Record<string, TemplateConfig> = {
   default: defaultTemplate,
   zp: zpTemplate,
-  zp2: zp2Template,
+  zp_old: zpOldTemplate,
 }
 
 const homeRegistry: Record<string, ComponentType<TemplateHomeProps>> = {
   default: DefaultHome,
   zp: ZpHome,
-  zp2: Zp2Home,
+  zp_old: ZpOldHome,
 }
 
 export function getTemplate(

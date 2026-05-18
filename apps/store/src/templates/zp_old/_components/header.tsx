@@ -14,10 +14,9 @@ type Props = {
 const NAV_LINKS = [
   { href: '#produtos',       label: 'Produtos' },
   { href: '#como-funciona',  label: 'Como funciona' },
-  { href: '#faq',            label: 'FAQ' },
 ]
 
-export function Zp2Header({ logoSlot, displayName }: Props) {
+export function ZpHeader({ logoSlot, displayName }: Props) {
   const name = displayName ?? 'ZP Pay'
   const [open, setOpen] = useState(false)
 

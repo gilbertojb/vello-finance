@@ -6,7 +6,7 @@ type Props = {
   displayName: string | null
 }
 
-export function Zp2Footer({ logoUrl, displayName }: Props) {
+export function ZpFooter({ logoUrl, displayName }: Props) {
   const name = displayName ?? 'ZP Pay'
   const year = new Date().getFullYear()
 

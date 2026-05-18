@@ -14,6 +14,7 @@ type Props = {
 const NAV_LINKS = [
   { href: '#produtos',       label: 'Produtos' },
   { href: '#como-funciona',  label: 'Como funciona' },
+  { href: '#faq',            label: 'FAQ' },
 ]
 
 export function ZpHeader({ logoSlot, displayName }: Props) {

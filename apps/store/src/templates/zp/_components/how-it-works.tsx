@@ -1,74 +1,76 @@
+import Image from 'next/image'
+
 const STEPS = [
   {
-    n: 'I',
-    title: 'Simule o crédito',
-    description:
-      'Escolha o produto e ajuste valor e prazo em tempo real. Veja sua parcela na hora.',
+    n: '1',
+    title: 'Simule na hora',
+    description: 'Veja suas possibilidades imediatamente.',
   },
   {
-    n: 'II',
-    title: 'Preencha os dados',
-    description:
-      'Formulário digital rápido. Sem papelada, sem filas, sem agência.',
+    n: '2',
+    title: 'Escolha se quer avançar',
+    description: 'Sem pressão, você decide.',
   },
   {
-    n: 'III',
-    title: 'Análise instantânea',
-    description:
-      'Sua proposta é analisada em minutos. Você recebe uma resposta pelo e-mail.',
+    n: '3',
+    title: 'Nós cuidamos do envio',
+    description: 'Sua solicitação é estruturada e enviada para instituições compatíveis.',
   },
   {
-    n: 'IV',
-    title: 'Crédito aprovado',
-    description:
-      'Assine digitalmente e acompanhe pelo painel. Dinheiro disponível em até 24 horas.',
+    n: '4',
+    title: 'Receba retorno',
+    description: 'E siga com a contratação, se fizer sentido.',
   },
 ]
 
 export function HowItWorks() {
   return (
-    <section
-      id="como-funciona"
-      className="border-t border-primary/8 bg-background py-24"
-    >
-      <div className="mx-auto max-w-7xl px-8">
-        <div className="mb-14 flex items-end justify-between gap-12 max-lg:flex-col max-lg:items-start">
-          <div>
-            <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Como funciona
-            </span>
-            <h2 className="mt-4 text-5xl font-light leading-none tracking-tight text-foreground max-lg:text-5xl max-sm:text-4xl">
-              Quatro passos para o<br />
-              <em className="font-serif text-6xl italic font-normal text-primary">
-                crédito na sua mão.
-              </em>
-            </h2>
-          </div>
-          <p className="max-w-[420px] text-sm leading-relaxed text-foreground/62">
-            Processo 100% digital, sem agência, sem fila. Você acompanha cada
-            etapa em tempo real.
-          </p>
-        </div>
+    <section id="como-funciona" className="relative overflow-hidden border-t border-primary/8 bg-background py-24">
+      <Image
+        src="/images/zp2/how-it-works-bg.jpg"
+        fill
+        sizes="100vw"
+        className="object-cover"
+        alt=""
+      />
+      <div className="absolute inset-0 bg-background/90" />
 
-        <div className="relative grid grid-cols-4 gap-8 max-lg:grid-cols-2">
+      <div className="relative z-10 mx-auto max-w-7xl px-8">
+        <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-primary">
+          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          Como funciona
+        </span>
+
+        <h2 className="mt-4 text-5xl font-light leading-none tracking-tight text-foreground max-sm:text-4xl">
+          Quatro passos para o{' '}
+          <em className="font-serif text-6xl italic font-normal text-primary">
+            crédito na sua mão.
+          </em>
+        </h2>
+
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-foreground/60">
+          Processo 100% digital, sem agência, sem fila.
+        </p>
+
+        <div className="relative mt-14 grid grid-cols-4 gap-8 max-lg:grid-cols-2 max-sm:grid-cols-1">
           <div
-            className="pointer-events-none absolute left-16 right-16 top-8 hidden h-px lg:block"
+            className="pointer-events-none absolute left-16 right-16 top-7 hidden h-px lg:block"
             style={{
               background:
                 'repeating-linear-gradient(90deg, oklch(0.83 0.10 85 / 0.30) 0 6px, transparent 6px 14px)',
             }}
             aria-hidden="true"
           />
+
           {STEPS.map((step) => (
             <div key={step.n} className="relative">
-              <div className="relative z-10 mb-6 grid h-14 w-14 place-items-center rounded-full border border-primary/30 bg-background font-serif italic text-2xl text-primary">
+              <div className="relative z-10 mb-6 grid h-14 w-14 place-items-center rounded-full border border-primary/30 bg-background font-serif text-2xl italic text-primary">
                 {step.n}
               </div>
               <h4 className="mb-2 text-lg font-semibold leading-tight tracking-tight text-foreground">
                 {step.title}
               </h4>
-              <p className="text-xs leading-relaxed text-foreground/62">
+              <p className="text-sm leading-relaxed text-foreground/62">
                 {step.description}
               </p>
             </div>

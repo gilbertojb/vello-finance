@@ -1,7 +1,7 @@
 import type { TemplateConfig } from '../_types'
 
-export const zp2Template: TemplateConfig = {
-  id: 'zp2',
+export const zpOldTemplate: TemplateConfig = {
+  id: 'zp_old',
   colors: {
     primary:    { l: 0.83, c: 0.10,  h: 85 },
     background: { l: 0.13, c: 0.015, h: 45 },
