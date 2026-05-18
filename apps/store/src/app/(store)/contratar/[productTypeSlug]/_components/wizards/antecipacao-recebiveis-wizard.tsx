@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -24,6 +25,7 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const blockIdade = fundacao
     ? (new Date().getTime() - new Date(fundacao).getTime()) / (1000 * 60 * 60 * 24 * 365.25) < 3
@@ -39,7 +41,8 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

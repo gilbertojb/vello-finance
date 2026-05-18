@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -26,6 +27,7 @@ function HomeEquityPJOperacaoStep({ proposalId, productId, productTypeSlug, simu
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!tipoImovel || !financiado || !matricula || !motivo) return setError('Preencha todos os campos.')
@@ -35,7 +37,8 @@ function HomeEquityPJOperacaoStep({ proposalId, productId, productTypeSlug, simu
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

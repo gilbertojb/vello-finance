@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -23,6 +24,7 @@ export function RendaOcupacaoStep({ proposalId, proposal, nextStep }: Props) {
   const [empresa, setEmpresa] = useState(saved.empresa ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!ocupacao || !rendaStr || !tempo) return setError('Preencha todos os campos obrigatórios.')
@@ -34,7 +36,8 @@ export function RendaOcupacaoStep({ proposalId, proposal, nextStep }: Props) {
         stepData: { ocupacao, profissao, renda: parseBRL(rendaStr), tempo, empresa },
         nextStep,
       })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

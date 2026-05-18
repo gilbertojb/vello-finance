@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -23,6 +24,7 @@ export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = '
   const [conjuge, setConjuge] = useState<Conjuge>({ nome: '', cpf: '', nascimento: '', email: '', whatsapp: '' })
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const ageBlock = nascimento ? calcAge(nascimento) >= 70 : false
 
@@ -36,7 +38,8 @@ export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = '
     if (estadoCivil === 'casado') data.conjuge = conjuge
     startTransition(async () => {
       const res = await saveStep({ proposalId, stepSlug, stepData: data, nextStep })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

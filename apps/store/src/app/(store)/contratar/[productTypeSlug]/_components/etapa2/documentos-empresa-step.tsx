@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveStep } from '@/app/(store)/contratar/actions'
 import { DocumentUploadChecklist } from '../shared/document-upload-checklist'
 import type { DocumentItem } from '../shared/document-upload-checklist'
@@ -23,10 +24,13 @@ type Props = WizardStepProps & { nextStep: string; extraDocs?: DocumentItem[] }
 
 export function DocumentosEmpresaStep({ proposalId, nextStep, extraDocs }: Props) {
   const [, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleAllUploaded() {
     startTransition(async () => {
-      await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-empresa', stepData: { uploaded: true }, nextStep })
+      const res = await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-empresa', stepData: { uploaded: true }, nextStep })
+      if ('error' in res) return
+      router.push(res.redirectTo)
     })
   }
 

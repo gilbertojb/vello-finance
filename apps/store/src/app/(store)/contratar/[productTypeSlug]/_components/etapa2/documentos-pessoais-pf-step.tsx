@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveStep } from '@/app/(store)/contratar/actions'
 import { DocumentUploadChecklist } from '../shared/document-upload-checklist'
 import type { DocumentItem } from '../shared/document-upload-checklist'
@@ -24,6 +25,7 @@ type Props = WizardStepProps & { nextStep: string; withCnh?: boolean }
 export function DocumentosPessoaisPFStep({ proposalId, proposal, nextStep, withCnh }: Props) {
   const hasConjuge = ((proposal?.form_data as Record<string, unknown>)?.['dados-pessoais'] as Record<string, unknown> | undefined)?.['estadoCivil'] === 'casado'
   const [, startTransition] = useTransition()
+  const router = useRouter()
 
   const docs: DocumentItem[] = [
     ...DOCS_PF,
@@ -33,7 +35,9 @@ export function DocumentosPessoaisPFStep({ proposalId, proposal, nextStep, withC
 
   function handleAllUploaded() {
     startTransition(async () => {
-      await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-pessoais', stepData: { uploaded: true }, nextStep })
+      const res = await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-pessoais', stepData: { uploaded: true }, nextStep })
+      if ('error' in res) return
+      router.push(res.redirectTo)
     })
   }
 

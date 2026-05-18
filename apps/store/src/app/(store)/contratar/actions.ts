@@ -23,7 +23,7 @@ const createProposalSchema = z.object({
 
 export async function createProposal(
   input: z.input<typeof createProposalSchema>,
-): Promise<{ error: string } | void> {
+): Promise<{ error: string } | { redirectTo: string }> {
   const tenantId = await getTenantId()
   if (!tenantId) return { error: 'Tenant não identificado.' }
 
@@ -64,9 +64,9 @@ export async function createProposal(
 
   if (error || !proposal) return { error: 'Erro ao criar proposta.' }
 
-  redirect(
-    `/contratar/${productTypeSlug.replace(/_/g, '-')}?step=${nextStep}&proposalId=${proposal.id}&productId=${productId}`,
-  )
+  return {
+    redirectTo: `/contratar/${productTypeSlug.replace(/_/g, '-')}?step=${nextStep}&proposalId=${proposal.id}&productId=${productId}`,
+  }
 }
 
 const saveStepSchema = z.object({
@@ -78,7 +78,7 @@ const saveStepSchema = z.object({
 
 export async function saveStep(
   input: z.input<typeof saveStepSchema>,
-): Promise<{ error: string } | void> {
+): Promise<{ error: string } | { redirectTo: string }> {
   const tenantId = await getTenantId()
   if (!tenantId) return { error: 'Tenant não identificado.' }
 
@@ -114,7 +114,7 @@ export async function saveStep(
   if (error) return { error: 'Erro ao salvar.' }
 
   const urlSlug = current.product_type_slug.replace(/_/g, '-')
-  redirect(`/contratar/${urlSlug}?step=${nextStep}&proposalId=${proposalId}`)
+  return { redirectTo: `/contratar/${urlSlug}?step=${nextStep}&proposalId=${proposalId}` }
 }
 
 export async function finalizeEtapa1(proposalId: string): Promise<{ error: string } | void> {

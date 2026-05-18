@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -26,6 +27,7 @@ export function DadosEmpresaPJStep({ proposalId, proposal, variant, nextStep, st
   const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRL(Number(saved.faturamento)) : '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const blockTempo = variant === 'simple' && tempoEmpresa === 'Menos de 3 anos'
 
@@ -38,7 +40,8 @@ export function DadosEmpresaPJStep({ proposalId, proposal, variant, nextStep, st
     else { data.atividade = atividade; data.produtos = produtos; data.faturamento = parseBRL(faturamentoStr) }
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug, stepData: data, nextStep })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

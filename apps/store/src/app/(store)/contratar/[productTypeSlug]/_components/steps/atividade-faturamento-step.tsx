@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -21,6 +22,7 @@ export function AtividadeFaturamentoStep({ proposalId, proposal, nextStep, fatur
   const [produtos, setProdutos] = useState(saved.produtos ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!atividade || !faturamentoStr) return setError('Preencha todos os campos obrigatórios.')
@@ -32,7 +34,8 @@ export function AtividadeFaturamentoStep({ proposalId, proposal, nextStep, fatur
         stepData: { atividade, faturamento: parseBRL(faturamentoStr), produtos },
         nextStep,
       })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

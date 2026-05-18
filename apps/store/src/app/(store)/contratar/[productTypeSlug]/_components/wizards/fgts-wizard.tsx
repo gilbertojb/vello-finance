@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -9,6 +10,7 @@ import { isValidCPF, calcAge, getStepData } from '../steps/types'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosBancariosEtapa2Step } from '../etapa2/dados-bancarios-step'
 import type { ProductWizardProps } from '../steps/types'
+import { cn } from '@/lib/utils'
 
 function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep }: ProductWizardProps) {
   const saved = getStepData<Record<string, string>>(proposal, 'liberacao-saque')
@@ -18,6 +20,7 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
   const [isPending, startTransition] = useTransition()
 
   const podeAvancar = liberou === 'Sim' || jaRealizei
+  const router = useRouter()
 
   function handleSubmit() {
     if (!podeAvancar) return setError('Complete a etapa antes de continuar.')
@@ -27,7 +30,8 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'liberacao-saque', stepData, nextStep: 'liberacao-bancos' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'liberacao-saque', stepData, nextStep: 'liberacao-bancos' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
@@ -37,10 +41,15 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
       <p className="text-sm text-muted-foreground">Você já liberou o Saque Aniversário no aplicativo do FGTS (Caixa)?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
-          <button key={v} type="button" onClick={() => setLiberou(v)}
-            className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${liberou === v ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'}`}>
+          <Button
+            key={v}
+            type="button"
+            variant="outline"
+            className={cn('flex-1 h-auto py-3', liberou === v && 'border-primary bg-primary/10 text-primary')}
+            onClick={() => setLiberou(v)}
+          >
             {v}
-          </button>
+          </Button>
         ))}
       </div>
       {liberou === 'Não' && !jaRealizei && (
@@ -52,10 +61,14 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
             <li>Selecione <strong>"Optar pelo Saque Aniversário"</strong></li>
             <li>Confirme sua opção</li>
           </ol>
-          <button type="button" onClick={() => setJaRealizei(true)}
-            className="mt-2 w-full rounded-lg border border-primary/30 bg-primary/5 py-2.5 text-sm font-semibold text-primary">
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2 w-full border-primary/30 bg-primary/5 text-primary"
+            onClick={() => setJaRealizei(true)}
+          >
             Já realizei ✓
-          </button>
+          </Button>
         </div>
       )}
       {error && <FieldError>{error}</FieldError>}
@@ -72,6 +85,7 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
   const [jaRealizei, setJaRealizei] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const podeAvancar = liberou === 'Sim' || jaRealizei
 
@@ -80,7 +94,8 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'liberacao-bancos', stepData: { liberou: 'Sim' }, nextStep: 'verificar-margem' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
@@ -90,10 +105,15 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
       <p className="text-sm text-muted-foreground">Você já autorizou os bancos a acessar seu FGTS para antecipação?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
-          <button key={v} type="button" onClick={() => setLiberou(v)}
-            className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${liberou === v ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'}`}>
+          <Button
+            key={v}
+            type="button"
+            variant="outline"
+            className={cn('flex-1 h-auto py-3', liberou === v && 'border-primary bg-primary/10 text-primary')}
+            onClick={() => setLiberou(v)}
+          >
             {v}
-          </button>
+          </Button>
         ))}
       </div>
       {liberou === 'Não' && !jaRealizei && (
@@ -104,10 +124,14 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
             <li>Selecione os bancos parceiros</li>
             <li>Confirme a autorização</li>
           </ol>
-          <button type="button" onClick={() => setJaRealizei(true)}
-            className="mt-2 w-full rounded-lg border border-primary/30 bg-primary/5 py-2.5 text-sm font-semibold text-primary">
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2 w-full border-primary/30 bg-primary/5 text-primary"
+            onClick={() => setJaRealizei(true)}
+          >
             Já realizei ✓
-          </button>
+          </Button>
         </div>
       )}
       {error && <FieldError>{error}</FieldError>}
@@ -130,6 +154,7 @@ function VerificarMargemStep({ proposalId, proposal }: ProductWizardProps) {
   const [isPending, startTransition] = useTransition()
 
   const ageBlock = nascimento ? calcAge(nascimento) >= 70 : false
+  const router = useRouter()
 
   function handleSubmit() {
     if (!proposalId) return
@@ -140,7 +165,8 @@ function VerificarMargemStep({ proposalId, proposal }: ProductWizardProps) {
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId, stepSlug: 'verificar-margem', stepData: { nome, cpf, rg, nascimento, email, whatsapp }, nextStep: 'dados-bancarios' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

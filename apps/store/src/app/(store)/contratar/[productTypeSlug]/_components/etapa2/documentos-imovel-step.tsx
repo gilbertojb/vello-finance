@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { saveStep, finalizeEtapa2 } from '@/app/(store)/contratar/actions'
 import { DocumentUploadChecklist } from '../shared/document-upload-checklist'
 import type { DocumentItem } from '../shared/document-upload-checklist'
@@ -18,13 +19,16 @@ type Props = WizardStepProps & { isFinalStep?: boolean; nextStep?: string; extra
 
 export function DocumentosImovelStep({ proposalId, isFinalStep, nextStep, extraDocs }: Props) {
   const [, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleAllUploaded() {
     startTransition(async () => {
       if (isFinalStep) {
         await finalizeEtapa2(proposalId!)
       } else {
-        await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-imovel', stepData: { uploaded: true }, nextStep: nextStep! })
+        const res = await saveStep({ proposalId: proposalId!, stepSlug: 'documentos-imovel', stepData: { uploaded: true }, nextStep: nextStep! })
+        if ('error' in res) return
+        router.push(res.redirectTo)
       }
     })
   }

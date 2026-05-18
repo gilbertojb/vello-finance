@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/ui/field'
 import { saveStep } from '@/app/(store)/contratar/actions'
@@ -16,6 +17,7 @@ export function DadosSociosStep({ proposalId, proposal, nextStep, withRg, withEs
   const [socios, setSocios] = useState<SocioData[]>(saved.socios ?? [])
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (socios.length === 0) return setError('Informe pelo menos 1 sócio.')
@@ -23,7 +25,8 @@ export function DadosSociosStep({ proposalId, proposal, nextStep, withRg, withEs
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'dados-socios', stepData: { socios }, nextStep })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

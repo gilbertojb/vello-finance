@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -26,6 +27,7 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
 
   const blocked = clt === 'Não' || vinculo === 'Não' || tempo === 'Não' || idade === 'Não'
   const allSim = clt === 'Sim' && vinculo === 'Sim' && tempo === 'Sim' && idade === 'Sim'
+  const router = useRouter()
 
   function handleSubmit() {
     if (blocked || !allSim) return
@@ -34,7 +36,8 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
@@ -72,13 +75,15 @@ function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
   const [autorizado, setAutorizado] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!autorizado) return setError('Autorização obrigatória para prosseguir.')
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'autorizacao-dataprev', stepData: { autorizado: true }, nextStep: 'dados-pessoais' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
@@ -107,13 +112,15 @@ function DadosProfissionaisStep({ proposalId, proposal }: ProductWizardProps) {
   const [isPending, startTransition] = useTransition()
 
   const blockTempo = tempoEmpresa === 'Menos de 6 meses'
+  const router = useRouter()
 
   function handleSubmit() {
     if (blockTempo || !empresa || !tempoEmpresa) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'dados-profissionais', stepData: { empresa, tempoEmpresa, tipoContrato: 'CLT (Carteira Assinada)' }, nextStep: 'dados-bancarios' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { FieldError } from '@/components/ui/field'
 import { saveStep } from '@/app/(store)/contratar/actions'
@@ -17,6 +18,7 @@ export function DadosBancariosEtapa2Step({ proposalId, proposal, nextStep, titul
   const [bankData, setBankData] = useState<BankData>({ ...EMPTY, ...saved })
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!bankData.banco || !bankData.agencia || !bankData.conta) return setError('Preencha banco, agência e conta.')
@@ -24,7 +26,8 @@ export function DadosBancariosEtapa2Step({ proposalId, proposal, nextStep, titul
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'dados-bancarios', stepData: bankData, nextStep })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 

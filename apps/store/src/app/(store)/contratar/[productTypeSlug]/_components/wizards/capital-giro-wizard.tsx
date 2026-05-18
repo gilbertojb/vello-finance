@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -25,6 +26,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   const blockMei = tipoEmpresa === 'MEI'
   const blockIdade = fundacao
@@ -41,7 +43,8 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
@@ -107,6 +110,7 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
   const [tipoGarantia, setTipoGarantia] = useState(saved.tipoGarantia ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
 
   function handleSubmit() {
     if (!possuiGarantia) return setError('Informe se possui garantia.')
@@ -114,7 +118,8 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
     setError('')
     startTransition(async () => {
       const res = await saveStep({ proposalId: proposalId!, stepSlug: 'garantia', stepData: { possuiGarantia, tipoGarantia }, nextStep: 'retorno' })
-      if (res && 'error' in res) setError(res.error)
+      if ('error' in res) setError(res.error)
+      else router.push(res.redirectTo)
     })
   }
 
