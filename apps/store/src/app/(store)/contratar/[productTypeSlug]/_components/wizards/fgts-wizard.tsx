@@ -44,7 +44,10 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
             key={v}
             type="button"
             variant="outline"
-            className={cn('flex-1 h-auto py-3', liberou === v && 'border-primary bg-primary/10 text-primary')}
+            className={cn(
+              'flex-1 h-auto py-3 border-foreground/20 bg-transparent text-foreground hover:bg-foreground/5',
+              liberou === v && 'border-primary bg-primary/15 text-primary hover:bg-primary/20'
+            )}
             onClick={() => setLiberou(v)}
           >
             {v}
@@ -52,9 +55,9 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
         ))}
       </div>
       {liberou === 'Não' && !jaRealizei && (
-        <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
-          <p className="text-sm font-semibold">Como liberar o Saque Aniversário:</p>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-foreground/10 bg-surface p-4 space-y-3">
+          <p className="text-sm font-semibold text-surface-foreground">Como liberar o Saque Aniversário:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-surface-foreground/70">
             <li>Acesse o aplicativo <strong>Caixa FGTS</strong></li>
             <li>Vá em <strong>Saque Aniversário</strong></li>
             <li>Selecione <strong>"Optar pelo Saque Aniversário"</strong></li>
@@ -62,8 +65,7 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
           </ol>
           <Button
             type="button"
-            variant="outline"
-            className="mt-2 w-full border-primary/30 bg-primary/5 text-primary"
+            className="mt-2 w-full"
             onClick={() => setJaRealizei(true)}
           >
             Já realizei ✓
@@ -107,7 +109,10 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
             key={v}
             type="button"
             variant="outline"
-            className={cn('flex-1 h-auto py-3', liberou === v && 'border-primary bg-primary/10 text-primary')}
+            className={cn(
+              'flex-1 h-auto py-3 border-foreground/20 bg-transparent text-foreground hover:bg-foreground/5',
+              liberou === v && 'border-primary bg-primary/15 text-primary hover:bg-primary/20'
+            )}
             onClick={() => setLiberou(v)}
           >
             {v}
@@ -115,17 +120,16 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
         ))}
       </div>
       {liberou === 'Não' && !jaRealizei && (
-        <div className="rounded-lg border bg-muted/40 p-4 space-y-3">
-          <p className="text-sm font-semibold">Como autorizar os bancos:</p>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-foreground/10 bg-surface p-4 space-y-3">
+          <p className="text-sm font-semibold text-surface-foreground">Como autorizar os bancos:</p>
+          <ol className="list-decimal list-inside space-y-1 text-sm text-surface-foreground/70">
             <li>No app Caixa FGTS, acesse <strong>Autorização de bancos</strong></li>
             <li>Selecione os bancos parceiros</li>
             <li>Confirme a autorização</li>
           </ol>
           <Button
             type="button"
-            variant="outline"
-            className="mt-2 w-full border-primary/30 bg-primary/5 text-primary"
+            className="mt-2 w-full"
             onClick={() => setJaRealizei(true)}
           >
             Já realizei ✓
