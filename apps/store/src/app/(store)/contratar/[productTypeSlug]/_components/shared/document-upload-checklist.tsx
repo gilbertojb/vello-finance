@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { CheckCircle2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { StoreButton as Button } from '@/components/ui/store-button'
 import { FieldError } from '@/components/ui/field'
 import { uploadDocument } from '@/app/(store)/contratar/actions'
 

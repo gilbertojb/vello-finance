@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { isValidCPF, calcAge, getStepData } from '../steps/types'
@@ -37,7 +37,6 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
 
   return (
     <div className="space-y-5">
-      <p className="text-base font-semibold">Saque Aniversário do FGTS</p>
       <p className="text-sm text-muted-foreground">Você já liberou o Saque Aniversário no aplicativo do FGTS (Caixa)?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
@@ -101,7 +100,6 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
 
   return (
     <div className="space-y-5">
-      <p className="text-base font-semibold">Autorização dos bancos no FGTS</p>
       <p className="text-sm text-muted-foreground">Você já autorizou os bancos a acessar seu FGTS para antecipação?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (

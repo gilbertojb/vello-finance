@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
@@ -53,7 +53,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       <Field>
         <FieldLabel>Tipo de empresa <span className="text-destructive">*</span></FieldLabel>
         <Select value={tipoEmpresa} onValueChange={setTipoEmpresa}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {TIPOS_EMPRESA.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
@@ -89,7 +89,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       <Field>
         <FieldLabel>Motivo do crédito <span className="text-destructive">*</span></FieldLabel>
         <Select value={motivo} onValueChange={setMotivo}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {MOTIVOS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>
@@ -125,7 +125,6 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
 
   return (
     <FieldGroup>
-      <p className="text-base font-semibold">Garantia na Operação</p>
       <p className="text-sm text-muted-foreground">Sua empresa possui alguma garantia real ou vinculada?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
@@ -139,7 +138,7 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
         <Field>
           <FieldLabel>Tipo de garantia <span className="text-destructive">*</span></FieldLabel>
           <Select value={tipoGarantia} onValueChange={setTipoGarantia}>
-            <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+            <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
             <SelectContent>
               {TIPOS_GARANTIA.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
             </SelectContent>

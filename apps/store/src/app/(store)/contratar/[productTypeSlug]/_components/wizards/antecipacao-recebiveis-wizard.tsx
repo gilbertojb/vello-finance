@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
@@ -51,7 +51,7 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
       <Field>
         <FieldLabel>Tipo de recebível <span className="text-destructive">*</span></FieldLabel>
         <Select value={tipoRecebivel} onValueChange={setTipoRecebivel}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {TIPOS_RECEBIVEL.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
@@ -86,7 +86,7 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
       <Field>
         <FieldLabel>Motivo do crédito <span className="text-destructive">*</span></FieldLabel>
         <Select value={motivo} onValueChange={setMotivo}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {MOTIVOS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>

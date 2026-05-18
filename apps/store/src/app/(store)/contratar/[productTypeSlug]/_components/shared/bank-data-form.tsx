@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import {
   Select,
@@ -37,7 +37,7 @@ export function BankDataForm({ value, onChange, titularLabel = 'titular do créd
       <Field>
         <FieldLabel>Banco <span className="text-destructive">*</span></FieldLabel>
         <Select value={value.banco} onValueChange={(v) => onChange({ ...value, banco: v })}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full h-11 rounded-lg">
             <SelectValue placeholder="Selecione seu banco…" />
           </SelectTrigger>
           <SelectContent>

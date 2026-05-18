@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
@@ -57,7 +57,6 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
 
   return (
     <div className="space-y-5">
-      <p className="text-base font-semibold">Verificação de elegibilidade</p>
       {pergunta('Você trabalha com carteira assinada (CLT)?', clt, setClt)}
       {pergunta('Seu vínculo está ativo (sem aviso prévio)?', vinculo, setVinculo)}
       {pergunta('Tempo de empresa igual ou superior a 6 meses?', tempo, setTempo)}
@@ -89,7 +88,6 @@ function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
 
   return (
     <div className="space-y-5">
-      <p className="text-base font-semibold">Autorização Dataprev</p>
       <label className="flex cursor-pointer items-start gap-3 rounded-lg border bg-muted/30 p-4">
         <input type="checkbox" className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary" checked={autorizado} onChange={(e) => setAutorizado(e.target.checked)} />
         <span className="text-sm text-muted-foreground">
@@ -134,7 +132,7 @@ function DadosProfissionaisStep({ proposalId, proposal }: ProductWizardProps) {
       <Field>
         <FieldLabel>Tempo de empresa <span className="text-destructive">*</span></FieldLabel>
         <Select value={tempoEmpresa} onValueChange={setTempoEmpresa}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {TEMPOS_EMPRESA_CLT.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>

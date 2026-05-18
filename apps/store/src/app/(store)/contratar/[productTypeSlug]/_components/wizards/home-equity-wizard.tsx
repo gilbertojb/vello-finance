@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
@@ -46,7 +46,7 @@ function HomeEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>Tipo de imóvel <span className="text-destructive">*</span></FieldLabel>
         <Select value={tipoImovel} onValueChange={setTipoImovel}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {TIPOS_IMOVEL.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
@@ -56,7 +56,7 @@ function HomeEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>O imóvel está financiado? <span className="text-destructive">*</span></FieldLabel>
         <Select value={financiado} onValueChange={setFinanciado}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="Não">Não</SelectItem>
             <SelectItem value="Sim">Sim</SelectItem>
@@ -99,7 +99,7 @@ function HomeEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>Motivo do crédito <span className="text-destructive">*</span></FieldLabel>
         <Select value={motivo} onValueChange={setMotivo}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {MOTIVOS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>

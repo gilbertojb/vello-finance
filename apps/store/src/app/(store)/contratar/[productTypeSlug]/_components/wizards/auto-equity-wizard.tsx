@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
@@ -53,7 +53,7 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>Tipo de veículo <span className="text-destructive">*</span></FieldLabel>
         <Select value={tipoVeiculo} onValueChange={setTipoVeiculo}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {TIPOS_VEICULO.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
@@ -63,7 +63,7 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>O veículo está financiado? <span className="text-destructive">*</span></FieldLabel>
         <Select value={financiado} onValueChange={setFinanciado}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="Não">Não</SelectItem>
             <SelectItem value="Sim">Sim</SelectItem>
@@ -86,7 +86,7 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>Ano de fabricação <span className="text-destructive">*</span></FieldLabel>
         <Select value={ano} onValueChange={setAno}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {ANOS.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}
           </SelectContent>
@@ -97,7 +97,7 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
       <Field>
         <FieldLabel>Motivo do crédito <span className="text-destructive">*</span></FieldLabel>
         <Select value={motivo} onValueChange={setMotivo}>
-          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {MOTIVOS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
           </SelectContent>

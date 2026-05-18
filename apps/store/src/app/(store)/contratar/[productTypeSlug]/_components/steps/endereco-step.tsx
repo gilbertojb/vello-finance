@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { StoreButton as Button } from '@/components/ui/store-button'
 import { FieldError } from '@/components/ui/field'
 import { saveStep } from '@/app/(store)/contratar/actions'
 import { getStepData } from './types'

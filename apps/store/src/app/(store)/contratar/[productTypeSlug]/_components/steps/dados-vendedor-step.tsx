@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { StoreButton as Button } from '@/components/ui/store-button'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { saveStep } from '@/app/(store)/contratar/actions'
@@ -81,7 +81,7 @@ export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = '
       <Field>
         <FieldLabel>Estado civil <span className="text-destructive">*</span></FieldLabel>
         <Select value={estadoCivil} onValueChange={setEstadoCivil}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full h-11 rounded-lg">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

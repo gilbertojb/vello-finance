@@ -1,6 +1,6 @@
 'use client'
 
-import { Input } from '@/components/ui/input'
+import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
   Select,
@@ -60,7 +60,7 @@ export function SocioFields({ value, onChange, withRg = false, withEstadoCivil =
       <Field>
         <FieldLabel>Quantidade de sócios <span className="text-destructive">*</span></FieldLabel>
         <Select value={String(value.length || '')} onValueChange={(v) => setCount(Number(v))}>
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full h-11 rounded-lg">
             <SelectValue placeholder="Selecione…" />
           </SelectTrigger>
           <SelectContent>
@@ -129,7 +129,7 @@ export function SocioFields({ value, onChange, withRg = false, withEstadoCivil =
                   value={socio.estadoCivil ?? 'solteiro'}
                   onValueChange={(v) => updateSocio(i, { estadoCivil: v as SocioData['estadoCivil'] })}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-11 rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
