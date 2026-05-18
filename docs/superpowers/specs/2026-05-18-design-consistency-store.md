@@ -93,21 +93,86 @@ Card branco
 
 ### 5. PDF da simulação
 
-O PDF (`simulation-pdf.tsx`) atualmente hardcoda "Sistema PRICE · Parcelas fixas". Deve receber a prop `sistema: 'PRICE' | 'SAC'` e renderizar os dados corretos:
-- Tabela de parcelas: mostrar as 12 primeiras linhas (ou todas se ≤ 12)
-- Para SAC: coluna "Amortização" + "Juros" + "Parcela"
-- Para PRICE: coluna "Parcela" + "Juros" + "Saldo devedor"
-- Layout do PDF deve espelhar o card de resultado do browser
+**Objetivo:** documento formal, fundo branco, contraste via tipografia e acento de cor primária. Espelha todos os dados do card de resultado do browser.
+
+#### Layout do PDF (A4, `@react-pdf/renderer`)
+
+```
+━━━━ barra de acento (4px, cor primary) ━━━━
+Header: logo/nome empresa (esq) | "SIMULAÇÃO DE CRÉDITO" + data (dir)
+─────────────────────────────────────────────
+Badge do produto · Nome do cliente (grande)
+
+[ Result box — borda-esq 4px primary, fundo primary/10 ]
+  Esq: label "Valor disponível" + valor principal (26px bold)
+       + sublabel "Sistema PRICE · parcelas fixas" ou "Sistema SAC · parcelas decrescentes"
+  Dir: label "Parcela mensal" + valor (ou "N× sem custo" para FGTS)
+
+[ Metrics grid — 4 células bg-gray-50 ]
+  Crédito solicitado | Taxa mensal | CET anual | Prazo
+
+─── DADOS DO PRODUTO ────────────────────────
+[ Extras grid — 3 colunas, dados específicos do produto ]
+
+─── TABELA DE PARCELAS — SISTEMA PRICE/SAC ──
+[ Tabela — cabeçalho bg-primary branco, zebra alternada ]
+
+─── Disclaimer ──────────────────────────────
+Footer: empresa + simulationId (esq) | data geração + validade (dir)
+```
+
+#### Tabela de parcelas
+
+- Mostrar as **12 primeiras parcelas** + linha de total no rodapé
+- Para produtos com prazo ≤ 12 meses: mostrar todas
+
+**Colunas PRICE:**
+
+| # | Juros | Amortização | Saldo devedor |
+|---|---|---|---|
+
+**Colunas SAC:**
+
+| # | Amortização | Juros | Valor da parcela |
+|---|---|---|---|
+
+#### Dados necessários no route handler
+
+O route `GET /api/simulations/[id]/pdf` precisará calcular e passar as parcelas para o componente. A lógica de cálculo já existe nos componentes de resultado (`calcPRICE`, `calcSAC`) — extrair para `apps/store/src/lib/calc-installments.ts` e reutilizar tanto nos cards de resultado quanto no PDF.
+
+Props adicionais em `SimulationPdfProps`:
+```typescript
+sistema: 'PRICE' | 'SAC' | null   // derivado de simulationData
+installments: Array<{              // calculado no route handler
+  n: number
+  juros: number
+  amortizacao: number
+  saldoDevedor: number    // PRICE
+  valorParcela?: number  // SAC (parcela total = amort + juros)
+}>
+```
+
+#### Paleta para o PDF (fundo branco)
+
+- Barra de acento e cabeçalho de tabela: `primary` (hex via `oklchToHex`)
+- Borda esquerda do result box: `primary`
+- Fundo do result box: `primary` a 10% opacity (misturar com branco)
+- Células de métricas: `#f9fafb`
+- Texto principal: `#0f172a`
+- Texto labels: `#6b7280`
+- Bordas: `#e5e7eb`
+- Disclaimer: `#fefce8` / `#fde68a` / `#78350f`
 
 ---
 
 ## Componentes afetados
 
-### Novos componentes
+### Novos componentes / arquivos
 
 | Arquivo | Descrição |
 |---|---|
 | `apps/store/src/app/(store)/_components/dots-indicator.tsx` | Novo `<DotsIndicator>` unificado (substitui `simulator-step-indicator.tsx` e `step-indicator.tsx`) |
+| `apps/store/src/lib/calc-installments.ts` | Funções `calcPRICE` e `calcSAC` extraídas dos componentes de resultado — reutilizadas nos cards e no PDF |
 
 ### Componentes a modificar
 
@@ -136,7 +201,8 @@ O PDF (`simulation-pdf.tsx`) atualmente hardcoda "Sistema PRICE · Parcelas fixa
 - `pessoa-juridica/antecipacao-recebiveis/resultado/_components/receivables-advance-resultado.tsx` — idem
 
 **PDF:**
-- `_components/simulation-pdf.tsx` — receber `sistema` e dados corretos, espelhar layout do card
+- `apps/store/src/lib/pdf/simulation-pdf.tsx` — redesenho completo: fundo branco, result box com borda-esq primary, tabela de parcelas (12 primeiras), sistema dinâmico PRICE/SAC
+- `apps/store/src/app/api/simulations/[id]/pdf/route.ts` — calcular parcelas via `calcInstallments` e passar como prop `installments` + `sistema`
 
 **Wizard:**
 - `contratar/[productTypeSlug]/_components/wizard-container.tsx` — **único lugar onde o card branco e o header são adicionados**; trocar `<StepIndicator>` por `<DotsIndicator>`; os steps individuais NÃO adicionam card próprio (evitar double-wrap)
@@ -162,6 +228,8 @@ O PDF (`simulation-pdf.tsx`) atualmente hardcoda "Sistema PRICE · Parcelas fixa
 - [ ] Todos os inputs e botões primários têm `h-11 rounded-[10px]`
 - [ ] Cards de resultado são light (bg-white), não dark
 - [ ] Card de resultado exibe "PRICE" ou "SAC" conforme a simulação, não hardcodado
-- [ ] PDF espelha o layout e dados do card de resultado do browser
+- [ ] PDF tem fundo branco, result box com borda-esq primary, tabela de parcelas (≤ 12 linhas)
+- [ ] PDF exibe "Sistema PRICE" ou "Sistema SAC" conforme a simulação, com colunas corretas
+- [ ] `calcPRICE` e `calcSAC` extraídas para `lib/calc-installments.ts` e compartilhadas entre cards e PDF
 - [ ] Nenhum componente shadcn global foi alterado (apenas overrides via className)
 - [ ] Funciona com a paleta de qualquer tenant (usa apenas CSS vars `--primary`, `--surface`, `--surface-foreground`)
