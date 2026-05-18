@@ -129,6 +129,42 @@ export async function getSimulationForPdf(simulationId: string, tenantId: string
   return data
 }
 
+export async function getProposal(proposalId: string, tenantId: string) {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('proposals')
+    .select(`
+      id,
+      product_id,
+      product_type_slug,
+      simulation_id,
+      status,
+      current_step,
+      client_name,
+      client_phone,
+      form_data,
+      documents_submitted,
+      created_at,
+      products (
+        id,
+        name,
+        min_amount,
+        max_amount,
+        min_term_months,
+        max_term_months,
+        min_rate_monthly,
+        max_rate_monthly,
+        product_type:product_types ( slug )
+      )
+    `)
+    .eq('id', proposalId)
+    .eq('tenant_id', tenantId)
+    .single()
+  return data
+}
+
+export type ProposalWithProduct = NonNullable<Awaited<ReturnType<typeof getProposal>>>
+
 export async function getTenantBranding(tenantId: string) {
   const supabase = createServiceClient()
   const { data } = await supabase
