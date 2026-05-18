@@ -165,6 +165,8 @@ export async function getProposal(proposalId: string, tenantId: string) {
 
 export type ProposalWithProduct = NonNullable<Awaited<ReturnType<typeof getProposal>>>
 
+export type TenantProduct = NonNullable<Awaited<ReturnType<typeof getTenantProduct>>>
+
 export async function getTenantBranding(tenantId: string) {
   const supabase = createServiceClient()
   const { data } = await supabase
