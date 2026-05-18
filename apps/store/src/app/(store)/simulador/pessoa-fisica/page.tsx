@@ -11,11 +11,11 @@ export const metadata: Metadata = { title: 'Crédito Pessoa Física' }
 const SLUG_TO_ROUTE: Record<string, string> = {
   home_equity:        '/simulador/pessoa-fisica/imovel-em-garantia',
   auto_equity:        '/simulador/pessoa-fisica/veiculo-em-garantia',
-  fgts:               '/simulador/pessoa-fisica/fgts',
+  fgts:               '/contratar/fgts',
   emprestimo_pessoal: '/simulador/pessoa-fisica/emprestimo-pessoal',
   conta_luz:          '/simulador/pessoa-fisica/conta-de-luz',
-  consignado_privado: '/simulador/pessoa-fisica/consignado',
-  consignado_publico: '/simulador/pessoa-fisica/consignado',
+  consignado_privado: '/contratar/consignado-clt',
+  consignado_publico: '/contratar/consignado-clt',
 }
 
 export default async function PessoaFisicaPage() {

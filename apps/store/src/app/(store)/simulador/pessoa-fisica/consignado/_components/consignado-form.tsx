@@ -32,13 +32,13 @@ export function ConsignadoForm({
     [minTermMonths, maxTermMonths],
   )
 
-  const valorTyped = Number(rawValor.replace(/\D/g, '')) / 100
+  const valorTyped = Math.max(0, Number(rawValor.replace(/\D/g, '')) || 0)
   const valorDesejado = valorTyped > teto ? teto : valorTyped
 
   const handleValorChange = (v: string) => {
     const digits = v.replace(/\D/g, '')
     setRawValor(digits)
-    const parsed = Number(digits) / 100
+    const parsed = Math.max(0, Number(digits) || 0)
     if (parsed > teto) {
       setShowMaxWarning(true)
     } else {

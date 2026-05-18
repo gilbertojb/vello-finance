@@ -6,7 +6,7 @@ import { AlertTriangle } from 'lucide-react'
 import { ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
 
-const LTV_LIMIT = 0.5
+const LTV_LIMIT = 0.6
 
 function parseBRL(raw: string): number {
   return Math.max(0, Number(raw.replace(/\D/g, '')) || 0)
@@ -39,6 +39,7 @@ export function HomeEquityForm({
   const [rawCredito, setRawCredito] = useState('')
   const [outroCredito, setOutroCredito] = useState('')
   const [instituicao, setInstituicao] = useState('')
+  const [valorLiberado, setValorLiberado] = useState('')
 
   const valorImovel = parseBRL(rawImovel)
   const valorCreditoTyped = parseBRL(rawCredito)
@@ -57,7 +58,7 @@ export function HomeEquityForm({
     valorImovel >= MIN_IMOVEL &&
     valorCredito > 0 &&
     outroCredito !== '' &&
-    (!showInstituicao || instituicao.trim().length > 0)
+    (!showInstituicao || (instituicao.trim().length > 0 && parseBRL(valorLiberado) > 0))
 
   function handleSubmit() {
     if (!canSubmit) return
@@ -68,6 +69,7 @@ export function HomeEquityForm({
       valorCredito,
       outroCredito,
       instituicao: showInstituicao ? instituicao.trim() : undefined,
+      valorLiberado: showInstituicao ? parseBRL(valorLiberado) : undefined,
     }
     const key = isPj ? 'sim:home-equity-pj' : 'sim:home-equity'
     sessionStorage.setItem(key, JSON.stringify(payload))
@@ -135,7 +137,7 @@ export function HomeEquityForm({
           htmlFor="valorImovel"
           className="mb-1.5 block text-sm font-semibold text-surface-foreground"
         >
-          Valor de avaliação do imóvel <span className="text-destructive">*</span>
+          Valor do Imóvel <span className="text-destructive">*</span>
         </label>
         <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
@@ -158,6 +160,11 @@ export function HomeEquityForm({
         <p className="mt-1.5 text-xs text-surface-foreground/50">
           Valor mínimo: {formatCurrency(MIN_IMOVEL)}
         </p>
+        {valorImovel > 0 && valorImovel < MIN_IMOVEL && (
+          <p className="mt-1.5 text-xs font-medium text-destructive">
+            O valor mínimo do imóvel para esta operação é de {formatCurrency(MIN_IMOVEL)}. Infelizmente, não podemos continuar.
+          </p>
+        )}
       </div>
 
       {/* Valor do crédito */}
@@ -190,13 +197,13 @@ export function HomeEquityForm({
           />
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">
-          Liberamos até 50% do valor do imóvel
+          Liberamos até 60% do valor do imóvel
         </p>
         {showWarning && (
-          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
-            <p className="text-xs font-medium text-surface-foreground/80">
-              Valor ajustado ao limite de 50% do imóvel ({formatCurrency(limite)})
+          <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-destructive" />
+            <p className="text-xs font-medium text-destructive/90">
+              O valor solicitado ultrapassa o limite permitido (60% do imóvel). Ajustamos automaticamente para {formatCurrency(limite)}.
             </p>
           </div>
         )}
@@ -226,24 +233,50 @@ export function HomeEquityForm({
         </label>
       </div>
 
-      {/* Banco / instituição (condicional) */}
+      {/* Banco / instituição e valor liberado (condicional) */}
       {showInstituicao && (
-        <div>
-          <label
-            htmlFor="instituicao"
-            className="mb-1.5 block text-sm font-semibold text-surface-foreground"
-          >
-            Qual banco ou instituição? <span className="text-destructive">*</span>
-          </label>
-          <input
-            type="text"
-            id="instituicao"
-            value={instituicao}
-            onChange={(e) => setInstituicao(e.target.value)}
-            placeholder="Ex: Itaú, Bradesco..."
-            className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
+        <>
+          <div>
+            <label
+              htmlFor="instituicao"
+              className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+            >
+              Qual banco ou instituição? <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              id="instituicao"
+              value={instituicao}
+              onChange={(e) => setInstituicao(e.target.value)}
+              placeholder="Ex: Itaú, Bradesco..."
+              className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+          <div>
+            <label
+              htmlFor="valorLiberado"
+              className="mb-1.5 block text-sm font-semibold text-surface-foreground"
+            >
+              Valor já liberado <span className="text-destructive">*</span>
+            </label>
+            <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+              <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
+              <input
+                type="text"
+                id="valorLiberado"
+                inputMode="numeric"
+                value={valorLiberado}
+                onChange={(e) => setValorLiberado(e.target.value.replace(/\D/g, ''))}
+                onBlur={() => {
+                  const v = parseBRL(valorLiberado)
+                  if (v > 0) setValorLiberado(new Intl.NumberFormat('pt-BR').format(v))
+                }}
+                placeholder="0"
+                className="flex-1 bg-transparent py-4 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
+              />
+            </div>
+          </div>
+        </>
       )}
 
       <button

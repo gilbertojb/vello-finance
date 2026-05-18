@@ -11,7 +11,7 @@ export function FgtsForm({ productId, minRateMonthly: _minRateMonthly }: Props) 
   const [whatsapp, setWhatsapp] = useState('')
   const [rawSaldo, setRawSaldo] = useState('')
 
-  const saldoFgts = Number(rawSaldo.replace(/\D/g, '')) / 100
+  const saldoFgts = Math.max(0, Number(rawSaldo.replace(/\D/g, '')) || 0)
 
   const canSubmit =
     nome.trim().split(/\s+/).filter(Boolean).length >= 2 &&

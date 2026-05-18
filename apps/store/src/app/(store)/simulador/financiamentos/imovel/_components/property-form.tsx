@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import { formatCurrency, generateTermOptions } from '@/lib/utils/simulator'
+import { formatCurrency } from '@/lib/utils/simulator'
 
 const ENTRADA_MIN_RATIO = 0.2
 
@@ -19,26 +19,23 @@ type Props = {
   maxAmount?: number
 }
 
+const PARCELAS_OPTIONS = [80, 180, 220, 230, 240]
+
 export function PropertyForm({
   productId,
-  minTermMonths,
-  maxTermMonths,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
   minAmount,
   maxAmount: _maxAmount,
 }: Props) {
   const MIN_IMOVEL = minAmount ?? 150_000
   const router = useRouter()
 
-  const PARCELAS_OPTIONS = useMemo(
-    () => generateTermOptions(minTermMonths, maxTermMonths),
-    [minTermMonths, maxTermMonths],
-  )
-
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawImovel, setRawImovel] = useState('')
   const [rawEntrada, setRawEntrada] = useState('')
-  const [parcelas, setParcelas] = useState(() => maxTermMonths ?? 360)
+  const [parcelas, setParcelas] = useState(240)
 
   const valorImovel = parseBRL(rawImovel)
   const entrada = parseBRL(rawEntrada)

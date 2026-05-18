@@ -6,7 +6,7 @@ import { RefreshCw, Info, Download } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 
-const PARCELAS_OPTIONS = [24, 36, 48, 60]
+const PARCELAS_OPTIONS = [15, 25, 35, 45, 60, 90]
 
 type Props = {
   productId: string
@@ -32,7 +32,7 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
     ano: number
     parcelas?: number
   } | null>(null)
-  const [parcelas, setParcelas] = useState(48)
+  const [parcelas, setParcelas] = useState(60)
   const [simulationId, setSimulationId] = useState<string | null>(null)
   const [isQualifying, setIsQualifying] = useState(false)
 

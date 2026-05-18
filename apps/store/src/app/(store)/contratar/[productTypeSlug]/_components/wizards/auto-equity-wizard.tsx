@@ -29,7 +29,7 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
   const [isPending, startTransition] = useTransition()
 
   const blockFinanciado = financiado === 'Sim'
-  const blockAno = ano ? currentYear - Number(ano) > 15 : false
+  const blockAno = ano ? currentYear - Number(ano) > 17 : false
 
   function handleSubmit() {
     if (blockFinanciado || blockAno) return

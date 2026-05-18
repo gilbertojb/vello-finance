@@ -1,9 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import { formatCurrency, generateTermOptions } from '@/lib/utils/simulator'
+import { formatCurrency } from '@/lib/utils/simulator'
 
 const ENTRADA_MIN_RATIO = 0.3
 
@@ -19,26 +19,23 @@ type Props = {
   maxAmount?: number
 }
 
+const PARCELAS_OPTIONS = [15, 25, 35, 45, 60, 90]
+
 export function VehicleForm({
   productId,
-  minTermMonths,
-  maxTermMonths,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
   minAmount,
   maxAmount: _maxAmount,
 }: Props) {
   const MIN_VEICULO = minAmount ?? 10_000
   const router = useRouter()
 
-  const PARCELAS_OPTIONS = useMemo(
-    () => generateTermOptions(minTermMonths, maxTermMonths),
-    [minTermMonths, maxTermMonths],
-  )
-
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawVeiculo, setRawVeiculo] = useState('')
   const [rawEntrada, setRawEntrada] = useState('')
-  const [parcelas, setParcelas] = useState(() => maxTermMonths ?? 48)
+  const [parcelas, setParcelas] = useState(90)
 
   const valorVeiculo = parseBRL(rawVeiculo)
   const entrada = parseBRL(rawEntrada)
