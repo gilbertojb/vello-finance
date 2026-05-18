@@ -5,18 +5,10 @@ import { useRouter } from 'next/navigation'
 import { Info, AlertTriangle, RefreshCw, Download } from 'lucide-react'
 import { formatCurrency, formatRate } from '@/lib/utils/simulator'
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
+import { StoreButton } from '@/components/ui/store-button'
 
-type Props = {
-  productId: string
-  productName: string
-  rateMonthly: number
-}
-
-type SimData = {
-  nome: string
-  whatsapp: string
-  saldoFgts: number
-}
+type Props = { productId: string; productName: string; rateMonthly: number }
+type SimData = { nome: string; whatsapp: string; saldoFgts: number }
 
 export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
   const router = useRouter()
@@ -33,7 +25,6 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
     try {
       const parsed: SimData = JSON.parse(stored)
       setData(parsed)
-
       const SIM_ID_KEY = 'sim:fgts:id'
       const existingId = sessionStorage.getItem(SIM_ID_KEY)
       if (existingId) {
@@ -61,73 +52,47 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
   }, [router, productId, rateMonthly])
 
   if (!data) {
-    return (
-      <div className="py-12 text-center text-sm text-surface-foreground/50">
-        Carregando dados da simulação...
-      </div>
-    )
+    return <div className="py-12 text-center text-sm text-surface-foreground/50">Carregando...</div>
   }
 
   const estimativa = data.saldoFgts * 0.75
 
   return (
-    <div className="space-y-5">
-      <div className="mb-4">
-        <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
+    <div className="space-y-4">
+      <div>
+        <p className="text-sm text-surface-foreground/55">Valor estimado de antecipação</p>
+        <p className="mt-1 text-3xl font-extrabold tracking-tight text-surface-foreground">
+          {formatCurrency(estimativa)}
+        </p>
+        <p className="mt-0.5 text-xs text-surface-foreground/45">75% do saldo informado</p>
       </div>
 
-      {/* Dados do saldo */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
-            Saldo informado
-          </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
-            {formatCurrency(data.saldoFgts)}
-          </div>
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
-            Prazo máximo
-          </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
-            120 meses
-          </div>
-        </div>
+      <div className="flex items-center justify-between rounded-lg bg-primary/12 px-4 py-2.5">
+        <span className="text-sm font-semibold text-surface-foreground">Parcelas mensais</span>
+        <span className="text-sm font-semibold text-surface-foreground">12× sem custo</span>
       </div>
 
-      {/* Card de resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-6 text-surface max-sm:p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-surface/70">Valor estimado de antecipação</h3>
-            <p className="text-xs text-surface/40">75% do saldo informado</p>
-          </div>
-          <p className="text-2xl font-bold leading-none tracking-tight text-surface">
-            <span className="text-sm font-medium text-surface/50">R$</span>{' '}
-            {estimativa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
-        </div>
+      <div className="h-px bg-surface-foreground/8" />
 
-        <div className="mt-5 border-t border-surface/15 pt-4">
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div>
-              <p className="mb-0.5 text-surface/40">Saldo FGTS</p>
-              <p className="font-medium text-surface/90">{formatCurrency(data.saldoFgts)}</p>
-            </div>
-            <div>
-              <p className="mb-0.5 text-surface/40">Taxa ref.</p>
-              <p className="font-medium text-surface/90">{formatRate(rateMonthly)}% a.m.</p>
-            </div>
-            <div>
-              <p className="mb-0.5 text-surface/40">Prazo máx.</p>
-              <p className="font-medium text-surface/90">10 anos</p>
-            </div>
-          </div>
+      <div className="space-y-2.5">
+        <div className="flex justify-between text-sm">
+          <span className="text-surface-foreground/55">Saldo FGTS</span>
+          <span className="font-semibold text-surface-foreground">{formatCurrency(data.saldoFgts)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-surface-foreground/55">Taxa referencial</span>
+          <span className="font-semibold text-surface-foreground">{formatRate(rateMonthly)}% a.m.</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-surface-foreground/55">Prazo máximo</span>
+          <span className="font-semibold text-surface-foreground">120 meses</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-surface-foreground/55">Sistema</span>
+          <span className="font-semibold text-surface-foreground">PRICE</span>
         </div>
       </div>
 
-      {/* Aviso estimativa */}
       <div className="flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
         <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
         <p className="text-xs leading-relaxed text-surface-foreground/80">
@@ -144,24 +109,20 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
         </p>
       </div>
 
-      <button
-        type="button"
+      <StoreButton
+        className="w-full bg-primary text-surface-foreground hover:bg-primary/90"
         disabled={!simulationId || isQualifying}
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
           const result = await qualifySimulation(simulationId)
-          if (result && !result.success) {
-            setIsQualifying(false)
-            return
-          }
+          if (result && !result.success) setIsQualifying(false)
         }}
-        className="w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
-      </button>
+      </StoreButton>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-1">
         <button
           type="button"
           onClick={() => router.back()}
@@ -172,10 +133,7 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
         <button
           type="button"
           disabled={!simulationId}
-          onClick={() => {
-            if (!simulationId) return
-            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
-          }}
+          onClick={() => { if (simulationId) window.open(`/api/simulations/${simulationId}/pdf`, '_blank') }}
           className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Download className="h-3.5 w-3.5" /> Baixar PDF

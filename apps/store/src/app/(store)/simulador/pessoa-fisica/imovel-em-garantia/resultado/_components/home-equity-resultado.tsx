@@ -3,8 +3,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { RefreshCw, Info, Download } from 'lucide-react'
-import { formatCurrency } from '@/lib/utils/simulator'
+import { formatCurrency, formatRate, calcSAC, calcPMT } from '@/lib/utils/simulator'
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
+import { StoreButton } from '@/components/ui/store-button'
 
 const PARCELAS_OPTIONS = [60, 120, 180, 240]
 
@@ -17,23 +18,15 @@ type Props = {
   isPj?: boolean
 }
 
-function calcSAC(principal: number, ratePercent: number, n: number) {
-  const r = ratePercent / 100
-  const amortization = principal / n
-  const firstInstallment = amortization + principal * r
-  const lastInstallment = amortization + amortization * r
-  return { firstInstallment, lastInstallment, amortization }
-}
-
-function calcPRICE(principal: number, ratePercent: number, n: number) {
-  const r = ratePercent / 100
-  if (r === 0) return principal / n
-  return (principal * (r * Math.pow(1 + r, n))) / (Math.pow(1 + r, n) - 1)
-}
-
 export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Props) {
   const router = useRouter()
-  const [data, setData] = useState<{ nome: string; whatsapp: string; valorImovel: number; valorCredito: number; parcelas?: number } | null>(null)
+  const [data, setData] = useState<{
+    nome: string
+    whatsapp: string
+    valorImovel: number
+    valorCredito: number
+    parcelas?: number
+  } | null>(null)
   const [parcelas, setParcelas] = useState(240)
   const [modalidade, setModalidade] = useState<Modalidade>('SAC')
   const [simulationId, setSimulationId] = useState<string | null>(null)
@@ -42,7 +35,9 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
   useEffect(() => {
     const key = isPj ? 'sim:home-equity-pj' : 'sim:home-equity'
     const stored = sessionStorage.getItem(key)
-    const route = isPj ? '/simulador/pessoa-juridica/imovel-em-garantia' : '/simulador/pessoa-fisica/imovel-em-garantia'
+    const route = isPj
+      ? '/simulador/pessoa-juridica/imovel-em-garantia'
+      : '/simulador/pessoa-fisica/imovel-em-garantia'
     if (!stored) {
       router.replace(route + `?productId=${productId}`)
       return
@@ -58,7 +53,7 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         setSimulationId(existingId)
       } else {
         const termMonths = parsed.parcelas ?? 240
-        const payment = calcPRICE(parsed.valorCredito, rateMonthly, termMonths)
+        const payment = calcPMT(parsed.valorCredito, rateMonthly, termMonths)
         saveSimulation({
           tenantProductId: productId,
           clientName: parsed.nome,
@@ -83,46 +78,50 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
   const ltv = data ? Math.round((data.valorCredito / data.valorImovel) * 100) : 0
 
   const calc = useMemo(() => {
-    if (!data) return { firstInstallment: 0, lastInstallment: 0, amortization: 0 }
+    if (!data) return { first: 0, last: 0, amortization: 0 }
     if (modalidade === 'SAC') {
       return calcSAC(data.valorCredito, rateMonthly, parcelas)
     }
-    const installment = calcPRICE(data.valorCredito, rateMonthly, parcelas)
-    return { firstInstallment: installment, lastInstallment: installment, amortization: null }
+    const installment = calcPMT(data.valorCredito, rateMonthly, parcelas)
+    return { first: installment, last: installment, amortization: 0 }
   }, [data, rateMonthly, parcelas, modalidade])
 
   const isSAC = modalidade === 'SAC'
 
   if (!data) {
-    return <div className="py-12 text-center text-sm text-surface-foreground/50">Carregando dados da simulação...</div>
+    return (
+      <div className="py-12 text-center text-sm text-surface-foreground/50">
+        Carregando dados da simulação...
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-5">
-      <div className="mb-4">
-        <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
-      </div>
-      {/* Valores do imóvel e crédito (somente leitura) */}
+    <div className="space-y-4">
+      {/* Greeting */}
+      <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
+
+      {/* Read-only fields */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor do imóvel
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
-            R$ {data.valorImovel.toLocaleString('pt-BR')}
+          <div className="rounded-lg border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
+            {formatCurrency(data.valorImovel)}
           </div>
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor do crédito
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
-            R$ {data.valorCredito.toLocaleString('pt-BR')}
+          <div className="rounded-lg border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
+            {formatCurrency(data.valorCredito)}
           </div>
         </div>
       </div>
 
-      {/* Parcelas e modalidade */}
+      {/* Parcelas + Modalidade toggles */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
@@ -138,14 +137,22 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
                 <option key={n} value={n}>{n}x</option>
               ))}
             </select>
-            <svg className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+            <svg
+              className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
         </div>
         <div>
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Modalidade
           </label>
-          <div className="flex overflow-hidden rounded-2xl border border-surface-foreground/15 bg-white">
+          <div className="flex overflow-hidden rounded-lg border border-surface-foreground/15 bg-white">
             {(['SAC', 'PRICE'] as Modalidade[]).map((m) => (
               <button
                 key={m}
@@ -164,71 +171,75 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         </div>
       </div>
 
-      {/* Card de resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-7">
-        <div className="mb-4 flex items-center gap-1.5 text-xs text-primary/70">
-          <RefreshCw className="h-3 w-3" />
-          <span>Cálculo em tempo real</span>
-        </div>
-
-        <p className="mb-1 text-sm font-medium text-primary/80">
+      {/* Valor principal */}
+      <div>
+        <p className="text-sm text-surface-foreground/55">
           {isSAC ? 'Primeira parcela (decrescente)' : 'Parcela fixa (PRICE)'}
         </p>
-        <div className="mb-3 text-4xl font-bold leading-none tracking-tight text-surface">
-          {formatCurrency(calc.firstInstallment)}
-        </div>
-
+        <p className="mt-1 text-3xl font-extrabold tracking-tight text-surface-foreground">
+          {formatCurrency(calc.first)}
+        </p>
         {isSAC && (
-          <div className="space-y-1 text-sm text-primary/80">
-            <p>Última parcela: <strong className="text-primary">{formatCurrency(calc.lastInstallment)}</strong></p>
-            <p>Amortização mensal fixa: <strong className="text-primary">{formatCurrency(calc.amortization!)}</strong></p>
-          </div>
+          <p className="mt-0.5 text-xs text-surface-foreground/45">
+            Última parcela: {formatCurrency(calc.last)}
+          </p>
         )}
+      </div>
 
-        <div className="mt-5 border-t border-surface/15 pt-4">
-          <div className="grid grid-cols-4 gap-2 text-xs">
-            {[
-              { label: 'Crédito', value: formatCurrency(data.valorCredito) },
-              { label: 'Prazo', value: `${parcelas}x` },
-              { label: 'Taxa ref.', value: `${rateMonthly.toFixed(2).replace('.', ',')}% a.m.` },
-              { label: 'LTV', value: `${ltv}%` },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <div className="text-surface/50">{label}</div>
-                <div className="mt-0.5 font-semibold text-surface">{value}</div>
-              </div>
-            ))}
+      {/* Highlight pill */}
+      <div className="flex items-center justify-between rounded-lg bg-primary/12 px-4 py-2.5">
+        <span className="text-sm font-semibold text-surface-foreground">
+          {isSAC ? `${parcelas}× decrescentes` : `${parcelas}× fixas`}
+        </span>
+        <span className="text-sm font-semibold text-surface-foreground">
+          {isSAC
+            ? `${formatCurrency(calc.last)} → ${formatCurrency(calc.first)}`
+            : formatCurrency(calc.first)}
+        </span>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-surface-foreground/8" />
+
+      {/* Data rows */}
+      <div className="space-y-2.5">
+        {[
+          { label: 'Crédito', value: formatCurrency(data.valorCredito) },
+          { label: 'Valor do imóvel', value: formatCurrency(data.valorImovel) },
+          { label: 'Taxa mensal', value: `${formatRate(rateMonthly)}% a.m.` },
+          { label: 'LTV', value: `${ltv}%` },
+          { label: 'Sistema', value: modalidade },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex justify-between text-sm">
+            <span className="text-surface-foreground/55">{label}</span>
+            <span className="font-semibold text-surface-foreground">{value}</span>
           </div>
-        </div>
+        ))}
       </div>
 
       {/* Aviso */}
-      <div className="flex items-start gap-2.5 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+      <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
         <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary/70" />
         <p className="text-xs text-surface-foreground/65">
-          Simulação estimada. A taxa e condições definitivas são apresentadas após a análise do seu perfil de crédito.
+          Simulação estimada. A taxa e condições definitivas são apresentadas após a análise do seu
+          perfil de crédito.
         </p>
       </div>
 
-      {/* CTAs */}
-      <button
-        type="button"
+      <StoreButton
+        className="w-full bg-primary text-surface-foreground hover:bg-primary/90"
         disabled={!simulationId || isQualifying}
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
           const result = await qualifySimulation(simulationId)
-          if (result && !result.success) {
-            setIsQualifying(false)
-            return
-          }
+          if (result && !result.success) setIsQualifying(false)
         }}
-        className="w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
-      </button>
+      </StoreButton>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-1">
         <button
           type="button"
           onClick={() => router.back()}
@@ -240,10 +251,9 @@ export function HomeEquityResultado({ productId, rateMonthly, isPj = false }: Pr
           type="button"
           disabled={!simulationId}
           onClick={() => {
-            if (!simulationId) return
-            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
+            if (simulationId) window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
           }}
-          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:opacity-30"
         >
           <Download className="h-3.5 w-3.5" /> Baixar PDF
         </button>

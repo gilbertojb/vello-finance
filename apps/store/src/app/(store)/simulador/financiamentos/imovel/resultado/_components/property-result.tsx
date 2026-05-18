@@ -3,10 +3,13 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Info, RefreshCw, Download } from 'lucide-react'
-import { formatCurrency, calcPMT } from '@/lib/utils/simulator'
+import { formatCurrency, formatRate, calcSAC, calcPMT } from '@/lib/utils/simulator'
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
+import { StoreButton } from '@/components/ui/store-button'
 
 const PARCELAS_OPTIONS = [60, 120, 180, 240, 300, 360]
+
+type Modalidade = 'SAC' | 'PRICE'
 
 type SimData = {
   nome: string
@@ -25,6 +28,7 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
   const [parcelas, setParcelas] = useState(360)
+  const [modalidade, setModalidade] = useState<Modalidade>('SAC')
   const [simulationId, setSimulationId] = useState<string | null>(null)
   const [isQualifying, setIsQualifying] = useState(false)
 
@@ -70,10 +74,16 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
   const principal = data ? data.valorImovel - data.entrada : 0
   const ltv = data ? Math.round((principal / data.valorImovel) * 100) : 0
 
-  const installment = useMemo(() => {
-    if (!data || principal <= 0) return 0
-    return calcPMT(principal, rateMonthly, parcelas)
-  }, [data, principal, rateMonthly, parcelas])
+  const calc = useMemo(() => {
+    if (!data || principal <= 0) return { first: 0, last: 0, amortization: 0 }
+    if (modalidade === 'SAC') {
+      return calcSAC(principal, rateMonthly, parcelas)
+    }
+    const installment = calcPMT(principal, rateMonthly, parcelas)
+    return { first: installment, last: installment, amortization: 0 }
+  }, [data, principal, rateMonthly, parcelas, modalidade])
+
+  const isSAC = modalidade === 'SAC'
 
   if (!data) {
     return (
@@ -84,20 +94,17 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
   }
 
   return (
-    <div className="space-y-5">
-      <div className="mb-4">
-        <p className="text-sm font-medium text-surface-foreground">
-          Olá, {data.nome}!
-        </p>
-      </div>
+    <div className="space-y-4">
+      {/* Greeting */}
+      <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
 
-      {/* Valor do imóvel e entrada (read-only) */}
+      {/* Read-only fields */}
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor do imóvel
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
+          <div className="rounded-lg border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             {formatCurrency(data.valorImovel)}
           </div>
         </div>
@@ -105,13 +112,36 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
           <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
             Valor de entrada
           </label>
-          <div className="rounded-2xl border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
+          <div className="rounded-lg border border-surface-foreground/12 bg-surface px-4 py-3 text-sm font-semibold text-surface-foreground">
             {formatCurrency(data.entrada)}
           </div>
         </div>
       </div>
 
-      {/* Seletor de parcelas */}
+      {/* Modalidade toggle */}
+      <div>
+        <label className="mb-1.5 block text-xs font-medium text-surface-foreground/55">
+          Sistema de amortização
+        </label>
+        <div className="flex overflow-hidden rounded-lg border border-surface-foreground/15 bg-white">
+          {(['SAC', 'PRICE'] as Modalidade[]).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setModalidade(m)}
+              className={`flex-1 py-3 text-sm font-bold transition-colors ${
+                modalidade === m
+                  ? 'bg-surface-foreground text-surface'
+                  : 'text-surface-foreground/50 hover:text-surface-foreground'
+              }`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Parcelas selector */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Em quanto tempo quer pagar?
@@ -122,7 +152,7 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
               key={p}
               type="button"
               onClick={() => setParcelas(p)}
-              className={`rounded-2xl border py-3 text-sm font-medium transition-colors ${
+              className={`rounded-lg border py-3 text-sm font-medium transition-colors ${
                 parcelas === p
                   ? 'border-primary bg-primary/5 text-primary'
                   : 'border-surface-foreground/12 bg-surface-foreground/5 text-surface-foreground/60 hover:bg-surface-foreground/10'
@@ -134,41 +164,54 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
         </div>
       </div>
 
-      {/* Card escuro com resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-6 text-surface max-sm:p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-surface/70">Parcela mensal</h3>
-            <p className="text-xs text-surface/40">Sistema PRICE (Fixas)</p>
-          </div>
-          <p className="text-2xl font-bold leading-none tracking-tight text-surface">
-            <span className="text-sm font-medium text-surface/50">R$</span>{' '}
-            {installment.toLocaleString('pt-BR', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+      {/* Valor principal */}
+      <div>
+        <p className="text-sm text-surface-foreground/55">
+          {isSAC ? 'Primeira parcela (decrescente)' : 'Parcela fixa (PRICE)'}
+        </p>
+        <p className="mt-1 text-3xl font-extrabold tracking-tight text-surface-foreground">
+          {formatCurrency(calc.first)}
+        </p>
+        {isSAC && (
+          <p className="mt-0.5 text-xs text-surface-foreground/45">
+            Última parcela: {formatCurrency(calc.last)}
           </p>
-        </div>
-
-        <div className="mt-5 border-t border-surface/15 pt-4">
-          <div className="grid grid-cols-4 gap-2 text-xs">
-            {[
-              { label: 'Financiado', value: formatCurrency(principal) },
-              { label: 'Prazo', value: `${parcelas}x` },
-              { label: 'Taxa ref.', value: `${rateMonthly.toFixed(2).replace('.', ',')}% a.m.` },
-              { label: 'LTV', value: `${ltv}%` },
-            ].map((item) => (
-              <div key={item.label}>
-                <p className="mb-0.5 text-surface/40">{item.label}</p>
-                <p className="font-medium text-surface/90">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* Aviso informativo */}
-      <div className="flex items-start gap-2.5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+      {/* Highlight pill */}
+      <div className="flex items-center justify-between rounded-lg bg-primary/12 px-4 py-2.5">
+        <span className="text-sm font-semibold text-surface-foreground">
+          {isSAC ? `${parcelas}× decrescentes` : `${parcelas}× fixas`}
+        </span>
+        <span className="text-sm font-semibold text-surface-foreground">
+          {isSAC
+            ? `${formatCurrency(calc.last)} → ${formatCurrency(calc.first)}`
+            : formatCurrency(calc.first)}
+        </span>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-surface-foreground/8" />
+
+      {/* Data rows */}
+      <div className="space-y-2.5">
+        {[
+          { label: 'Financiado', value: formatCurrency(principal) },
+          { label: 'Valor do imóvel', value: formatCurrency(data.valorImovel) },
+          { label: 'Taxa mensal', value: `${formatRate(rateMonthly)}% a.m.` },
+          { label: 'LTV', value: `${ltv}%` },
+          { label: 'Sistema', value: modalidade },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex justify-between text-sm">
+            <span className="text-surface-foreground/55">{label}</span>
+            <span className="font-semibold text-surface-foreground">{value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Aviso */}
+      <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
         <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
         <p className="text-xs leading-relaxed text-primary/80">
           Esta é uma simulação referencial. Condições finais dependem da análise de crédito e
@@ -176,21 +219,20 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
         </p>
       </div>
 
-      {/* CTA */}
-      <button
-        type="button"
+      <StoreButton
+        className="w-full bg-primary text-surface-foreground hover:bg-primary/90"
         disabled={!simulationId || isQualifying}
         onClick={async () => {
           if (!simulationId) return
           setIsQualifying(true)
-          await qualifySimulation(simulationId)
+          const result = await qualifySimulation(simulationId)
+          if (result && !result.success) setIsQualifying(false)
         }}
-        className="w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
-      </button>
+      </StoreButton>
 
-      <div className="flex items-center justify-center gap-6 pt-2">
+      <div className="flex items-center justify-center gap-6 pt-1">
         <button
           type="button"
           onClick={() => router.back()}
@@ -202,10 +244,9 @@ export function PropertyResult({ productId, rateMonthly }: Props) {
           type="button"
           disabled={!simulationId}
           onClick={() => {
-            if (!simulationId) return
-            window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
+            if (simulationId) window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
           }}
-          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:opacity-30"
         >
           <Download className="h-3.5 w-3.5" /> Baixar PDF
         </button>
