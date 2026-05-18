@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { listActiveProductsByCategory } from '@/app/(store)/queries'
 import { ProdutoSelector } from '@/app/(store)/_components/produto-selector'
-import { SimulatorStepIndicator } from '@/app/(store)/_components/simulator-step-indicator'
+import { DotsIndicator, SIMULATOR_STEPS } from '@/app/(store)/_components/dots-indicator'
 
 export const metadata: Metadata = { title: 'Financiamentos' }
 
@@ -33,12 +33,12 @@ export default async function FinanciamentosPage() {
         <Link href="/" className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-surface-foreground/55 transition-colors hover:text-surface-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar
         </Link>
-        <div className="mb-10"><SimulatorStepIndicator currentStep={1} /></div>
-        <div className="rounded-2xl border border-surface-foreground/10 bg-white p-10 max-sm:p-6">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
+        <DotsIndicator steps={SIMULATOR_STEPS} currentStep="produto" />
+        <div className="rounded-2xl border border-surface-foreground/10 bg-white p-6 max-sm:p-5">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-label text-primary-foreground">
             Financiamentos
           </span>
-          <h2 className="mb-2 mt-5 text-[26px] font-bold leading-tight tracking-tight text-surface-foreground">
+          <h2 className="mb-2 mt-5 text-2xl font-bold leading-tight tracking-tight text-surface-foreground">
             Qual financiamento você está buscando?
           </h2>
           <p className="mb-8 text-sm leading-relaxed text-surface-foreground/55">

@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { getTenantProduct } from '@/app/(store)/queries'
-import { SimulatorStepIndicator } from '@/app/(store)/_components/simulator-step-indicator'
+import { DotsIndicator, SIMULATOR_STEPS } from '@/app/(store)/_components/dots-indicator'
 import { ContaLuzResultado } from './_components/energy-bill-resultado'
 
 export const metadata: Metadata = { title: 'Sua simulação está pronta' }
@@ -32,16 +32,14 @@ export default async function ContaLuzResultadoPage({ searchParams }: Props) {
           <ArrowLeft className="h-3.5 w-3.5" /> Voltar
         </Link>
 
-        <div className="mb-10">
-          <SimulatorStepIndicator currentStep={3} />
-        </div>
+        <DotsIndicator steps={SIMULATOR_STEPS} currentStep="resultado" />
 
-        <div className="rounded-2xl border border-surface-foreground/10 bg-white p-10 max-sm:p-6">
-          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
+        <div className="rounded-2xl border border-surface-foreground/10 bg-white p-6 max-sm:p-5">
+          <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-label text-primary-foreground">
             Simulação Concluída
           </span>
 
-          <h2 className="mb-2 mt-5 text-[26px] font-bold leading-tight tracking-tight text-surface-foreground">
+          <h2 className="mb-2 mt-5 text-2xl font-bold leading-tight tracking-tight text-surface-foreground">
             Sua simulação está pronta!
           </h2>
           <p className="mb-8 text-sm leading-relaxed text-surface-foreground/55">
