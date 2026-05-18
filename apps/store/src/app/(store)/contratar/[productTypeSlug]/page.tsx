@@ -1,7 +1,7 @@
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { getTenantProduct, getProposal } from '@/app/(store)/queries'
-import { URL_TO_DB_SLUG } from './_components/flow-config'
+import { URL_TO_DB_SLUG, PRODUCT_FLOWS } from './_components/flow-config'
 import { WizardContainer } from './_components/wizard-container'
 
 type Props = {
@@ -26,10 +26,12 @@ export default async function ContratarPage({ params, searchParams }: Props) {
 
   if (!product && !proposal) redirect('/simulador')
 
+  const defaultStep = PRODUCT_FLOWS[dbSlug]?.etapa1[0]?.slug ?? 'operacao'
+
   return (
     <WizardContainer
       productTypeSlug={dbSlug}
-      currentStep={step ?? 'operacao'}
+      currentStep={step ?? defaultStep}
       proposal={proposal ?? null}
       product={product ?? null}
       productId={productId ?? null}
