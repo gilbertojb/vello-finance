@@ -97,31 +97,31 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
       </div>
 
       {/* Card de resultado */}
-      <div className="rounded-2xl bg-surface-foreground p-6 text-primary-foreground max-sm:p-5">
+      <div className="rounded-2xl bg-surface-foreground p-6 text-surface max-sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-primary-foreground/70">Valor estimado de antecipação</h3>
-            <p className="text-xs text-primary-foreground/40">75% do saldo informado</p>
+            <h3 className="text-sm font-medium text-surface/70">Valor estimado de antecipação</h3>
+            <p className="text-xs text-surface/40">75% do saldo informado</p>
           </div>
-          <p className="text-2xl font-bold leading-none tracking-tight text-primary-foreground">
-            <span className="text-sm font-medium text-primary-foreground/50">R$</span>{' '}
+          <p className="text-2xl font-bold leading-none tracking-tight text-surface">
+            <span className="text-sm font-medium text-surface/50">R$</span>{' '}
             {estimativa.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
 
-        <div className="mt-5 border-t border-primary-foreground/10 pt-4">
+        <div className="mt-5 border-t border-surface/15 pt-4">
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
-              <p className="mb-0.5 text-primary-foreground/40">Saldo FGTS</p>
-              <p className="font-medium text-primary-foreground/90">{formatCurrency(data.saldoFgts)}</p>
+              <p className="mb-0.5 text-surface/40">Saldo FGTS</p>
+              <p className="font-medium text-surface/90">{formatCurrency(data.saldoFgts)}</p>
             </div>
             <div>
-              <p className="mb-0.5 text-primary-foreground/40">Taxa ref.</p>
-              <p className="font-medium text-primary-foreground/90">{formatRate(rateMonthly)}% a.m.</p>
+              <p className="mb-0.5 text-surface/40">Taxa ref.</p>
+              <p className="font-medium text-surface/90">{formatRate(rateMonthly)}% a.m.</p>
             </div>
             <div>
-              <p className="mb-0.5 text-primary-foreground/40">Prazo máx.</p>
-              <p className="font-medium text-primary-foreground/90">10 anos</p>
+              <p className="mb-0.5 text-surface/40">Prazo máx.</p>
+              <p className="font-medium text-surface/90">10 anos</p>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@ export function FgtsResultado({ productId, productName, rateMonthly }: Props) {
             return
           }
         }}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>

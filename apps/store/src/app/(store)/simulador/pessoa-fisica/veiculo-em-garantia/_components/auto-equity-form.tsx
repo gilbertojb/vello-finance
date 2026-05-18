@@ -91,7 +91,7 @@ export function AutoEquityForm({
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -100,7 +100,7 @@ export function AutoEquityForm({
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           WhatsApp para contato <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/40">+55</span>
           <div className="h-5 w-px bg-surface-foreground/12" />
           <input
@@ -126,7 +126,7 @@ export function AutoEquityForm({
             value={marca}
             onChange={(e) => setMarca(e.target.value)}
             placeholder="Ex: Fiat, VW..."
-            className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
 
@@ -143,7 +143,7 @@ export function AutoEquityForm({
             value={ano}
             onChange={(e) => setAno(e.target.value.replace(/\D/g, ''))}
             placeholder="Ex: 2021"
-            className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       </div>
@@ -153,7 +153,7 @@ export function AutoEquityForm({
         <label htmlFor="valorFipe" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Valor aproximado da Tabela FIPE <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
           <input
             type="text"
@@ -174,7 +174,7 @@ export function AutoEquityForm({
         <label htmlFor="valorCredito" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Quanto você precisa de crédito? <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
           <input
             type="text"
@@ -204,7 +204,7 @@ export function AutoEquityForm({
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity disabled:opacity-40"
+        className="mt-2 w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity disabled:opacity-40"
       >
         Ver minha simulação →
       </button>

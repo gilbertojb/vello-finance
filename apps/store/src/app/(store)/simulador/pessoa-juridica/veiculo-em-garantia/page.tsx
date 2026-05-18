@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getTenantProduct } from '@/app/(store)/simulador/queries'
-import { SimulatorStepIndicator } from '@/app/(store)/simulador/_components/simulator-step-indicator'
+import { getTenantProduct } from '@/app/(store)/queries'
+import { SimulatorStepIndicator } from '@/app/(store)/_components/simulator-step-indicator'
 import { AutoEquityForm } from '../../pessoa-fisica/veiculo-em-garantia/_components/auto-equity-form'
 
 export const metadata: Metadata = { title: 'Empréstimo com Garantia de Veículo PJ' }
@@ -35,7 +35,7 @@ export default async function AutoEquityPjDadosPage({ searchParams }: Props) {
           <SimulatorStepIndicator currentStep={2} />
         </div>
 
-        <div className="rounded-2xl border border-foreground/[0.06] bg-background p-10 max-sm:p-6">
+        <div className="rounded-2xl border border-surface-foreground/10 bg-white p-10 max-sm:p-6">
           <span className="inline-flex items-center rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[.18em] text-primary-foreground">
             {tp.products.name}
           </span>

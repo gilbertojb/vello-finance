@@ -126,7 +126,7 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
               className={`flex-1 rounded-2xl border py-3 text-sm font-medium transition-colors ${
                 parcelas === p
                   ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-surface-foreground/12 bg-background text-surface-foreground/60 hover:bg-surface'
+                  : 'border-surface-foreground/12 bg-surface-foreground/5 text-surface-foreground/60 hover:bg-surface-foreground/10'
               }`}
             >
               {p}x
@@ -135,19 +135,19 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
         </div>
       </div>
 
-      <div className="rounded-2xl bg-surface-foreground p-6 text-primary-foreground max-sm:p-5">
+      <div className="rounded-2xl bg-surface-foreground p-6 text-surface max-sm:p-5">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-medium text-primary-foreground/70">Parcela mensal</h3>
-            <p className="text-xs text-primary-foreground/40">Sistema PRICE (Fixas)</p>
+            <h3 className="text-sm font-medium text-surface/70">Parcela mensal</h3>
+            <p className="text-xs text-surface/40">Sistema PRICE (Fixas)</p>
           </div>
-          <p className="text-2xl font-bold leading-none tracking-tight text-primary-foreground">
-            <span className="text-sm font-medium text-primary-foreground/50">R$</span>{' '}
+          <p className="text-2xl font-bold leading-none tracking-tight text-surface">
+            <span className="text-sm font-medium text-surface/50">R$</span>{' '}
             {installment.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
 
-        <div className="mt-5 border-t border-primary-foreground/10 pt-4">
+        <div className="mt-5 border-t border-surface/15 pt-4">
           <div className="grid grid-cols-4 gap-2 text-xs">
             {[
               { label: 'Crédito', value: formatCurrency(data.valorCredito) },
@@ -156,8 +156,8 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
               { label: 'LTV', value: `${ltv}%` },
             ].map((item, i) => (
               <div key={i}>
-                <p className="mb-0.5 text-primary-foreground/40">{item.label}</p>
-                <p className="font-medium text-primary-foreground/90">{item.value}</p>
+                <p className="mb-0.5 text-surface/40">{item.label}</p>
+                <p className="font-medium text-surface/90">{item.value}</p>
               </div>
             ))}
           </div>
@@ -185,7 +185,7 @@ export function AutoEquityResultado({ productId, rateMonthly, isPj = false }: Pr
             return
           }
         }}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity hover:opacity-90 disabled:opacity-40"
       >
         {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
       </button>

@@ -59,7 +59,7 @@ export function ProdutoSelector({ options }: { options: ProdutoOption[] }) {
         type="button"
         disabled={!selected}
         onClick={() => selectedOption && router.push(selectedOption.href)}
-        className="w-full rounded-2xl bg-background px-5 py-4 text-base font-semibold text-primary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+        className="w-full rounded-2xl bg-surface-foreground px-5 py-4 text-base font-semibold text-surface transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
       >
         Continuar →
       </button>

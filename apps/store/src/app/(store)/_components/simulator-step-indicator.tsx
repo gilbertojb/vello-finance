@@ -1,36 +1,37 @@
 import { Check } from 'lucide-react'
 
-const STEP_LABELS = ['Produto', 'Dados', 'Resultado']
+const STEPS = ['Produto', 'Dados', 'Resultado']
 
 export function SimulatorStepIndicator({ currentStep }: { currentStep: 1 | 2 | 3 }) {
   return (
-    <div className="flex items-center justify-center">
-      {STEP_LABELS.map((label, i) => {
-        const n = i + 1
-        const completed = n < currentStep
-        const current = n === currentStep
-        const isLast = i === STEP_LABELS.length - 1
+    <div className="flex items-center justify-start gap-0">
+      {STEPS.map((label, i) => {
+        const n      = i + 1
+        const done   = n < currentStep
+        const active = n === currentStep
+        const isLast = i === STEPS.length - 1
+
         return (
           <div key={n} className="flex items-center">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-2">
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold transition-colors ${
-                  completed
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
+                  done
                     ? 'bg-primary text-primary-foreground'
-                    : current
-                      ? 'bg-surface-foreground text-surface'
-                      : 'bg-surface-foreground/12 text-surface-foreground/35'
+                    : active
+                      ? 'bg-surface-foreground text-surface ring-4 ring-surface-foreground/10'
+                      : 'bg-surface-foreground/8 text-surface-foreground/30'
                 }`}
               >
-                {completed ? <Check className="h-4 w-4" /> : n}
+                {done ? <Check className="h-3 w-3 stroke-[2.5]" /> : n}
               </div>
               <span
-                className={`mt-2 text-xs font-medium ${
-                  completed
+                className={`text-[11px] font-medium tracking-wide ${
+                  done
                     ? 'text-primary'
-                    : current
+                    : active
                       ? 'text-surface-foreground'
-                      : 'text-surface-foreground/35'
+                      : 'text-surface-foreground/30'
                 }`}
               >
                 {label}
@@ -38,7 +39,9 @@ export function SimulatorStepIndicator({ currentStep }: { currentStep: 1 | 2 | 3
             </div>
             {!isLast && (
               <div
-                className={`mb-5 mx-3 h-px w-16 ${completed ? 'bg-primary' : 'bg-surface-foreground/12'}`}
+                className={`mb-5 mx-4 h-px w-12 rounded-full transition-colors ${
+                  done ? 'bg-primary/40' : 'bg-surface-foreground/12'
+                }`}
               />
             )}
           </div>

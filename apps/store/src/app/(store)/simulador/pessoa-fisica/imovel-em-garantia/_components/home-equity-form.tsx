@@ -101,7 +101,7 @@ export function HomeEquityForm({
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -113,7 +113,7 @@ export function HomeEquityForm({
         >
           WhatsApp para contato <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/40">
             +55
           </span>
@@ -137,7 +137,7 @@ export function HomeEquityForm({
         >
           Valor de avaliação do imóvel <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -169,7 +169,7 @@ export function HomeEquityForm({
           Quanto você precisa de crédito?{' '}
           <span className="text-destructive">*</span>
         </label>
-        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-background focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-center rounded-2xl border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -213,7 +213,7 @@ export function HomeEquityForm({
               id="outroCredito"
               value={outroCredito}
               onChange={(e) => setOutroCredito(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              className="w-full appearance-none rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="" disabled>
                 Selecione...
@@ -241,7 +241,7 @@ export function HomeEquityForm({
             value={instituicao}
             onChange={(e) => setInstituicao(e.target.value)}
             placeholder="Ex: Itaú, Bradesco..."
-            className="w-full rounded-2xl border border-surface-foreground/15 bg-background px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="w-full rounded-2xl border border-surface-foreground/15 bg-white px-5 py-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>
       )}
@@ -250,7 +250,7 @@ export function HomeEquityForm({
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full rounded-2xl bg-background px-5 py-4 text-sm font-semibold text-primary transition-opacity disabled:opacity-40"
+        className="mt-2 w-full rounded-2xl bg-surface-foreground px-5 py-4 text-sm font-semibold text-surface transition-opacity disabled:opacity-40"
       >
         Ver minha simulação →
       </button>
