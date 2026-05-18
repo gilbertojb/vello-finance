@@ -1,0 +1,168 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
+import { getStepData } from '../steps/types'
+import { BlockMessage } from '../steps/block-message'
+import { RetornoStep } from '../steps/retorno-step'
+import { DadosPessoaisPFStep } from '../steps/dados-pessoais-pf-step'
+import { DadosBancariosEtapa2Step } from '../etapa2/dados-bancarios-step'
+import type { ProductWizardProps } from '../steps/types'
+
+const TEMPOS_EMPRESA_CLT = ['Menos de 6 meses', '6 meses a 1 ano', '1 a 3 anos', '3 a 5 anos', 'Mais de 5 anos']
+
+function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep }: ProductWizardProps) {
+  const saved = getStepData<Record<string, string>>(proposal, 'pre-filtro')
+  const [clt, setClt] = useState(saved.clt ?? '')
+  const [vinculo, setVinculo] = useState(saved.vinculo ?? '')
+  const [tempo, setTempo] = useState(saved.tempo ?? '')
+  const [idade, setIdade] = useState(saved.idade ?? '')
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const blocked = clt === 'Não' || vinculo === 'Não' || tempo === 'Não' || idade === 'Não'
+  const allSim = clt === 'Sim' && vinculo === 'Sim' && tempo === 'Sim' && idade === 'Sim'
+
+  function handleSubmit() {
+    if (blocked || !allSim) return
+    startTransition(async () => {
+      const stepData = { clt, vinculo, tempo, idade }
+      const res = proposalId
+        ? await saveStep({ proposalId, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
+      if (res && 'error' in res) setError(res.error)
+    })
+  }
+
+  const pergunta = (label: string, val: string, set: (v: string) => void) => (
+    <div>
+      <p className="mb-2 text-sm font-medium">{label}</p>
+      <div className="flex gap-3">
+        {(['Sim', 'Não'] as const).map((v) => (
+          <button key={v} type="button" onClick={() => set(v)}
+            className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${val === v ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'}`}>
+            {v}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="space-y-5">
+      <p className="text-base font-semibold">Verificação de elegibilidade</p>
+      {pergunta('Você trabalha com carteira assinada (CLT)?', clt, setClt)}
+      {pergunta('Seu vínculo está ativo (sem aviso prévio)?', vinculo, setVinculo)}
+      {pergunta('Tempo de empresa igual ou superior a 6 meses?', tempo, setTempo)}
+      {pergunta('Sua idade está entre 21 e 65 anos?', idade, setIdade)}
+      {blocked && <BlockMessage message="Infelizmente, não atende aos requisitos mínimos para esta modalidade de crédito no momento. Mas existem outras opções disponíveis para você!" />}
+      {error && <FieldError>{error}</FieldError>}
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || !allSim}>
+        {isPending ? 'Salvando…' : 'Prosseguir'}
+      </Button>
+    </div>
+  )
+}
+
+function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
+  const [autorizado, setAutorizado] = useState(false)
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  function handleSubmit() {
+    if (!autorizado) return setError('Autorização obrigatória para prosseguir.')
+    setError('')
+    startTransition(async () => {
+      const res = await saveStep({ proposalId: proposalId!, stepSlug: 'autorizacao-dataprev', stepData: { autorizado: true }, nextStep: 'dados-pessoais' })
+      if (res && 'error' in res) setError(res.error)
+    })
+  }
+
+  return (
+    <div className="space-y-5">
+      <p className="text-base font-semibold">Autorização Dataprev</p>
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border bg-muted/30 p-4">
+        <input type="checkbox" className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary" checked={autorizado} onChange={(e) => setAutorizado(e.target.checked)} />
+        <span className="text-sm text-muted-foreground">
+          Autorizo a consulta dos meus dados via Dataprev para análise de crédito consignado.
+        </span>
+      </label>
+      {error && <FieldError>{error}</FieldError>}
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || !autorizado}>
+        {isPending ? 'Salvando…' : 'Prosseguir'}
+      </Button>
+    </div>
+  )
+}
+
+function DadosProfissionaisStep({ proposalId, proposal }: ProductWizardProps) {
+  const saved = getStepData<Record<string, string>>(proposal, 'dados-profissionais')
+  const [empresa, setEmpresa] = useState(saved.empresa ?? '')
+  const [tempoEmpresa, setTempoEmpresa] = useState(saved.tempoEmpresa ?? '')
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const blockTempo = tempoEmpresa === 'Menos de 6 meses'
+
+  function handleSubmit() {
+    if (blockTempo || !empresa || !tempoEmpresa) return setError('Preencha todos os campos.')
+    setError('')
+    startTransition(async () => {
+      const res = await saveStep({ proposalId: proposalId!, stepSlug: 'dados-profissionais', stepData: { empresa, tempoEmpresa, tipoContrato: 'CLT (Carteira Assinada)' }, nextStep: 'dados-bancarios' })
+      if (res && 'error' in res) setError(res.error)
+    })
+  }
+
+  return (
+    <FieldGroup>
+      <Field>
+        <FieldLabel>Empresa atual <span className="text-destructive">*</span></FieldLabel>
+        <Input placeholder="Nome da empresa" value={empresa} onChange={(e) => setEmpresa(e.target.value)} />
+      </Field>
+
+      <Field>
+        <FieldLabel>Tempo de empresa <span className="text-destructive">*</span></FieldLabel>
+        <Select value={tempoEmpresa} onValueChange={setTempoEmpresa}>
+          <SelectTrigger className="w-full"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectContent>
+            {TEMPOS_EMPRESA_CLT.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {blockTempo && <BlockMessage message="É necessário ter pelo menos 6 meses de empresa para esta linha de crédito." />}
+      </Field>
+
+      <Field>
+        <FieldLabel>Tipo de contrato</FieldLabel>
+        <Input value="CLT (Carteira Assinada)" readOnly className="opacity-60" />
+      </Field>
+
+      {error && <FieldError>{error}</FieldError>}
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockTempo}>
+        {isPending ? 'Salvando…' : 'Prosseguir'}
+      </Button>
+    </FieldGroup>
+  )
+}
+
+export function ConsignadoPrivadoWizard({ currentStep, ...props }: ProductWizardProps) {
+  switch (currentStep) {
+    case 'pre-filtro':
+      return <PreFiltroStep {...props} currentStep={currentStep} />
+    case 'autorizacao-dataprev':
+      return <AutorizacaoDataprevStep {...props} currentStep={currentStep} />
+    case 'dados-pessoais':
+      return <DadosPessoaisPFStep {...props} nextStep="dados-profissionais" />
+    case 'dados-profissionais':
+      return <DadosProfissionaisStep {...props} currentStep={currentStep} />
+    case 'dados-bancarios':
+      return <DadosBancariosEtapa2Step {...props} nextStep="retorno" />
+    case 'retorno':
+      return <RetornoStep {...props} message="Muito obrigado! Recebemos os seus dados e vamos iniciar a análise. Fique atento ao WhatsApp e e-mail, em breve você recebe um retorno." />
+    default:
+      return null
+  }
+}
