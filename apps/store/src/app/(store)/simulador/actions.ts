@@ -14,7 +14,7 @@ const saveSimulationSchema = z.object({
   desiredTermMonths: z.number().int().positive('Prazo inválido'),
   estimatedRate: z.number().positive('Taxa inválida'),
   estimatedPayment: z.number().min(0),
-  simulationData: z.record(z.unknown()),
+  simulationData: z.record(z.string(), z.unknown()),
 })
 
 export async function saveSimulation(
