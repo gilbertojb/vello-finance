@@ -1,0 +1,117 @@
+'use client'
+
+import { useState, useTransition } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { saveStep } from '@/app/(store)/contratar/actions'
+import { isValidCPF, calcAge, getStepData } from './types'
+import type { WizardStepProps } from './types'
+
+type Conjuge = { nome: string; cpf: string; nascimento: string; email: string; whatsapp: string }
+type Props = WizardStepProps & { nextStep: string; stepSlug?: string }
+
+export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = 'dados-vendedor' }: Props) {
+  const saved = getStepData<Record<string, string>>(proposal, stepSlug)
+  const [nome, setNome] = useState(saved.nome ?? '')
+  const [cpf, setCpf] = useState(saved.cpf ?? '')
+  const [nascimento, setNascimento] = useState(saved.nascimento ?? '')
+  const [email, setEmail] = useState(saved.email ?? '')
+  const [whatsapp, setWhatsapp] = useState(saved.whatsapp ?? '')
+  const [estadoCivil, setEstadoCivil] = useState(saved.estadoCivil ?? 'solteiro')
+  const [conjuge, setConjuge] = useState<Conjuge>({ nome: '', cpf: '', nascimento: '', email: '', whatsapp: '' })
+  const [error, setError] = useState('')
+  const [isPending, startTransition] = useTransition()
+
+  const ageBlock = nascimento ? calcAge(nascimento) >= 70 : false
+
+  function handleSubmit() {
+    if (!proposalId) return
+    if (nome.trim().split(' ').length < 2) return setError('Informe o nome completo (mínimo 2 palavras).')
+    if (!isValidCPF(cpf)) return setError('CPF inválido.')
+    if (ageBlock) return setError('Operação indisponível para maiores de 70 anos.')
+    setError('')
+    const data: Record<string, unknown> = { nome, cpf, nascimento, email, whatsapp, estadoCivil }
+    if (estadoCivil === 'casado') data.conjuge = conjuge
+    startTransition(async () => {
+      const res = await saveStep({ proposalId, stepSlug, stepData: data, nextStep })
+      if (res && 'error' in res) setError(res.error)
+    })
+  }
+
+  return (
+    <FieldGroup>
+      <p className="text-sm text-muted-foreground">
+        Não se preocupe — a cada etapa concluída, sua proposta fica salva automaticamente.
+      </p>
+
+      <Field>
+        <FieldLabel>Nome completo <span className="text-destructive">*</span></FieldLabel>
+        <Input placeholder="Nome completo do vendedor" value={nome} onChange={(e) => setNome(e.target.value)} />
+      </Field>
+
+      <div className="grid grid-cols-2 gap-3">
+        <Field>
+          <FieldLabel>CPF <span className="text-destructive">*</span></FieldLabel>
+          <Input inputMode="numeric" placeholder="000.000.000-00" value={cpf}
+            onChange={(e) => setCpf(e.target.value.replace(/\D/g, '').slice(0, 11))} />
+        </Field>
+        <Field>
+          <FieldLabel>Nascimento <span className="text-destructive">*</span></FieldLabel>
+          <Input type="date" value={nascimento} onChange={(e) => setNascimento(e.target.value)} />
+          {ageBlock && <FieldError>Operação indisponível para ≥ 70 anos.</FieldError>}
+        </Field>
+      </div>
+
+      <Field>
+        <FieldLabel>E-mail <span className="text-destructive">*</span></FieldLabel>
+        <Input type="email" placeholder="email@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+
+      <Field>
+        <FieldLabel>WhatsApp <span className="text-destructive">*</span></FieldLabel>
+        <Input type="tel" placeholder="+55 (11) 99999-9999" value={whatsapp}
+          onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ''))} />
+      </Field>
+
+      <Field>
+        <FieldLabel>Estado civil <span className="text-destructive">*</span></FieldLabel>
+        <Select value={estadoCivil} onValueChange={setEstadoCivil}>
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="solteiro">Solteiro(a)</SelectItem>
+            <SelectItem value="casado">Casado(a)</SelectItem>
+            <SelectItem value="outros">Outros</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
+      {estadoCivil === 'casado' && (
+        <div className="space-y-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <p className="text-sm font-semibold text-muted-foreground">Dados do cônjuge do vendedor</p>
+          {(['nome', 'cpf', 'nascimento', 'email', 'whatsapp'] as const).map((f) => (
+            <Field key={f}>
+              <FieldLabel>
+                {f === 'nome' ? 'Nome completo' : f === 'cpf' ? 'CPF' : f === 'nascimento' ? 'Nascimento' : f === 'email' ? 'E-mail' : 'WhatsApp'}
+                {' '}<span className="text-destructive">*</span>
+              </FieldLabel>
+              <Input
+                type={f === 'nascimento' ? 'date' : f === 'email' ? 'email' : 'text'}
+                value={conjuge[f]}
+                onChange={(e) => setConjuge((p) => ({ ...p, [f]: e.target.value }))}
+              />
+            </Field>
+          ))}
+        </div>
+      )}
+
+      {error && <FieldError>{error}</FieldError>}
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || ageBlock}>
+        {isPending ? 'Salvando…' : 'Prosseguir'}
+      </Button>
+    </FieldGroup>
+  )
+}
