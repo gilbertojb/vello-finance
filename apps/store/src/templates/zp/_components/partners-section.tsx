@@ -2,11 +2,36 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 const PARTNERS = [
-  { name: 'Itaú',      src: '/images/zp/partners/itau.png',      width: 261, height: 260 },
-  { name: 'Bradesco',  src: '/images/zp/partners/bradesco.png',  width: 634, height: 141 },
-  { name: 'Santander', src: '/images/zp/partners/santander.png', width: 993, height: 173 },
-  { name: 'Creditas',  src: '/images/zp/partners/creditas.png',  width: 836, height: 161 },
-  { name: 'CashMe',    src: '/images/zp/partners/cashme.png',    width: 841, height: 159 },
+  {
+    name: 'Itaú',
+    src: '/images/zp/partners/itau.png',
+    width: 261,
+    height: 260,
+  },
+  {
+    name: 'Bradesco',
+    src: '/images/zp/partners/bradesco.png',
+    width: 634,
+    height: 141,
+  },
+  {
+    name: 'Santander',
+    src: '/images/zp/partners/santander.png',
+    width: 993,
+    height: 173,
+  },
+  {
+    name: 'Creditas',
+    src: '/images/zp/partners/creditas.png',
+    width: 836,
+    height: 161,
+  },
+  {
+    name: 'CashMe',
+    src: '/images/zp/partners/cashme.png',
+    width: 841,
+    height: 159,
+  },
 ]
 
 export function PartnersSection() {
@@ -27,7 +52,7 @@ export function PartnersSection() {
             {PARTNERS.map((partner) => (
               <div
                 key={partner.name}
-                className="flex h-14 items-center justify-center rounded-xl bg-white px-6"
+                className="flex h-14 items-center justify-center rounded-xl px-6"
               >
                 <Image
                   src={partner.src}
