@@ -34,7 +34,7 @@ export function Etapa2Container({ proposal, step }: Props) {
       {flow && flow.etapa2.length > 0 && (
         <DotsIndicator steps={flow.etapa2} currentStep={step} />
       )}
-      <div className="mt-6">
+      <div className="mt-6 rounded-2xl border border-surface-foreground/10 bg-white p-6 max-sm:p-5">
         {renderStep(slug, step, stepProps)}
       </div>
     </div>

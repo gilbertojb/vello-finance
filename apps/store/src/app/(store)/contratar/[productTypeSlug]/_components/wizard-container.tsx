@@ -72,7 +72,7 @@ export function WizardContainer({
           </h2>
         </div>
       )}
-      <div className={!isRetorno ? 'rounded-2xl border border-surface-foreground/10 bg-white p-6 max-sm:p-5' : ''}>
+      <div className="rounded-2xl border border-surface-foreground/10 bg-white p-6 max-sm:p-5">
         {renderWizard(productTypeSlug, stepProps)}
       </div>
     </div>

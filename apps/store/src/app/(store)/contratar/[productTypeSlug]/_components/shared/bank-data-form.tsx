@@ -76,14 +76,14 @@ export function BankDataForm({ value, onChange, titularLabel = 'titular do créd
         />
       </Field>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border bg-muted/40 p-4">
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-foreground/15 bg-surface p-4">
         <input
           type="checkbox"
           className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary"
           checked={value.confirmaTitularidade}
           onChange={(e) => onChange({ ...value, confirmaTitularidade: e.target.checked })}
         />
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-surface-foreground">
           Confirmo que esta conta bancária está no nome do {titularLabel}.
         </span>
       </label>

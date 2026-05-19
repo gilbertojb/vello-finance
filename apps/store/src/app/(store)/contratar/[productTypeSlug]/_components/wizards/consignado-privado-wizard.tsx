@@ -46,10 +46,10 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
       <p className="mb-2 text-sm font-medium">{label}</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
-          <button key={v} type="button" onClick={() => set(v)}
-            className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${val === v ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'}`}>
+          <Button key={v} type="button" variant="outline" onClick={() => set(v)}
+            className={`flex-1 h-11 rounded-lg border text-sm font-semibold transition-colors ${val === v ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15' : 'border-input text-surface-foreground hover:bg-surface'}`}>
             {v}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -88,9 +88,9 @@ function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
 
   return (
     <div className="space-y-5">
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border bg-muted/30 p-4">
+      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-foreground/15 bg-surface p-4">
         <input type="checkbox" className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary" checked={autorizado} onChange={(e) => setAutorizado(e.target.checked)} />
-        <span className="text-sm text-muted-foreground">
+        <span className="text-sm text-surface-foreground">
           Autorizo a consulta dos meus dados via Dataprev para análise de crédito consignado.
         </span>
       </label>

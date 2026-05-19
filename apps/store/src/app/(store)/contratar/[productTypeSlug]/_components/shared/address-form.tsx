@@ -55,7 +55,7 @@ export function AddressForm({ label, value, onChange, showSameAs }: Props) {
             className="h-4 w-4 rounded accent-primary"
             onChange={(e) => { if (e.target.checked) onChange({ ...showSameAs.data }); else onChange(EMPTY) }}
           />
-          <span className="text-sm text-muted-foreground">{showSameAs.label}</span>
+          <span className="text-sm text-surface-foreground">{showSameAs.label}</span>
         </label>
       )}
 

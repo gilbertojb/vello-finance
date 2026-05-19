@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { parseBRL, formatBRL, getStepData } from '../steps/types'
+import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
@@ -69,20 +70,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
 
       <Field>
         <FieldLabel>Faturamento dos últimos 12 meses <span className="text-destructive">*</span></FieldLabel>
-        <div className="flex items-center rounded-lg border border-input bg-transparent focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
-          <span className="select-none pl-3 pr-2 text-sm text-muted-foreground">R$</span>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={faturamentoStr}
-            placeholder="0,00"
-            className="flex-1 bg-transparent py-2 pr-3 text-sm outline-none placeholder:text-muted-foreground"
-            onChange={(e) => {
-              const digits = e.target.value.replace(/\D/g, '')
-              setFaturamentoStr(formatBRL(parseInt(digits || '0') / 100))
-            }}
-          />
-        </div>
+        <StoreCurrencyInput value={faturamentoStr} onChange={setFaturamentoStr} />
         {blockFaturamento && <BlockMessage message="O faturamento mínimo exigido para essa linha de crédito é de R$ 250 mil." />}
       </Field>
 
@@ -125,13 +113,13 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
 
   return (
     <FieldGroup>
-      <p className="text-sm text-muted-foreground">Sua empresa possui alguma garantia real ou vinculada?</p>
+      <p className="text-sm text-surface-foreground/70">Sua empresa possui alguma garantia real ou vinculada?</p>
       <div className="flex gap-3">
         {(['Sim', 'Não'] as const).map((v) => (
-          <button key={v} type="button" onClick={() => setPossuiGarantia(v)}
-            className={`flex-1 rounded-lg border py-3 text-sm font-semibold transition-colors ${possuiGarantia === v ? 'border-primary bg-primary/10 text-primary' : 'border-input text-muted-foreground'}`}>
+          <Button key={v} type="button" variant="outline" onClick={() => setPossuiGarantia(v)}
+            className={`flex-1 h-11 rounded-lg border text-sm font-semibold transition-colors ${possuiGarantia === v ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15' : 'border-input text-surface-foreground hover:bg-surface'}`}>
             {v}
-          </button>
+          </Button>
         ))}
       </div>
       {possuiGarantia === 'Sim' && (

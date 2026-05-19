@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { saveStep } from '@/app/(store)/contratar/actions'
 import { parseBRL, formatBRL, getStepData } from './types'
+import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import type { WizardStepProps } from './types'
 
 const OCUPACOES = ['CLT', 'Autônomo', 'Empresário', 'Aposentado', 'Servidor Público']
@@ -64,20 +65,7 @@ export function RendaOcupacaoStep({ proposalId, proposal, nextStep }: Props) {
 
       <Field>
         <FieldLabel>Renda mensal <span className="text-destructive">*</span></FieldLabel>
-        <div className="flex items-center rounded-lg border border-input bg-transparent focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50">
-          <span className="select-none pl-3 pr-2 text-sm text-muted-foreground">R$</span>
-          <input
-            type="text"
-            inputMode="decimal"
-            value={rendaStr}
-            placeholder="0,00"
-            className="flex-1 bg-transparent py-2 pr-3 text-sm outline-none placeholder:text-muted-foreground"
-            onChange={(e) => {
-              const digits = e.target.value.replace(/\D/g, '')
-              setRendaStr(formatBRL(parseInt(digits || '0') / 100))
-            }}
-          />
-        </div>
+        <StoreCurrencyInput value={rendaStr} onChange={setRendaStr} />
       </Field>
 
       <Field>
