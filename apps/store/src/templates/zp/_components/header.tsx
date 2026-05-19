@@ -1,20 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import type { ReactNode } from 'react'
-import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
+
+import Link from 'next/link'
+
+import type { ReactNode } from 'react'
+import { useState } from 'react'
+
 import { cn } from '@/lib/utils'
 
 type Props = {
-  logoSlot:    ReactNode
+  logoSlot: ReactNode
   displayName: string | null
 }
 
 const NAV_LINKS = [
-  { href: '#produtos',       label: 'Produtos' },
-  { href: '#como-funciona',  label: 'Como funciona' },
-  { href: '#faq',            label: 'FAQ' },
+  { href: '#produtos', label: 'Produtos' },
+  { href: '#como-funciona', label: 'Como funciona' },
+  { href: '#faq', label: 'FAQ' },
 ]
 
 export function ZpHeader({ logoSlot, displayName }: Props) {
@@ -23,14 +26,16 @@ export function ZpHeader({ logoSlot, displayName }: Props) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-primary/8 bg-background/85 backdrop-blur-[14px]">
+      <header className="sticky top-0 z-50 w-full border-b border-primary/12 bg-background/80 backdrop-blur-[14px]">
         <div className="mx-auto flex h-store-header max-w-7xl items-center gap-10 px-8">
           <Link
             href="/"
             className="flex items-center gap-2.5 font-bold text-xl tracking-tight text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2"
           >
             {logoSlot ?? (
-              <span className="text-xl font-bold tracking-tight text-foreground">{name}</span>
+              <span className="text-xl font-bold tracking-tight text-foreground">
+                {name}
+              </span>
             )}
           </Link>
 
@@ -69,7 +74,9 @@ export function ZpHeader({ logoSlot, displayName }: Props) {
       <div
         className={cn(
           'fixed inset-x-0 top-store-header z-40 border-b border-primary/8 bg-background/95 backdrop-blur-[14px] transition-all duration-200 md:hidden',
-          open ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0',
+          open
+            ? 'pointer-events-auto opacity-100'
+            : 'pointer-events-none opacity-0',
         )}
       >
         <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-8 py-4">

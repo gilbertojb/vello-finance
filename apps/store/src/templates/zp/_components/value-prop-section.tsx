@@ -24,7 +24,6 @@ export function ValuePropSection() {
     <section className="bg-surface py-24">
       <div className="mx-auto max-w-7xl px-8">
         <div className="grid grid-cols-2 items-center gap-16 max-lg:grid-cols-1">
-
           {/* Coluna esquerda */}
           <div>
             <span className="inline-flex items-center gap-2.5 rounded-full border border-surface-foreground/20 bg-surface-foreground/5 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-surface-foreground/60">
@@ -34,13 +33,14 @@ export function ValuePropSection() {
 
             <h2 className="mt-4 text-5xl font-light leading-tight tracking-tight text-surface-foreground max-sm:text-4xl">
               Você não precisa sair{' '}
-              <em className="font-serif italic font-normal text-accent-olive">
+              <em className="font-serif text-6xl italic font-normal text-accent-olive max-sm:text-5xl">
                 buscando banco por banco.
               </em>
             </h2>
 
             <p className="mt-4 text-base leading-relaxed text-surface-foreground/60">
-              Aqui você centraliza tudo. Isso reduz erro, tempo e custo na escolha do crédito.
+              Aqui você centraliza tudo. Isso reduz erro, tempo e custo na
+              escolha do crédito.
             </p>
 
             <div className="mt-8 flex flex-col gap-3">
@@ -53,8 +53,12 @@ export function ValuePropSection() {
                     <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-surface-foreground">{item.title}</p>
-                    <p className="mt-0.5 text-sm text-surface-foreground/60">{item.description}</p>
+                    <p className="font-semibold text-surface-foreground">
+                      {item.title}
+                    </p>
+                    <p className="mt-0.5 text-sm text-surface-foreground/60">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -64,7 +68,7 @@ export function ValuePropSection() {
           {/* Coluna direita: imagem (oculta em mobile) */}
           <div className="relative h-96 overflow-hidden rounded-3xl max-lg:hidden">
             <Image
-              src="/images/zp2/value-prop.jpg"
+              src="/images/zp/value-prop.jpg"
               fill
               sizes="(max-width: 1280px) 50vw, 640px"
               className="object-cover"
@@ -72,7 +76,6 @@ export function ValuePropSection() {
             />
             <div className="absolute inset-0 bg-linear-to-t from-surface/95 via-transparent to-transparent" />
           </div>
-
         </div>
       </div>
     </section>

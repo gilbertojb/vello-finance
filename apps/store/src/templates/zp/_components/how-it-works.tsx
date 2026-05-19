@@ -14,7 +14,8 @@ const STEPS = [
   {
     n: '3',
     title: 'Nós cuidamos do envio',
-    description: 'Sua solicitação é estruturada e enviada para instituições compatíveis.',
+    description:
+      'Sua solicitação é estruturada e enviada para instituições compatíveis.',
   },
   {
     n: '4',
@@ -25,9 +26,12 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <section id="como-funciona" className="relative overflow-hidden border-t border-primary/8 bg-background py-24">
+    <section
+      id="como-funciona"
+      className="relative overflow-hidden border-t border-primary/8 bg-background py-24"
+    >
       <Image
-        src="/images/zp2/how-it-works-bg.jpg"
+        src="/images/zp/how-it-works-bg.jpg"
         fill
         sizes="100vw"
         className="object-cover"
@@ -43,7 +47,7 @@ export function HowItWorks() {
 
         <h2 className="mt-4 text-5xl font-light leading-none tracking-tight text-foreground max-sm:text-4xl">
           Quatro passos para o{' '}
-          <em className="font-serif text-6xl italic font-normal text-primary">
+          <em className="font-serif text-6xl italic font-normal text-primary max-sm:text-5xl">
             crédito na sua mão.
           </em>
         </h2>

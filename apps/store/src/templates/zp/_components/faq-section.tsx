@@ -53,12 +53,16 @@ export function FaqSection() {
 
         <h2 className="mt-4 text-5xl font-light leading-none tracking-tight text-foreground max-sm:text-4xl">
           Perguntas{' '}
-          <em className="font-serif text-6xl italic font-normal text-primary">
+          <em className="font-serif text-6xl italic font-normal text-primary max-sm:text-5xl">
             frequentes
           </em>
         </h2>
 
-        <Accordion type="single" collapsible className="mt-10 flex flex-col gap-3">
+        <Accordion
+          type="single"
+          collapsible
+          className="mt-10 flex flex-col gap-3"
+        >
           {FAQS.map((faq, i) => (
             <AccordionItem
               key={faq.q}

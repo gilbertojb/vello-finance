@@ -58,6 +58,7 @@
   --height-store-header: 4.875rem;  /* 78px */
   --size-logo-avatar:    2.125rem;  /* 34px */
   --height-hero-image:   35rem;
+  --height-hero-section: 80svh;
 
   /* Semantic color tokens */
   --color-success: var(--success);
@@ -155,7 +156,8 @@ body {
     animation-duration: 0.01ms !important;
     animation-delay:    0ms   !important;
   }
-  .anim-float {
+  .anim-float,
+  .animate-ping {
     animation: none !important;
   }
 }

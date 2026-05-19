@@ -9,10 +9,21 @@ export function HeroSection({ displayName }: Props) {
   const name = displayName ?? 'ZP Pay'
 
   return (
-    <section className="relative overflow-hidden border-b border-primary/8 bg-background">
-      <div className="mx-auto max-w-7xl px-8">
-        <div className="grid grid-cols-[1.05fr_1fr] items-center gap-16 py-24 max-lg:grid-cols-1 max-lg:gap-12">
+    <section className="relative flex items-center overflow-hidden border-b border-primary/8 bg-background h-svh md:h-hero-section">
+      <div className="absolute inset-0 hidden md:block">
+        <Image
+          src="/images/zp/hero-bg.jpg"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+          alt=""
+        />
+        <div className="absolute inset-0 bg-background/70" />
+      </div>
 
+      <div className="relative z-10 mx-auto max-w-7xl px-8">
+        <div className="grid grid-cols-[1.05fr_1fr] items-center gap-16 py-24 max-lg:grid-cols-1 max-lg:gap-12">
           {/* Coluna esquerda */}
           <div>
             <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-primary">
@@ -20,12 +31,13 @@ export function HeroSection({ displayName }: Props) {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
               </span>
-              {name}
+              {name} - soluções de crédito
             </span>
 
             <h1 className="mb-5 mt-6 text-5xl font-light leading-none tracking-tighter max-sm:text-4xl">
-              Precisa de crédito?{' '}
-              <em className="font-serif text-6xl font-normal italic text-primary">
+              Precisa de crédito?
+              <br />
+              <em className="font-serif text-6xl font-normal italic text-primary max-sm:text-5xl">
                 Vamos te ajudar a encontrar o melhor caminho.
               </em>
             </h1>
@@ -67,9 +79,9 @@ export function HeroSection({ displayName }: Props) {
           </div>
 
           {/* Coluna direita: imagem (oculta em mobile) */}
-          <div className="relative h-hero-image overflow-hidden rounded-3xl border border-primary/12 max-lg:hidden">
+          {/* <div className="relative h-hero-image overflow-hidden rounded-3xl border border-primary/12 max-lg:hidden">
             <Image
-              src="/images/zp2/hero-bg.jpg"
+              src="/images/zp/hero-bg.jpg"
               fill
               sizes="(max-width: 1280px) 50vw, 640px"
               className="object-cover object-top"
@@ -77,8 +89,7 @@ export function HeroSection({ displayName }: Props) {
               alt=""
             />
             <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-background" />
-          </div>
-
+          </div> */}
         </div>
       </div>
     </section>

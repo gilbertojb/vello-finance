@@ -12,7 +12,11 @@ const CATEGORIES = [
     icon: Building2,
     title: 'Crédito Pessoa Jurídica',
     href: '/simulador/pessoa-juridica',
-    items: ['Capital de Giro', 'Antecipação de Recebíveis', 'Crédito com Garantia'],
+    items: [
+      'Capital de Giro',
+      'Antecipação de Recebíveis',
+      'Crédito com Garantia',
+    ],
   },
   {
     icon: Home,
@@ -33,7 +37,7 @@ export function ProductsSection() {
 
         <h2 className="mt-4 text-5xl font-light leading-none tracking-tight text-surface-foreground max-sm:text-4xl">
           Soluções completas{' '}
-          <em className="font-serif italic font-normal text-accent-olive">
+          <em className="font-serif text-6xl italic font-normal text-accent-olive max-sm:text-5xl">
             para cada perfil
           </em>
         </h2>
@@ -59,7 +63,10 @@ export function ProductsSection() {
 
               <ul className="mt-4 flex flex-col gap-1.5">
                 {cat.items.map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-surface-foreground/60">
+                  <li
+                    key={item}
+                    className="flex items-center gap-2 text-sm text-surface-foreground/60"
+                  >
                     <span className="h-1 w-1 shrink-0 rounded-full bg-primary/50" />
                     {item}
                   </li>
