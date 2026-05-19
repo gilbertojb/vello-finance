@@ -1,6 +1,13 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
-const PARTNERS = ['Itaú', 'Bradesco', 'Santander', 'Creditas', 'CashMe']
+const PARTNERS = [
+  { name: 'Itaú',      src: '/images/zp/partners/itau.png',      width: 261, height: 260 },
+  { name: 'Bradesco',  src: '/images/zp/partners/bradesco.png',  width: 634, height: 141 },
+  { name: 'Santander', src: '/images/zp/partners/santander.png', width: 993, height: 173 },
+  { name: 'Creditas',  src: '/images/zp/partners/creditas.png',  width: 836, height: 161 },
+  { name: 'CashMe',    src: '/images/zp/partners/cashme.png',    width: 841, height: 159 },
+]
 
 export function PartnersSection() {
   return (
@@ -16,13 +23,19 @@ export function PartnersSection() {
             Parceiros de confiança, oferecendo as melhores condições para você.
           </p>
 
-          <div className="mt-10 flex flex-wrap justify-center gap-4">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
             {PARTNERS.map((partner) => (
               <div
-                key={partner}
-                className="flex h-9 items-center rounded-lg border border-foreground/8 bg-foreground/4 px-5 text-sm font-medium text-foreground/50"
+                key={partner.name}
+                className="flex h-14 items-center justify-center rounded-xl bg-white px-6"
               >
-                {partner}
+                <Image
+                  src={partner.src}
+                  alt={partner.name}
+                  width={partner.width}
+                  height={partner.height}
+                  className="h-7 w-auto object-contain"
+                />
               </div>
             ))}
           </div>
