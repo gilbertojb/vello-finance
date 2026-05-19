@@ -49,7 +49,7 @@ export function ValuePropSection() {
                   key={item.title}
                   className="flex items-start gap-4 rounded-xl border border-surface-foreground/8 bg-white p-5"
                 >
-                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-primary/8">
+                  <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-background">
                     <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -66,15 +66,14 @@ export function ValuePropSection() {
           </div>
 
           {/* Coluna direita: imagem (oculta em mobile) */}
-          <div className="relative h-96 overflow-hidden rounded-3xl max-lg:hidden">
+          <div className="relative h-full overflow-hidden rounded-3xl max-lg:hidden">
             <Image
-              src="/images/zp/value-prop.jpg"
+              src="/images/zp/value-props.jpg"
               fill
               sizes="(max-width: 1280px) 50vw, 640px"
               className="object-cover"
               alt=""
             />
-            <div className="absolute inset-0 bg-linear-to-t from-surface/95 via-transparent to-transparent" />
           </div>
         </div>
       </div>

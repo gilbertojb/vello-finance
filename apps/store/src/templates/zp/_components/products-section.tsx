@@ -53,7 +53,7 @@ export function ProductsSection() {
               href={cat.href}
               className="group flex flex-col rounded-2xl border border-surface-foreground/12 bg-white p-8 transition-all hover:-translate-y-0.5 hover:border-surface-foreground/25 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
             >
-              <div className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-primary/8">
+              <div className="mb-5 grid h-12 w-12 place-items-center rounded-xl bg-background">
                 <cat.icon className="h-6 w-6 text-primary" />
               </div>
 

@@ -61,7 +61,7 @@ export function BenefitsSection() {
               key={b.title}
               className="rounded-2xl border border-surface-foreground/8 bg-white p-6"
             >
-              <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-primary/8">
+              <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl bg-background">
                 <b.icon className="h-5 w-5 text-primary" />
               </div>
               <h3 className="text-base font-semibold leading-tight text-surface-foreground">

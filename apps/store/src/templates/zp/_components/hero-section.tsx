@@ -19,7 +19,7 @@ export function HeroSection({ displayName }: Props) {
           className="object-cover object-center"
           alt=""
         />
-        <div className="absolute inset-0 bg-background/70" />
+        {/* <div className="absolute inset-0 bg-background/50" /> */}
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-8">
