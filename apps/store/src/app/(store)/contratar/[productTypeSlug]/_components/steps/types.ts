@@ -18,6 +18,10 @@ export function formatBRL(n: number): string {
   return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
+export function formatBRLInput(n: number): string {
+  return n > 0 ? new Intl.NumberFormat('pt-BR').format(n) : ''
+}
+
 export function isValidCPF(cpf: string): boolean {
   const d = cpf.replace(/\D/g, '')
   if (d.length !== 11 || /^(\d)\1+$/.test(d)) return false

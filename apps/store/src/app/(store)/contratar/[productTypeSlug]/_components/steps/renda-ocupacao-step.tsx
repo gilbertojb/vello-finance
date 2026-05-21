@@ -7,7 +7,7 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from './types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from './types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import type { WizardStepProps } from './types'
 
@@ -20,7 +20,7 @@ export function RendaOcupacaoStep({ proposalId, proposal, nextStep }: Props) {
   const saved = getStepData<Record<string, string>>(proposal, 'renda-ocupacao')
   const [ocupacao, setOcupacao] = useState(saved.ocupacao ?? '')
   const [profissao, setProfissao] = useState(saved.profissao ?? '')
-  const [rendaStr, setRendaStr] = useState(saved.renda ? formatBRL(Number(saved.renda)) : '')
+  const [rendaStr, setRendaStr] = useState(saved.renda ? formatBRLInput(Number(saved.renda)) : '')
   const [tempo, setTempo] = useState(saved.tempo ?? '')
   const [empresa, setEmpresa] = useState(saved.empresa ?? '')
   const [error, setError] = useState('')

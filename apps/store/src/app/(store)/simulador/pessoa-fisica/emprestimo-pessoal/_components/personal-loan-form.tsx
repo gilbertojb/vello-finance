@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
 import { generateTermOptions, formatCurrency } from '@/lib/utils/simulator'
+import { StorePhoneInput } from '@/components/ui/store-phone-input'
 
 type Props = {
   productId: string
@@ -87,18 +88,7 @@ export function EmprestimoPessoalForm({
         <label htmlFor="whatsapp" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           WhatsApp para contato <span className="text-destructive">*</span>
         </label>
-        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
-          <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/40">+55</span>
-          <div className="h-5 w-px bg-surface-foreground/12" />
-          <input
-            type="tel"
-            id="whatsapp"
-            value={whatsapp}
-            onChange={(e) => setWhatsapp(e.target.value)}
-            placeholder="(11) 99999-9999"
-            className="flex-1 bg-transparent pl-3 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:outline-none"
-          />
-        </div>
+        <StorePhoneInput id="whatsapp" value={whatsapp} onChange={setWhatsapp} />
       </div>
 
       {/* Valor desejado */}

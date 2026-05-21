@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { StoreButton as Button } from '@/components/ui/store-button'
 import { StoreInput as Input } from '@/components/ui/store-input'
+import { StorePhoneInput } from '@/components/ui/store-phone-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { saveStep } from '@/app/(store)/contratar/actions'
@@ -74,8 +75,7 @@ export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = '
 
       <Field>
         <FieldLabel>WhatsApp <span className="text-destructive">*</span></FieldLabel>
-        <Input type="tel" placeholder="+55 (11) 99999-9999" value={whatsapp}
-          onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ''))} />
+        <StorePhoneInput value={whatsapp} onChange={setWhatsapp} />
       </Field>
 
       <Field>
@@ -101,11 +101,15 @@ export function DadosVendedorStep({ proposalId, proposal, nextStep, stepSlug = '
                 {f === 'nome' ? 'Nome completo' : f === 'cpf' ? 'CPF' : f === 'nascimento' ? 'Nascimento' : f === 'email' ? 'E-mail' : 'WhatsApp'}
                 {' '}<span className="text-destructive">*</span>
               </FieldLabel>
-              <Input
-                type={f === 'nascimento' ? 'date' : f === 'email' ? 'email' : 'text'}
-                value={conjuge[f]}
-                onChange={(e) => setConjuge((p) => ({ ...p, [f]: e.target.value }))}
-              />
+              {f === 'whatsapp' ? (
+                <StorePhoneInput value={conjuge[f]} onChange={(v) => setConjuge((p) => ({ ...p, [f]: v }))} />
+              ) : (
+                <Input
+                  type={f === 'nascimento' ? 'date' : f === 'email' ? 'email' : 'text'}
+                  value={conjuge[f]}
+                  onChange={(e) => setConjuge((p) => ({ ...p, [f]: e.target.value }))}
+                />
+              )}
             </Field>
           ))}
         </div>

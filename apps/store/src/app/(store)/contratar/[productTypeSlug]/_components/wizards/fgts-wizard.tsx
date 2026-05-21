@@ -2,15 +2,31 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { ChevronLeft } from 'lucide-react'
 import { StoreButton as Button } from '@/components/ui/store-button'
 import { StoreInput as Input } from '@/components/ui/store-input'
+import { StorePhoneInput } from '@/components/ui/store-phone-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { isValidCPF, calcAge, getStepData } from '../steps/types'
+import { ToggleGroup } from '../steps/toggle-group'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosBancariosEtapa2Step } from '../etapa2/dados-bancarios-step'
 import type { ProductWizardProps } from '../steps/types'
-import { cn } from '@/lib/utils'
+
+function BackButton() {
+  const router = useRouter()
+  return (
+    <button
+      type="button"
+      onClick={() => router.back()}
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground"
+    >
+      <ChevronLeft className="h-3.5 w-3.5" />
+      Voltar
+    </button>
+  )
+}
 
 function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep }: ProductWizardProps) {
   const saved = getStepData<Record<string, string>>(proposal, 'liberacao-saque')
@@ -38,24 +54,9 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">Você já liberou o Saque Aniversário no aplicativo do FGTS (Caixa)?</p>
-      <div className="flex gap-3">
-        {(['Sim', 'Não'] as const).map((v) => (
-          <Button
-            key={v}
-            type="button"
-            variant="outline"
-            className={cn(
-              'flex-1 h-auto py-3 border-foreground/20 bg-transparent text-foreground hover:bg-foreground/5',
-              liberou === v && 'border-primary bg-primary/15 text-primary hover:bg-primary/20'
-            )}
-            onClick={() => setLiberou(v)}
-          >
-            {v}
-          </Button>
-        ))}
-      </div>
+      <ToggleGroup options={['Sim', 'Não']} value={liberou} onChange={setLiberou} />
       {liberou === 'Não' && !jaRealizei && (
-        <div className="rounded-lg border border-foreground/10 bg-surface p-4 space-y-3">
+        <div className="rounded-lg border border-surface-foreground/10 bg-surface p-4 space-y-3">
           <p className="text-sm font-semibold text-surface-foreground">Como liberar o Saque Aniversário:</p>
           <ol className="list-decimal list-inside space-y-1 text-sm text-surface-foreground/70">
             <li>Acesse o aplicativo <strong>Caixa FGTS</strong></li>
@@ -63,11 +64,7 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
             <li>Selecione <strong>"Optar pelo Saque Aniversário"</strong></li>
             <li>Confirme sua opção</li>
           </ol>
-          <Button
-            type="button"
-            className="mt-2 w-full"
-            onClick={() => setJaRealizei(true)}
-          >
+          <Button type="button" className="mt-2 w-full" onClick={() => setJaRealizei(true)}>
             Já realizei ✓
           </Button>
         </div>
@@ -76,6 +73,9 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
       <Button className="w-full" onClick={handleSubmit} disabled={isPending || !podeAvancar}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
+      <div className="flex justify-center pt-1">
+        <BackButton />
+      </div>
     </div>
   )
 }
@@ -103,35 +103,16 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
   return (
     <div className="space-y-5">
       <p className="text-sm text-muted-foreground">Você já autorizou os bancos a acessar seu FGTS para antecipação?</p>
-      <div className="flex gap-3">
-        {(['Sim', 'Não'] as const).map((v) => (
-          <Button
-            key={v}
-            type="button"
-            variant="outline"
-            className={cn(
-              'flex-1 h-auto py-3 border-foreground/20 bg-transparent text-foreground hover:bg-foreground/5',
-              liberou === v && 'border-primary bg-primary/15 text-primary hover:bg-primary/20'
-            )}
-            onClick={() => setLiberou(v)}
-          >
-            {v}
-          </Button>
-        ))}
-      </div>
+      <ToggleGroup options={['Sim', 'Não']} value={liberou} onChange={setLiberou} />
       {liberou === 'Não' && !jaRealizei && (
-        <div className="rounded-lg border border-foreground/10 bg-surface p-4 space-y-3">
+        <div className="rounded-lg border border-surface-foreground/10 bg-surface p-4 space-y-3">
           <p className="text-sm font-semibold text-surface-foreground">Como autorizar os bancos:</p>
           <ol className="list-decimal list-inside space-y-1 text-sm text-surface-foreground/70">
             <li>No app Caixa FGTS, acesse <strong>Autorização de bancos</strong></li>
             <li>Selecione os bancos parceiros</li>
             <li>Confirme a autorização</li>
           </ol>
-          <Button
-            type="button"
-            className="mt-2 w-full"
-            onClick={() => setJaRealizei(true)}
-          >
+          <Button type="button" className="mt-2 w-full" onClick={() => setJaRealizei(true)}>
             Já realizei ✓
           </Button>
         </div>
@@ -140,6 +121,9 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
       <Button className="w-full" onClick={handleSubmit} disabled={isPending || !podeAvancar}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
+      <div className="flex justify-center pt-1">
+        <BackButton />
+      </div>
     </div>
   )
 }
@@ -201,13 +185,15 @@ function VerificarMargemStep({ proposalId, proposal }: ProductWizardProps) {
       </Field>
       <Field>
         <FieldLabel>WhatsApp <span className="text-destructive">*</span></FieldLabel>
-        <Input type="tel" placeholder="+55 (11) 99999-9999" value={whatsapp}
-          onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ''))} />
+        <StorePhoneInput value={whatsapp} onChange={setWhatsapp} />
       </Field>
       {error && <FieldError>{error}</FieldError>}
       <Button className="w-full" onClick={handleSubmit} disabled={isPending || ageBlock}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
+      <div className="flex justify-center pt-1">
+        <BackButton />
+      </div>
     </FieldGroup>
   )
 }

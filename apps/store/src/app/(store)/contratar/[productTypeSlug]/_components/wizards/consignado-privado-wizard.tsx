@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { getStepData } from '../steps/types'
+import { ToggleGroup } from '../steps/toggle-group'
 import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosPessoaisPFStep } from '../steps/dados-pessoais-pf-step'
@@ -44,14 +45,7 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
   const pergunta = (label: string, val: string, set: (v: string) => void) => (
     <div>
       <p className="mb-2 text-sm font-medium">{label}</p>
-      <div className="flex gap-3">
-        {(['Sim', 'Não'] as const).map((v) => (
-          <Button key={v} type="button" variant="outline" onClick={() => set(v)}
-            className={`flex-1 h-11 rounded-lg border text-sm font-semibold transition-colors ${val === v ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15' : 'border-input text-surface-foreground hover:bg-surface'}`}>
-            {v}
-          </Button>
-        ))}
-      </div>
+      <ToggleGroup options={['Sim', 'Não']} value={val} onChange={set} />
     </div>
   )
 

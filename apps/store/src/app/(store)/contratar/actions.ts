@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
+import { DB_TO_URL_SLUG } from './[productTypeSlug]/_components/flow-config'
 import type { Json } from '@vello/database'
 
 async function getTenantId(): Promise<string | null> {
@@ -64,8 +65,9 @@ export async function createProposal(
 
   if (error || !proposal) return { error: 'Erro ao criar proposta.' }
 
+  const urlSlug = DB_TO_URL_SLUG[productTypeSlug] ?? productTypeSlug.replace(/_/g, '-')
   return {
-    redirectTo: `/contratar/${productTypeSlug.replace(/_/g, '-')}?step=${nextStep}&proposalId=${proposal.id}&productId=${productId}`,
+    redirectTo: `/contratar/${urlSlug}?step=${nextStep}&proposalId=${proposal.id}&productId=${productId}`,
   }
 }
 
@@ -113,7 +115,7 @@ export async function saveStep(
 
   if (error) return { error: 'Erro ao salvar.' }
 
-  const urlSlug = current.product_type_slug.replace(/_/g, '-')
+  const urlSlug = DB_TO_URL_SLUG[current.product_type_slug] ?? current.product_type_slug.replace(/_/g, '-')
   return { redirectTo: `/contratar/${urlSlug}?step=${nextStep}&proposalId=${proposalId}` }
 }
 

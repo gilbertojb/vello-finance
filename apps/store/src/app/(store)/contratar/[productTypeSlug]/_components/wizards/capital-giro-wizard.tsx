@@ -7,7 +7,8 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from '../steps/types'
+import { ToggleGroup } from '../steps/toggle-group'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
@@ -23,7 +24,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const saved = getStepData<Record<string, string>>(proposal, 'operacao')
   const [tipoEmpresa, setTipoEmpresa] = useState(saved.tipoEmpresa ?? '')
   const [fundacao, setFundacao] = useState(saved.fundacao ?? '')
-  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRL(Number(saved.faturamento)) : '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -114,14 +115,7 @@ function CapitalGiroGarantiaStep({ proposalId, proposal }: ProductWizardProps) {
   return (
     <FieldGroup>
       <p className="text-sm text-surface-foreground/70">Sua empresa possui alguma garantia real ou vinculada?</p>
-      <div className="flex gap-3">
-        {(['Sim', 'Não'] as const).map((v) => (
-          <Button key={v} type="button" variant="outline" onClick={() => setPossuiGarantia(v)}
-            className={`flex-1 h-11 rounded-lg border text-sm font-semibold transition-colors ${possuiGarantia === v ? 'border-primary bg-primary/10 text-primary hover:bg-primary/15' : 'border-input text-surface-foreground hover:bg-surface'}`}>
-            {v}
-          </Button>
-        ))}
-      </div>
+      <ToggleGroup options={['Sim', 'Não']} value={possuiGarantia} onChange={setPossuiGarantia} />
       {possuiGarantia === 'Sim' && (
         <Field>
           <FieldLabel>Tipo de garantia <span className="text-destructive">*</span></FieldLabel>

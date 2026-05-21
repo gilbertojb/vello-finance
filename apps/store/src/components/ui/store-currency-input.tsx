@@ -8,23 +8,29 @@ type Props = {
   className?: string
 }
 
-function fmt(reais: number): string {
-  return reais.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+function formatInteger(n: number): string {
+  return n > 0 ? new Intl.NumberFormat('pt-BR').format(n) : ''
 }
 
 export function StoreCurrencyInput({ value, onChange, className }: Props) {
   return (
-    <div className={cn('flex h-11 items-center rounded-lg border border-input bg-transparent focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50', className)}>
-      <span className="select-none pl-3 pr-2 text-sm text-surface-foreground/60">R$</span>
+    <div
+      className={cn(
+        'flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white',
+        'focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20',
+        className,
+      )}
+    >
+      <span className="select-none pl-5 pr-3 text-sm font-medium text-surface-foreground/50">R$</span>
       <input
         type="text"
-        inputMode="decimal"
+        inputMode="numeric"
         value={value}
-        placeholder="0,00"
-        className="flex-1 bg-transparent py-2 pr-3 text-sm outline-none placeholder:text-surface-foreground/40"
+        placeholder="0"
+        className="flex-1 bg-transparent py-2 pr-5 text-sm text-surface-foreground placeholder:text-surface-foreground/35 outline-none"
         onChange={(e) => {
           const digits = e.target.value.replace(/\D/g, '')
-          onChange(fmt(parseInt(digits || '0') / 100))
+          onChange(formatInteger(parseInt(digits || '0', 10)))
         }}
       />
     </div>

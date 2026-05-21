@@ -7,7 +7,7 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from '../steps/types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
@@ -22,7 +22,7 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const saved = getStepData<Record<string, string>>(proposal, 'operacao')
   const [tipoRecebivel, setTipoRecebivel] = useState(saved.tipoRecebivel ?? '')
   const [fundacao, setFundacao] = useState(saved.fundacao ?? '')
-  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRL(Number(saved.faturamento)) : '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()

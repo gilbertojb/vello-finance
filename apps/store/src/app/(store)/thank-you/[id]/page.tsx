@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { CheckCircle } from 'lucide-react'
-import { getSimulation } from '../../queries'
+import { CheckCircle, ArrowRight } from 'lucide-react'
+import { getSimulation, getTenantProductByProductId } from '../../queries'
+import { DB_TO_URL_SLUG, PRODUCT_FLOWS } from '../../contratar/[productTypeSlug]/_components/flow-config'
 
 export const metadata: Metadata = { title: 'Solicitação recebida' }
 
@@ -15,6 +16,19 @@ export default async function AgradecimentoPage({ params }: Props) {
 
   const productName = (simulation?.products as { name: string } | null)?.name ?? 'Crédito'
   const clientName = simulation?.client_name
+
+  const productTypeSlug = (simulation?.products as { product_type?: { slug?: string } } | null)?.product_type?.slug ?? null
+  const productId = simulation?.product_id ?? null
+
+  let contratarHref: string | null = null
+  if (productTypeSlug && productId) {
+    const tenantProduct = await getTenantProductByProductId(productId, tenantId)
+    const urlSlug = DB_TO_URL_SLUG[productTypeSlug]
+    const firstStep = PRODUCT_FLOWS[productTypeSlug]?.etapa1[0]?.slug
+    if (tenantProduct && urlSlug && firstStep) {
+      contratarHref = `/contratar/${urlSlug}?step=${firstStep}&productId=${tenantProduct.id}&simulationId=${id}`
+    }
+  }
 
   return (
     <div className="min-h-[calc(100vh-78px)] bg-surface py-12 text-surface-foreground">
@@ -38,12 +52,23 @@ export default async function AgradecimentoPage({ params }: Props) {
             Um de nossos consultores vai entrar em contato pelo seu WhatsApp em breve para
             dar continuidade à sua solicitação de <strong>{productName}</strong>.
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center rounded-2xl bg-background px-6 py-3.5 text-sm font-semibold text-primary transition-opacity hover:opacity-90"
-          >
-            Voltar ao início
-          </Link>
+          <div className="flex flex-col items-center gap-3">
+            {contratarHref && (
+              <Link
+                href={contratarHref}
+                className="inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                Continuar com a contratação
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
+            <Link
+              href="/"
+              className="inline-flex items-center rounded-2xl bg-background px-6 py-3.5 text-sm font-semibold text-primary transition-opacity hover:opacity-90"
+            >
+              Voltar ao início
+            </Link>
+          </div>
         </div>
       </div>
     </div>

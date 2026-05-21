@@ -94,13 +94,29 @@ export async function getSimulation(simulationId: string, tenantId: string) {
     .select(`
       id,
       client_name,
+      product_id,
       desired_amount,
       desired_term_months,
       status,
-      products ( name )
+      products (
+        name,
+        product_type:product_types ( slug )
+      )
     `)
     .eq('id', simulationId)
     .eq('tenant_id', tenantId)
+    .single()
+  return data
+}
+
+export async function getTenantProductByProductId(productId: string, tenantId: string) {
+  const supabase = createServiceClient()
+  const { data } = await supabase
+    .from('tenant_products')
+    .select('id')
+    .eq('product_id', productId)
+    .eq('tenant_id', tenantId)
+    .eq('is_active', true)
     .single()
   return data
 }

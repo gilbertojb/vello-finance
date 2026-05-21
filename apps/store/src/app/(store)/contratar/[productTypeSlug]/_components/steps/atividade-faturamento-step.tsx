@@ -6,7 +6,7 @@ import { StoreButton as Button } from '@/components/ui/store-button'
 import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from './types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from './types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import type { WizardStepProps } from './types'
 
@@ -19,7 +19,7 @@ type Props = WizardStepProps & {
 export function AtividadeFaturamentoStep({ proposalId, proposal, nextStep, faturamentoLabel = 'Faturamento anual', hasProdutos }: Props) {
   const saved = getStepData<Record<string, string>>(proposal, 'atividade-faturamento')
   const [atividade, setAtividade] = useState(saved.atividade ?? '')
-  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRL(Number(saved.faturamento)) : '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [produtos, setProdutos] = useState(saved.produtos ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()

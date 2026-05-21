@@ -7,7 +7,7 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from '../steps/types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
@@ -21,19 +21,20 @@ const TIPOS_IMOVEL = ['Casa de rua', 'Casa de condomínio', 'Apartamento', 'Terr
 
 function FinanciamentoImovelOperacaoStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep }: ProductWizardProps) {
   const saved = getStepData<Record<string, string>>(proposal, 'operacao')
+  const [tipoComprador, setTipoComprador] = useState(saved.tipoComprador ?? '')
   const [tipoImovel, setTipoImovel] = useState(saved.tipoImovel ?? '')
   const [financiado, setFinanciado] = useState(saved.financiado ?? '')
-  const [valorPagoStr, setValorPagoStr] = useState(saved.valorPago ? formatBRL(Number(saved.valorPago)) : '')
+  const [valorPagoStr, setValorPagoStr] = useState(saved.valorPago ? formatBRLInput(Number(saved.valorPago)) : '')
   const [matricula, setMatricula] = useState(saved.matricula ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
   function handleSubmit() {
-    if (!tipoImovel || !financiado || !matricula) return setError('Preencha todos os campos.')
+    if (!tipoComprador || !tipoImovel || !financiado || !matricula) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
-      const stepData = { tipoImovel, financiado, valorPago: parseBRL(valorPagoStr), matricula }
+      const stepData = { tipoComprador, tipoImovel, financiado, valorPago: parseBRL(valorPagoStr), matricula }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-solicitante' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-solicitante' })
@@ -44,6 +45,17 @@ function FinanciamentoImovelOperacaoStep({ proposalId, productId, productTypeSlu
 
   return (
     <FieldGroup>
+      <Field>
+        <FieldLabel>Tipo de comprador <span className="text-destructive">*</span></FieldLabel>
+        <Select value={tipoComprador} onValueChange={setTipoComprador}>
+          <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Pessoa Física">Pessoa Física</SelectItem>
+            <SelectItem value="Pessoa Jurídica">Pessoa Jurídica</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
       <Field>
         <FieldLabel>Tipo de imóvel <span className="text-destructive">*</span></FieldLabel>
         <Select value={tipoImovel} onValueChange={setTipoImovel}>

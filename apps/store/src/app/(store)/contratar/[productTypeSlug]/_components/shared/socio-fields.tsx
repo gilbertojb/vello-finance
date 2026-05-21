@@ -1,6 +1,7 @@
 'use client'
 
 import { StoreInput as Input } from '@/components/ui/store-input'
+import { StorePhoneInput } from '@/components/ui/store-phone-input'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import {
   Select,
@@ -117,8 +118,7 @@ export function SocioFields({ value, onChange, withRg = false, withEstadoCivil =
 
           <Field>
             <FieldLabel>WhatsApp <span className="text-destructive">*</span></FieldLabel>
-            <Input type="tel" placeholder="+55 (11) 99999-9999" value={socio.whatsapp}
-              onChange={(e) => updateSocio(i, { whatsapp: e.target.value.replace(/\D/g, '') })} />
+            <StorePhoneInput value={socio.whatsapp} onChange={(v) => updateSocio(i, { whatsapp: v })} />
           </Field>
 
           {withEstadoCivil && (
@@ -169,8 +169,7 @@ export function SocioFields({ value, onChange, withRg = false, withEstadoCivil =
                         </Field>
                         <Field>
                           <FieldLabel>WhatsApp <span className="text-destructive">*</span></FieldLabel>
-                          <Input type="tel" placeholder="+55 (11) 99999-9999" value={c.whatsapp}
-                            onChange={(e) => patch('whatsapp', e.target.value.replace(/\D/g, ''))} />
+                          <StorePhoneInput value={c.whatsapp} onChange={(v) => patch('whatsapp', v)} />
                         </Field>
                       </>
                     )

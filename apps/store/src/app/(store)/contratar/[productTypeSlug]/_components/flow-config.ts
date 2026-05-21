@@ -158,3 +158,16 @@ export const URL_TO_DB_SLUG: Record<string, string> = {
   'financiamento-veiculo': 'financiamento_veiculo',
   'consignado-clt': 'consignado_privado',
 }
+
+export const DB_TO_URL_SLUG: Record<string, string> = {
+  home_equity: 'home-equity',
+  home_equity_pj: 'home-equity-pj',
+  auto_equity: 'auto-equity',
+  auto_equity_pj: 'auto-equity-pj',
+  fgts: 'fgts',
+  capital_giro: 'capital-de-giro',
+  antecipacao_recebiveis: 'antecipacao-recebiveis',
+  financiamento_imovel: 'financiamento-imovel',
+  financiamento_veiculo: 'financiamento-veiculo',
+  consignado_privado: 'consignado-clt',
+}

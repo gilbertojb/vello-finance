@@ -8,6 +8,7 @@ import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { getStepData } from '../steps/types'
+import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosPessoaisPFStep } from '../steps/dados-pessoais-pf-step'
 import { RendaOcupacaoStep } from '../steps/renda-ocupacao-step'
@@ -23,9 +24,11 @@ function FinanciamentoVeiculoOperacaoStep({ proposalId, productId, productTypeSl
   const [placa, setPlaca] = useState(saved.placa ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
+  const blockFinanciado = financiado === 'Sim'
   const router = useRouter()
 
   function handleSubmit() {
+    if (blockFinanciado) return
     if (!tipoVeiculo || !financiado || !placa) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
@@ -59,9 +62,7 @@ function FinanciamentoVeiculoOperacaoStep({ proposalId, productId, productTypeSl
             <SelectItem value="Sim">Sim</SelectItem>
           </SelectContent>
         </Select>
-        {financiado === 'Sim' && (
-          <p className="mt-1 text-xs text-muted-foreground">Atenção: se o valor pago já superar 80% do veículo, a operação não poderá prosseguir.</p>
-        )}
+        {blockFinanciado && <BlockMessage message="No momento, não conseguimos seguir pois o veículo já possui um financiamento ativo. Para avançarmos, ele precisa estar totalmente quitado." />}
       </Field>
 
       <Field>
@@ -76,7 +77,7 @@ function FinanciamentoVeiculoOperacaoStep({ proposalId, productId, productTypeSl
       </Field>
 
       {error && <FieldError>{error}</FieldError>}
-      <Button className="w-full" onClick={handleSubmit} disabled={isPending}>
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockFinanciado}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
     </FieldGroup>

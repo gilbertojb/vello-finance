@@ -7,7 +7,7 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from '../steps/types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
@@ -23,7 +23,7 @@ function HomeEquityPJOperacaoStep({ proposalId, productId, productTypeSlug, simu
   const saved = getStepData<Record<string, string>>(proposal, 'operacao')
   const [tipoImovel, setTipoImovel] = useState(saved.tipoImovel ?? '')
   const [financiado, setFinanciado] = useState(saved.financiado ?? '')
-  const [valorPagoStr, setValorPagoStr] = useState(saved.valorPago ? formatBRL(Number(saved.valorPago)) : '')
+  const [valorPagoStr, setValorPagoStr] = useState(saved.valorPago ? formatBRLInput(Number(saved.valorPago)) : '')
   const [matricula, setMatricula] = useState(saved.matricula ?? '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')

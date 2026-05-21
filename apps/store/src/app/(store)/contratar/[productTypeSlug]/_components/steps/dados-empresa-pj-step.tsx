@@ -7,7 +7,7 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, getStepData } from './types'
+import { parseBRL, formatBRL, formatBRLInput, getStepData } from './types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { BlockMessage } from './block-message'
 import type { WizardStepProps } from './types'
@@ -25,7 +25,7 @@ export function DadosEmpresaPJStep({ proposalId, proposal, variant, nextStep, st
   const [tempoEmpresa, setTempoEmpresa] = useState(saved.tempoEmpresa ?? '')
   const [atividade, setAtividade] = useState(saved.atividade ?? '')
   const [produtos, setProdutos] = useState(saved.produtos ?? '')
-  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRL(Number(saved.faturamento)) : '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
