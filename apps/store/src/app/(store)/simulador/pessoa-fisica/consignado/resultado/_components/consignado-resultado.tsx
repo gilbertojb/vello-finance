@@ -2,9 +2,8 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Info, RefreshCw, Download } from 'lucide-react'
+import { Info, RefreshCw } from 'lucide-react'
 import { formatCurrency, formatRate, calcPMT, calcCETAnual } from '@/lib/utils/simulator'
-import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 import { StoreButton } from '@/components/ui/store-button'
 
 type Props = {
@@ -32,8 +31,6 @@ export function ConsignadoResultado({
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
   const [parcelas, setParcelas] = useState(24)
-  const [simulationId, setSimulationId] = useState<string | null>(null)
-  const [isQualifying, setIsQualifying] = useState(false)
 
   const PARCELAS_OPTIONS = useMemo(() => {
     const opts: number[] = []
@@ -53,33 +50,10 @@ export function ConsignadoResultado({
       const parsed: SimData = JSON.parse(stored)
       setData(parsed)
       setParcelas(parsed.parcelas)
-
-      const SIM_ID_KEY = 'sim:consignado:id'
-      const existingId = sessionStorage.getItem(SIM_ID_KEY)
-      if (existingId) {
-        setSimulationId(existingId)
-      } else {
-        const payment = calcPMT(parsed.valorDesejado, rateMonthly, parsed.parcelas)
-        saveSimulation({
-          tenantProductId: productId,
-          clientName: parsed.nome,
-          clientPhone: parsed.whatsapp,
-          desiredAmount: parsed.valorDesejado,
-          desiredTermMonths: parsed.parcelas,
-          estimatedRate: rateMonthly,
-          estimatedPayment: payment,
-          simulationData: parsed as Record<string, unknown>,
-        }).then((result) => {
-          if (result.success && result.data) {
-            setSimulationId(result.data.id)
-            sessionStorage.setItem(SIM_ID_KEY, result.data.id)
-          }
-        })
-      }
     } catch {
       router.replace(`/simulador/pessoa-fisica/consignado?productId=${productId}`)
     }
-  }, [router, productId, rateMonthly])
+  }, [router, productId])
 
   const installment = useMemo(() => {
     if (!data) return 0
@@ -98,10 +72,8 @@ export function ConsignadoResultado({
 
   return (
     <div className="space-y-4">
-      {/* Greeting */}
       <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
 
-      {/* Parcelas selector */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Em quanto tempo quer pagar?
@@ -124,7 +96,6 @@ export function ConsignadoResultado({
         </div>
       </div>
 
-      {/* Valor principal */}
       <div>
         <p className="text-sm text-surface-foreground/55">Parcela mensal</p>
         <p className="mt-1 text-3xl font-extrabold tracking-tight text-surface-foreground">
@@ -133,7 +104,6 @@ export function ConsignadoResultado({
         <p className="mt-0.5 text-xs text-surface-foreground/45">Sistema PRICE (parcelas fixas)</p>
       </div>
 
-      {/* Highlight pill */}
       <div className="flex items-center justify-between rounded-lg bg-primary/12 px-4 py-2.5">
         <span className="text-sm font-semibold text-surface-foreground">
           {parcelas}× de {formatCurrency(installment)}
@@ -143,10 +113,8 @@ export function ConsignadoResultado({
         </span>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-surface-foreground/8" />
 
-      {/* Data rows */}
       <div className="space-y-2.5">
         {[
           { label: 'Valor solicitado', value: formatCurrency(data.valorDesejado) },
@@ -161,7 +129,6 @@ export function ConsignadoResultado({
         ))}
       </div>
 
-      {/* Aviso */}
       <div className="flex items-start gap-2.5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
         <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
         <p className="text-xs leading-relaxed text-primary/80">
@@ -174,34 +141,18 @@ export function ConsignadoResultado({
 
       <StoreButton
         className="w-full bg-primary text-surface-foreground hover:bg-primary/90"
-        disabled={!simulationId || isQualifying}
-        onClick={async () => {
-          if (!simulationId) return
-          setIsQualifying(true)
-          const result = await qualifySimulation(simulationId)
-          if (result && !result.success) setIsQualifying(false)
-        }}
+        onClick={() => router.push(`/contratar/consignado-clt?step=pre-filtro&productId=${productId}`)}
       >
-        {isQualifying ? 'Aguarde...' : simulationId ? 'Quero contratar este crédito →' : 'Carregando...'}
+        Quero contratar este crédito →
       </StoreButton>
 
-      <div className="flex items-center justify-center gap-6 pt-1">
+      <div className="flex items-center justify-center pt-1">
         <button
           type="button"
           onClick={() => router.back()}
           className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refazer
-        </button>
-        <button
-          type="button"
-          disabled={!simulationId}
-          onClick={() => {
-            if (simulationId) window.open(`/api/simulations/${simulationId}/pdf`, '_blank')
-          }}
-          className="inline-flex items-center gap-2 text-xs font-medium text-surface-foreground/40 transition-colors hover:text-surface-foreground disabled:opacity-30"
-        >
-          <Download className="h-3.5 w-3.5" /> Baixar PDF
         </button>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { COMPLETED_STATUSES } from './status-config'
 
 export async function listProposals() {
   const supabase = await createClient()
@@ -8,19 +9,24 @@ export async function listProposals() {
     .select(`
       id,
       status,
-      purpose,
-      desired_amount,
-      desired_term_months,
-      estimated_rate,
-      estimated_payment,
+      product_type_slug,
+      current_step,
       client_name,
-      client_email,
       client_phone,
-      submitted_at,
+      documents_submitted,
       created_at,
+      updated_at,
       products ( name ),
-      proposal_stages ( name, order_num )
+      simulations (
+        client_name,
+        client_phone,
+        desired_amount,
+        desired_term_months,
+        estimated_rate,
+        estimated_payment
+      )
     `)
+    .in('status', COMPLETED_STATUSES as unknown as string[])
     .order('created_at', { ascending: false })
 
   if (error) throw error

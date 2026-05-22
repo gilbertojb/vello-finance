@@ -160,7 +160,7 @@ export function ConsignadoPrivadoWizard({ currentStep, ...props }: ProductWizard
     case 'dados-bancarios':
       return <DadosBancariosEtapa2Step {...props} nextStep="retorno" />
     case 'retorno':
-      return <RetornoStep {...props} message="Muito obrigado! Recebemos os seus dados e vamos iniciar a análise. Fique atento ao WhatsApp e e-mail, em breve você recebe um retorno." />
+      return <RetornoStep {...props} skipDocuments message="Muito obrigado! Recebemos os seus dados e vamos iniciar a análise. Fique atento ao WhatsApp e e-mail, em breve você recebe um retorno." />
     default:
       return null
   }

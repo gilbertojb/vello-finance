@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertTriangle, ChevronDown } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
 import { generateTermOptions } from '@/lib/utils/simulator'
+import { StoreButton } from '@/components/ui/store-button'
+import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 type Props = {
   productId: string
@@ -37,7 +40,6 @@ export function AntecipacaoReceiveisForm({
   const valorRecebiveis = Number(rawRecebiveis.replace(/\D/g, '')) / 100
   const valorCreditoTyped = Number(rawCredito.replace(/\D/g, '')) / 100
 
-  // Limite de 100% dos recebíveis
   const limite = valorRecebiveis
   const valorCredito = valorCreditoTyped > limite && limite > 0 ? limite : valorCreditoTyped
 
@@ -83,13 +85,12 @@ export function AntecipacaoReceiveisForm({
         <label htmlFor="nome" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Nome completo <span className="text-destructive">*</span>
         </label>
-        <input
+        <StoreInput
           type="text"
           id="nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="h-11 w-full rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -106,7 +107,7 @@ export function AntecipacaoReceiveisForm({
         <label htmlFor="valorRecebiveis" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Valor total de recebíveis <span className="text-destructive">*</span>
         </label>
-        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
           <input
             type="text"
@@ -129,22 +130,18 @@ export function AntecipacaoReceiveisForm({
         <label htmlFor="tipoRecebivel" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Tipo de recebível <span className="text-destructive">*</span>
         </label>
-        <div className="relative">
-          <select
-            id="tipoRecebivel"
-            value={tipoRecebivel}
-            onChange={(e) => setTipoRecebivel(e.target.value)}
-            className="h-11 w-full appearance-none rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="">Selecione o tipo de recebível</option>
-            <option value="Cartão de Crédito">Cartão de Crédito</option>
-            <option value="Boleto">Boleto</option>
-            <option value="NF-e">NF-e</option>
-            <option value="Contrato">Contrato</option>
-            <option value="Duplicata">Duplicata</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" />
-        </div>
+        <Select value={tipoRecebivel || undefined} onValueChange={setTipoRecebivel}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione o tipo de recebível" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Cartão de Crédito">Cartão de Crédito</SelectItem>
+            <SelectItem value="Boleto">Boleto</SelectItem>
+            <SelectItem value="NF-e">NF-e</SelectItem>
+            <SelectItem value="Contrato">Contrato</SelectItem>
+            <SelectItem value="Duplicata">Duplicata</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Valor de crédito desejado */}
@@ -152,7 +149,7 @@ export function AntecipacaoReceiveisForm({
         <label htmlFor="valorCredito" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Valor de crédito desejado <span className="text-destructive">*</span>
         </label>
-        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
           <input
             type="text"
@@ -201,14 +198,14 @@ export function AntecipacaoReceiveisForm({
         </div>
       </div>
 
-      <button
+      <StoreButton
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity disabled:opacity-40"
+        className="mt-2 w-full"
       >
         Ver minha simulação →
-      </button>
+      </StoreButton>
     </div>
   )
 }

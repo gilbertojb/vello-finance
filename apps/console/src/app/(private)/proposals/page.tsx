@@ -6,12 +6,7 @@ import { listProposals } from './queries'
 
 export const metadata: Metadata = { title: 'Propostas' }
 
-export default async function ProposalsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ status?: string }>
-}) {
-  const { status } = await searchParams
+export default async function ProposalsPage() {
   const proposals = await listProposals()
 
   return (
@@ -26,8 +21,8 @@ export default async function ProposalsPage({
             Propostas<span className="text-primary">.</span>
           </h1>
           <p className="m-0 max-w-xl text-sm leading-normal text-foreground/55">
-            Acompanhe contratos em andamento. Filtre por produto ou status e visualize todas as
-            operações em formato de cartões.
+            Acompanhe contratos em andamento. Filtre por produto e visualize todas as operações em
+            formato de cartões.
           </p>
         </div>
         <div className="flex items-center gap-2.5">
@@ -46,7 +41,7 @@ export default async function ProposalsPage({
         </div>
       </div>
 
-      <ProposalsList proposals={proposals} activeStatus={status} />
+      <ProposalsList proposals={proposals} />
     </div>
   )
 }

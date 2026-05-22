@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/server'
+import { COMPLETED_STATUSES } from '@/app/(private)/proposals/status-config'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -25,7 +26,7 @@ export async function NavMain() {
   const supabase = await createClient()
   const [{ count: simCount }, { count: propCount }] = await Promise.all([
     supabase.from('simulations').select('*', { count: 'exact', head: true }),
-    supabase.from('proposals').select('*', { count: 'exact', head: true }),
+    supabase.from('proposals').select('*', { count: 'exact', head: true }).in('status', COMPLETED_STATUSES as unknown as string[]),
   ])
 
   const sections = [

@@ -180,6 +180,22 @@ export async function uploadDocument(
   return { storagePath }
 }
 
+export async function finalizeProposal(proposalId: string): Promise<{ error: string } | void> {
+  const tenantId = await getTenantId()
+  if (!tenantId) return { error: 'Tenant não identificado.' }
+
+  const supabase = createServiceClient()
+  const { error } = await supabase
+    .from('proposals')
+    .update({ status: 'em_analise' })
+    .eq('id', proposalId)
+    .eq('tenant_id', tenantId)
+
+  if (error) return { error: 'Erro ao finalizar.' }
+
+  redirect(`/proposta/${proposalId}/finalizado`)
+}
+
 export async function finalizeEtapa2(proposalId: string): Promise<{ error: string } | void> {
   const tenantId = await getTenantId()
   if (!tenantId) return { error: 'Tenant não identificado.' }

@@ -4,6 +4,8 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
 import { generateTermOptions, formatCurrency } from '@/lib/utils/simulator'
+import { StoreButton } from '@/components/ui/store-button'
+import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
 
 type Props = {
@@ -73,13 +75,12 @@ export function EmprestimoPessoalForm({
         <label htmlFor="nome" className="mb-1.5 block text-sm font-semibold text-surface-foreground">
           Seu nome completo <span className="text-destructive">*</span>
         </label>
-        <input
+        <StoreInput
           type="text"
           id="nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="h-11 w-full rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -146,14 +147,14 @@ export function EmprestimoPessoalForm({
         </div>
       </div>
 
-      <button
+      <StoreButton
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity disabled:opacity-40"
+        className="mt-2 w-full"
       >
         Ver minha simulação →
-      </button>
+      </StoreButton>
     </div>
   )
 }

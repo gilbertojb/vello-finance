@@ -12,6 +12,10 @@ function toISO(d: Date): string {
   return d.toISOString()
 }
 
+// Propostas que completaram o wizard (enviaram documentos)
+const COMPLETED_STATUSES = ['em_analise', 'pre_aprovada', 'necessita_detalhes', 'reprovada', 'aprovada'] as const
+const PIPELINE_STATUSES  = ['em_analise', 'pre_aprovada', 'necessita_detalhes'] as const
+
 // ─── KPIs ─────────────────────────────────────────────────────────────────────
 
 export async function getDashboardKpis(): Promise<{
@@ -40,8 +44,8 @@ export async function getDashboardKpis(): Promise<{
   ] = await Promise.all([
     supabase
       .from('proposals')
-      .select('desired_amount, status')
-      .in('status', ['in_pipeline', 'approved']),
+      .select('simulations ( desired_amount )')
+      .in('status', [...PIPELINE_STATUSES]),
     supabase
       .from('simulations')
       .select('desired_amount, created_at')
@@ -54,49 +58,45 @@ export async function getDashboardKpis(): Promise<{
     supabase
       .from('proposals')
       .select('id')
+      .in('status', [...COMPLETED_STATUSES])
       .gte('created_at', d30),
     supabase
       .from('proposals')
-      .select('desired_amount')
-      .eq('status', 'approved')
-      .gte('approved_at', d7),
+      .select('simulations ( desired_amount )')
+      .eq('status', 'aprovada')
+      .gte('updated_at', d7),
     supabase
       .from('proposals')
-      .select('desired_amount')
-      .eq('status', 'approved'),
+      .select('simulations ( desired_amount )')
+      .eq('status', 'aprovada'),
   ])
 
   const activeProposalsList = activeProps ?? []
-  const sims30List = sims30 ?? []
-  const simsPrevList = simsPrev ?? []
-  const proposals30List = proposals30 ?? []
-  const approvedWeekList = approvedWeek ?? []
-  const approvedAllList = approvedAll ?? []
+  const sims30List          = sims30 ?? []
+  const simsPrevList        = simsPrev ?? []
+  const proposals30List     = proposals30 ?? []
+  const approvedWeekList    = approvedWeek ?? []
+  const approvedAllList     = approvedAll ?? []
 
-  const volumeContratado = activeProposalsList.reduce(
-    (sum, p) => sum + Number(p.desired_amount),
-    0,
-  )
-  const activeProposals = activeProposalsList.length
-  const sims30Count = sims30List.length
-  const sims30Volume = sims30List.reduce((sum, s) => sum + Number(s.desired_amount), 0)
+  function proposalAmount(p: { simulations: { desired_amount: number } | { desired_amount: number }[] | null }): number {
+    const sim = Array.isArray(p.simulations) ? p.simulations[0] : p.simulations
+    return sim ? Number(sim.desired_amount) : 0
+  }
 
-  const prevCount = simsPrevList.length
-  const simsGrowth =
-    prevCount === 0 ? 0 : Math.round(((sims30Count - prevCount) / prevCount) * 100)
+  const volumeContratado = activeProposalsList.reduce((sum, p) => sum + proposalAmount(p), 0)
+  const activeProposals  = activeProposalsList.length
+  const sims30Count      = sims30List.length
+  const sims30Volume     = sims30List.reduce((sum, s) => sum + Number(s.desired_amount), 0)
+
+  const prevCount  = simsPrevList.length
+  const simsGrowth = prevCount === 0 ? 0 : Math.round(((sims30Count - prevCount) / prevCount) * 100)
 
   const conversionRate =
-    sims30Count === 0
-      ? 0
-      : Math.round((proposals30List.length / sims30Count) * 1000) / 10
+    sims30Count === 0 ? 0 : Math.round((proposals30List.length / sims30Count) * 1000) / 10
 
-  const disbursed = approvedWeekList.reduce((sum, p) => sum + Number(p.desired_amount), 0)
-  const totalApproved = approvedAllList.reduce(
-    (sum, p) => sum + Number(p.desired_amount),
-    0,
-  )
-  const disbursedGrowth =
-    totalApproved === 0 ? 0 : Math.round((disbursed / totalApproved) * 1000) / 10
+  const disbursed      = approvedWeekList.reduce((sum, p) => sum + proposalAmount(p), 0)
+  const totalApproved  = approvedAllList.reduce((sum, p) => sum + proposalAmount(p), 0)
+  const disbursedGrowth = totalApproved === 0 ? 0 : Math.round((disbursed / totalApproved) * 1000) / 10
 
   return {
     volumeContratado,
@@ -127,36 +127,31 @@ export async function getTrendData(): Promise<
   const d30 = toISO(subDays(now, 30))
 
   const [{ data: sims }, { data: props }] = await Promise.all([
-    supabase
-      .from('simulations')
-      .select('created_at')
-      .gte('created_at', d30),
+    supabase.from('simulations').select('created_at').gte('created_at', d30),
     supabase
       .from('proposals')
       .select('created_at')
+      .in('status', [...COMPLETED_STATUSES])
       .gte('created_at', d30),
   ])
 
-  // Build a map per day for last 30 days
   const days: Array<{ date: string; label: string; simulations: number; proposals: number }> = []
   for (let i = 29; i >= 0; i--) {
-    const d = subDays(now, i)
+    const d     = subDays(now, i)
     const dateStr = d.toISOString().slice(0, 10)
-    const dd = String(d.getDate()).padStart(2, '0')
-    const mm = String(d.getMonth() + 1).padStart(2, '0')
+    const dd    = String(d.getDate()).padStart(2, '0')
+    const mm    = String(d.getMonth() + 1).padStart(2, '0')
     days.push({ date: dateStr, label: `${dd}/${mm}`, simulations: 0, proposals: 0 })
   }
 
   const dayMap = new Map(days.map((d) => [d.date, d]))
 
   for (const s of sims ?? []) {
-    const key = s.created_at.slice(0, 10)
-    const entry = dayMap.get(key)
+    const entry = dayMap.get(s.created_at.slice(0, 10))
     if (entry) entry.simulations++
   }
   for (const p of props ?? []) {
-    const key = p.created_at.slice(0, 10)
-    const entry = dayMap.get(key)
+    const entry = dayMap.get(p.created_at.slice(0, 10))
     if (entry) entry.proposals++
   }
 
@@ -177,17 +172,20 @@ export async function getPipelineData(): Promise<
   }>
 > {
   const supabase = await createClient()
-  const { data } = await supabase.from('proposals').select('status')
+  const { data } = await supabase
+    .from('proposals')
+    .select('status')
+    .in('status', [...COMPLETED_STATUSES])
 
   const proposals = data ?? []
-  const total = proposals.length
+  const total     = proposals.length
 
   const STATUS_META: Record<string, { label: string; color: string }> = {
-    simulation:  { label: 'Simulação',    color: '#6B7280' },
-    in_pipeline: { label: 'Em andamento', color: '#F59E0B' },
-    approved:    { label: 'Aprovada',     color: '#10B981' },
-    rejected:    { label: 'Rejeitada',    color: '#EF4444' },
-    cancelled:   { label: 'Cancelada',    color: '#6B7280' },
+    em_analise:         { label: 'Em análise',     color: '#6366F1' },
+    pre_aprovada:       { label: 'Pré-aprovada',   color: '#10B981' },
+    necessita_detalhes: { label: 'Det. pendentes', color: '#F59E0B' },
+    reprovada:          { label: 'Reprovada',       color: '#EF4444' },
+    aprovada:           { label: 'Aprovada',        color: '#22C55E' },
   }
 
   const counts: Record<string, number> = {}
@@ -198,9 +196,9 @@ export async function getPipelineData(): Promise<
   return Object.entries(STATUS_META)
     .map(([status, meta]) => ({
       status,
-      label: meta.label,
-      color: meta.color,
-      count: counts[status] ?? 0,
+      label:      meta.label,
+      color:      meta.color,
+      count:      counts[status] ?? 0,
       percentage: total === 0 ? 0 : Math.round(((counts[status] ?? 0) / total) * 100),
     }))
     .filter((item) => item.count > 0)
@@ -222,20 +220,25 @@ export async function getProductVolume(): Promise<
   const supabase = await createClient()
   const { data } = await supabase
     .from('proposals')
-    .select('desired_amount, products ( name )')
+    .select('products ( name ), simulations ( desired_amount )')
+    .in('status', [...COMPLETED_STATUSES])
 
   const proposals = data ?? []
+  const map       = new Map<string, { count: number; volume: number }>()
 
-  const map: Map<string, { count: number; volume: number }> = new Map()
   for (const p of proposals) {
     const productData = p.products
     const name =
       Array.isArray(productData)
         ? (productData[0] as { name: string } | undefined)?.name ?? 'Sem produto'
         : (productData as { name: string } | null)?.name ?? 'Sem produto'
+
+    const simData  = Array.isArray(p.simulations) ? p.simulations[0] : p.simulations
+    const amount   = simData ? Number(simData.desired_amount) : 0
+
     const entry = map.get(name) ?? { count: 0, volume: 0 }
     entry.count++
-    entry.volume += Number(p.desired_amount)
+    entry.volume += amount
     map.set(name, entry)
   }
 
@@ -266,24 +269,24 @@ export async function getFunnelData(): Promise<
 
   const [{ data: sims }, { data: props }] = await Promise.all([
     supabase.from('simulations').select('status'),
-    supabase.from('proposals').select('status'),
+    supabase.from('proposals').select('status').in('status', [...COMPLETED_STATUSES]),
   ])
 
   const simulations = sims ?? []
-  const proposals = props ?? []
+  const proposals   = props ?? []
 
-  const totalSims = simulations.length
-  const qualified = simulations.filter((s) => s.status === 'pre_qualificado').length
+  const totalSims  = simulations.length
+  const qualified  = simulations.filter((s) => s.status === 'pre_qualificado').length
   const totalProps = proposals.length
-  const approved = proposals.filter((p) => p.status === 'approved').length
+  const approved   = proposals.filter((p) => p.status === 'aprovada').length
 
   const base = totalSims || 1
 
   return [
     { label: 'Simulações',   count: totalSims,  percentage: 100 },
-    { label: 'Qualificadas', count: qualified,  percentage: Math.round((qualified / base) * 100) },
+    { label: 'Qualificadas', count: qualified,  percentage: Math.round((qualified  / base) * 100) },
     { label: 'Propostas',    count: totalProps, percentage: Math.round((totalProps / base) * 100) },
-    { label: 'Pagas',        count: approved,   percentage: Math.round((approved / base) * 100) },
+    { label: 'Pagas',        count: approved,   percentage: Math.round((approved   / base) * 100) },
   ]
 }
 
@@ -313,18 +316,19 @@ export async function getRecentActivity(): Promise<
     supabase
       .from('proposals')
       .select('id, client_name, status, created_at, products ( name )')
+      .in('status', [...COMPLETED_STATUSES])
       .order('created_at', { ascending: false })
       .limit(8),
   ])
 
   const ACTION_MAP: Record<string, string> = {
-    'sim:rascunho':        'simulou',
-    'sim:pre_qualificado': 'qualificou simulação',
-    'prop:simulation':     'iniciou proposta',
-    'prop:in_pipeline':    'enviou proposta',
-    'prop:approved':       'proposta aprovada',
-    'prop:rejected':       'proposta rejeitada',
-    'prop:cancelled':      'proposta cancelada',
+    'sim:rascunho':              'simulou',
+    'sim:pre_qualificado':       'qualificou simulação',
+    'prop:em_analise':           'enviou proposta',
+    'prop:pre_aprovada':         'proposta pré-aprovada',
+    'prop:necessita_detalhes':   'detalhes solicitados',
+    'prop:reprovada':            'proposta reprovada',
+    'prop:aprovada':             'proposta aprovada',
   }
 
   type ActivityItem = {
@@ -337,39 +341,30 @@ export async function getRecentActivity(): Promise<
     status: string
   }
 
-  const simItems: ActivityItem[] = (sims ?? []).map((s) => {
-    const productData = s.products
-    const productName =
-      Array.isArray(productData)
-        ? (productData[0] as { name: string } | undefined)?.name ?? '—'
-        : (productData as { name: string } | null)?.name ?? '—'
-    return {
-      id: `sim-${s.id}`,
-      client_name: s.client_name,
-      action: ACTION_MAP[`sim:${s.status}`] ?? s.status,
-      product: productName,
-      time: s.created_at,
-      type: 'simulation',
-      status: s.status,
-    }
-  })
+  function resolveProductName(productData: unknown): string {
+    if (Array.isArray(productData)) return (productData[0] as { name: string } | undefined)?.name ?? '—'
+    return (productData as { name: string } | null)?.name ?? '—'
+  }
 
-  const propItems: ActivityItem[] = (props ?? []).map((p) => {
-    const productData = p.products
-    const productName =
-      Array.isArray(productData)
-        ? (productData[0] as { name: string } | undefined)?.name ?? '—'
-        : (productData as { name: string } | null)?.name ?? '—'
-    return {
-      id: `prop-${p.id}`,
-      client_name: p.client_name,
-      action: ACTION_MAP[`prop:${p.status}`] ?? p.status,
-      product: productName,
-      time: p.created_at,
-      type: 'proposal',
-      status: p.status,
-    }
-  })
+  const simItems: ActivityItem[] = (sims ?? []).map((s) => ({
+    id:          `sim-${s.id}`,
+    client_name: s.client_name,
+    action:      ACTION_MAP[`sim:${s.status}`] ?? s.status,
+    product:     resolveProductName(s.products),
+    time:        s.created_at,
+    type:        'simulation',
+    status:      s.status,
+  }))
+
+  const propItems: ActivityItem[] = (props ?? []).map((p) => ({
+    id:          `prop-${p.id}`,
+    client_name: p.client_name ?? 'Cliente',
+    action:      ACTION_MAP[`prop:${p.status}`] ?? p.status,
+    product:     resolveProductName(p.products),
+    time:        p.created_at,
+    type:        'proposal',
+    status:      p.status,
+  }))
 
   return [...simItems, ...propItems]
     .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())

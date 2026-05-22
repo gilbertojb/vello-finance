@@ -3,9 +3,11 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import { ChevronDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/simulator'
+import { StoreButton } from '@/components/ui/store-button'
+import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const LTV_LIMIT = 0.6
 
@@ -98,13 +100,12 @@ export function HomeEquityForm({
         >
           Seu nome completo <span className="text-destructive">*</span>
         </label>
-        <input
+        <StoreInput
           type="text"
           id="nome"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
           placeholder="Como consta no seu documento"
-          className="h-11 w-full rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
         />
       </div>
 
@@ -127,7 +128,7 @@ export function HomeEquityForm({
         >
           Valor do Imóvel <span className="text-destructive">*</span>
         </label>
-        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -164,7 +165,7 @@ export function HomeEquityForm({
           Quanto você precisa de crédito?{' '}
           <span className="text-destructive">*</span>
         </label>
-        <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
           <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">
             R$
           </span>
@@ -199,26 +200,18 @@ export function HomeEquityForm({
 
       {/* Já tem crédito em outro banco */}
       <div>
-        <label className="block text-sm font-semibold text-surface-foreground">
-          <span className="mb-1.5 block">
-            Já tem crédito solicitado em outro banco? <span className="text-destructive">*</span>
-          </span>
-          <div className="relative">
-            <select
-              id="outroCredito"
-              value={outroCredito}
-              onChange={(e) => setOutroCredito(e.target.value)}
-              className="h-11 w-full appearance-none rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
-            >
-              <option value="" disabled>
-                Selecione...
-              </option>
-              <option value="nao">Não</option>
-              <option value="sim">Sim, já tenho uma proposta</option>
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 text-surface-foreground/40" />
-          </div>
+        <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
+          Já tem crédito solicitado em outro banco? <span className="text-destructive">*</span>
         </label>
+        <Select value={outroCredito || undefined} onValueChange={setOutroCredito}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Selecione..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="nao">Não</SelectItem>
+            <SelectItem value="sim">Sim, já tenho uma proposta</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Banco / instituição e valor liberado (condicional) */}
@@ -231,13 +224,12 @@ export function HomeEquityForm({
             >
               Qual banco ou instituição? <span className="text-destructive">*</span>
             </label>
-            <input
+            <StoreInput
               type="text"
               id="instituicao"
               value={instituicao}
               onChange={(e) => setInstituicao(e.target.value)}
               placeholder="Ex: Itaú, Bradesco..."
-              className="h-11 w-full rounded-lg border border-surface-foreground/15 bg-white px-4 text-sm text-surface-foreground placeholder:text-surface-foreground/35 focus:border-primary/40 focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div>
@@ -247,7 +239,7 @@ export function HomeEquityForm({
             >
               Valor já liberado <span className="text-destructive">*</span>
             </label>
-            <div className="h-11 flex items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
+            <div className="flex h-11 items-center rounded-lg border border-surface-foreground/15 bg-white focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/20">
               <span className="select-none pl-5 pr-2 text-sm font-medium text-surface-foreground/50">R$</span>
               <input
                 type="text"
@@ -267,14 +259,14 @@ export function HomeEquityForm({
         </>
       )}
 
-      <button
+      <StoreButton
         type="button"
         disabled={!canSubmit}
         onClick={handleSubmit}
-        className="mt-2 w-full h-11 rounded-lg bg-primary px-5 text-sm font-semibold text-surface-foreground transition-opacity disabled:opacity-40"
+        className="mt-2 w-full"
       >
         Ver minha simulação →
-      </button>
+      </StoreButton>
     </div>
   )
 }

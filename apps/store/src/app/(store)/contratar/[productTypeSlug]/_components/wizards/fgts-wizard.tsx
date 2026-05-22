@@ -209,7 +209,7 @@ export function FgtsWizard({ currentStep, ...props }: ProductWizardProps) {
     case 'dados-bancarios':
       return <DadosBancariosEtapa2Step {...props} nextStep="retorno" />
     case 'retorno':
-      return <RetornoStep {...props} message="Recebemos seus dados e já começamos a análise! Fique de olho no WhatsApp e no e-mail." />
+      return <RetornoStep {...props} skipDocuments message="Recebemos seus dados e já começamos a análise! Fique de olho no WhatsApp e no e-mail." />
     default:
       return null
   }

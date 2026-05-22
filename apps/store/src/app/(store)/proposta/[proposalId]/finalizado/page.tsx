@@ -6,6 +6,23 @@ import { getProposal } from '@/app/(store)/queries'
 
 type Props = { params: Promise<{ proposalId: string }> }
 
+const NO_DOCS_SLUGS = ['fgts', 'consignado_privado']
+
+const MESSAGES: Record<string, { title: string; body: string }> = {
+  fgts: {
+    title: 'Dados recebidos!',
+    body: 'Em breve, você receberá o link para seguir com a contratação do crédito. Fique atento ao seu e-mail e WhatsApp, entraremos em contato com os próximos passos!',
+  },
+  consignado_privado: {
+    title: 'Dados recebidos!',
+    body: 'Recebemos seus dados e já começamos a análise da sua margem consignável. Fique atento ao WhatsApp e e-mail, em breve você recebe um retorno.',
+  },
+  default: {
+    title: 'Documentos enviados!',
+    body: 'Agora, nossa equipe jurídica e os analistas de crédito darão continuidade à análise. Fique de olho no seu e-mail e WhatsApp, em breve entraremos em contato com os próximos passos.',
+  },
+}
+
 export default async function FinalizadoPage({ params }: Props) {
   const { proposalId } = await params
   const tenantId = (await headers()).get('x-tenant-id')
@@ -14,8 +31,8 @@ export default async function FinalizadoPage({ params }: Props) {
   const proposal = await getProposal(proposalId, tenantId)
   if (!proposal) notFound()
 
-  const isFgts = proposal.product_type_slug === 'fgts'
-
+  const slug = proposal.product_type_slug ?? ''
+  const msg = MESSAGES[slug] ?? MESSAGES.default
   const productName = proposal.products?.name ?? ''
 
   return (
@@ -32,13 +49,11 @@ export default async function FinalizadoPage({ params }: Props) {
         )}
 
         <h1 className="mb-3 text-2xl font-extrabold tracking-tight text-surface-foreground">
-          {isFgts ? 'Dados recebidos!' : 'Documentos enviados!'}
+          {msg.title}
         </h1>
 
         <p className="text-base leading-relaxed text-surface-foreground/70">
-          {isFgts
-            ? 'Em breve, você receberá o link para seguir com a contratação do crédito. Fique atento ao seu e-mail e WhatsApp, entraremos em contato com os próximos passos!'
-            : 'Agora, nossa equipe jurídica e os analistas de crédito darão continuidade à análise. Fique de olho no seu e-mail e WhatsApp, em breve entraremos em contato com os próximos passos.'}
+          {msg.body}
         </p>
 
         <div className="mt-6 w-full rounded-lg border border-surface-foreground/10 bg-surface px-6 py-4 text-left">

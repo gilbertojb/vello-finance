@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import { StoreButton as Button } from '@/components/ui/store-button'
 import { FieldError } from '@/components/ui/field'
-import { finalizeEtapa1 } from '@/app/(store)/contratar/actions'
+import { finalizeEtapa1, finalizeProposal } from '@/app/(store)/contratar/actions'
 import type { WizardStepProps } from './types'
 
-type Props = WizardStepProps & { message: string }
+type Props = WizardStepProps & { message: string; skipDocuments?: boolean }
 
-export function RetornoStep({ proposalId, proposal, message }: Props) {
+export function RetornoStep({ proposalId, proposal, message, skipDocuments }: Props) {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
@@ -20,7 +20,9 @@ export function RetornoStep({ proposalId, proposal, message }: Props) {
   function handleConfirm() {
     if (!proposalId) return
     startTransition(async () => {
-      const res = await finalizeEtapa1(proposalId)
+      const res = skipDocuments
+        ? await finalizeProposal(proposalId)
+        : await finalizeEtapa1(proposalId)
       if (res && 'error' in res) setError(res.error)
       else setDone(true)
     })
