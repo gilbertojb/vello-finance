@@ -37,6 +37,7 @@ export default async function ContratarPage({ params, searchParams }: Props) {
         product={product ?? null}
         productId={productId ?? null}
         simulationId={simulationId ?? null}
+        videoUrl={(product as { video_url?: string | null } | null)?.video_url ?? null}
       />
     </div>
   )

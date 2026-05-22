@@ -8,15 +8,14 @@ import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
 import { ToggleGroup } from '../steps/toggle-group'
-import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
-import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
+import { getStepData } from '../steps/types'
 import { BlockMessage } from '../steps/block-message'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
 import { DadosSociosStep } from '../steps/dados-socios-step'
 import type { ProductWizardProps } from '../steps/types'
 
-const TIPOS_EMPRESA = ['LTDA', 'EPP', 'S.A.', 'Outros', 'MEI']
+const TIPOS_EMPRESA = ['EI', 'ME', 'EPP', 'LTDA', 'SLU', 'EIRELI', 'S.A.', 'SS', 'Cooperativa', 'Associação', 'Fundação']
 const MOTIVOS = ['Quitar dívidas pessoais', 'Quitar dívidas da empresa', 'Investir em negócio próprio', 'Reforma ou construção', 'Aquisição de outro imóvel', 'Projetos pessoais', 'Outros']
 const TIPOS_GARANTIA = ['Duplicatas', 'Cartões de Crédito', 'Aplicações Financeiras', 'Domicílio Simples', 'Imóvel Empresarial', 'Recebíveis']
 
@@ -24,24 +23,21 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const saved = getStepData<Record<string, string>>(proposal, 'operacao')
   const [tipoEmpresa, setTipoEmpresa] = useState(saved.tipoEmpresa ?? '')
   const [fundacao, setFundacao] = useState(saved.fundacao ?? '')
-  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const blockMei = tipoEmpresa === 'MEI'
   const blockIdade = fundacao
     ? (new Date().getTime() - new Date(fundacao).getTime()) / (1000 * 60 * 60 * 24 * 365.25) < 3
     : false
-  const blockFaturamento = parseBRL(faturamentoStr) > 0 && parseBRL(faturamentoStr) < 250000
 
   function handleSubmit() {
-    if (blockMei || blockIdade || blockFaturamento) return
-    if (!tipoEmpresa || !fundacao || !faturamentoStr || !motivo) return setError('Preencha todos os campos.')
+    if (blockIdade) return
+    if (!tipoEmpresa || !fundacao || !motivo) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
-      const stepData = { tipoEmpresa, fundacao, faturamento: parseBRL(faturamentoStr), motivo }
+      const stepData = { tipoEmpresa, fundacao, motivo }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
@@ -60,19 +56,12 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
             {TIPOS_EMPRESA.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
           </SelectContent>
         </Select>
-        {blockMei && <BlockMessage message="Esta linha de crédito não está disponível para MEI." />}
       </Field>
 
       <Field>
         <FieldLabel>Data de abertura do CNPJ <span className="text-destructive">*</span></FieldLabel>
         <Input type="date" value={fundacao} onChange={(e) => setFundacao(e.target.value)} />
         {blockIdade && <BlockMessage message="A empresa precisa ter pelo menos 3 anos de existência para essa linha de crédito." />}
-      </Field>
-
-      <Field>
-        <FieldLabel>Faturamento dos últimos 12 meses <span className="text-destructive">*</span></FieldLabel>
-        <StoreCurrencyInput value={faturamentoStr} onChange={setFaturamentoStr} />
-        {blockFaturamento && <BlockMessage message="O faturamento mínimo exigido para essa linha de crédito é de R$ 250 mil." />}
       </Field>
 
       <Field>
@@ -86,7 +75,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       </Field>
 
       {error && <FieldError>{error}</FieldError>}
-      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockMei || blockIdade || blockFaturamento}>
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockIdade}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
     </FieldGroup>

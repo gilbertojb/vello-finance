@@ -22,6 +22,7 @@ type Props = {
   product: TenantProduct | null
   productId: string | null
   simulationId: string | null
+  videoUrl?: string | null
 }
 
 export function WizardContainer({
@@ -31,6 +32,7 @@ export function WizardContainer({
   product,
   productId,
   simulationId,
+  videoUrl,
 }: Props) {
   const flow = PRODUCT_FLOWS[productTypeSlug]
   if (!flow) {
@@ -53,6 +55,7 @@ export function WizardContainer({
     simulationId,
     proposal,
     currentStep,
+    videoUrl,
   }
 
   return (

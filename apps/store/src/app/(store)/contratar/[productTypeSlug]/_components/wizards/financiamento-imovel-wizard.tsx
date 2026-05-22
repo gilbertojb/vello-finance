@@ -7,13 +7,14 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { parseBRL, formatBRL, formatBRLInput, getStepData } from '../steps/types'
+import { parseBRL, formatBRLInput, getStepData } from '../steps/types'
 import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { RetornoStep } from '../steps/retorno-step'
+import { DadosPessoaisPFStep } from '../steps/dados-pessoais-pf-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
 import { AtividadeFaturamentoStep } from '../steps/atividade-faturamento-step'
 import { DadosSociosStep } from '../steps/dados-socios-step'
-import { DadosVendedorStep } from '../steps/dados-vendedor-step'
+import { RendaOcupacaoStep } from '../steps/renda-ocupacao-step'
 import { EnderecoStep } from '../steps/endereco-step'
 import type { ProductWizardProps } from '../steps/types'
 
@@ -33,11 +34,12 @@ function FinanciamentoImovelOperacaoStep({ proposalId, productId, productTypeSlu
   function handleSubmit() {
     if (!tipoComprador || !tipoImovel || !financiado || !matricula) return setError('Preencha todos os campos.')
     setError('')
+    const nextStep = tipoComprador === 'Pessoa Física' ? 'dados-pessoais' : 'dados-solicitante'
     startTransition(async () => {
       const stepData = { tipoComprador, tipoImovel, financiado, valorPago: parseBRL(valorPagoStr), matricula }
       const res = proposalId
-        ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-solicitante' })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-solicitante' })
+        ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })
@@ -108,14 +110,19 @@ export function FinanciamentoImovelWizard({ currentStep, ...props }: ProductWiza
   switch (currentStep) {
     case 'operacao':
       return <FinanciamentoImovelOperacaoStep {...props} currentStep={currentStep} />
+    // PF path
+    case 'dados-pessoais':
+      return <DadosPessoaisPFStep {...props} nextStep="renda-ocupacao" withEstadoCivil />
+    case 'renda-ocupacao':
+      return <RendaOcupacaoStep {...props} nextStep="endereco-imovel" withComposicaoRenda />
+    // PJ path
     case 'dados-solicitante':
       return <DadosEmpresaPJStep {...props} variant="simple" nextStep="atividade-faturamento" stepSlug="dados-solicitante" />
     case 'atividade-faturamento':
       return <AtividadeFaturamentoStep {...props} nextStep="dados-socios" hasProdutos />
     case 'dados-socios':
-      return <DadosSociosStep {...props} nextStep="dados-vendedor" withEstadoCivil />
-    case 'dados-vendedor':
-      return <DadosVendedorStep {...props} nextStep="endereco-imovel" stepSlug="dados-vendedor" />
+      return <DadosSociosStep {...props} nextStep="endereco-imovel" withEstadoCivil />
+    // Common
     case 'endereco-imovel':
       return <EnderecoStep {...props} stepSlug="endereco-imovel" nextStep="retorno" label="Endereço do Imóvel" />
     case 'retorno':

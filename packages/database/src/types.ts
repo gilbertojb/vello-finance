@@ -614,6 +614,7 @@ export type Database = {
           tenant_id: string
           updated_at: string
           vello_spread_pct: number
+          video_url: string | null
         }
         Insert: {
           cover_url?: string | null
@@ -626,6 +627,7 @@ export type Database = {
           tenant_id: string
           updated_at?: string
           vello_spread_pct: number
+          video_url?: string | null
         }
         Update: {
           cover_url?: string | null
@@ -638,6 +640,7 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           vello_spread_pct?: number
+          video_url?: string | null
         }
         Relationships: [
           {

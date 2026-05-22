@@ -9,7 +9,7 @@ import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const LTV_LIMIT = 0.6
+const LTV_LIMIT = 0.5
 
 function parseBRL(raw: string): number {
   return Math.max(0, Number(raw.replace(/\D/g, '')) || 0)
@@ -186,13 +186,13 @@ export function HomeEquityForm({
           />
         </div>
         <p className="mt-1.5 text-xs text-surface-foreground/50">
-          Liberamos até 60% do valor do imóvel
+          Liberamos até 50% do valor do imóvel
         </p>
         {showWarning && (
           <div className="mt-2.5 flex items-start gap-2.5 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3">
             <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-destructive" />
             <p className="text-xs font-medium text-destructive/90">
-              O valor solicitado ultrapassa o limite permitido (60% do imóvel). Ajustamos automaticamente para {formatCurrency(limite)}.
+              O valor solicitado ultrapassa o limite permitido (50% do imóvel). Ajustamos automaticamente para {formatCurrency(limite)}.
             </p>
           </div>
         )}

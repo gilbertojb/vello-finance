@@ -64,6 +64,9 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
   )
 }
 
+const DATAPREV_AUTH_URL =
+  'https://www.gov.br/servidor/pt-br/acesso-a-informacao/faq/sou-gov.br/consignacoes/2-como-gerar-autorizacao-de-emprestimo-consignado-no-aplicativo-sou-gov.br'
+
 function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
   const [autorizado, setAutorizado] = useState(false)
   const [error, setError] = useState('')
@@ -82,10 +85,23 @@ function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-lg border border-surface-foreground/15 bg-surface p-4 space-y-3">
+        <p className="text-sm text-surface-foreground">
+          Para prosseguir, você precisa autorizar a consulta dos seus dados via Dataprev. Acesse a página oficial e siga as instruções.
+        </p>
+        <a
+          href={DATAPREV_AUTH_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex w-full items-center justify-center rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+        >
+          Acessar página de autorização →
+        </a>
+      </div>
       <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-foreground/15 bg-surface p-4">
         <input type="checkbox" className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary" checked={autorizado} onChange={(e) => setAutorizado(e.target.checked)} />
         <span className="text-sm text-surface-foreground">
-          Autorizo a consulta dos meus dados via Dataprev para análise de crédito consignado.
+          Já realizei a autorização e desejo prosseguir.
         </span>
       </label>
       {error && <FieldError>{error}</FieldError>}

@@ -6,6 +6,7 @@ export type WizardStepProps = {
   productTypeSlug: string
   simulationId: string | null
   proposal: ProposalWithProduct | null
+  videoUrl?: string | null
 }
 
 export type ProductWizardProps = WizardStepProps & { currentStep: string }

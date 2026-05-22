@@ -36,6 +36,7 @@ export async function getTenantProduct(tenantProductId: string, tenantId: string
     .select(`
       id,
       cover_url,
+      video_url,
       products (
         id,
         name,

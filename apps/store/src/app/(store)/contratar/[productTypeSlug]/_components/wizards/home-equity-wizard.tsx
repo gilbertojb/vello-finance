@@ -113,7 +113,7 @@ export function HomeEquityWizard({ currentStep, ...props }: ProductWizardProps) 
     case 'endereco-residencial':
       return <EnderecoStep {...props} stepSlug="endereco-residencial" nextStep="renda-ocupacao" label="Endereço Residencial" showSameAs={{ label: 'Mesmo endereço da garantia', sourceStepSlug: 'endereco-garantia' }} />
     case 'renda-ocupacao':
-      return <RendaOcupacaoStep {...props} nextStep="retorno" />
+      return <RendaOcupacaoStep {...props} nextStep="retorno" withComposicaoRenda />
     case 'retorno':
       return <RetornoStep {...props} message="Obrigado pelas informações! Agora é com a gente, sua proposta já está em análise. Fique de olho no WhatsApp e no seu e-mail." />
     default:

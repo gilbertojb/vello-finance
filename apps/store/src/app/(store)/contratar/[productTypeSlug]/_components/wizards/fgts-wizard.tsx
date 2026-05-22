@@ -14,6 +14,44 @@ import { RetornoStep } from '../steps/retorno-step'
 import { DadosBancariosEtapa2Step } from '../etapa2/dados-bancarios-step'
 import type { ProductWizardProps } from '../steps/types'
 
+function VideoPlayer({ url }: { url: string }) {
+  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([^&\n?#]+)/)
+  const vimeoMatch = !ytMatch ? url.match(/vimeo\.com\/(\d+)/) : null
+
+  if (ytMatch) {
+    return (
+      <div className="relative w-full overflow-hidden rounded-lg aspect-video">
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://www.youtube.com/embed/${ytMatch[1]}`}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="Vídeo explicativo"
+        />
+      </div>
+    )
+  }
+
+  if (vimeoMatch) {
+    return (
+      <div className="relative w-full overflow-hidden rounded-lg aspect-video">
+        <iframe
+          className="absolute inset-0 h-full w-full"
+          src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
+          allowFullScreen
+          title="Vídeo explicativo"
+        />
+      </div>
+    )
+  }
+
+  return (
+    <video className="w-full rounded-lg" controls>
+      <source src={url} />
+    </video>
+  )
+}
+
 function BackButton() {
   const router = useRouter()
   return (
@@ -28,7 +66,7 @@ function BackButton() {
   )
 }
 
-function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep }: ProductWizardProps) {
+function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulationId, proposal, currentStep, videoUrl }: ProductWizardProps) {
   const saved = getStepData<Record<string, string>>(proposal, 'liberacao-saque')
   const [liberou, setLiberou] = useState(saved.liberou ?? '')
   const [jaRealizei, setJaRealizei] = useState(false)
@@ -53,6 +91,7 @@ function LiberacaoSaqueStep({ proposalId, productId, productTypeSlug, simulation
 
   return (
     <div className="space-y-5">
+      {videoUrl && <VideoPlayer url={videoUrl} />}
       <p className="text-sm text-muted-foreground">Você já liberou o Saque Aniversário no aplicativo do FGTS (Caixa)?</p>
       <ToggleGroup options={['Sim', 'Não']} value={liberou} onChange={setLiberou} />
       {liberou === 'Não' && !jaRealizei && (
@@ -107,9 +146,11 @@ function LiberacaoBancosStep({ proposalId, proposal }: ProductWizardProps) {
       {liberou === 'Não' && !jaRealizei && (
         <div className="rounded-lg border border-surface-foreground/10 bg-surface p-4 space-y-3">
           <p className="text-sm font-semibold text-surface-foreground">Como autorizar os bancos:</p>
-          <ol className="list-decimal list-inside space-y-1 text-sm text-surface-foreground/70">
-            <li>No app Caixa FGTS, acesse <strong>Autorização de bancos</strong></li>
-            <li>Selecione os bancos parceiros</li>
+          <ol className="list-decimal list-inside space-y-1.5 text-sm text-surface-foreground/70">
+            <li>Acesse o <strong>app FGTS</strong> ou o site da Caixa</li>
+            <li>Vá em <strong>"Autorizar bancos"</strong></li>
+            <li>Procure por <strong>QI Sociedade de Crédito</strong>, <strong>CDC Sociedade de Crédito</strong> e <strong>ZIPDIN Soluções Digitais</strong></li>
+            <li>Selecione cada banco parceiro</li>
             <li>Confirme a autorização</li>
           </ol>
           <Button type="button" className="mt-2 w-full" onClick={() => setJaRealizei(true)}>

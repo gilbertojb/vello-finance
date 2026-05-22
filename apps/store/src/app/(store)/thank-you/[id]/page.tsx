@@ -49,8 +49,7 @@ export default async function AgradecimentoPage({ params }: Props) {
                 Olá, <strong className="text-surface-foreground">{clientName}</strong>!{' '}
               </>
             ) : null}
-            Um de nossos consultores vai entrar em contato pelo seu WhatsApp em breve para
-            dar continuidade à sua solicitação de <strong>{productName}</strong>.
+            Sua simulação de <strong>{productName}</strong> foi concluída. Continue abaixo para preencher as informações da sua proposta e dar início à análise.
           </p>
           <div className="flex flex-col items-center gap-3">
             {contratarHref && (

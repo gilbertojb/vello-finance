@@ -109,12 +109,11 @@ export const PRODUCT_FLOWS: Record<string, { etapa1: StepConfig[]; etapa2: StepC
       { slug: 'dados-solicitante', label: 'Solicitante' },
       { slug: 'atividade-faturamento', label: 'Atividade' },
       { slug: 'dados-socios', label: 'Sócios' },
-      { slug: 'dados-vendedor', label: 'Vendedor' },
       { slug: 'endereco-imovel', label: 'End. Imóvel' },
       { slug: 'retorno', label: 'Confirmação' },
     ],
     etapa2: [
-      { slug: 'dados-bancarios-vendedor', label: 'Dados Bancários' },
+      { slug: 'dados-bancarios', label: 'Dados Bancários' },
       { slug: 'documentos-empresa', label: 'Docs. Empresa' },
       { slug: 'documentos-imovel', label: 'Docs. Imóvel' },
     ],
@@ -124,7 +123,6 @@ export const PRODUCT_FLOWS: Record<string, { etapa1: StepConfig[]; etapa2: StepC
       { slug: 'operacao', label: 'Operação' },
       { slug: 'dados-pessoais', label: 'Dados Pessoais' },
       { slug: 'renda-ocupacao', label: 'Renda' },
-      { slug: 'dados-vendedor', label: 'Vendedor' },
       { slug: 'retorno', label: 'Confirmação' },
     ],
     etapa2: [
