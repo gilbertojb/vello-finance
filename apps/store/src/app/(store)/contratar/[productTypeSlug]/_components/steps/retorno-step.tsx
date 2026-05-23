@@ -45,6 +45,19 @@ function SimulationSummary({ proposal }: Pick<WizardStepProps, 'proposal'>) {
   )
 }
 
+const SIM_KEYS: Record<string, string> = {
+  home_equity: 'sim:home-equity',
+  home_equity_pj: 'sim:home-equity-pj',
+  auto_equity: 'sim:auto-equity',
+  auto_equity_pj: 'sim:auto-equity-pj',
+  fgts: 'sim:fgts',
+  capital_giro: 'sim:capital-giro',
+  antecipacao_recebiveis: 'sim:antecipacao-recebiveis',
+  financiamento_imovel: 'sim:financiamento-imovel',
+  financiamento_veiculo: 'sim:financiamento-veiculo',
+  consignado_privado: 'sim:consignado',
+}
+
 export function RetornoStep({ proposalId, proposal, message, skipDocuments }: Props) {
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
@@ -58,8 +71,16 @@ export function RetornoStep({ proposalId, proposal, message, skipDocuments }: Pr
       const res = skipDocuments
         ? await finalizeProposal(proposalId)
         : await finalizeEtapa1(proposalId)
-      if (res && 'error' in res) setError(res.error)
-      else setDone(true)
+      if (res && 'error' in res) {
+        setError(res.error)
+      } else {
+        const slug = proposal?.product_type_slug
+        if (slug) {
+          const key = SIM_KEYS[slug]
+          if (key) sessionStorage.removeItem(key)
+        }
+        setDone(true)
+      }
     })
   }
 
