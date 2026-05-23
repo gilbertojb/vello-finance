@@ -39,10 +39,18 @@ function AutoEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
     if (!/^[A-Z]{3}[\d]{4}$|^[A-Z]{3}\d[A-Z]\d{2}$/i.test(placa.replace('-', ''))) return setError('Formato de placa inválido.')
     setError('')
     startTransition(async () => {
+      let clientName: string | undefined
+      let clientPhone: string | undefined
+      try {
+        const sim = JSON.parse(sessionStorage.getItem('sim:auto-equity') ?? '{}')
+        clientName = sim.nome || undefined
+        clientPhone = sim.whatsapp || undefined
+      } catch { /* ignore */ }
+
       const stepData = { tipoVeiculo, financiado, placa: placa.toUpperCase(), ano, motivo }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais' })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais' })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais', clientName, clientPhone })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })

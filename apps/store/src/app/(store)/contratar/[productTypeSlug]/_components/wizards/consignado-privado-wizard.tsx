@@ -33,10 +33,18 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
   function handleSubmit() {
     if (blocked || !allSim) return
     startTransition(async () => {
+      let clientName: string | undefined
+      let clientPhone: string | undefined
+      try {
+        const sim = JSON.parse(sessionStorage.getItem('sim:consignado') ?? '{}')
+        clientName = sim.nome || undefined
+        clientPhone = sim.whatsapp || undefined
+      } catch { /* ignore */ }
+
       const stepData = { clt, vinculo, tempo, idade }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev', clientName, clientPhone })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })

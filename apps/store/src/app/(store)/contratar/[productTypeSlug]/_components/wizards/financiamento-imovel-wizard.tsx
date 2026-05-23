@@ -36,10 +36,20 @@ function FinanciamentoImovelOperacaoStep({ proposalId, productId, productTypeSlu
     setError('')
     const nextStep = tipoComprador === 'Pessoa Física' ? 'dados-pessoais' : 'dados-solicitante'
     startTransition(async () => {
+      let clientName: string | undefined
+      let clientPhone: string | undefined
+      if (tipoComprador === 'Pessoa Física') {
+        try {
+          const sim = JSON.parse(sessionStorage.getItem('sim:financiamento-imovel') ?? '{}')
+          clientName = sim.nome || undefined
+          clientPhone = sim.whatsapp || undefined
+        } catch { /* ignore */ }
+      }
+
       const stepData = { tipoComprador, tipoImovel, financiado, valorPago: parseBRL(valorPagoStr), matricula }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep, clientName, clientPhone })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })

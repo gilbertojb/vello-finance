@@ -33,10 +33,18 @@ function HomeEquityOperacaoStep({ proposalId, productId, productTypeSlug, simula
     if (!tipoImovel || !financiado || !matricula || !motivo) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
+      let clientName: string | undefined
+      let clientPhone: string | undefined
+      try {
+        const sim = JSON.parse(sessionStorage.getItem('sim:home-equity') ?? '{}')
+        clientName = sim.nome || undefined
+        clientPhone = sim.whatsapp || undefined
+      } catch { /* ignore */ }
+
       const stepData = { tipoImovel, financiado, valorPago: parseBRL(valorPagoStr), matricula, motivo }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais' })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais' })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-pessoais', clientName, clientPhone })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })
