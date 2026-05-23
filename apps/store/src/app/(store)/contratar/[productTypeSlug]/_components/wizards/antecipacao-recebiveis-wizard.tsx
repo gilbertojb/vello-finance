@@ -7,8 +7,9 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
-import { getStepData } from '../steps/types'
+import { parseBRL, formatBRLInput, getStepData } from '../steps/types'
 import { BlockMessage } from '../steps/block-message'
+import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
 import { DadosSociosStep } from '../steps/dados-socios-step'
@@ -22,6 +23,7 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const [tipoRecebivel, setTipoRecebivel] = useState(saved.tipoRecebivel ?? '')
   const [fundacao, setFundacao] = useState(saved.fundacao ?? '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -29,13 +31,14 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const blockIdade = fundacao
     ? (new Date().getTime() - new Date(fundacao).getTime()) / (1000 * 60 * 60 * 24 * 365.25) < 3
     : false
+  const blockFaturamento = faturamentoStr ? parseBRL(faturamentoStr) < 120000 : false
 
   function handleSubmit() {
-    if (blockIdade) return
-    if (!tipoRecebivel || !fundacao || !motivo) return setError('Preencha todos os campos.')
+    if (blockIdade || blockFaturamento) return
+    if (!tipoRecebivel || !fundacao || !motivo || !faturamentoStr) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
-      const stepData = { tipoRecebivel, fundacao, motivo }
+      const stepData = { tipoRecebivel, fundacao, motivo, faturamento: String(parseBRL(faturamentoStr)) }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
@@ -72,8 +75,14 @@ function AntecipacaoOperacaoStep({ proposalId, productId, productTypeSlug, simul
         </Select>
       </Field>
 
+      <Field>
+        <FieldLabel>Faturamento dos últimos 12 meses <span className="text-destructive">*</span></FieldLabel>
+        <StoreCurrencyInput value={faturamentoStr} onChange={setFaturamentoStr} />
+        {blockFaturamento && <BlockMessage message="O faturamento mínimo para essa linha de crédito é R$ 120.000 nos últimos 12 meses." />}
+      </Field>
+
       {error && <FieldError>{error}</FieldError>}
-      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockIdade}>
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockIdade || blockFaturamento}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
     </FieldGroup>

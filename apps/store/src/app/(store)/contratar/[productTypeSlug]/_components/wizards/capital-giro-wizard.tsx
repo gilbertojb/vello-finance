@@ -7,9 +7,10 @@ import { StoreInput as Input } from '@/components/ui/store-input'
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { createProposal, saveStep } from '@/app/(store)/contratar/actions'
+import { parseBRL, formatBRLInput, getStepData } from '../steps/types'
 import { ToggleGroup } from '../steps/toggle-group'
-import { getStepData } from '../steps/types'
 import { BlockMessage } from '../steps/block-message'
+import { StoreCurrencyInput } from '@/components/ui/store-currency-input'
 import { RetornoStep } from '../steps/retorno-step'
 import { DadosEmpresaPJStep } from '../steps/dados-empresa-pj-step'
 import { DadosSociosStep } from '../steps/dados-socios-step'
@@ -24,6 +25,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const [tipoEmpresa, setTipoEmpresa] = useState(saved.tipoEmpresa ?? '')
   const [fundacao, setFundacao] = useState(saved.fundacao ?? '')
   const [motivo, setMotivo] = useState(saved.motivo ?? '')
+  const [faturamentoStr, setFaturamentoStr] = useState(saved.faturamento ? formatBRLInput(Number(saved.faturamento)) : '')
   const [error, setError] = useState('')
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -31,13 +33,14 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
   const blockIdade = fundacao
     ? (new Date().getTime() - new Date(fundacao).getTime()) / (1000 * 60 * 60 * 24 * 365.25) < 3
     : false
+  const blockFaturamento = faturamentoStr ? parseBRL(faturamentoStr) < 250000 : false
 
   function handleSubmit() {
-    if (blockIdade) return
-    if (!tipoEmpresa || !fundacao || !motivo) return setError('Preencha todos os campos.')
+    if (blockIdade || blockFaturamento) return
+    if (!tipoEmpresa || !fundacao || !motivo || !faturamentoStr) return setError('Preencha todos os campos.')
     setError('')
     startTransition(async () => {
-      const stepData = { tipoEmpresa, fundacao, motivo }
+      const stepData = { tipoEmpresa, fundacao, motivo, faturamento: String(parseBRL(faturamentoStr)) }
       const res = proposalId
         ? await saveStep({ proposalId, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
         : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'operacao', stepData, nextStep: 'dados-empresa' })
@@ -65,6 +68,12 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       </Field>
 
       <Field>
+        <FieldLabel>Faturamento dos últimos 12 meses <span className="text-destructive">*</span></FieldLabel>
+        <StoreCurrencyInput value={faturamentoStr} onChange={setFaturamentoStr} />
+        {blockFaturamento && <BlockMessage message="O faturamento mínimo para essa linha de crédito é R$ 250.000 nos últimos 12 meses." />}
+      </Field>
+
+      <Field>
         <FieldLabel>Motivo do crédito <span className="text-destructive">*</span></FieldLabel>
         <Select value={motivo} onValueChange={setMotivo}>
           <SelectTrigger className="w-full h-11 rounded-lg"><SelectValue placeholder="Selecione…" /></SelectTrigger>
@@ -75,7 +84,7 @@ function CapitalGiroOperacaoStep({ proposalId, productId, productTypeSlug, simul
       </Field>
 
       {error && <FieldError>{error}</FieldError>}
-      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockIdade}>
+      <Button className="w-full" onClick={handleSubmit} disabled={isPending || blockIdade || blockFaturamento}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
     </FieldGroup>

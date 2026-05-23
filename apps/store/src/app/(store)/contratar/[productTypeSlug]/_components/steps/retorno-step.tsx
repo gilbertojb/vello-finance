@@ -6,9 +6,44 @@ import { CheckCircle2 } from 'lucide-react'
 import { StoreButton as Button } from '@/components/ui/store-button'
 import { FieldError } from '@/components/ui/field'
 import { finalizeEtapa1, finalizeProposal } from '@/app/(store)/contratar/actions'
+import { formatBRL } from './types'
 import type { WizardStepProps } from './types'
 
 type Props = WizardStepProps & { message: string; skipDocuments?: boolean }
+
+function SimulationSummary({ proposal }: Pick<WizardStepProps, 'proposal'>) {
+  const sim = proposal?.simulations as {
+    desired_amount?: number | null
+    desired_term_months?: number | null
+    estimated_rate?: number | null
+    estimated_payment?: number | null
+  } | null | undefined
+
+  if (!sim?.desired_amount) return null
+
+  const rows = [
+    sim.desired_amount != null && { label: 'Crédito solicitado', value: `R$ ${formatBRL(sim.desired_amount)}` },
+    sim.desired_term_months != null && { label: 'Parcelas', value: `${sim.desired_term_months}x` },
+    sim.estimated_rate != null && { label: 'Juros mensais', value: `${sim.estimated_rate.toFixed(2).replace('.', ',')}% a.m.` },
+    sim.estimated_payment != null && { label: 'Valor da parcela', value: `R$ ${formatBRL(sim.estimated_payment)}` },
+  ].filter(Boolean) as { label: string; value: string }[]
+
+  if (rows.length === 0) return null
+
+  return (
+    <div className="rounded-lg border border-surface-foreground/15 bg-surface p-5">
+      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-surface-foreground/50">Resumo da simulação</p>
+      <dl className="space-y-2">
+        {rows.map(({ label, value }) => (
+          <div key={label} className="flex items-center justify-between text-sm">
+            <dt className="text-surface-foreground/70">{label}</dt>
+            <dd className="font-semibold text-surface-foreground">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
 
 export function RetornoStep({ proposalId, proposal, message, skipDocuments }: Props) {
   const [done, setDone] = useState(false)
@@ -60,6 +95,7 @@ export function RetornoStep({ proposalId, proposal, message, skipDocuments }: Pr
           {productName}
         </span>
       )}
+      <SimulationSummary proposal={proposal} />
       <div className="rounded-lg border border-surface-foreground/15 bg-surface p-5">
         <p className="text-sm text-surface-foreground">
           Seus dados foram salvos. Clique em confirmar para finalizar a etapa de qualificação.

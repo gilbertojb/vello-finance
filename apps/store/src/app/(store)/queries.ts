@@ -172,6 +172,12 @@ export async function getProposal(proposalId: string, tenantId: string) {
         min_rate_monthly,
         max_rate_monthly,
         product_type:product_types ( slug )
+      ),
+      simulations (
+        desired_amount,
+        desired_term_months,
+        estimated_rate,
+        estimated_payment
       )
     `)
     .eq('id', proposalId)
