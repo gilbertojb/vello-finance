@@ -281,6 +281,48 @@ export type Database = {
           },
         ]
       }
+      proposal_comments: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          proposal_id: string
+          tenant_id: string
+        }
+        Insert: {
+          author_name: string
+          body: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+          tenant_id: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_comments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_comments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_documents: {
         Row: {
           created_at: string
@@ -312,6 +354,48 @@ export type Database = {
             columns: ["proposal_id"]
             isOneToOne: false
             referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_events: {
+        Row: {
+          created_at: string
+          from_status: string | null
+          id: string
+          proposal_id: string
+          tenant_id: string
+          to_status: string
+        }
+        Insert: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          proposal_id: string
+          tenant_id: string
+          to_status: string
+        }
+        Update: {
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          proposal_id?: string
+          tenant_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_events_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
