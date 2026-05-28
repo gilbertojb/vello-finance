@@ -87,3 +87,12 @@ export async function getProposal(id: string) {
 }
 
 export type ProposalDetail = Awaited<ReturnType<typeof getProposal>>
+
+export async function getTenantName(): Promise<string> {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('tenants')
+    .select('name')
+    .single()
+  return data?.name ?? 'Loja'
+}
