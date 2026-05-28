@@ -55,7 +55,7 @@ export function ProposalDetailHeader({ proposal }: ProposalDetailHeaderProps) {
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {product?.name && <span>{product.name}</span>}
               {product?.name && <span className="text-border">·</span>}
-              <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-[10px]">
+              <span className="font-mono bg-muted px-1.5 py-0.5 rounded text-xs">
                 {shortId}
               </span>
               <span className="text-border">·</span>
