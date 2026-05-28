@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 import { Eye, MoreHorizontal } from 'lucide-react'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -131,8 +133,10 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
         <div className="flex items-center gap-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <Eye />
+              <Button variant="ghost" size="icon-sm" asChild>
+                <Link href={`/proposals/${proposal.id}`}>
+                  <Eye />
+                </Link>
               </Button>
             </TooltipTrigger>
             <TooltipContent>Ver detalhes</TooltipContent>
