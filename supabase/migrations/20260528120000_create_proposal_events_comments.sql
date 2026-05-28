@@ -59,7 +59,7 @@ CREATE POLICY "proposal_comments_tenant_select" ON proposal_comments
 
 -- ============================================================
 -- Seed: backfill proposal_events para propostas existentes
--- Cria um evento "proposta_criada" para cada proposta que
+-- Cria um evento "nova_proposta" para cada proposta que
 -- ainda não tem nenhum evento registrado.
 -- ============================================================
 INSERT INTO proposal_events (proposal_id, tenant_id, from_status, to_status, created_at)
@@ -81,33 +81,10 @@ SELECT
   p.tenant_id,
   'nova_proposta',
   p.status,
-  p.updated_at
+  GREATEST(p.updated_at, p.created_at)
 FROM proposals p
 WHERE p.status IN ('em_analise','pre_aprovada','necessita_detalhes','reprovada','aprovada')
   AND NOT EXISTS (
     SELECT 1 FROM proposal_events e
     WHERE e.proposal_id = p.id AND e.to_status = p.status
   );
-
--- Seed: comentários de teste para validação visual (remover em produção)
-DO $$
-DECLARE
-  v_proposal_id UUID;
-  v_tenant_id   UUID;
-BEGIN
-  SELECT p.id, p.tenant_id INTO v_proposal_id, v_tenant_id
-  FROM proposals p
-  WHERE p.status = 'em_analise'
-  LIMIT 1;
-
-  IF v_proposal_id IS NOT NULL THEN
-    INSERT INTO proposal_comments (proposal_id, tenant_id, author_name, body, created_at)
-    VALUES
-      (v_proposal_id, v_tenant_id, 'Maria Alves',
-       'Proposta recebida. Aguardando envio do CRLV pelo cliente.',
-       now() - interval '2 days'),
-      (v_proposal_id, v_tenant_id, 'Carlos Ramos',
-       'Análise de crédito iniciada. Aguardando retorno da IF parceira.',
-       now() - interval '1 day');
-  END IF;
-END $$;
