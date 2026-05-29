@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils'
 
 import type { ProposalRow } from '../queries'
 import { STATUS_CFG, STATUS_FILTERS } from '../status-config'
-import { DateRangePicker } from './date-range-picker'
+import { DateRangePicker } from '@/components/date-range-picker'
 import { ProposalCard } from './proposal-card'
 
 function EmptyState() {
