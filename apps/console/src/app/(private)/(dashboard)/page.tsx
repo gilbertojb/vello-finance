@@ -3,12 +3,16 @@ import type { Metadata } from 'next'
 import { CalendarDays, Download } from 'lucide-react'
 
 import { ActivityFeed } from './_components/activity-feed'
+import { CommissionKpiCards } from './_components/commission-kpi-cards'
+import { FunnelKpiCards } from './_components/funnel-kpi-cards'
 import { KpiCards } from './_components/kpi-cards'
 import { PipelineDistribution } from './_components/pipeline-distribution'
 import { ProductVolume } from './_components/product-volume'
 import { TrendChart } from './_components/trend-chart'
 
 import {
+  getDashboardCommissionKpis,
+  getDashboardFunnelKpis,
   getDashboardKpis,
   getPipelineData,
   getProductVolume,
@@ -19,12 +23,14 @@ import {
 export const metadata: Metadata = { title: 'Dashboard' }
 
 export default async function DashboardPage() {
-  const [kpis, trend, pipeline, products, activity] = await Promise.all([
+  const [kpis, trend, pipeline, products, activity, funnel, commissions] = await Promise.all([
     getDashboardKpis(),
     getTrendData(),
     getPipelineData(),
     getProductVolume(),
     getRecentActivity(),
+    getDashboardFunnelKpis(),
+    getDashboardCommissionKpis(),
   ])
 
   return (
@@ -61,6 +67,24 @@ export default async function DashboardPage() {
 
       {/* KPI Cards */}
       <KpiCards kpis={kpis} />
+
+      {/* Funil de Leads */}
+      <div className="mt-3.5">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-xs font-medium uppercase tracking-widest text-foreground/38">Funil de leads</span>
+          <div className="h-px flex-1 bg-primary/8" />
+        </div>
+        <FunnelKpiCards kpis={funnel} />
+      </div>
+
+      {/* Comissões */}
+      <div className="mt-3.5">
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-xs font-medium uppercase tracking-widest text-foreground/38">Financeiro</span>
+          <div className="h-px flex-1 bg-primary/8" />
+        </div>
+        <CommissionKpiCards kpis={commissions} />
+      </div>
 
       {/* Row 2: Trend (2/3) + Pipeline (1/3) */}
       <div className="mt-3.5 grid grid-cols-3 gap-3.5">

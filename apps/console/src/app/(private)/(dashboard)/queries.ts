@@ -372,3 +372,65 @@ export async function getRecentActivity(): Promise<
 }
 
 export type RecentActivity = Awaited<ReturnType<typeof getRecentActivity>>
+
+export async function getDashboardFunnelKpis(): Promise<{
+  abandonaram: number
+  apenasSimularam: number
+  emContratacao: number
+  contrataram: number
+}> {
+  const supabase = await createClient()
+
+  const [{ data: allSims }, { data: proposals }] = await Promise.all([
+    supabase.from('simulations').select('id, status'),
+    supabase.from('proposals').select('id, simulation_id, status'),
+  ])
+
+  const sims = allSims ?? []
+  const props = proposals ?? []
+
+  const simIdsWithProposal = new Set(props.map((p) => p.simulation_id).filter(Boolean))
+
+  const abandonaram = sims.filter(
+    (s) => s.status === 'rascunho' && !simIdsWithProposal.has(s.id)
+  ).length
+
+  const apenasSimularam = sims.filter(
+    (s) => s.status === 'pre_qualificado' && !simIdsWithProposal.has(s.id)
+  ).length
+
+  const emContratacao = props.filter((p) =>
+    ['em_analise', 'pre_aprovada', 'necessita_detalhes'].includes(p.status)
+  ).length
+
+  const contrataram = props.filter((p) => p.status === 'aprovada').length
+
+  return { abandonaram, apenasSimularam, emContratacao, contrataram }
+}
+
+export type DashboardFunnelKpis = Awaited<ReturnType<typeof getDashboardFunnelKpis>>
+
+export async function getDashboardCommissionKpis(): Promise<{
+  aReceber: number
+  recebidas: number
+}> {
+  const supabase = await createClient()
+
+  const { data } = await supabase
+    .from('commission_snapshots')
+    .select('tenant_commission_amount, paid_at')
+
+  const snapshots = data ?? []
+
+  const aReceber = snapshots
+    .filter((s) => s.paid_at === null && s.tenant_commission_amount !== null)
+    .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
+
+  const recebidas = snapshots
+    .filter((s) => s.paid_at !== null && s.tenant_commission_amount !== null)
+    .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
+
+  return { aReceber, recebidas }
+}
+
+export type DashboardCommissionKpis = Awaited<ReturnType<typeof getDashboardCommissionKpis>>
