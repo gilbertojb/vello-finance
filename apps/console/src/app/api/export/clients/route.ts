@@ -6,8 +6,8 @@ export async function GET(req: NextRequest) {
   const filters = {
     stage:   searchParams.get('stage') ?? undefined,
     product: searchParams.get('product') ?? undefined,
-    de:      searchParams.get('de') ?? undefined,
-    ate:     searchParams.get('ate') ?? undefined,
+    from:    searchParams.get('from') ?? undefined,
+    to:      searchParams.get('to') ?? undefined,
   }
 
   const leads = await listLeads(filters)
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       `"${l.product}"`,
       `"${l.stage}"`,
       l.desiredAmount,
-      `"${l.origem}"`,
+      `"${l.origin}"`,
       `"${new Date(l.createdAt).toLocaleDateString('pt-BR')}"`,
     ].join(','),
   )

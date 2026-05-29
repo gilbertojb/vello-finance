@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 
-export type LeadStage = 'abandonou' | 'simulou' | 'em_contratacao' | 'contratou'
+export type LeadStage = 'abandoned' | 'simulated' | 'in_contracting' | 'contracted'
 
 export interface LeadRow {
   id: string
@@ -8,15 +8,15 @@ export interface LeadRow {
   product: string
   stage: LeadStage
   desiredAmount: number
-  origem: string
+  origin: string
   createdAt: string
 }
 
 export interface ClientsFilters {
   stage?: string
   product?: string
-  de?: string
-  ate?: string
+  from?: string
+  to?: string
 }
 
 export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]> {
@@ -39,8 +39,6 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
 
   const simulations = sims ?? []
 
-  // Fetch proposals separately — FK is proposals.simulation_id → simulations.id
-  // so we can't embed proposals inside simulations via PostgREST types
   const { data: proposals, error: proposalsError } = await supabase
     .from('proposals')
     .select('id, status, simulation_id')
@@ -51,7 +49,6 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
 
   if (proposalsError) throw proposalsError
 
-  // Group proposals by simulation_id
   const proposalsBySimId = new Map<string, Array<{ id: string; status: string }>>()
   for (const p of proposals ?? []) {
     if (!p.simulation_id) continue
@@ -64,17 +61,17 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
     const productName = (sim.products as { name: string } | null)?.name ?? '—'
     const simProposals = proposalsBySimId.get(sim.id) ?? []
 
-    let stage: LeadStage = 'abandonou'
+    let stage: LeadStage = 'abandoned'
     if (simProposals.some((p) => p.status === 'aprovada')) {
-      stage = 'contratou'
+      stage = 'contracted'
     } else if (
       simProposals.some((p) =>
         ['em_analise', 'pre_aprovada', 'necessita_detalhes'].includes(p.status),
       )
     ) {
-      stage = 'em_contratacao'
+      stage = 'in_contracting'
     } else if (sim.status === 'pre_qualificado' && simProposals.length === 0) {
-      stage = 'simulou'
+      stage = 'simulated'
     }
 
     return {
@@ -83,7 +80,7 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
       product: productName,
       stage,
       desiredAmount: Number(sim.desired_amount),
-      origem: sim.seller_id ? 'Vendedor' : 'Loja própria',
+      origin: sim.seller_id ? 'Vendedor' : 'Loja própria',
       createdAt: sim.created_at,
     }
   })
@@ -96,11 +93,11 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
   if (filters.product) {
     filtered = filtered.filter((r) => r.product === filters.product)
   }
-  if (filters.de) {
-    filtered = filtered.filter((r) => r.createdAt >= filters.de!)
+  if (filters.from) {
+    filtered = filtered.filter((r) => r.createdAt >= filters.from!)
   }
-  if (filters.ate) {
-    filtered = filtered.filter((r) => r.createdAt <= filters.ate! + 'T23:59:59Z')
+  if (filters.to) {
+    filtered = filtered.filter((r) => r.createdAt <= filters.to! + 'T23:59:59Z')
   }
 
   return filtered
@@ -108,16 +105,16 @@ export async function listLeads(filters: ClientsFilters = {}): Promise<LeadRow[]
 
 export async function getClientsKpis(filters: ClientsFilters = {}): Promise<{
   total: number
-  abandonaram: number
-  emContratacao: number
-  contrataram: number
+  abandoned: number
+  inContracting: number
+  contracted: number
 }> {
   const leads = await listLeads(filters)
   return {
     total: leads.length,
-    abandonaram: leads.filter((l) => l.stage === 'abandonou').length,
-    emContratacao: leads.filter((l) => l.stage === 'em_contratacao').length,
-    contrataram: leads.filter((l) => l.stage === 'contratou').length,
+    abandoned: leads.filter((l) => l.stage === 'abandoned').length,
+    inContracting: leads.filter((l) => l.stage === 'in_contracting').length,
+    contracted: leads.filter((l) => l.stage === 'contracted').length,
   }
 }
 

@@ -66,7 +66,7 @@ export function ClientsTable({ leads }: Props) {
                   <span className="text-sm font-medium">{brl(lead.desiredAmount)}</span>
                 </td>
                 <td className={cn('p-4', !isLast && 'border-b border-primary/8')}>
-                  <span className="text-xs text-foreground/55">{lead.origem}</span>
+                  <span className="text-xs text-foreground/55">{lead.origin}</span>
                 </td>
                 <td className={cn('p-4', !isLast && 'border-b border-primary/8')}>
                   <span className="text-xs text-foreground/55">{formatDate(lead.createdAt)}</span>

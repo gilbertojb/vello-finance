@@ -28,11 +28,11 @@ export function OrigemVendasTable({ rows }: Props) {
             </tr>
           ) : (
             rows.map((row) => (
-              <tr key={row.origem} className="border-b last:border-0 hover:bg-muted/20">
-                <td className="px-4 py-3 font-medium">{row.origem}</td>
-                <td className="px-4 py-3 text-right">{row.propostasAprovadas}</td>
-                <td className="px-4 py-3 text-right">{brl(row.volumeContratado)}</td>
-                <td className="px-4 py-3 text-right">{brl(row.comissaoGerada)}</td>
+              <tr key={row.origin} className="border-b last:border-0 hover:bg-muted/20">
+                <td className="px-4 py-3 font-medium">{row.origin}</td>
+                <td className="px-4 py-3 text-right">{row.approvedProposals}</td>
+                <td className="px-4 py-3 text-right">{brl(row.contractedVolume)}</td>
+                <td className="px-4 py-3 text-right">{brl(row.generatedCommission)}</td>
               </tr>
             ))
           )}

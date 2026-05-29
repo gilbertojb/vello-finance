@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Download } from 'lucide-react'
+import { Suspense } from 'react'
 
 import { ClientsFilters } from './_components/clients-filters'
 import { ClientsKpiCards } from './_components/clients-kpi-cards'
@@ -9,22 +10,24 @@ import { getClientsKpis, listLeads, listProducts } from './queries'
 export const metadata: Metadata = { title: 'Clientes' }
 
 interface Props {
-  searchParams: Promise<{ stage?: string; product?: string; de?: string; ate?: string }>
+  searchParams: Promise<{ stage?: string; product?: string; from?: string; to?: string }>
 }
 
 export default async function ClientsPage({ searchParams }: Props) {
-  const filters = await searchParams
+  const { stage, product, from, to } = await searchParams
+  const filters = { stage, product, from, to }
+
   const [leads, kpis, products] = await Promise.all([
     listLeads(filters),
     getClientsKpis(filters),
     listProducts(),
   ])
 
-  const csvParams = new URLSearchParams(
-    Object.fromEntries(
-      Object.entries(filters).filter(([, v]) => v !== undefined),
-    ) as Record<string, string>,
-  )
+  const csvParams = new URLSearchParams()
+  if (stage) csvParams.set('stage', stage)
+  if (product) csvParams.set('product', product)
+  if (from) csvParams.set('from', from)
+  if (to) csvParams.set('to', to)
 
   return (
     <div className="mx-auto w-full max-w-10/12 p-8">
@@ -50,13 +53,15 @@ export default async function ClientsPage({ searchParams }: Props) {
 
       <ClientsKpiCards
         total={kpis.total}
-        abandonaram={kpis.abandonaram}
-        emContratacao={kpis.emContratacao}
-        contrataram={kpis.contrataram}
+        abandoned={kpis.abandoned}
+        inContracting={kpis.inContracting}
+        contracted={kpis.contracted}
       />
 
       <div className="mt-4">
-        <ClientsFilters products={products} />
+        <Suspense>
+          <ClientsFilters products={products} />
+        </Suspense>
       </div>
 
       <div className="mt-3.5">

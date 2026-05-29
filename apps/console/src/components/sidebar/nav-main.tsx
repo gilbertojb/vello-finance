@@ -24,6 +24,14 @@ import {
 
 import { NavLink } from './nav-link'
 
+type NavItem = {
+  href: string
+  icon: React.ReactNode
+  label: string
+  badge?: number
+  disabled?: boolean
+}
+
 export async function NavMain() {
   const supabase = await createClient()
   const [{ count: simCount }, { count: propCount }] = await Promise.all([
@@ -31,7 +39,7 @@ export async function NavMain() {
     supabase.from('proposals').select('*', { count: 'exact', head: true }).in('status', COMPLETED_STATUSES as unknown as string[]),
   ])
 
-  const sections = [
+  const sections: Array<{ label: string; items: NavItem[] }> = [
     {
       label: 'Visão Geral',
       items: [

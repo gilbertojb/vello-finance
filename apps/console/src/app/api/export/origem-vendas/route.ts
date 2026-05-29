@@ -8,21 +8,16 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
 
   const filters: SalesOriginFilters = {
-    produto: searchParams.get('produto') ?? undefined,
-    de: searchParams.get('de') ?? undefined,
-    ate: searchParams.get('ate') ?? undefined,
+    product: searchParams.get('product') ?? undefined,
+    from: searchParams.get('from') ?? undefined,
+    to: searchParams.get('to') ?? undefined,
   }
 
   const rows = await getSalesOriginData(filters)
 
   const header = ['Origem', 'Propostas aprovadas', 'Volume contratado', 'Comissão gerada']
   const lines = rows.map((r) =>
-    [
-      r.origem,
-      r.propostasAprovadas,
-      brl(r.volumeContratado),
-      brl(r.comissaoGerada),
-    ].join(','),
+    [r.origin, r.approvedProposals, brl(r.contractedVolume), brl(r.generatedCommission)].join(','),
   )
 
   const csv = [header.join(','), ...lines].join('\n')

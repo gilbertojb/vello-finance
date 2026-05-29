@@ -13,10 +13,10 @@ interface Props {
 }
 
 const STAGES = [
-  { value: 'abandonou',      label: 'Abandonou' },
-  { value: 'simulou',        label: 'Simulou' },
-  { value: 'em_contratacao', label: 'Em contratação' },
-  { value: 'contratou',      label: 'Contratou' },
+  { value: 'abandoned',      label: 'Abandonou' },
+  { value: 'simulated',      label: 'Simulou' },
+  { value: 'in_contracting', label: 'Em contratação' },
+  { value: 'contracted',     label: 'Contratou' },
 ]
 
 export function ClientsFilters({ products }: Props) {
@@ -34,16 +34,16 @@ export function ClientsFilters({ products }: Props) {
   )
 
   const dateRange: DateRange | undefined =
-    params.get('de') && params.get('ate')
-      ? { from: new Date(params.get('de')!), to: new Date(params.get('ate')!) }
+    params.get('from')
+      ? { from: new Date(params.get('from')!), to: params.get('to') ? new Date(params.get('to')!) : undefined }
       : undefined
 
   function onDateChange(range: DateRange | undefined) {
     const next = new URLSearchParams(params.toString())
-    if (range?.from) next.set('de', format(range.from, 'yyyy-MM-dd'))
-    else next.delete('de')
-    if (range?.to) next.set('ate', format(range.to, 'yyyy-MM-dd'))
-    else next.delete('ate')
+    if (range?.from) next.set('from', format(range.from, 'yyyy-MM-dd'))
+    else next.delete('from')
+    if (range?.to) next.set('to', format(range.to, 'yyyy-MM-dd'))
+    else next.delete('to')
     router.push(`/clients?${next.toString()}`)
   }
 

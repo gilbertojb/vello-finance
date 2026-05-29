@@ -42,10 +42,10 @@ interface Props {
 export function FunnelKpiCards({ kpis }: Props) {
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      <FunnelCard label="Abandonaram" value={kpis.abandonaram} icon={<RotateCcw size={15} />} color="muted" />
-      <FunnelCard label="Apenas simularam" value={kpis.apenasSimularam} icon={<Sparkles size={15} />} color="primary" />
-      <FunnelCard label="Em contratação" value={kpis.emContratacao} icon={<ArrowRight size={15} />} color="warning" />
-      <FunnelCard label="Contrataram" value={kpis.contrataram} icon={<Handshake size={15} />} color="success" />
+      <FunnelCard label="Abandonaram" value={kpis.abandoned} icon={<RotateCcw size={15} />} color="muted" />
+      <FunnelCard label="Apenas simularam" value={kpis.simulatedOnly} icon={<Sparkles size={15} />} color="primary" />
+      <FunnelCard label="Em contratação" value={kpis.inContracting} icon={<ArrowRight size={15} />} color="warning" />
+      <FunnelCard label="Contrataram" value={kpis.contracted} icon={<Handshake size={15} />} color="success" />
     </div>
   )
 }

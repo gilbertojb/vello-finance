@@ -1,23 +1,23 @@
 import { createClient } from '@/lib/supabase/server'
 
 export interface LeadOriginRow {
-  origem: string
+  origin: string
   leads: number
-  convertidos: number
-  taxaConversao: number
-  volumeSolicitado: number
+  converted: number
+  conversionRate: number
+  requestedVolume: number
 }
 
 export interface LeadOriginFilters {
-  produto?: string
-  de?: string
-  ate?: string
+  product?: string
+  from?: string
+  to?: string
 }
 
 export interface LeadOriginKpis {
   totalLeads: number
-  lojaPropriaLeads: number
-  vendedoresLeads: number
+  ownStoreLeads: number
+  sellerLeads: number
 }
 
 export async function getLeadOriginData(
@@ -29,16 +29,16 @@ export async function getLeadOriginData(
     .from('simulations')
     .select('id, seller_id, desired_amount, created_at, products ( name )')
 
-  if (filters.de) simsQuery = simsQuery.gte('created_at', filters.de)
-  if (filters.ate) simsQuery = simsQuery.lte('created_at', filters.ate + 'T23:59:59Z')
+  if (filters.from) simsQuery = simsQuery.gte('created_at', filters.from)
+  if (filters.to) simsQuery = simsQuery.lte('created_at', filters.to + 'T23:59:59Z')
 
   const { data: simsData, error: simsError } = await simsQuery
   if (simsError) throw simsError
 
   const sims = (simsData ?? []).filter((s) => {
-    if (!filters.produto) return true
+    if (!filters.product) return true
     const product = Array.isArray(s.products) ? s.products[0] : s.products
-    return (product as { name: string } | null)?.name === filters.produto
+    return (product as { name: string } | null)?.name === filters.product
   })
 
   const simIds = sims.map((s) => s.id)
@@ -52,24 +52,24 @@ export async function getLeadOriginData(
 
   const proposalSimIds = new Set((propsData ?? []).map((p) => p.simulation_id).filter(Boolean))
 
-  const map = new Map<string, { leads: number; convertidos: number; volume: number }>()
+  const map = new Map<string, { leads: number; converted: number; volume: number }>()
 
   for (const sim of sims) {
-    const origem = sim.seller_id ? 'Vendedor' : 'Loja própria'
-    const entry = map.get(origem) ?? { leads: 0, convertidos: 0, volume: 0 }
+    const origin = sim.seller_id ? 'Vendedor' : 'Loja própria'
+    const entry = map.get(origin) ?? { leads: 0, converted: 0, volume: 0 }
     entry.leads++
     entry.volume += Number(sim.desired_amount)
-    if (proposalSimIds.has(sim.id)) entry.convertidos++
-    map.set(origem, entry)
+    if (proposalSimIds.has(sim.id)) entry.converted++
+    map.set(origin, entry)
   }
 
   return Array.from(map.entries())
-    .map(([origem, { leads, convertidos, volume }]) => ({
-      origem,
+    .map(([origin, { leads, converted, volume }]) => ({
+      origin,
       leads,
-      convertidos,
-      taxaConversao: leads === 0 ? 0 : Math.round((convertidos / leads) * 1000) / 10,
-      volumeSolicitado: volume,
+      converted,
+      conversionRate: leads === 0 ? 0 : Math.round((converted / leads) * 1000) / 10,
+      requestedVolume: volume,
     }))
     .sort((a, b) => b.leads - a.leads)
 }
@@ -79,9 +79,9 @@ export async function getLeadOriginKpis(
 ): Promise<LeadOriginKpis> {
   const rows = await getLeadOriginData(filters)
   const totalLeads = rows.reduce((s, r) => s + r.leads, 0)
-  const lojaPropriaLeads = rows.find((r) => r.origem === 'Loja própria')?.leads ?? 0
-  const vendedoresLeads = rows.find((r) => r.origem === 'Vendedor')?.leads ?? 0
-  return { totalLeads, lojaPropriaLeads, vendedoresLeads }
+  const ownStoreLeads = rows.find((r) => r.origin === 'Loja própria')?.leads ?? 0
+  const sellerLeads = rows.find((r) => r.origin === 'Vendedor')?.leads ?? 0
+  return { totalLeads, ownStoreLeads, sellerLeads }
 }
 
 export async function listLeadOriginProducts(): Promise<string[]> {

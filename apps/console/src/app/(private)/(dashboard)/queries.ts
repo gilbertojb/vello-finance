@@ -374,10 +374,10 @@ export async function getRecentActivity(): Promise<
 export type RecentActivity = Awaited<ReturnType<typeof getRecentActivity>>
 
 export async function getDashboardFunnelKpis(): Promise<{
-  abandonaram: number
-  apenasSimularam: number
-  emContratacao: number
-  contrataram: number
+  abandoned: number
+  simulatedOnly: number
+  inContracting: number
+  contracted: number
 }> {
   const supabase = await createClient()
 
@@ -391,28 +391,28 @@ export async function getDashboardFunnelKpis(): Promise<{
 
   const simIdsWithProposal = new Set(props.map((p) => p.simulation_id).filter(Boolean))
 
-  const abandonaram = sims.filter(
+  const abandoned = sims.filter(
     (s) => s.status === 'rascunho' && !simIdsWithProposal.has(s.id)
   ).length
 
-  const apenasSimularam = sims.filter(
+  const simulatedOnly = sims.filter(
     (s) => s.status === 'pre_qualificado' && !simIdsWithProposal.has(s.id)
   ).length
 
-  const emContratacao = props.filter((p) =>
+  const inContracting = props.filter((p) =>
     ['em_analise', 'pre_aprovada', 'necessita_detalhes'].includes(p.status)
   ).length
 
-  const contrataram = props.filter((p) => p.status === 'aprovada').length
+  const contracted = props.filter((p) => p.status === 'aprovada').length
 
-  return { abandonaram, apenasSimularam, emContratacao, contrataram }
+  return { abandoned, simulatedOnly, inContracting, contracted }
 }
 
 export type DashboardFunnelKpis = Awaited<ReturnType<typeof getDashboardFunnelKpis>>
 
 export async function getDashboardCommissionKpis(): Promise<{
-  aReceber: number
-  recebidas: number
+  toReceive: number
+  received: number
 }> {
   const supabase = await createClient()
 
@@ -422,15 +422,15 @@ export async function getDashboardCommissionKpis(): Promise<{
 
   const snapshots = data ?? []
 
-  const aReceber = snapshots
+  const toReceive = snapshots
     .filter((s) => s.paid_at === null && s.tenant_commission_amount !== null)
     .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
 
-  const recebidas = snapshots
+  const received = snapshots
     .filter((s) => s.paid_at !== null && s.tenant_commission_amount !== null)
     .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
 
-  return { aReceber, recebidas }
+  return { toReceive, received }
 }
 
 export type DashboardCommissionKpis = Awaited<ReturnType<typeof getDashboardCommissionKpis>>

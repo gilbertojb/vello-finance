@@ -29,12 +29,12 @@ export function OrigemLeadsTable({ rows }: Props) {
             </tr>
           ) : (
             rows.map((row) => (
-              <tr key={row.origem} className="border-b last:border-0 hover:bg-muted/20">
-                <td className="px-4 py-3 font-medium">{row.origem}</td>
+              <tr key={row.origin} className="border-b last:border-0 hover:bg-muted/20">
+                <td className="px-4 py-3 font-medium">{row.origin}</td>
                 <td className="px-4 py-3 text-right">{row.leads}</td>
-                <td className="px-4 py-3 text-right">{row.convertidos}</td>
-                <td className="px-4 py-3 text-right">{row.taxaConversao}%</td>
-                <td className="px-4 py-3 text-right">{brl(row.volumeSolicitado)}</td>
+                <td className="px-4 py-3 text-right">{row.converted}</td>
+                <td className="px-4 py-3 text-right">{row.conversionRate}%</td>
+                <td className="px-4 py-3 text-right">{brl(row.requestedVolume)}</td>
               </tr>
             ))
           )}

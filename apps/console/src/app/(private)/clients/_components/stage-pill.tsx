@@ -1,22 +1,22 @@
 import type { LeadStage } from '../queries'
 
 const STAGE_CONFIG: Record<LeadStage, { label: string; bg: string; color: string }> = {
-  abandonou: {
+  abandoned: {
     label: 'Abandonou',
     bg: 'color-mix(in oklch, var(--muted-foreground) 12%, transparent)',
     color: 'var(--muted-foreground)',
   },
-  simulou: {
+  simulated: {
     label: 'Simulou',
     bg: 'color-mix(in oklch, var(--primary) 14%, transparent)',
     color: 'var(--primary)',
   },
-  em_contratacao: {
+  in_contracting: {
     label: 'Em contratação',
     bg: 'color-mix(in oklch, var(--warning) 14%, transparent)',
     color: 'var(--warning)',
   },
-  contratou: {
+  contracted: {
     label: 'Contratou',
     bg: 'color-mix(in oklch, var(--success) 14%, transparent)',
     color: 'var(--success)',

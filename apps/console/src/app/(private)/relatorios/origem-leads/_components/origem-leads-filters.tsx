@@ -1,6 +1,8 @@
 'use client'
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
+import { format } from 'date-fns'
+import type { DateRange } from 'react-day-picker'
 import { DateRangePicker } from '@/components/date-range-picker'
 import {
   Select,
@@ -21,19 +23,30 @@ export function OrigemLeadsFilters({ products }: Props) {
 
   function update(key: string, value: string | undefined) {
     const next = new URLSearchParams(params.toString())
-    if (value) {
-      next.set(key, value)
-    } else {
-      next.delete(key)
-    }
+    if (value) next.set(key, value)
+    else next.delete(key)
+    router.push(`${pathname}?${next.toString()}`)
+  }
+
+  const dateRange: DateRange | undefined =
+    params.get('from')
+      ? { from: new Date(params.get('from')!), to: params.get('to') ? new Date(params.get('to')!) : undefined }
+      : undefined
+
+  function onDateChange(range: DateRange | undefined) {
+    const next = new URLSearchParams(params.toString())
+    if (range?.from) next.set('from', format(range.from, 'yyyy-MM-dd'))
+    else next.delete('from')
+    if (range?.to) next.set('to', format(range.to, 'yyyy-MM-dd'))
+    else next.delete('to')
     router.push(`${pathname}?${next.toString()}`)
   }
 
   return (
     <div className="flex flex-wrap items-center gap-3">
       <Select
-        value={params.get('produto') ?? 'all'}
-        onValueChange={(v) => update('produto', v === 'all' ? undefined : v)}
+        value={params.get('product') ?? 'all'}
+        onValueChange={(v) => update('product', v === 'all' ? undefined : v)}
       >
         <SelectTrigger className="h-9 w-48 text-sm">
           <SelectValue placeholder="Produto" />
@@ -48,16 +61,7 @@ export function OrigemLeadsFilters({ products }: Props) {
         </SelectContent>
       </Select>
 
-      <DateRangePicker
-        from={params.get('de') ?? undefined}
-        to={params.get('ate') ?? undefined}
-        onChange={(de, ate) => {
-          const next = new URLSearchParams(params.toString())
-          de ? next.set('de', de) : next.delete('de')
-          ate ? next.set('ate', ate) : next.delete('ate')
-          router.push(`${pathname}?${next.toString()}`)
-        }}
-      />
+      <DateRangePicker value={dateRange} onChange={onDateChange} />
     </div>
   )
 }

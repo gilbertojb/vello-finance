@@ -4,70 +4,61 @@ export interface CommissionRow {
   id: string
   clientName: string
   product: string
-  valorFinanciado: number
-  comissaoPct: number
-  comissaoValor: number
-  status: 'a_receber' | 'pago'
-  createdAt: string
+  financedAmount: number
+  commissionPct: number
+  commissionAmount: number
+  status: 'to_receive' | 'paid'
+  capturedAt: string
 }
 
 export interface FinanceiroFilters {
-  status?: 'a_receber' | 'pago'
-  de?: string
-  ate?: string
+  status?: 'to_receive' | 'paid'
+  from?: string
+  to?: string
 }
 
 export async function getFinanceiroKpis(): Promise<{
-  aReceber: number
-  recebido: number
-  proximoPagamento: string | null
+  toReceive: number
+  received: number
+  nextPayment: string | null
 }> {
   const supabase = await createClient()
 
   const { data } = await supabase
     .from('commission_snapshots')
-    .select('tenant_commission_amount, paid_at, expected_payment_date')
+    .select('tenant_commission_amount, paid_at')
 
   const snapshots = data ?? []
 
-  const aReceber = snapshots
+  const toReceive = snapshots
     .filter((s) => s.paid_at === null && s.tenant_commission_amount !== null)
     .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
 
-  const recebido = snapshots
+  const received = snapshots
     .filter((s) => s.paid_at !== null && s.tenant_commission_amount !== null)
     .reduce((sum, s) => sum + Number(s.tenant_commission_amount), 0)
 
-  const pendingDates = snapshots
-    .filter((s) => s.paid_at === null && s.expected_payment_date !== null)
-    .map((s) => s.expected_payment_date as string)
-    .sort()
-
-  const proximoPagamento = pendingDates[0] ?? null
-
-  return { aReceber, recebido, proximoPagamento }
+  return { toReceive, received, nextPayment: null }
 }
 
 export async function listComissoes(filters: FinanceiroFilters = {}): Promise<CommissionRow[]> {
   const supabase = await createClient()
 
-  const query = supabase
+  const { data, error } = await supabase
     .from('commission_snapshots')
     .select(`
       id,
       tenant_commission_amount,
       tenant_commission_pct,
       paid_at,
-      created_at,
+      captured_at,
       proposals (
         client_name,
         simulations ( desired_amount ),
         products ( name )
       )
     `)
-    .order('created_at', { ascending: false })
-
-  const { data, error } = await query
+    .order('captured_at', { ascending: false })
 
   if (error) throw error
 
@@ -87,12 +78,12 @@ export async function listComissoes(filters: FinanceiroFilters = {}): Promise<Co
     return {
       id: snap.id,
       clientName: proposal?.client_name ?? '—',
-      product: product?.name ?? '—',
-      valorFinanciado: sim ? Number(sim.desired_amount) : 0,
-      comissaoPct: Number(snap.tenant_commission_pct ?? 0),
-      comissaoValor: Number(snap.tenant_commission_amount ?? 0),
-      status: snap.paid_at ? 'pago' : 'a_receber',
-      createdAt: snap.created_at,
+      product: (product as { name: string } | null)?.name ?? '—',
+      financedAmount: sim ? Number((sim as { desired_amount: number }).desired_amount) : 0,
+      commissionPct: Number(snap.tenant_commission_pct ?? 0),
+      commissionAmount: Number(snap.tenant_commission_amount ?? 0),
+      status: snap.paid_at ? 'paid' : 'to_receive',
+      capturedAt: snap.captured_at,
     }
   })
 
@@ -101,11 +92,11 @@ export async function listComissoes(filters: FinanceiroFilters = {}): Promise<Co
   if (filters.status) {
     filtered = filtered.filter((r) => r.status === filters.status)
   }
-  if (filters.de) {
-    filtered = filtered.filter((r) => r.createdAt >= filters.de!)
+  if (filters.from) {
+    filtered = filtered.filter((r) => r.capturedAt >= filters.from!)
   }
-  if (filters.ate) {
-    filtered = filtered.filter((r) => r.createdAt <= filters.ate! + 'T23:59:59Z')
+  if (filters.to) {
+    filtered = filtered.filter((r) => r.capturedAt <= filters.to! + 'T23:59:59Z')
   }
 
   return filtered

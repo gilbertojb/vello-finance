@@ -22,7 +22,7 @@ export function CommissionKpiCards({ kpis }: Props) {
           </span>
         </div>
         <div className="text-3xl font-semibold leading-none tracking-tight text-warning">
-          {brl(kpis.aReceber)}
+          {brl(kpis.toReceive)}
         </div>
         <p className="mt-2 text-xs text-foreground/38">Propostas aprovadas, pagamento pendente</p>
       </div>
@@ -35,7 +35,7 @@ export function CommissionKpiCards({ kpis }: Props) {
           </span>
         </div>
         <div className="text-3xl font-semibold leading-none tracking-tight text-success">
-          {brl(kpis.recebidas)}
+          {brl(kpis.received)}
         </div>
         <p className="mt-2 text-xs text-foreground/38">Confirmado pelo painel admin</p>
       </div>

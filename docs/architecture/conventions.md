@@ -81,6 +81,14 @@ src/app/(private)/plans/
 | Branches | `feat/`, `fix/`, `chore/` | `feat/admin-products` |
 | Commits | Conventional Commits com escopo | `feat(admin): adiciona CRUD de produtos` |
 
+### Idioma do código
+
+**Todo código deve estar em inglês**: nomes de variáveis, propriedades de interfaces TypeScript, URL query params e nomes de funções.
+
+- URL query params: `from`, `to`, `product`, `stage`, `status` — nunca `de`, `ate`, `produto`, `estagio`
+- Propriedades TypeScript: `toReceive`, `received`, `abandoned`, `contracted`, `conversionRate`, `requestedVolume` — nunca `aReceber`, `recebidas`, `abandonaram`, `contrataram`, `taxaConversao`, `volumeSolicitado`
+- Exceção permitida: strings de UI exibidas ao usuário permanecem em português (ex: labels, textos de botão)
+
 **Escopos válidos nos commits:**
 `admin` · `console` · `store` · `api` · `packages/auth` · `packages/database` · `packages/env` · `packages/transactional` · `packages/config` · `supabase`
 

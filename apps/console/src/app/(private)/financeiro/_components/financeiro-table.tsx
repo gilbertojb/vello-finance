@@ -9,19 +9,12 @@ const brl = (v: number) =>
 const pct = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'percent', maximumFractionDigits: 2 }).format(v / 100)
 
-const dateStr = (v: string) => {
-  const d = new Date(v)
-  return d.toLocaleDateString('pt-BR')
-}
+const formatDate = (v: string) => new Date(v).toLocaleDateString('pt-BR')
 
 const PAGE_SIZE = 20
 
-interface StatusPillProps {
-  status: CommissionRow['status']
-}
-
-function StatusPill({ status }: StatusPillProps) {
-  if (status === 'pago') {
+function StatusPill({ status }: { status: CommissionRow['status'] }) {
+  if (status === 'paid') {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full border border-success/40 px-2.5 py-0.5 text-xs font-medium text-success">
         <span className="size-1.5 rounded-full bg-success" />
@@ -73,13 +66,13 @@ export function FinanceiroTable({ rows }: Props) {
                 <tr key={row.id} className="border-b last:border-0 hover:bg-muted/20">
                   <td className="px-4 py-3 font-medium">{row.clientName}</td>
                   <td className="px-4 py-3 text-foreground/60">{row.product}</td>
-                  <td className="px-4 py-3 text-right">{brl(row.valorFinanciado)}</td>
-                  <td className="px-4 py-3 text-right">{pct(row.comissaoPct)}</td>
-                  <td className="px-4 py-3 text-right font-medium">{brl(row.comissaoValor)}</td>
+                  <td className="px-4 py-3 text-right">{brl(row.financedAmount)}</td>
+                  <td className="px-4 py-3 text-right">{pct(row.commissionPct)}</td>
+                  <td className="px-4 py-3 text-right font-medium">{brl(row.commissionAmount)}</td>
                   <td className="px-4 py-3">
                     <StatusPill status={row.status} />
                   </td>
-                  <td className="px-4 py-3 text-foreground/60">{dateStr(row.createdAt)}</td>
+                  <td className="px-4 py-3 text-foreground/60">{formatDate(row.capturedAt)}</td>
                 </tr>
               ))
             )}

@@ -1,22 +1,22 @@
 import { createClient } from '@/lib/supabase/server'
 
 export interface SalesOriginRow {
-  origem: string
-  propostasAprovadas: number
-  volumeContratado: number
-  comissaoGerada: number
+  origin: string
+  approvedProposals: number
+  contractedVolume: number
+  generatedCommission: number
 }
 
 export interface SalesOriginFilters {
-  produto?: string
-  de?: string
-  ate?: string
+  product?: string
+  from?: string
+  to?: string
 }
 
 export interface SalesOriginKpis {
-  totalAprovadas: number
-  lojaPropriaAprovadas: number
-  vendedoresAprovadas: number
+  totalApproved: number
+  ownStoreApproved: number
+  sellerApproved: number
 }
 
 export async function getSalesOriginData(
@@ -32,21 +32,21 @@ export async function getSalesOriginData(
     `)
     .eq('status', 'aprovada')
 
-  if (filters.de) propsQuery = propsQuery.gte('updated_at', filters.de)
-  if (filters.ate) propsQuery = propsQuery.lte('updated_at', filters.ate + 'T23:59:59Z')
+  if (filters.from) propsQuery = propsQuery.gte('updated_at', filters.from)
+  if (filters.to) propsQuery = propsQuery.lte('updated_at', filters.to + 'T23:59:59Z')
 
   const { data: propsData, error: propsError } = await propsQuery
   if (propsError) throw propsError
 
   const proposals = (propsData ?? []).filter((p) => {
-    if (!filters.produto) return true
+    if (!filters.product) return true
     const sim = Array.isArray(p.simulations) ? p.simulations[0] : p.simulations
     const product = sim
       ? Array.isArray(sim.products)
         ? sim.products[0]
         : sim.products
       : null
-    return (product as { name: string } | null)?.name === filters.produto
+    return (product as { name: string } | null)?.name === filters.product
   })
 
   const propIds = proposals.map((p) => p.id)
@@ -67,36 +67,36 @@ export async function getSalesOriginData(
     )
   }
 
-  const map = new Map<string, { count: number; volume: number; comissao: number }>()
+  const map = new Map<string, { count: number; volume: number; commission: number }>()
 
   for (const prop of proposals) {
     const sim = Array.isArray(prop.simulations) ? prop.simulations[0] : prop.simulations
-    const origem = sim?.seller_id ? 'Vendedor' : 'Loja própria'
-    const entry = map.get(origem) ?? { count: 0, volume: 0, comissao: 0 }
+    const origin = sim?.seller_id ? 'Vendedor' : 'Loja própria'
+    const entry = map.get(origin) ?? { count: 0, volume: 0, commission: 0 }
     entry.count++
     entry.volume += sim ? Number(sim.desired_amount) : 0
-    entry.comissao += commissionByProposal.get(prop.id) ?? 0
-    map.set(origem, entry)
+    entry.commission += commissionByProposal.get(prop.id) ?? 0
+    map.set(origin, entry)
   }
 
   return Array.from(map.entries())
-    .map(([origem, { count, volume, comissao }]) => ({
-      origem,
-      propostasAprovadas: count,
-      volumeContratado: volume,
-      comissaoGerada: comissao,
+    .map(([origin, { count, volume, commission }]) => ({
+      origin,
+      approvedProposals: count,
+      contractedVolume: volume,
+      generatedCommission: commission,
     }))
-    .sort((a, b) => b.propostasAprovadas - a.propostasAprovadas)
+    .sort((a, b) => b.approvedProposals - a.approvedProposals)
 }
 
 export async function getSalesOriginKpis(
   filters: SalesOriginFilters = {},
 ): Promise<SalesOriginKpis> {
   const rows = await getSalesOriginData(filters)
-  const totalAprovadas = rows.reduce((s, r) => s + r.propostasAprovadas, 0)
-  const lojaPropriaAprovadas = rows.find((r) => r.origem === 'Loja própria')?.propostasAprovadas ?? 0
-  const vendedoresAprovadas = rows.find((r) => r.origem === 'Vendedor')?.propostasAprovadas ?? 0
-  return { totalAprovadas, lojaPropriaAprovadas, vendedoresAprovadas }
+  const totalApproved = rows.reduce((s, r) => s + r.approvedProposals, 0)
+  const ownStoreApproved = rows.find((r) => r.origin === 'Loja própria')?.approvedProposals ?? 0
+  const sellerApproved = rows.find((r) => r.origin === 'Vendedor')?.approvedProposals ?? 0
+  return { totalApproved, ownStoreApproved, sellerApproved }
 }
 
 export async function listSalesOriginProducts(): Promise<string[]> {

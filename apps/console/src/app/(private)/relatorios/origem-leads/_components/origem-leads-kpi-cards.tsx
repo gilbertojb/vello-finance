@@ -18,14 +18,14 @@ export function OrigemLeadsKpiCards({ kpis }: Props) {
         <p className="text-xs font-medium uppercase tracking-widest text-foreground/45">
           Pela loja própria
         </p>
-        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.lojaPropriaLeads}</p>
+        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.ownStoreLeads}</p>
       </div>
 
       <div className="rounded-xl border bg-card p-5">
         <p className="text-xs font-medium uppercase tracking-widest text-foreground/45">
           Por vendedores
         </p>
-        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.vendedoresLeads}</p>
+        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.sellerLeads}</p>
       </div>
     </div>
   )

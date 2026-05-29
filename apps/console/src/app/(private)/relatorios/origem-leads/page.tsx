@@ -14,23 +14,18 @@ import { OrigemLeadsTable } from './_components/origem-leads-table'
 export const metadata: Metadata = { title: 'Origem de Leads' }
 
 interface Props {
-  searchParams: Promise<{ produto?: string; de?: string; ate?: string }>
+  searchParams: Promise<{ product?: string; from?: string; to?: string }>
 }
 
 export default async function OrigemLeadsPage({ searchParams }: Props) {
-  const sp = await searchParams
+  const { product, from, to } = await searchParams
 
-  const filters: LeadOriginFilters = {
-    produto: sp.produto,
-    de: sp.de,
-    ate: sp.ate,
-  }
+  const filters: LeadOriginFilters = { product, from, to }
 
   const exportParams = new URLSearchParams()
-  if (sp.produto) exportParams.set('produto', sp.produto)
-  if (sp.de) exportParams.set('de', sp.de)
-  if (sp.ate) exportParams.set('ate', sp.ate)
-  const exportHref = `/api/export/origem-leads?${exportParams.toString()}`
+  if (product) exportParams.set('product', product)
+  if (from) exportParams.set('from', from)
+  if (to) exportParams.set('to', to)
 
   const [kpis, rows, products] = await Promise.all([
     getLeadOriginKpis(filters),
@@ -53,7 +48,7 @@ export default async function OrigemLeadsPage({ searchParams }: Props) {
           </p>
         </div>
         <a
-          href={exportHref}
+          href={`/api/export/origem-leads?${exportParams.toString()}`}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
         >
           <Download size={14} /> Exportar CSV

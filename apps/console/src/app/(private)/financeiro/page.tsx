@@ -8,16 +8,16 @@ import { FinanceiroTable } from './_components/financeiro-table'
 export const metadata: Metadata = { title: 'Financeiro' }
 
 interface Props {
-  searchParams: Promise<{ status?: string; de?: string; ate?: string }>
+  searchParams: Promise<{ status?: string; from?: string; to?: string }>
 }
 
 export default async function FinanceiroPage({ searchParams }: Props) {
-  const sp = await searchParams
+  const { status, from, to } = await searchParams
 
   const filters: FinanceiroFilters = {
-    status: sp.status === 'a_receber' || sp.status === 'pago' ? sp.status : undefined,
-    de: sp.de,
-    ate: sp.ate,
+    status: status === 'to_receive' || status === 'paid' ? status : undefined,
+    from,
+    to,
   }
 
   const [kpis, rows] = await Promise.all([

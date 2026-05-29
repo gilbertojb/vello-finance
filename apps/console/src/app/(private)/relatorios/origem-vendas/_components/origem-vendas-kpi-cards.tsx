@@ -11,21 +11,21 @@ export function OrigemVendasKpiCards({ kpis }: Props) {
         <p className="text-xs font-medium uppercase tracking-widest text-foreground/45">
           Total aprovadas
         </p>
-        <p className="mt-2 text-2xl font-semibold text-foreground">{kpis.totalAprovadas}</p>
+        <p className="mt-2 text-2xl font-semibold text-foreground">{kpis.totalApproved}</p>
       </div>
 
       <div className="rounded-xl border bg-card p-5">
         <p className="text-xs font-medium uppercase tracking-widest text-foreground/45">
           Pela loja própria
         </p>
-        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.lojaPropriaAprovadas}</p>
+        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.ownStoreApproved}</p>
       </div>
 
       <div className="rounded-xl border bg-card p-5">
         <p className="text-xs font-medium uppercase tracking-widest text-foreground/45">
           Por vendedores
         </p>
-        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.vendedoresAprovadas}</p>
+        <p className="mt-2 text-2xl font-semibold text-primary">{kpis.sellerApproved}</p>
       </div>
     </div>
   )
