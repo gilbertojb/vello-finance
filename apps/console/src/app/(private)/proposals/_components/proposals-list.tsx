@@ -1,14 +1,11 @@
 'use client'
 
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useState } from 'react'
 import { type DateRange } from 'react-day-picker'
 import {
-  Clock,
-  CreditCard,
   FileText,
   LayoutGrid,
   Search,
-  TrendingUp,
 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -18,80 +15,9 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 import type { ProposalRow } from '../queries'
-import { PIPELINE_STATUSES, STATUS_CFG, STATUS_FILTERS } from '../status-config'
+import { STATUS_CFG, STATUS_FILTERS } from '../status-config'
 import { DateRangePicker } from './date-range-picker'
 import { ProposalCard } from './proposal-card'
-
-// ── KPI helpers (internos) ────────────────────────────────────────────────────
-
-function brl(value: number): string {
-  if (value >= 1_000_000) return `R$ ${(value / 1_000_000).toFixed(1)}M`
-  if (value >= 1_000) return `R$ ${(value / 1_000).toFixed(1)}k`
-  return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-}
-
-function Spark({ data, color = 'var(--primary)' }: { data: number[]; color?: string }) {
-  if (data.length < 2) return null
-  const w = 80, h = 28
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const pts = data
-    .map((v, i) => {
-      const x = (i / (data.length - 1)) * w
-      const y = h - ((v - min) / (max - min || 1)) * h
-      return `${x},${y}`
-    })
-    .join(' ')
-  return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden>
-      <polyline points={`0,${h} ${pts} ${w},${h}`} fill={color} fillOpacity="0.08" stroke="none" />
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function Delta({ value, suffix = '%' }: { value: number; suffix?: string }) {
-  const up = value >= 0
-  return (
-    <span className={cn('inline-flex items-center gap-1 text-xs font-semibold', up ? 'text-success' : 'text-destructive')}>
-      {up ? '▲' : '▼'} {Math.abs(value).toFixed(1)}{suffix}
-    </span>
-  )
-}
-
-interface KpiCardProps {
-  label: string
-  icon: ReactNode
-  value: string
-  featured?: boolean
-  spark: number[]
-  sparkColor?: string
-  delta: ReactNode
-  foot?: string
-}
-
-function KpiCard({ label, icon, value, featured, spark, sparkColor = 'var(--primary)', delta, foot }: KpiCardProps) {
-  return (
-    <Card className={cn('gap-3 py-5', featured && 'ring-primary/30')}>
-      <CardContent className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{label}</span>
-          <span className="grid size-8 place-items-center rounded-lg bg-primary/8 text-primary">{icon}</span>
-        </div>
-        <p className={cn('text-3xl font-semibold leading-none tracking-tight', featured && 'text-primary')}>
-          {value}
-        </p>
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-0.5">
-            {delta}
-            {foot && <span className="text-xs text-muted-foreground">{foot}</span>}
-          </div>
-          <Spark data={spark} color={sparkColor} />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function EmptyState() {
   return (
@@ -121,26 +47,6 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
   const [activeStatus, setActiveStatus] = useState<string | undefined>()
   const [search, setSearch] = useState('')
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
-
-  const stats = useMemo(() => {
-    const inPipeline = proposals.filter((p) => PIPELINE_STATUSES.includes(p.status as never))
-
-    const volume = inPipeline.reduce((sum, p) => {
-      const sim = Array.isArray(p.simulations) ? p.simulations[0] : p.simulations
-      return sum + (sim ? Number(sim.desired_amount) : 0)
-    }, 0)
-
-    const atRisk = inPipeline.filter(
-      (p) => (Date.now() - new Date(p.created_at).getTime()) / 86_400_000 > 7,
-    ).length
-
-    const approved = proposals.filter((p) => p.status === 'aprovada')
-    const avgDays  = approved.length
-      ? approved.reduce((s, p) => s + (Date.now() - new Date(p.created_at).getTime()) / 86_400_000, 0) / approved.length
-      : 0
-
-    return { inProgress: inPipeline.length, volume, atRisk, avgDays: Number(avgDays.toFixed(1)) }
-  }, [proposals])
 
   const productTypes = useMemo(() => {
     const map = new Map<string, number>()
@@ -184,46 +90,6 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* KPIs */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <KpiCard
-          featured
-          label="Em andamento"
-          icon={<FileText size={15} />}
-          value={stats.inProgress.toLocaleString('pt-BR')}
-          spark={[4, 5, 6, 5, 7, 8, 7, 9, 8, 10, 9, 12]}
-          delta={<Delta value={12.5} />}
-          foot="vs. semana anterior"
-        />
-        <KpiCard
-          label="Volume no pipeline"
-          icon={<CreditCard size={15} />}
-          value={brl(stats.volume)}
-          spark={[40, 45, 42, 48, 50, 55, 52, 58, 60, 62, 65, 70]}
-          sparkColor="var(--success)"
-          delta={<Delta value={8.3} />}
-          foot="últimos 30 dias"
-        />
-        <KpiCard
-          label="SLA em risco"
-          icon={<Clock size={15} />}
-          value={stats.atRisk.toLocaleString('pt-BR')}
-          spark={[2, 1, 3, 2, 4, 3, 5, 4, 3, 4, 3, 2]}
-          sparkColor={stats.atRisk > 0 ? 'var(--destructive)' : 'var(--muted-foreground)'}
-          delta={<Delta value={stats.atRisk > 0 ? -5.0 : 0} />}
-          foot={`${stats.atRisk} vencendo hoje`}
-        />
-        <KpiCard
-          label="Tempo médio"
-          icon={<TrendingUp size={15} />}
-          value={`${stats.avgDays}d`}
-          spark={[12, 11, 13, 12, 11, 10, 11, 10, 9, 10, 9, 8]}
-          sparkColor="var(--muted-foreground)"
-          delta={<Delta value={-2.1} suffix=" dias" />}
-          foot="proposta → aprovada"
-        />
-      </div>
-
       {/* Filtro por produto */}
       <Card className="py-3">
         <CardContent className="flex flex-wrap items-center gap-1">
@@ -309,7 +175,7 @@ export function ProposalsList({ proposals }: ProposalsListProps) {
       {displayed.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
           {displayed.map((proposal) => (
             <ProposalCard key={proposal.id} proposal={proposal} />
           ))}

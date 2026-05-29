@@ -73,8 +73,8 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
   const productColor = (product?.name && PRODUCT_COLOR[product.name]) ?? 'bg-muted-foreground'
 
   return (
-    <Link href={`/proposals/${proposal.id}`} className="block">
-    <Card className="gap-3 py-0 cursor-pointer transition-all hover:-translate-y-0.5 hover:border-primary/25">
+    <Link href={`/proposals/${proposal.id}`} className="flex h-full">
+    <Card className="gap-3 py-0 w-full cursor-pointer transition-all hover:-translate-y-0.5 hover:border-primary/25">
       <CardContent className="flex flex-col gap-3 pt-4">
         {/* ID + produto */}
         <div className="flex items-center justify-between">

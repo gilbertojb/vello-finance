@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Download, Plus } from 'lucide-react'
+import { Download } from 'lucide-react'
 
 import { ProposalsList } from './_components/proposals-list'
 import { listProposals } from './queries'
@@ -25,20 +25,12 @@ export default async function ProposalsPage() {
             formato de cartões.
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
-          <button
-            type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
-          >
-            <Download size={14} /> Exportar CSV
-          </button>
-          <button
-            type="button"
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border-none bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
-          >
-            <Plus size={14} /> Nova proposta
-          </button>
-        </div>
+        <button
+          type="button"
+          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-primary/16 bg-foreground/4 px-4 py-2.5 text-sm font-medium text-foreground"
+        >
+          <Download size={14} /> Exportar CSV
+        </button>
       </div>
 
       <ProposalsList proposals={proposals} />
