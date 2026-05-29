@@ -8,6 +8,8 @@ import {
   Package,
   Megaphone,
   Settings,
+  CircleDollarSign,
+  TrendingUp,
 } from 'lucide-react'
 
 import { createClient } from '@/lib/supabase/server'
@@ -42,7 +44,13 @@ export async function NavMain() {
       items: [
         { href: '/simulations', icon: <ClipboardList className="size-4" />, label: 'Simulações', badge: simCount ?? 0 },
         { href: '/proposals', icon: <FileText className="size-4" />, label: 'Propostas', badge: propCount ?? 0 },
-        { href: '/clients', icon: <Users className="size-4" />, label: 'Clientes', disabled: true },
+        { href: '/clients', icon: <Users className="size-4" />, label: 'Clientes' },
+      ],
+    },
+    {
+      label: 'Financeiro',
+      items: [
+        { href: '/financeiro', icon: <CircleDollarSign className="size-4" />, label: 'Financeiro' },
       ],
     },
     {
@@ -50,6 +58,13 @@ export async function NavMain() {
       items: [
         { href: '/products', icon: <Package className="size-4" />, label: 'Produtos' },
         { href: '/campaigns', icon: <Megaphone className="size-4" />, label: 'Campanhas', disabled: true },
+      ],
+    },
+    {
+      label: 'Relatórios',
+      items: [
+        { href: '/relatorios/origem-leads', icon: <TrendingUp className="size-4" />, label: 'Origem de Leads' },
+        { href: '/relatorios/origem-vendas', icon: <TrendingUp className="size-4" />, label: 'Origem de Vendas' },
       ],
     },
     {
