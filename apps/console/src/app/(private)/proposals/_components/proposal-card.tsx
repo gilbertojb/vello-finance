@@ -1,12 +1,8 @@
 import Link from 'next/link'
 
-import { Eye, MoreHorizontal } from 'lucide-react'
-
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
 import { STATUS_CFG } from '../status-config'
@@ -78,7 +74,8 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
   const productColor = (product?.name && PRODUCT_COLOR[product.name]) ?? 'bg-muted-foreground'
 
   return (
-    <Card className="gap-3 py-0 transition-shadow hover:shadow-sm">
+    <Link href={`/proposals/${proposal.id}`} className="block">
+    <Card className="gap-3 py-0 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30">
       <CardContent className="flex flex-col gap-3 pt-4">
         {/* ID + produto */}
         <div className="flex items-center justify-between">
@@ -128,29 +125,10 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
         )}
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between bg-transparent px-4">
+      <CardFooter className="bg-transparent px-4">
         <span className="text-xs text-muted-foreground">{dateStr}</span>
-        <div className="flex items-center gap-0.5">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm" asChild>
-                <Link href={`/proposals/${proposal.id}`}>
-                  <Eye />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Ver detalhes</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon-sm">
-                <MoreHorizontal />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Mais opções</TooltipContent>
-          </Tooltip>
-        </div>
       </CardFooter>
     </Card>
+    </Link>
   )
 }
