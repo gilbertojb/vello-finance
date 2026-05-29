@@ -121,5 +121,5 @@ export async function getClientsKpis(filters: ClientsFilters = {}): Promise<{
 export async function listProducts(): Promise<string[]> {
   const supabase = await createClient()
   const { data } = await supabase.from('products').select('name').order('name')
-  return (data ?? []).map((p) => p.name)
+  return [...new Set((data ?? []).map((p) => p.name))]
 }

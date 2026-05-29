@@ -87,7 +87,7 @@ export async function getLeadOriginKpis(
 export async function listLeadOriginProducts(): Promise<string[]> {
   const supabase = await createClient()
   const { data } = await supabase.from('products').select('name').order('name')
-  return (data ?? []).map((p) => p.name)
+  return [...new Set((data ?? []).map((p) => p.name))]
 }
 
 export type LeadOriginData = Awaited<ReturnType<typeof getLeadOriginData>>
