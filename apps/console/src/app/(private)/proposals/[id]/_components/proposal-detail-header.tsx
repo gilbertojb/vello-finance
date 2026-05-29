@@ -3,7 +3,6 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { STATUS_CFG } from '@/app/(private)/proposals/status-config'
@@ -65,9 +64,12 @@ export function ProposalDetailHeader({ proposal }: ProposalDetailHeaderProps) {
         </div>
 
         {statusCfg && (
-          <Badge variant={statusCfg.variant} className={statusCfg.className}>
-            {statusCfg.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <span className={cn('size-1.5 rounded-full', statusCfg.dotColor)} />
+            <span className={cn('text-sm font-medium', statusCfg.textColor)}>
+              {statusCfg.label}
+            </span>
+          </div>
         )}
       </CardContent>
     </Card>

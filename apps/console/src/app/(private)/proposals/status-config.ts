@@ -7,14 +7,17 @@ export interface StatusConfig {
   label: string
   variant: BadgeVariant
   className?: string
+  dotColor: string
+  textColor?: string
 }
 
 export const STATUS_CFG: Record<string, StatusConfig> = {
-  em_analise:         { label: 'Em análise',    variant: 'secondary' },
-  pre_aprovada:       { label: 'Pré-aprovada',  variant: 'outline', className: 'border-success/40 text-success' },
-  necessita_detalhes: { label: 'Det. pendentes', variant: 'outline' },
-  reprovada:          { label: 'Reprovada',      variant: 'destructive' },
-  aprovada:           { label: 'Aprovada',       variant: 'outline', className: 'border-success/40 text-success' },
+  nova_proposta:      { label: 'Nova proposta',   variant: 'secondary', dotColor: 'bg-muted-foreground/60' },
+  em_analise:         { label: 'Em análise',      variant: 'secondary', dotColor: 'bg-muted-foreground/60' },
+  pre_aprovada:       { label: 'Pré-aprovada',    variant: 'outline',   className: 'border-success/40 text-success', dotColor: 'bg-success', textColor: 'text-success' },
+  necessita_detalhes: { label: 'Det. pendentes',  variant: 'outline',   dotColor: 'bg-warning', textColor: 'text-warning' },
+  reprovada:          { label: 'Reprovada',        variant: 'destructive', dotColor: 'bg-destructive', textColor: 'text-destructive' },
+  aprovada:           { label: 'Aprovada',         variant: 'outline',   className: 'border-success/40 text-success', dotColor: 'bg-success', textColor: 'text-success' },
 }
 
 export const STATUS_FILTERS = [

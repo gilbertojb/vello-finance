@@ -1,7 +1,6 @@
 import Link from 'next/link'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
@@ -75,7 +74,7 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
 
   return (
     <Link href={`/proposals/${proposal.id}`} className="block">
-    <Card className="gap-3 py-0 cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 hover:border-primary/30">
+    <Card className="gap-3 py-0 cursor-pointer transition-all hover:-translate-y-0.5 hover:border-primary/25">
       <CardContent className="flex flex-col gap-3 pt-4">
         {/* ID + produto */}
         <div className="flex items-center justify-between">
@@ -116,12 +115,12 @@ export function ProposalCard({ proposal }: ProposalCardProps) {
 
         {/* Status */}
         {statusCfg && (
-          <Badge
-            variant={statusCfg.variant}
-            className={cn('w-fit', statusCfg.className)}
-          >
-            {statusCfg.label}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <span className={cn('size-1.5 rounded-full', statusCfg.dotColor)} />
+            <span className={cn('text-xs font-medium', statusCfg.textColor)}>
+              {statusCfg.label}
+            </span>
+          </div>
         )}
       </CardContent>
 

@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, FileText, Image } from 'lucide-react'
+import { CheckCircle2, Clock, Eye, FileText, Image } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -46,11 +46,13 @@ export function DocumentsTab({ proposal }: DocumentsTabProps) {
       {/* Resumo */}
       <div className="mb-4 flex gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-success/30 bg-success/8 px-2.5 py-1 text-xs font-medium text-success">
-          ✓ {sentCount} enviado{sentCount !== 1 ? 's' : ''}
+          <CheckCircle2 className="size-3" />
+          {sentCount} enviado{sentCount !== 1 ? 's' : ''}
         </span>
         {pendingCount > 0 && (
           <span className="inline-flex items-center gap-1.5 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
-            ⏳ {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
+            <Clock className="size-3" />
+            {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
           </span>
         )}
       </div>

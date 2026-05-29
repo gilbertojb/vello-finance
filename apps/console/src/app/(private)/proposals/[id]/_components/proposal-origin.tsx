@@ -24,7 +24,7 @@ export function ProposalOrigin({ tenantName }: ProposalOriginProps) {
         </p>
 
         <div className="flex items-center gap-2.5">
-          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground text-xs font-bold">
+          <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/15 text-primary text-xs font-bold">
             {initials || '?'}
           </div>
           <div>

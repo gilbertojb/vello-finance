@@ -288,7 +288,7 @@ A data/hora de cada etapa concluída vem da tabela `proposal_events`. Etapas fut
 
 | Situação | Comportamento |
 |---|---|
-| Proposta não encontrada / de outro tenant | `notFound()` → página 404 do console |
+| Proposta não encontrada / de outro tenant | Retorna para a listagem com toast message: "Proposta não encontrada" |
 | Erro de query | `throw error` → Next.js error boundary |
 | Documento sem URL assinada | Botões "Visualizar" e "Baixar" desabilitados com tooltip "Arquivo indisponível" |
 | Sem documentos enviados | Exibe apenas os itens pendentes (todos amarelos) |
