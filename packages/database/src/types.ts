@@ -610,6 +610,7 @@ export type Database = {
           estimated_rate: number | null
           id: string
           product_id: string
+          seller_id: string | null
           simulation_data: Json | null
           status: string
           tenant_id: string
@@ -630,6 +631,7 @@ export type Database = {
           estimated_rate?: number | null
           id?: string
           product_id: string
+          seller_id?: string | null
           simulation_data?: Json | null
           status?: string
           tenant_id: string
@@ -650,6 +652,7 @@ export type Database = {
           estimated_rate?: number | null
           id?: string
           product_id?: string
+          seller_id?: string | null
           simulation_data?: Json | null
           status?: string
           tenant_id?: string
@@ -661,6 +664,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_users"
             referencedColumns: ["id"]
           },
           {
