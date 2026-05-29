@@ -4,8 +4,8 @@ import { ptBR } from 'date-fns/locale'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { getRequiredDocs } from '../../required-documents'
-import type { ProposalDetail } from '../../queries'
+import { getRequiredDocs } from '@/app/(private)/proposals/required-documents'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 type ProposalEvent = NonNullable<ProposalDetail['proposal_events']>[number]
 
@@ -19,12 +19,18 @@ function buildSteps(productTypeSlug: string, currentStatus: string): TimelineSte
   const hasDocsStep = getRequiredDocs(productTypeSlug).length > 0
   const isReprovada = currentStatus === 'reprovada'
 
+  const isNeedsDetails = currentStatus === 'necessita_detalhes'
+  const showNeedsDetails = isNeedsDetails || ['pre_aprovada', 'aprovada'].includes(currentStatus)
+
   const steps: TimelineStep[] = [
     { key: 'nova_proposta',   label: 'Proposta criada',      matchStatus: 'nova_proposta' },
     ...(hasDocsStep
       ? [{ key: 'proposta_criada', label: 'Documentos enviados', matchStatus: 'proposta_criada' }]
       : []),
     { key: 'em_analise',       label: 'Em análise',           matchStatus: 'em_analise' },
+    ...(showNeedsDetails
+      ? [{ key: 'necessita_detalhes', label: 'Detalhes solicitados', matchStatus: 'necessita_detalhes' }]
+      : []),
     ...(isReprovada
       ? [{ key: 'reprovada', label: 'Reprovada', matchStatus: 'reprovada' }]
       : [
@@ -91,9 +97,9 @@ export function ProposalTimeline({ proposal }: ProposalTimelineProps) {
                   )} />
                   {!isLast && (
                     <div className={cn(
-                      'w-px flex-1 my-1',
+                      'w-px flex-1 my-1 min-h-5',
                       isDone ? 'bg-success/30' : 'bg-border',
-                    )} style={{ minHeight: '20px' }} />
+                    )} />
                   )}
                 </div>
 

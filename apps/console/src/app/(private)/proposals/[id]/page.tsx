@@ -2,7 +2,7 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
-import { getProposal, getTenantName } from '../queries'
+import { getProposal, getTenantName } from '@/app/(private)/proposals/queries'
 import { ProposalDetailHeader } from './_components/proposal-detail-header'
 import { ProposalTabs } from './_components/proposal-tabs'
 import { ProposalTimeline } from './_components/proposal-timeline'
@@ -28,16 +28,13 @@ export default async function ProposalDetailPage({ params }: PageProps) {
   // Intentional exception: md:grid-cols-[1fr_256px] uses an arbitrary value
   // because no standard Tailwind token achieves a 1fr + 256px two-column grid.
 
-  let proposal: Awaited<ReturnType<typeof getProposal>>
-  let tenantName: string
-  try {
-    ;[proposal, tenantName] = await Promise.all([getProposal(id), getTenantName()])
-  } catch {
-    notFound()
-  }
+  const [proposal, tenantName] = await Promise.all([
+    getProposal(id),
+    getTenantName(),
+  ]).catch(() => notFound())
 
   return (
-    <div className="mx-auto w-full max-w-screen-xl p-8">
+    <div className="mx-auto max-w-10/12 w-full p-8">
       <span className="text-xs font-medium uppercase tracking-widest text-foreground/45">
         Originação · Pipeline
       </span>

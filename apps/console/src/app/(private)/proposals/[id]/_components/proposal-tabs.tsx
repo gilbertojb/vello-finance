@@ -5,8 +5,8 @@ import { useState } from 'react'
 
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import type { ProposalDetail } from '../../queries'
-import { getRequiredDocs } from '../../required-documents'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
+import { getRequiredDocs } from '@/app/(private)/proposals/required-documents'
 import { ClientDataTab } from './client-data-tab'
 import { CommentsTab } from './comments-tab'
 import { DocumentsTab } from './documents-tab'
@@ -70,7 +70,7 @@ export function ProposalTabs({ proposal }: ProposalTabsProps) {
               <span className={cn(
                 'rounded-full px-1.5 py-px text-xs font-semibold',
                 tab.badge.warn
-                  ? 'bg-amber-100 text-amber-700'
+                  ? 'bg-warning/15 text-warning'
                   : 'bg-muted text-muted-foreground',
               )}>
                 {tab.badge.value}

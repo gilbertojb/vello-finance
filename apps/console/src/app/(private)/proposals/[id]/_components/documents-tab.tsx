@@ -7,9 +7,9 @@ import { Eye, FileText, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getRequiredDocs } from '../../required-documents'
+import { getRequiredDocs } from '@/app/(private)/proposals/required-documents'
 import { DocumentPreviewModal } from './document-preview-modal'
-import type { ProposalDetail } from '../../queries'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 type UploadedDoc = NonNullable<ProposalDetail['proposal_documents']>[number]
 
@@ -49,7 +49,7 @@ export function DocumentsTab({ proposal }: DocumentsTabProps) {
           ✓ {sentCount} enviado{sentCount !== 1 ? 's' : ''}
         </span>
         {pendingCount > 0 && (
-          <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-600">
+          <span className="inline-flex items-center gap-1.5 rounded-md border border-warning/30 bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
             ⏳ {pendingCount} pendente{pendingCount !== 1 ? 's' : ''}
           </span>
         )}
@@ -108,18 +108,18 @@ export function DocumentsTab({ proposal }: DocumentsTabProps) {
         {pendingDocs.map((doc) => (
           <div
             key={doc.type}
-            className="flex items-center justify-between rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5"
+            className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/10 px-3 py-2.5"
           >
             <div className="flex items-center gap-2.5">
-              <div className="grid size-8 shrink-0 place-items-center rounded-md bg-amber-50">
-                <FileText className="size-4 text-amber-600" />
+              <div className="grid size-8 shrink-0 place-items-center rounded-md bg-warning/15">
+                <FileText className="size-4 text-warning" />
               </div>
               <div>
-                <p className="text-sm font-medium text-amber-600">{doc.label}</p>
+                <p className="text-sm font-medium text-warning">{doc.label}</p>
                 <p className="text-xs text-muted-foreground">Não enviado pelo cliente</p>
               </div>
             </div>
-            <Badge variant="outline" className="border-amber-200 text-amber-600 text-xs">
+            <Badge variant="outline" className="border-warning/30 text-warning text-xs">
               Pendente
             </Badge>
           </div>

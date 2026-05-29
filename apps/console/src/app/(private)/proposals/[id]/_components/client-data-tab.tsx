@@ -1,7 +1,7 @@
 // apps/console/src/app/(private)/proposals/[id]/_components/client-data-tab.tsx
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import type { ProposalDetail } from '../../queries'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 function brlFull(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })

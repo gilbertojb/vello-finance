@@ -30,6 +30,7 @@ function isImage(path: string): boolean {
 
 export function DocumentPreviewModal({
   proposalId,
+  documentId: _documentId,
   fileName,
   storagePath,
   open,

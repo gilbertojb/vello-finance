@@ -93,6 +93,6 @@ export async function getTenantName(): Promise<string> {
   const { data } = await supabase
     .from('tenants')
     .select('name')
-    .single()
+    .maybeSingle()
   return data?.name ?? 'Loja'
 }

@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { STATUS_CFG } from '../../status-config'
-import type { ProposalDetail } from '../../queries'
+import { STATUS_CFG } from '@/app/(private)/proposals/status-config'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 function getInitials(name: string): string {
   const parts = name.trim().split(' ').filter(Boolean)

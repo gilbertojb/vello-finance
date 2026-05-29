@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import type { ProposalDetail } from '../../queries'
+import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 function getInitials(name: string): string {
   const parts = name.trim().split(' ').filter(Boolean)
