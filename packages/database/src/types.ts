@@ -66,6 +66,89 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_snapshots: {
+        Row: {
+          captured_at: string
+          financial_partner_id: string | null
+          id: string
+          if_commission_amount: number | null
+          if_commission_pct: number
+          loan_amount: number | null
+          paid_at: string | null
+          product_id: string
+          proposal_id: string
+          tenant_commission_amount: number | null
+          tenant_commission_pct: number
+          tenant_id: string
+          vello_commission_amount: number | null
+          vello_commission_pct: number
+          vello_spread_pct: number
+        }
+        Insert: {
+          captured_at?: string
+          financial_partner_id?: string | null
+          id?: string
+          if_commission_amount?: number | null
+          if_commission_pct?: number
+          loan_amount?: number | null
+          paid_at?: string | null
+          product_id: string
+          proposal_id: string
+          tenant_commission_amount?: number | null
+          tenant_commission_pct?: number
+          tenant_id: string
+          vello_commission_amount?: number | null
+          vello_commission_pct?: number
+          vello_spread_pct?: number
+        }
+        Update: {
+          captured_at?: string
+          financial_partner_id?: string | null
+          id?: string
+          if_commission_amount?: number | null
+          if_commission_pct?: number
+          loan_amount?: number | null
+          paid_at?: string | null
+          product_id?: string
+          proposal_id?: string
+          tenant_commission_amount?: number | null
+          tenant_commission_pct?: number
+          tenant_id?: string
+          vello_commission_amount?: number | null
+          vello_commission_pct?: number
+          vello_spread_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_snapshots_financial_partner_id_fkey"
+            columns: ["financial_partner_id"]
+            isOneToOne: false
+            referencedRelation: "financial_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_snapshots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_snapshots_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commission_snapshots_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_partners: {
         Row: {
           api_base_url: string | null
