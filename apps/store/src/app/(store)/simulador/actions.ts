@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
+import { PRODUCT_FLOWS, DB_TO_URL_SLUG } from '@/app/(store)/contratar/[productTypeSlug]/_components/flow-config'
 import type { Json } from '@vello/database'
 
 const saveSimulationSchema = z.object({
@@ -66,11 +67,86 @@ export async function qualifySimulation(simulationId: string): Promise<{ success
   if (!tenantId) return { success: false as const, message: 'Não autenticado.', errors: null }
 
   const supabase = createServiceClient()
+
+  const { data: simulation } = await supabase
+    .from('simulations')
+    .select(`
+      id,
+      client_name,
+      client_phone,
+      product_id,
+      products (
+        id,
+        product_type:product_types ( slug )
+      )
+    `)
+    .eq('id', simulationId)
+    .eq('tenant_id', tenantId)
+    .single()
+
+  if (!simulation) return { success: false as const, message: 'Simulação não encontrada.', errors: null }
+
   await supabase
     .from('simulations')
     .update({ status: 'pre_qualificado' })
     .eq('id', simulationId)
     .eq('tenant_id', tenantId)
 
-  redirect(`/thank-you/${simulationId}`)
+  const productTypeSlug = (simulation.products as { product_type?: { slug?: string } } | null)?.product_type?.slug
+  const urlSlug = productTypeSlug ? DB_TO_URL_SLUG[productTypeSlug] : null
+  const firstStep = productTypeSlug ? PRODUCT_FLOWS[productTypeSlug]?.etapa1[0]?.slug : null
+
+  if (!productTypeSlug || !urlSlug || !firstStep) {
+    redirect(`/thank-you/${simulationId}`)
+    return
+  }
+
+  const { data: tenantProduct } = await supabase
+    .from('tenant_products')
+    .select('id')
+    .eq('product_id', simulation.product_id)
+    .eq('tenant_id', tenantId)
+    .eq('is_active', true)
+    .single()
+
+  if (!tenantProduct) {
+    redirect(`/thank-you/${simulationId}`)
+    return
+  }
+
+  // Se proposta já existe para esta simulação, redirecionar para ela
+  const { data: existing } = await supabase
+    .from('proposals')
+    .select('id, current_step')
+    .eq('simulation_id', simulationId)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+
+  if (existing) {
+    redirect(`/contratar/${urlSlug}?step=${existing.current_step}&proposalId=${existing.id}&productId=${tenantProduct.id}&simulationId=${simulationId}`)
+    return
+  }
+
+  const { data: proposal } = await supabase
+    .from('proposals')
+    .insert({
+      tenant_id: tenantId,
+      product_id: simulation.product_id,
+      product_type_slug: productTypeSlug,
+      simulation_id: simulationId,
+      status: 'nova_proposta',
+      current_step: firstStep,
+      client_name: simulation.client_name ?? null,
+      client_phone: (simulation as unknown as { client_phone?: string }).client_phone ?? null,
+      form_data: {} as Json,
+    })
+    .select('id')
+    .single()
+
+  if (!proposal) {
+    redirect(`/thank-you/${simulationId}`)
+    return
+  }
+
+  redirect(`/contratar/${urlSlug}?step=${firstStep}&proposalId=${proposal.id}&productId=${tenantProduct.id}&simulationId=${simulationId}`)
 }

@@ -1,9 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertTriangle } from 'lucide-react'
-import { generateTermOptions } from '@/lib/utils/simulator'
 import { StoreButton } from '@/components/ui/store-button'
 import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
@@ -19,23 +18,28 @@ type Props = {
 
 export function AntecipacaoReceiveisForm({
   productId,
-  minTermMonths,
-  maxTermMonths,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
   maxAmount: _maxAmount,
   minAmount: _minAmount,
 }: Props) {
   const router = useRouter()
-  const PARCELAS_OPTIONS = useMemo(
-    () => generateTermOptions(minTermMonths, maxTermMonths),
-    [minTermMonths, maxTermMonths],
-  )
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawRecebiveis, setRawRecebiveis] = useState('')
   const [tipoRecebivel, setTipoRecebivel] = useState('')
   const [rawCredito, setRawCredito] = useState('')
-  const [parcelas, setParcelas] = useState<number | null>(null)
+  const [prazo, setPrazo] = useState<number | null>(null)
   const [showAjusteWarning, setShowAjusteWarning] = useState(false)
+
+  const prazoOptions = useMemo(
+    () => (tipoRecebivel === 'NF-e' || tipoRecebivel === 'Contrato') ? [30, 60, 90, 190] : [30, 60, 90],
+    [tipoRecebivel],
+  )
+
+  useEffect(() => {
+    if (prazo !== null && !prazoOptions.includes(prazo)) setPrazo(null)
+  }, [prazoOptions, prazo])
 
   const valorRecebiveis = Number(rawRecebiveis.replace(/\D/g, '')) / 100
   const valorCreditoTyped = Number(rawCredito.replace(/\D/g, '')) / 100
@@ -55,17 +59,17 @@ export function AntecipacaoReceiveisForm({
     valorRecebiveis > 0 &&
     tipoRecebivel !== '' &&
     valorCredito > 0 &&
-    parcelas !== null
+    prazo !== null
 
   const handleSubmit = () => {
-    if (!canSubmit || parcelas === null) return
+    if (!canSubmit || prazo === null) return
     const payload = {
       nome: nome.trim(),
       whatsapp: whatsapp.replace(/\D/g, ''),
       valorRecebiveis,
       tipoRecebivel,
       valorCredito,
-      parcelas,
+      prazo,
     }
     sessionStorage.setItem('sim:antecipacao-recebiveis', JSON.stringify(payload))
     router.push(`/simulador/pessoa-juridica/antecipacao-recebiveis/resultado?productId=${productId}`)
@@ -175,24 +179,24 @@ export function AntecipacaoReceiveisForm({
         )}
       </div>
 
-      {/* Parcelas */}
+      {/* Prazo */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Número de parcelas <span className="text-destructive">*</span>
+          Prazo <span className="text-destructive">*</span>
         </label>
         <div className="flex gap-2">
-          {PARCELAS_OPTIONS.map((p) => (
+          {prazoOptions.map((p) => (
             <button
               key={p}
               type="button"
-              onClick={() => setParcelas(p)}
+              onClick={() => setPrazo(p)}
               className={`flex-1 rounded-2xl border py-3 text-sm font-medium transition-colors ${
-                parcelas === p
+                prazo === p
                   ? 'border-primary bg-primary/5 text-primary'
                   : 'border-surface-foreground/12 bg-surface-foreground/5 text-surface-foreground/60 hover:bg-surface-foreground/10'
               }`}
             >
-              {p}x
+              {p} dias
             </button>
           ))}
         </div>

@@ -7,7 +7,7 @@ import { formatCurrency, formatRate, calcPMT, calcCETAnual } from '@/lib/utils/s
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 import { StoreButton } from '@/components/ui/store-button'
 
-const PARCELAS_OPTIONS = [12, 24, 36, 48]
+const PARCELAS_OPTIONS = [120, 140, 240]
 
 type Props = {
   productId: string
@@ -25,7 +25,7 @@ type SimData = {
 export function CapitalGiroResultado({ productId, productName, rateMonthly }: Props) {
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
-  const [parcelas, setParcelas] = useState(12)
+  const [parcelas, setParcelas] = useState(120)
   const [simulationId, setSimulationId] = useState<string | null>(null)
   const [isQualifying, setIsQualifying] = useState(false)
 

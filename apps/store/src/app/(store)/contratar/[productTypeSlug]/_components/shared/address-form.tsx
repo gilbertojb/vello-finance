@@ -36,7 +36,7 @@ export function AddressForm({ label, value, onChange, showSameAs }: Props) {
       const res = await fetch(`/api/cep/${digits}`)
       if (!res.ok) throw new Error()
       const data = await res.json()
-      onChange({ ...value, cep: digits, rua: data.logradouro ?? '', bairro: data.bairro ?? '', cidade: data.localidade ?? '', estado: data.uf ?? '' })
+      onChange({ ...value, cep: digits, rua: data.street ?? '', bairro: data.neighborhood ?? '', cidade: data.city ?? '', estado: data.state ?? '' })
     } catch {
       setCepError('CEP não encontrado. Preencha o endereço manualmente.')
     } finally {

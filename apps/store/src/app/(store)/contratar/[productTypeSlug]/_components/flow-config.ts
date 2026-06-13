@@ -121,8 +121,9 @@ export const PRODUCT_FLOWS: Record<string, { etapa1: StepConfig[]; etapa2: StepC
   financiamento_veiculo: {
     etapa1: [
       { slug: 'operacao', label: 'Operação' },
-      { slug: 'dados-pessoais', label: 'Dados Pessoais' },
-      { slug: 'renda-ocupacao', label: 'Renda' },
+      { slug: 'dados-solicitante', label: 'Solicitante' },
+      { slug: 'atividade-faturamento', label: 'Atividade' },
+      { slug: 'dados-socios', label: 'Sócios' },
       { slug: 'retorno', label: 'Confirmação' },
     ],
     etapa2: [
@@ -134,7 +135,6 @@ export const PRODUCT_FLOWS: Record<string, { etapa1: StepConfig[]; etapa2: StepC
   consignado_privado: {
     etapa1: [
       { slug: 'pre-filtro', label: 'Qualificação' },
-      { slug: 'autorizacao-dataprev', label: 'Autorização' },
       { slug: 'dados-pessoais', label: 'Dados Pessoais' },
       { slug: 'dados-profissionais', label: 'Emprego' },
       { slug: 'dados-bancarios', label: 'Dados Bancários' },

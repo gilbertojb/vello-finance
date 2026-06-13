@@ -43,8 +43,8 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
 
       const stepData = { clt, vinculo, tempo, idade }
       const res = proposalId
-        ? await saveStep({ proposalId, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev' })
-        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'autorizacao-dataprev', clientName, clientPhone })
+        ? await saveStep({ proposalId, stepSlug: 'pre-filtro', stepData, nextStep: 'dados-pessoais' })
+        : await createProposal({ productId: productId!, productTypeSlug, simulationId: simulationId ?? undefined, stepSlug: 'pre-filtro', stepData, nextStep: 'dados-pessoais', clientName, clientPhone })
       if ('error' in res) setError(res.error)
       else router.push(res.redirectTo)
     })
@@ -66,54 +66,6 @@ function PreFiltroStep({ proposalId, productId, productTypeSlug, simulationId, p
       {blocked && <BlockMessage message="Infelizmente, não atende aos requisitos mínimos para esta modalidade de crédito no momento. Mas existem outras opções disponíveis para você!" />}
       {error && <FieldError>{error}</FieldError>}
       <Button className="w-full" onClick={handleSubmit} disabled={isPending || !allSim}>
-        {isPending ? 'Salvando…' : 'Prosseguir'}
-      </Button>
-    </div>
-  )
-}
-
-const DATAPREV_AUTH_URL =
-  'https://www.gov.br/servidor/pt-br/acesso-a-informacao/faq/sou-gov.br/consignacoes/2-como-gerar-autorizacao-de-emprestimo-consignado-no-aplicativo-sou-gov.br'
-
-function AutorizacaoDataprevStep({ proposalId }: ProductWizardProps) {
-  const [autorizado, setAutorizado] = useState(false)
-  const [error, setError] = useState('')
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
-
-  function handleSubmit() {
-    if (!autorizado) return setError('Autorização obrigatória para prosseguir.')
-    setError('')
-    startTransition(async () => {
-      const res = await saveStep({ proposalId: proposalId!, stepSlug: 'autorizacao-dataprev', stepData: { autorizado: true }, nextStep: 'dados-pessoais' })
-      if ('error' in res) setError(res.error)
-      else router.push(res.redirectTo)
-    })
-  }
-
-  return (
-    <div className="space-y-5">
-      <div className="rounded-lg border border-surface-foreground/15 bg-surface p-4 space-y-3">
-        <p className="text-sm text-surface-foreground">
-          Para prosseguir, você precisa autorizar a consulta dos seus dados via Dataprev. Acesse a página oficial e siga as instruções.
-        </p>
-        <a
-          href={DATAPREV_AUTH_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex w-full items-center justify-center rounded-lg border border-primary/40 bg-primary/10 px-4 py-2.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
-        >
-          Acessar página de autorização →
-        </a>
-      </div>
-      <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-surface-foreground/15 bg-surface p-4">
-        <input type="checkbox" className="mt-0.5 h-4 w-4 flex-shrink-0 rounded accent-primary" checked={autorizado} onChange={(e) => setAutorizado(e.target.checked)} />
-        <span className="text-sm text-surface-foreground">
-          Já realizei a autorização e desejo prosseguir.
-        </span>
-      </label>
-      {error && <FieldError>{error}</FieldError>}
-      <Button className="w-full" onClick={handleSubmit} disabled={isPending || !autorizado}>
         {isPending ? 'Salvando…' : 'Prosseguir'}
       </Button>
     </div>
@@ -175,8 +127,6 @@ export function ConsignadoPrivadoWizard({ currentStep, ...props }: ProductWizard
   switch (currentStep) {
     case 'pre-filtro':
       return <PreFiltroStep {...props} currentStep={currentStep} />
-    case 'autorizacao-dataprev':
-      return <AutorizacaoDataprevStep {...props} currentStep={currentStep} />
     case 'dados-pessoais':
       return <DadosPessoaisPFStep {...props} nextStep="dados-profissionais" />
     case 'dados-profissionais':

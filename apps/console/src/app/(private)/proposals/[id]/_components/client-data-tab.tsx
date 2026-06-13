@@ -9,27 +9,87 @@ function brlFull(value: number): string {
 
 function formatLabel(key: string): string {
   const LABELS: Record<string, string> = {
-    nome_completo:        'Nome completo',
-    cpf:                  'CPF',
-    rg:                   'RG',
-    data_nascimento:      'Data de nascimento',
-    email:                'E-mail',
-    whatsapp:             'WhatsApp',
-    nome_mae:             'Nome da mãe',
-    tipo_ocupacao:        'Tipo de ocupação',
-    renda_mensal:         'Renda mensal',
-    tempo_ocupacao:       'Tempo na ocupação',
-    tipo_veiculo:         'Tipo de veículo',
-    placa:                'Placa',
-    ano_fabricacao:       'Ano de fabricação',
-    motivo_credito:       'Motivo do crédito',
-    banco:                'Banco',
-    agencia:              'Agência',
-    conta:                'Conta-corrente',
-    pix:                  'Chave PIX',
-    financiado:           'Veículo financiado?',
+    // snake_case (legado)
+    nome_completo:            'Nome completo',
+    cpf:                      'CPF',
+    rg:                       'RG',
+    data_nascimento:          'Data de nascimento',
+    email:                    'E-mail',
+    whatsapp:                 'WhatsApp',
+    nome_mae:                 'Nome da mãe',
+    tipo_ocupacao:            'Tipo de ocupação',
+    renda_mensal:             'Renda mensal',
+    tempo_ocupacao:           'Tempo na ocupação',
+    tipo_veiculo:             'Tipo de veículo',
+    placa:                    'Placa',
+    ano_fabricacao:           'Ano de fabricação',
+    motivo_credito:           'Motivo do crédito',
+    banco:                    'Banco',
+    agencia:                  'Agência',
+    conta:                    'Conta-corrente',
+    pix:                      'Chave PIX',
+    financiado:               'Financiado?',
+    // camelCase (wizard store)
+    nomeCompleto:             'Nome completo',
+    dataNascimento:           'Data de nascimento',
+    nomeMae:                  'Nome da mãe',
+    tipoOcupacao:             'Tipo de ocupação',
+    rendaMensal:              'Renda mensal',
+    tempoOcupacao:            'Tempo na ocupação',
+    tipoVeiculo:              'Tipo de veículo',
+    anoFabricacao:            'Ano de fabricação',
+    tipoComprador:            'Tipo de comprador',
+    tipoImovel:               'Tipo de imóvel',
+    tipoRecebivel:            'Tipo de recebível',
+    faturamento:              'Faturamento (12 meses)',
+    fundacao:                 'Abertura do CNPJ',
+    motivo:                   'Motivo do crédito',
+    valorPago:                'Valor pago',
+    matricula:                'Matrícula',
+    tipoContrato:             'Tipo de contrato',
+    tempoEmpresa:             'Tempo de empresa',
+    empresa:                  'Empresa',
+    estadoCivil:              'Estado civil',
+    autorizado:               'Autorizado',
+    clt:                      'CLT',
+    vinculo:                  'Vínculo ativo',
+    tempo:                    'Tempo de empresa',
+    idade:                    'Faixa de idade',
+    composicaoRenda:          'Composição de renda',
+    rendaComplementar:        'Renda complementar',
+    tipoGarantia:             'Tipo de garantia',
+    valorImovel:              'Valor do imóvel',
+    valorVeiculo:             'Valor do veículo',
+    confirmacaoTitularidade:  'Confirmação de titularidade',
+    agenciaDv:                'Agência DV',
+    contaDv:                  'Conta DV',
+    tipoConta:                'Tipo de conta',
+    valorCredito:             'Valor de crédito',
+    valorRecebiveis:          'Total de recebíveis',
+    valorDesejado:            'Valor desejado',
+    modelo:                   'Modelo',
+    cnpj:                     'CNPJ',
+    razaoSocial:              'Razão social',
+    nomeFantasia:             'Nome fantasia',
+    naturezaJuridica:         'Natureza jurídica',
+    regimeTributario:         'Regime tributário',
+    atividadePrincipal:       'Atividade principal',
   }
-  return LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  if (LABELS[key]) return LABELS[key]
+  // camelCase → "Camel Case"
+  return key
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/[-_]/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+    .trim()
+}
+
+function formatValue(v: unknown): string {
+  if (v === null || v === undefined) return '—'
+  if (typeof v === 'boolean') return v ? 'Sim' : 'Não'
+  if (Array.isArray(v)) return v.map((i) => formatValue(i)).join(', ')
+  if (typeof v === 'object') return JSON.stringify(v)
+  return String(v)
 }
 
 interface FieldItemProps {
@@ -61,12 +121,26 @@ export function ClientDataTab({ proposal }: ClientDataTabProps) {
     ? proposal.simulations[0]
     : proposal.simulations
 
-  const formData = (proposal.form_data ?? {}) as Record<string, unknown>
+  const rawFormData = (proposal.form_data ?? {}) as Record<string, unknown>
+  const formData: Record<string, unknown> = {}
+  for (const stepData of Object.values(rawFormData)) {
+    if (stepData && typeof stepData === 'object' && !Array.isArray(stepData)) {
+      Object.assign(formData, stepData)
+    }
+  }
 
-  const personalKeys = ['nome_completo','cpf','rg','data_nascimento','email','whatsapp','nome_mae']
+  const personalKeys = ['nome_completo','nomeCompleto','cpf','rg','data_nascimento','dataNascimento','email','whatsapp','nome_mae','nomeMae']
+  const seenPersonalLabels = new Set<string>()
   const personalEntries = personalKeys
     .filter((k) => formData[k] != null)
-    .map((k) => ({ key: k, label: formatLabel(k), value: String(formData[k]) }))
+    .reduce<{ key: string; label: string; value: string }[]>((acc, k) => {
+      const label = formatLabel(k)
+      if (!seenPersonalLabels.has(label)) {
+        seenPersonalLabels.add(label)
+        acc.push({ key: k, label, value: formatValue(formData[k]) })
+      }
+      return acc
+    }, [])
 
   const excludedKeys = new Set([
     ...personalKeys,
@@ -74,7 +148,7 @@ export function ClientDataTab({ proposal }: ClientDataTabProps) {
   ])
   const operationEntries = Object.entries(formData)
     .filter(([k]) => !excludedKeys.has(k))
-    .map(([k, v]) => ({ key: k, label: formatLabel(k), value: String(v ?? '') }))
+    .map(([k, v]) => ({ key: k, label: formatLabel(k), value: formatValue(v) }))
 
   return (
     <div className="space-y-5">
@@ -89,7 +163,7 @@ export function ClientDataTab({ proposal }: ClientDataTabProps) {
                 key={key}
                 label={label}
                 value={value}
-                full={key === 'email' || key === 'nome_completo'}
+                full={key === 'email' || key === 'nome_completo' || key === 'nomeCompleto'}
               />
             ))}
           </div>

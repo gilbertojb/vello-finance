@@ -1,7 +1,6 @@
 import {
   BarChart2,
   LayoutDashboard,
-  ClipboardList,
   FileText,
   Users,
   UserCog,
@@ -12,8 +11,6 @@ import {
   TrendingUp,
 } from 'lucide-react'
 
-import { createClient } from '@/lib/supabase/server'
-import { COMPLETED_STATUSES } from '@/app/(private)/proposals/status-config'
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -33,12 +30,6 @@ type NavItem = {
 }
 
 export async function NavMain() {
-  const supabase = await createClient()
-  const [{ count: simCount }, { count: propCount }] = await Promise.all([
-    supabase.from('simulations').select('*', { count: 'exact', head: true }),
-    supabase.from('proposals').select('*', { count: 'exact', head: true }).in('status', COMPLETED_STATUSES as unknown as string[]),
-  ])
-
   const sections: Array<{ label: string; items: NavItem[] }> = [
     {
       label: 'Visão Geral',
@@ -50,8 +41,7 @@ export async function NavMain() {
     {
       label: 'Originação',
       items: [
-        { href: '/simulations', icon: <ClipboardList className="size-4" />, label: 'Simulações', badge: simCount ?? 0 },
-        { href: '/proposals', icon: <FileText className="size-4" />, label: 'Propostas', badge: propCount ?? 0 },
+        { href: '/proposals', icon: <FileText className="size-4" />, label: 'Propostas' },
         { href: '/clients', icon: <Users className="size-4" />, label: 'Clientes' },
       ],
     },

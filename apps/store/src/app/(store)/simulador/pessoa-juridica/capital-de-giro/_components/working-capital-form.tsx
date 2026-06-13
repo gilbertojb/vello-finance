@@ -1,8 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { generateTermOptions } from '@/lib/utils/simulator'
 import { StoreButton } from '@/components/ui/store-button'
 import { StoreInput } from '@/components/ui/store-input'
 import { StorePhoneInput } from '@/components/ui/store-phone-input'
@@ -15,18 +14,16 @@ type Props = {
   minAmount?: number
 }
 
+const PARCELAS_OPTIONS = [120, 140, 240]
+
 export function CapitalGiroForm({
   productId,
-  minTermMonths,
-  maxTermMonths,
+  minTermMonths: _minTermMonths,
+  maxTermMonths: _maxTermMonths,
   maxAmount: _maxAmount,
   minAmount: _minAmount,
 }: Props) {
   const router = useRouter()
-  const PARCELAS_OPTIONS = useMemo(
-    () => generateTermOptions(minTermMonths, maxTermMonths),
-    [minTermMonths, maxTermMonths],
-  )
   const [nome, setNome] = useState('')
   const [whatsapp, setWhatsapp] = useState('')
   const [rawDesejado, setRawDesejado] = useState('')

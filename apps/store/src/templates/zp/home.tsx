@@ -1,11 +1,10 @@
-import { Plus_Jakarta_Sans, Instrument_Serif } from 'next/font/google'
-
 import type { Metadata } from 'next'
+
+import { cn } from '@/lib/utils'
+import { Instrument_Serif, Plus_Jakarta_Sans } from 'next/font/google'
 
 import { TenantLogo } from '@/components/tenant-logo'
 import type { TemplateHomeProps } from '@/templates/_types'
-
-import { cn } from '@/lib/utils'
 
 import { ZpHeader } from './_components/header'
 import { ZpFooter } from './_components/footer'

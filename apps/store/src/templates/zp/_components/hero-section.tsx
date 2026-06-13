@@ -9,7 +9,7 @@ export function HeroSection({ displayName }: Props) {
   const name = displayName ?? 'ZP Pay'
 
   return (
-    <section className="relative flex items-center overflow-hidden border-b border-primary/8 bg-background h-svh md:h-hero-section">
+    <section className="relative flex items-center overflow-hidden border-b border-primary/8 bg-background min-h-svh md:min-h-hero-section">
       <div className="absolute inset-0 hidden md:block">
         <Image
           src="/images/zp/hero-bg.jpg"
@@ -23,7 +23,7 @@ export function HeroSection({ displayName }: Props) {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-8">
-        <div className="grid grid-cols-[1.05fr_1fr] items-center gap-16 py-24 max-lg:grid-cols-1 max-lg:gap-12">
+        <div className="grid grid-cols-[1.05fr_1fr] items-center gap-16 py-24 max-lg:grid-cols-1 max-lg:gap-12 max-lg:py-16 max-sm:py-12">
           {/* Coluna esquerda */}
           <div>
             <span className="inline-flex items-center gap-2.5 rounded-full border border-primary/28 bg-primary/4 px-3.5 py-2 text-xs font-medium uppercase tracking-[.22em] text-primary">

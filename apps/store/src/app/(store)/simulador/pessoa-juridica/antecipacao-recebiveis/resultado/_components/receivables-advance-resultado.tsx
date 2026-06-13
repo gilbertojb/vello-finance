@@ -7,8 +7,6 @@ import { formatCurrency, formatRate, calcPMT, calcCETAnual } from '@/lib/utils/s
 import { saveSimulation, qualifySimulation } from '@/app/(store)/simulador/actions'
 import { StoreButton } from '@/components/ui/store-button'
 
-const PARCELAS_OPTIONS = [6, 12, 18, 24]
-
 type Props = {
   productId: string
   productName: string
@@ -21,15 +19,20 @@ type SimData = {
   valorRecebiveis: number
   tipoRecebivel: string
   valorCredito: number
-  parcelas: number
+  prazo: number
 }
 
 export function AntecipacaoReceiveisResultado({ productId, productName, rateMonthly }: Props) {
   const router = useRouter()
   const [data, setData] = useState<SimData | null>(null)
-  const [parcelas, setParcelas] = useState(6)
+  const [prazo, setPrazo] = useState(30)
   const [simulationId, setSimulationId] = useState<string | null>(null)
   const [isQualifying, setIsQualifying] = useState(false)
+
+  const prazoOptions = useMemo(
+    () => (data?.tipoRecebivel === 'NF-e' || data?.tipoRecebivel === 'Contrato') ? [30, 60, 90, 190] : [30, 60, 90],
+    [data?.tipoRecebivel],
+  )
 
   useEffect(() => {
     const stored = sessionStorage.getItem('sim:antecipacao-recebiveis')
@@ -40,20 +43,20 @@ export function AntecipacaoReceiveisResultado({ productId, productName, rateMont
     try {
       const parsed: SimData = JSON.parse(stored)
       setData(parsed)
-      setParcelas(parsed.parcelas)
+      setPrazo(parsed.prazo)
 
       const SIM_ID_KEY = 'sim:antecipacao-recebiveis:id'
       const existingId = sessionStorage.getItem(SIM_ID_KEY)
       if (existingId) {
         setSimulationId(existingId)
       } else {
-        const payment = calcPMT(parsed.valorCredito, rateMonthly, parsed.parcelas)
+        const payment = calcPMT(parsed.valorCredito, rateMonthly, parsed.prazo)
         saveSimulation({
           tenantProductId: productId,
           clientName: parsed.nome,
           clientPhone: parsed.whatsapp,
           desiredAmount: parsed.valorCredito,
-          desiredTermMonths: parsed.parcelas,
+          desiredTermMonths: parsed.prazo,
           estimatedRate: rateMonthly,
           estimatedPayment: payment,
           simulationData: parsed as Record<string, unknown>,
@@ -71,8 +74,8 @@ export function AntecipacaoReceiveisResultado({ productId, productName, rateMont
 
   const installment = useMemo(() => {
     if (!data) return 0
-    return calcPMT(data.valorCredito, rateMonthly, parcelas)
-  }, [data, rateMonthly, parcelas])
+    return calcPMT(data.valorCredito, rateMonthly, prazo)
+  }, [data, rateMonthly, prazo])
 
   const cetAnual = useMemo(() => calcCETAnual(rateMonthly), [rateMonthly])
 
@@ -89,24 +92,24 @@ export function AntecipacaoReceiveisResultado({ productId, productName, rateMont
       {/* Greeting */}
       <p className="text-sm font-medium text-surface-foreground">Olá, {data.nome}!</p>
 
-      {/* Parcelas selector */}
+      {/* Prazo selector */}
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-surface-foreground">
-          Em quanto tempo quer pagar?
+          Prazo de antecipação
         </label>
         <div className="flex gap-2">
-          {PARCELAS_OPTIONS.map((p) => (
+          {prazoOptions.map((p) => (
             <button
               key={p}
               type="button"
-              onClick={() => setParcelas(p)}
+              onClick={() => setPrazo(p)}
               className={`flex-1 rounded-lg border py-3 text-sm font-medium transition-colors ${
-                parcelas === p
+                prazo === p
                   ? 'border-primary bg-primary/5 text-primary'
                   : 'border-surface-foreground/12 bg-surface-foreground/5 text-surface-foreground/60 hover:bg-surface-foreground/10'
               }`}
             >
-              {p}x
+              {p} dias
             </button>
           ))}
         </div>
@@ -124,7 +127,7 @@ export function AntecipacaoReceiveisResultado({ productId, productName, rateMont
       {/* Highlight pill */}
       <div className="flex items-center justify-between rounded-lg bg-primary/12 px-4 py-2.5">
         <span className="text-sm font-semibold text-surface-foreground">
-          {parcelas}× de {formatCurrency(installment)}
+          {prazo} dias — {formatCurrency(installment)}
         </span>
         <span className="text-sm font-semibold text-surface-foreground">
           {formatRate(rateMonthly)}% a.m.
@@ -142,7 +145,7 @@ export function AntecipacaoReceiveisResultado({ productId, productName, rateMont
           { label: 'Tipo de recebível', value: data.tipoRecebivel },
           { label: 'Taxa mensal', value: `${formatRate(rateMonthly)}% a.m.` },
           { label: 'CET anual', value: `${cetAnual.toFixed(1).replace('.', ',')}%` },
-          { label: 'Prazo', value: `${parcelas}x` },
+          { label: 'Prazo', value: `${prazo} dias` },
         ].map(({ label, value }) => (
           <div key={label} className="flex justify-between text-sm">
             <span className="text-surface-foreground/55">{label}</span>
