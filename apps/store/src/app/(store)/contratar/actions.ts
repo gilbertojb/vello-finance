@@ -4,11 +4,26 @@ import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { createServiceClient } from '@/lib/supabase/service'
+import { hashCpf } from '@/app/(store)/meus-documentos/_lib/cpf-hash'
+import { validateCPF } from '@/lib/utils/cpf'
 import { DB_TO_URL_SLUG } from './[productTypeSlug]/_components/flow-config'
 import type { Json } from '@vello/database'
 
 async function getTenantId(): Promise<string | null> {
   return (await headers()).get('x-tenant-id')
+}
+
+function extractCpfFromFormData(formData: Record<string, unknown>): string | null {
+  for (const value of Object.values(formData)) {
+    if (value && typeof value === 'object' && 'cpf' in value) {
+      const raw = (value as { cpf?: unknown }).cpf
+      if (typeof raw === 'string') {
+        const digits = raw.replace(/\D/g, '')
+        if (validateCPF(digits)) return digits
+      }
+    }
+  }
+  return null
 }
 
 const createProposalSchema = z.object({
@@ -47,6 +62,10 @@ export async function createProposal(
 
   if (!tp) return { error: 'Produto não encontrado.' }
 
+  const candidateData = { [stepSlug]: stepData } as Record<string, unknown>
+  const cpf = extractCpfFromFormData(candidateData)
+  const clientCpfHash = cpf ? hashCpf(cpf) : null
+
   const { data: proposal, error } = await supabase
     .from('proposals')
     .insert({
@@ -58,7 +77,8 @@ export async function createProposal(
       current_step: nextStep,
       client_name: clientName ?? null,
       client_phone: clientPhone ?? null,
-      form_data: { [stepSlug]: stepData } as Json,
+      client_cpf_hash: clientCpfHash,
+      form_data: candidateData as Json,
     })
     .select('id')
     .single()
@@ -104,12 +124,17 @@ export async function saveStep(
     [stepSlug]: stepData,
   }
 
+  const mergedCpf = extractCpfFromFormData(mergedFormData)
+
+  const updatePayload: Record<string, unknown> = {
+    form_data: mergedFormData as Json,
+    current_step: nextStep,
+  }
+  if (mergedCpf) updatePayload.client_cpf_hash = hashCpf(mergedCpf)
+
   const { error } = await supabase
     .from('proposals')
-    .update({
-      form_data: mergedFormData as Json,
-      current_step: nextStep,
-    })
+    .update(updatePayload)
     .eq('id', proposalId)
     .eq('tenant_id', tenantId)
 
