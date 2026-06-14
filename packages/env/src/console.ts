@@ -6,7 +6,7 @@ export const env = createEnv({
   server: {
     ...sharedServer,
     CONSOLE_BASE_DOMAIN: z.string().min(1), // ex: vellofinance.com.br
-    STORE_BASE_DOMAIN: z.string().min(1),
+    STORE_BASE_DOMAIN: z.string().min(1), // ex: vellofinance.com.br (host publico da store)
     NODE_ENV: z.enum(['development', 'test', 'production']),
     RESEND_API_KEY: z.string().min(1),
   },
