@@ -5,10 +5,13 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "db:types": "turbo db:types"
+    "db:types": "turbo db:types",
+    "backfill:cpf-hash": "tsx scripts/backfill-cpf-hash.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.11",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.22.4",
     "turbo": "^2.9.12"
   },
   "packageManager": "pnpm@10.33.0",
@@ -16,6 +19,9 @@
     "node": ">=18"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@sentry/cli", "msw"]
+    "onlyBuiltDependencies": [
+      "@sentry/cli",
+      "msw"
+    ]
   }
 }
