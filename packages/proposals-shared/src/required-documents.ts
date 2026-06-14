@@ -1,5 +1,3 @@
-// apps/console/src/app/(private)/proposals/required-documents.ts
-
 export interface RequiredDoc {
   type: string
   label: string

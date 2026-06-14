@@ -7,7 +7,7 @@ import { CheckCircle2, Clock, Eye, FileText, Image } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getRequiredDocs } from '@/app/(private)/proposals/required-documents'
+import { getRequiredDocs } from '@vello/proposals-shared/required-documents'
 import { DocumentPreviewModal } from './document-preview-modal'
 import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 

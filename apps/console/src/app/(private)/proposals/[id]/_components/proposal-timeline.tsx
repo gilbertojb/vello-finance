@@ -4,7 +4,7 @@ import { ptBR } from 'date-fns/locale'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { getRequiredDocs } from '@/app/(private)/proposals/required-documents'
+import { getRequiredDocs } from '@vello/proposals-shared/required-documents'
 import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
 type ProposalEvent = NonNullable<ProposalDetail['proposal_events']>[number]

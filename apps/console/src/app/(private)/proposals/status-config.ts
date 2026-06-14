@@ -28,17 +28,3 @@ export const STATUS_FILTERS = [
   { label: 'Reprovada',      value: 'reprovada' },
   { label: 'Aprovada',       value: 'aprovada' },
 ] as const
-
-export const PIPELINE_STATUSES = [
-  'em_analise',
-  'pre_aprovada',
-  'necessita_detalhes',
-] as const
-
-export const COMPLETED_STATUSES = [
-  'em_analise',
-  'pre_aprovada',
-  'necessita_detalhes',
-  'reprovada',
-  'aprovada',
-] as const

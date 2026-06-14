@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { COMPLETED_STATUSES } from './status-config'
+import { COMPLETED_STATUSES } from '@vello/proposals-shared/status-config'
 
 export async function listProposals() {
   const supabase = await createClient()
