@@ -66,6 +66,41 @@ export type Database = {
         }
         Relationships: []
       }
+      client_access_attempts: {
+        Row: {
+          attempted_at: string
+          cpf_hash: string | null
+          id: string
+          ip_hash: string
+          success: boolean
+          tenant_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          cpf_hash?: string | null
+          id?: string
+          ip_hash: string
+          success?: boolean
+          tenant_id: string
+        }
+        Update: {
+          attempted_at?: string
+          cpf_hash?: string | null
+          id?: string
+          ip_hash?: string
+          success?: boolean
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_access_attempts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commission_snapshots: {
         Row: {
           captured_at: string
@@ -406,6 +441,54 @@ export type Database = {
           },
         ]
       }
+      proposal_document_access_log: {
+        Row: {
+          action: string
+          document_type: string | null
+          id: string
+          ip_hash: string
+          occurred_at: string
+          proposal_id: string
+          tenant_id: string
+          user_agent_hash: string | null
+        }
+        Insert: {
+          action: string
+          document_type?: string | null
+          id?: string
+          ip_hash: string
+          occurred_at?: string
+          proposal_id: string
+          tenant_id: string
+          user_agent_hash?: string | null
+        }
+        Update: {
+          action?: string
+          document_type?: string | null
+          id?: string
+          ip_hash?: string
+          occurred_at?: string
+          proposal_id?: string
+          tenant_id?: string
+          user_agent_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_document_access_log_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_document_access_log_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proposal_documents: {
         Row: {
           created_at: string
@@ -526,6 +609,7 @@ export type Database = {
       }
       proposals: {
         Row: {
+          client_cpf_hash: string | null
           client_name: string | null
           client_phone: string | null
           created_at: string
@@ -541,6 +625,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_cpf_hash?: string | null
           client_name?: string | null
           client_phone?: string | null
           created_at?: string
@@ -556,6 +641,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_cpf_hash?: string | null
           client_name?: string | null
           client_phone?: string | null
           created_at?: string
