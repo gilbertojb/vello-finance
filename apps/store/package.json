@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "env:load": "dotenv -e ../../.env --"
   },
   "dependencies": {
@@ -45,7 +47,9 @@
     "@vello/typescript-config": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "tailwindcss": "^4.2.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9",
+    "@vitest/ui": "^2.1.9"
   },
   "biome": {
     "extends": "@vello/biome-config/base"
