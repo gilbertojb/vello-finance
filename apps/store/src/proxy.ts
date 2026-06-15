@@ -32,6 +32,11 @@ export async function proxy(request: NextRequest) {
   //    O updateSession garante que tokens sejam renovados para uso futuro (ex: OTP de proposta).
   const { response } = await updateSession(request, tenant)
 
+  if (pathname.startsWith('/meus-documentos')) {
+    response.headers.set('Cache-Control', 'no-store')
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+
   return response
 }
 
