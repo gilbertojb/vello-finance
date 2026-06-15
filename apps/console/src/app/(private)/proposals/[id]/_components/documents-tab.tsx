@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getRequiredDocs } from '@vello/proposals-shared/required-documents'
+import { ClientShareCard } from './client-share-card'
 import { DocumentPreviewModal } from './document-preview-modal'
 import type { ProposalDetail } from '@/app/(private)/proposals/queries'
 
@@ -21,9 +22,10 @@ function isImage(path: string): boolean {
 
 interface DocumentsTabProps {
   proposal: ProposalDetail
+  portalUrl: string
 }
 
-export function DocumentsTab({ proposal }: DocumentsTabProps) {
+export function DocumentsTab({ proposal, portalUrl }: DocumentsTabProps) {
   const [preview, setPreview] = useState<{
     docId: string
     fileName: string | null
@@ -43,6 +45,14 @@ export function DocumentsTab({ proposal }: DocumentsTabProps) {
 
   return (
     <>
+      {pendingCount > 0 && (
+        <ClientShareCard
+          portalUrl={portalUrl}
+          pendingCount={pendingCount}
+          clientName={proposal.client_name}
+          clientPhone={proposal.client_phone}
+        />
+      )}
       {/* Resumo */}
       <div className="mb-4 flex gap-2">
         <span className="inline-flex items-center gap-1.5 rounded-md border border-success/30 bg-success/8 px-2.5 py-1 text-xs font-medium text-success">

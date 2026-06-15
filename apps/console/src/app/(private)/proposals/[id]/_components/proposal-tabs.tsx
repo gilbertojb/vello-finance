@@ -15,9 +15,10 @@ type Tab = 'cliente' | 'documentos' | 'comentarios'
 
 interface ProposalTabsProps {
   proposal: ProposalDetail
+  portalUrl: string
 }
 
-export function ProposalTabs({ proposal }: ProposalTabsProps) {
+export function ProposalTabs({ proposal, portalUrl }: ProposalTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('cliente')
 
   const uploaded = Array.isArray(proposal.proposal_documents)
@@ -83,7 +84,7 @@ export function ProposalTabs({ proposal }: ProposalTabsProps) {
       {/* Tab content */}
       <div className="p-4">
         {activeTab === 'cliente'     && <ClientDataTab proposal={proposal} />}
-        {activeTab === 'documentos'  && <DocumentsTab proposal={proposal} />}
+        {activeTab === 'documentos'  && <DocumentsTab proposal={proposal} portalUrl={portalUrl} />}
         {activeTab === 'comentarios' && <CommentsTab proposal={proposal} />}
       </div>
     </Card>

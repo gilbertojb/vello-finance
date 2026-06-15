@@ -43,6 +43,7 @@ export async function getProposal(id: string) {
     .from('proposals')
     .select(`
       id,
+      tenant_id,
       status,
       product_type_slug,
       form_data,

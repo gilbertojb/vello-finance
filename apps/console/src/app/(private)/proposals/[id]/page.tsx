@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { getProposal, getTenantName } from '@/app/(private)/proposals/queries'
+import { getPortalUrl } from '@/lib/tenant/portal-url'
 import { ProposalDetailHeader } from './_components/proposal-detail-header'
 import { ProposalTabs } from './_components/proposal-tabs'
 import { ProposalTimeline } from './_components/proposal-timeline'
@@ -33,6 +34,8 @@ export default async function ProposalDetailPage({ params }: PageProps) {
     getTenantName(),
   ]).catch(() => notFound())
 
+  const portalUrl = await getPortalUrl(proposal.tenant_id)
+
   return (
     <div className="mx-auto max-w-10/12 w-full p-8">
       <span className="text-xs font-medium uppercase tracking-widest text-foreground/45">
@@ -45,7 +48,7 @@ export default async function ProposalDetailPage({ params }: PageProps) {
       <ProposalDetailHeader proposal={proposal} />
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_256px]">
-        <ProposalTabs proposal={proposal} />
+        <ProposalTabs proposal={proposal} portalUrl={portalUrl} />
 
         <div className="flex flex-col gap-4">
           <ProposalTimeline proposal={proposal} />
