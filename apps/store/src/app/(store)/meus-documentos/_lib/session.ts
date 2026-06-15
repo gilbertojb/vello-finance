@@ -13,6 +13,7 @@ const DEFAULT_EXPIRES_SECONDS = 30 * 60
 interface ClientSessionPayload {
   cpf_hash: string
   tenant_id: string
+  cpf_display?: string
 }
 
 function getSecret(): Uint8Array {

@@ -46,7 +46,7 @@ export default async function ProposalDocumentsPage({ params }: PageProps) {
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 md:py-16">
-      <ClientHeader title="Portal do cliente" />
+      <ClientHeader title="Portal do cliente" name={proposal.client_name} cpfDisplay={session.cpf_display} />
       <div className="flex flex-col gap-3">
         <Link
           href="/meus-documentos/propostas"

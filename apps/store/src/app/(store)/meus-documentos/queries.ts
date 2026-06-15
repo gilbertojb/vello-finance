@@ -9,6 +9,7 @@ export async function listClientProposals(tenantId: string, cpfHash: string) {
       id,
       status,
       product_type_slug,
+      client_name,
       products ( name ),
       proposal_documents ( document_type )
     `)
@@ -31,6 +32,7 @@ export async function listClientProposals(tenantId: string, cpfHash: string) {
       productName: (p.products as { name?: string } | null)?.name ?? '—',
       productTypeSlug: p.product_type_slug,
       pendingCount,
+      clientName: p.client_name ?? null,
     }
   })
 }
@@ -47,6 +49,7 @@ export async function getClientProposal(
       id,
       status,
       product_type_slug,
+      client_name,
       products ( name ),
       proposal_documents ( id, document_type, file_name, storage_path, created_at )
     `)

@@ -21,6 +21,7 @@ export default async function PropostasPage() {
   if (!session) redirect('/meus-documentos')
 
   const proposals = await listClientProposals(tenantId, session.cpf_hash)
+  const clientName = proposals[0]?.clientName ?? null
 
   if (proposals[0]) {
     await logAccess({
@@ -34,7 +35,7 @@ export default async function PropostasPage() {
 
   return (
     <section className="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-10 md:py-16">
-      <ClientHeader title="Portal do cliente" />
+      <ClientHeader title="Portal do cliente" name={clientName} cpfDisplay={session.cpf_display} />
       <div className="flex flex-col gap-2">
         <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
           Suas propostas<span className="text-primary">.</span>

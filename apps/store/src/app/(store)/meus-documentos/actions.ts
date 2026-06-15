@@ -48,7 +48,8 @@ export async function validateCpfAction(formData: FormData): Promise<{ error?: s
   const parsed = cpfSchema.safeParse({ cpf: formData.get('cpf') })
   if (!parsed.success) return { error: GENERIC_ERROR }
 
-  const cpfHash = hashCpf(parsed.data.cpf)
+  const cpfDigits = parsed.data.cpf
+  const cpfHash = hashCpf(cpfDigits)
 
   const { blocked } = await checkRateLimit({ ipHash, cpfHash })
   if (blocked) {
@@ -58,7 +59,8 @@ export async function validateCpfAction(formData: FormData): Promise<{ error?: s
 
   await recordAttempt({ tenantId, ipHash, cpfHash, success: true })
 
-  const token = await signClientSession({ cpf_hash: cpfHash, tenant_id: tenantId })
+  const cpfDisplay = `${cpfDigits.slice(0, 3)}.***.***-${cpfDigits.slice(9, 11)}`
+  const token = await signClientSession({ cpf_hash: cpfHash, tenant_id: tenantId, cpf_display: cpfDisplay })
   await setClientSessionCookie(token)
 
   redirect('/meus-documentos/propostas')
