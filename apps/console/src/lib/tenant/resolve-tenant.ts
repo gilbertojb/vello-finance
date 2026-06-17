@@ -20,8 +20,8 @@ export async function resolveTenant(
     if (!slug) return null
     filter = `slug=eq.${slug}`
   } else {
-    // Domínio customizado → busca por custom_domain
-    filter = `custom_domain=eq.${host}`
+    // Domínio customizado do console → busca por console_custom_domain
+    filter = `console_custom_domain=eq.${host}`
   }
 
   const url = `${supabaseUrl}/rest/v1/tenants?select=id,slug,status&${filter}&limit=1`
