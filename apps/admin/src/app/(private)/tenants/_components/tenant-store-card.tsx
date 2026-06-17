@@ -21,6 +21,7 @@ type Props = {
   slug: string
   onSlugChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   defaultCustomDomain: string
+  defaultConsoleCustomDomain: string
   errors: FormErrors
 }
 
@@ -28,6 +29,7 @@ export function TenantStoreCard({
   slug,
   onSlugChange,
   defaultCustomDomain,
+  defaultConsoleCustomDomain,
   errors,
 }: Props) {
   return (
@@ -38,7 +40,7 @@ export function TenantStoreCard({
           <CardTitle>Configurações da Loja</CardTitle>
         </div>
         <CardDescription>
-          URL de acesso à loja e domínio personalizado.
+          URL de acesso à loja, ao console e domínios personalizados.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -63,7 +65,7 @@ export function TenantStoreCard({
 
           <Field>
             <FieldLabel htmlFor="custom_domain">
-              Domínio Customizado
+              Domínio Customizado (Loja)
             </FieldLabel>
             <Input
               id="custom_domain"
@@ -72,6 +74,19 @@ export function TenantStoreCard({
               defaultValue={defaultCustomDomain}
             />
             <FieldError errors={errors?.custom_domain} />
+          </Field>
+
+          <Field className="md:col-span-2">
+            <FieldLabel htmlFor="console_custom_domain">
+              Domínio Customizado (Console)
+            </FieldLabel>
+            <Input
+              id="console_custom_domain"
+              name="console_custom_domain"
+              placeholder="painel.empresa.com.br"
+              defaultValue={defaultConsoleCustomDomain}
+            />
+            <FieldError errors={errors?.console_custom_domain} />
           </Field>
         </FieldGroup>
       </CardContent>

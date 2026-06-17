@@ -137,6 +137,7 @@ export function TenantForm({ tenant }: Props) {
         slug={slug}
         onSlugChange={handleSlugChange}
         defaultCustomDomain={tenant?.custom_domain ?? ''}
+        defaultConsoleCustomDomain={tenant?.console_custom_domain ?? ''}
         errors={formState.errors}
       />
 
