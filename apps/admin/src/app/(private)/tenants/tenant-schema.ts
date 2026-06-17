@@ -15,6 +15,7 @@ export const tenantSchema = z.object({
       'Slug deve conter apenas letras minúsculas, números e hífens',
     ),
   custom_domain: z.string().optional().nullable(),
+  console_custom_domain: z.string().optional().nullable(),
   contact_name: z.string().min(2).max(100).optional().nullable(),
   bank_name: z.string().optional().nullable(),
   bank_agency: z.string().optional().nullable(),

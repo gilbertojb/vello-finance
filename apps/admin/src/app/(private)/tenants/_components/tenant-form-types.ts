@@ -18,6 +18,7 @@ export type TenantForEdit = {
   phone: string | null
   slug: string
   custom_domain: string | null
+  console_custom_domain: string | null
   bank_name: string | null
   bank_agency: string | null
   bank_account: string | null
