@@ -972,6 +972,7 @@ export type Database = {
           bank_pix_key: string | null
           cnpj: string | null
           company_name: string | null
+          console_custom_domain: string | null
           created_at: string
           custom_domain: string | null
           email: string
@@ -994,6 +995,7 @@ export type Database = {
           bank_pix_key?: string | null
           cnpj?: string | null
           company_name?: string | null
+          console_custom_domain?: string | null
           created_at?: string
           custom_domain?: string | null
           email: string
@@ -1016,6 +1018,7 @@ export type Database = {
           bank_pix_key?: string | null
           cnpj?: string | null
           company_name?: string | null
+          console_custom_domain?: string | null
           created_at?: string
           custom_domain?: string | null
           email?: string
