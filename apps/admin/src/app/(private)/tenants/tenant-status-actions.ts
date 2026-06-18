@@ -41,7 +41,7 @@ export async function resendWelcomeEmail(tenantId: string) {
   // Buscar tenant
   const { data: tenant, error: tenantError } = await supabase
     .from('tenants')
-    .select('id, email, slug, custom_domain, name')
+    .select('id, email, slug, console_custom_domain, name')
     .eq('id', tenantId)
     .single()
 
@@ -73,7 +73,7 @@ export async function resendWelcomeEmail(tenantId: string) {
 
   // Construir URL de reset
   const domain =
-    tenant.custom_domain ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
+    tenant.console_custom_domain ?? `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
   // Enviar email

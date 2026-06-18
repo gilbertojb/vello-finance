@@ -1,3 +1,5 @@
+import { env } from '@vello/env/admin'
+
 import { notFound } from 'next/navigation'
 
 import { ResendWelcomeButton } from '../../_components/resend-welcome-button'
@@ -34,7 +36,7 @@ export default async function EditTenantPage({ params }: Props) {
               <TenantStatusBadge status={tenant.status} />
             </div>
             <p className="text-muted-foreground text-sm mt-0.5">
-              {tenant.custom_domain || `${tenant.slug}.vellofinance.com.br`}
+              {tenant.console_custom_domain || `${tenant.slug}.${env.CONSOLE_BASE_DOMAIN}`}
             </p>
           </div>
         </div>

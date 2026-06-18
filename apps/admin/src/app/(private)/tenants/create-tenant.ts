@@ -169,7 +169,7 @@ export async function createTenant(data: FormData) {
 
   // Construir URL de reset
   const domain =
-    tenantData.custom_domain ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
+    tenantData.console_custom_domain ?? `${tenantData.slug}.${env.CONSOLE_BASE_DOMAIN}`
   const resetUrl = `https://${domain}/reset-password?token=${linkData.properties.hashed_token}&type=recovery`
 
   // Enviar email
