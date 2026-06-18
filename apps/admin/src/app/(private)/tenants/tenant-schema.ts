@@ -14,8 +14,22 @@ export const tenantSchema = z.object({
       /^[a-z0-9-]+$/,
       'Slug deve conter apenas letras minúsculas, números e hífens',
     ),
-  custom_domain: z.string().optional().nullable(),
-  console_custom_domain: z.string().optional().nullable(),
+  custom_domain: z
+    .string()
+    .regex(
+      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/,
+      'Domínio inválido. Use apenas o hostname, sem protocolo ou barra (ex: creditos.empresa.com.br)',
+    )
+    .optional()
+    .nullable(),
+  console_custom_domain: z
+    .string()
+    .regex(
+      /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/,
+      'Domínio inválido. Use apenas o hostname, sem protocolo ou barra (ex: painel.empresa.com.br)',
+    )
+    .optional()
+    .nullable(),
   contact_name: z.string().min(2).max(100).optional().nullable(),
   bank_name: z.string().optional().nullable(),
   bank_agency: z.string().optional().nullable(),
