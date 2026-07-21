@@ -1,107 +1,107 @@
-# Convenções do Projeto — Vello Finance
+# Project Conventions — Vello Finance
 
-## Estrutura de Pastas por App (Next.js App Router)
+## Folder Structure per App (Next.js App Router)
 
-Todos os 3 apps Next.js (`admin`, `console`, `store`) usam diretório `src/`:
+All 3 Next.js apps (`admin`, `console`, `store`) use a `src/` directory:
 
 ```
 apps/[admin|console|store]/src/
 ├── app/
-│   ├── layout.tsx              ← Layout raiz (fonte + html/body + Providers)
+│   ├── layout.tsx              ← Root layout (font + html/body + Providers)
 │   ├── providers.tsx           ← ThemeProvider + TooltipProvider ('use client')
-│   ├── globals.css             ← CSS variables + shadcn base + tokens Vello
-│   ├── (public)/               ← Route group: rotas sem autenticação
-│   │   ├── layout.tsx          ← Layout duas colunas (form + decorativo)
+│   ├── globals.css             ← CSS variables + shadcn base + Vello tokens
+│   ├── (public)/               ← Route group: unauthenticated routes
+│   │   ├── layout.tsx          ← Two-column layout (form + decorative)
 │   │   └── sign-in/
 │   │       ├── page.tsx
 │   │       └── sign-in-form.tsx
-│   ├── (private)/              ← Route group: rotas autenticadas
-│   │   ├── layout.tsx          ← SidebarProvider + Header + conteúdo
-│   │   └── [módulos]/          ← Ex: (dashboard)/, tenants/, plans/
-│   ├── not-found/page.tsx      ← 404 estilizado (rewrite do proxy quando tenant não existe)
-│   ├── unavailable/page.tsx    ← 503 estilizado (rewrite do proxy quando tenant inativo)
-│   └── api/                    ← Route Handlers (quando Edge Function não basta)
-├── assets/                     ← SVGs e imagens estáticas importadas no código
+│   ├── (private)/              ← Route group: authenticated routes
+│   │   ├── layout.tsx          ← SidebarProvider + Header + content
+│   │   └── [modules]/          ← E.g.: (dashboard)/, tenants/, plans/
+│   ├── not-found/page.tsx      ← Styled 404 (proxy rewrite when tenant doesn't exist)
+│   ├── unavailable/page.tsx    ← Styled 503 (proxy rewrite when tenant is inactive)
+│   └── api/                    ← Route Handlers (when an Edge Function isn't enough)
+├── assets/                     ← SVGs and static images imported in code
 ├── components/
-│   ├── ui/                     ← shadcn/ui (gerado pelo CLI — não editar)
-│   ├── header.tsx              ← Header compartilhado (server component)
-│   └── sidebar/                ← Componentes da sidebar (ver padrão abaixo)
-├── hooks/                      ← Custom hooks reutilizáveis
-├── http/                       ← Server Actions que NÃO são de formulário (ex: sign-out)
+│   ├── ui/                     ← shadcn/ui (CLI-generated — do not edit)
+│   ├── header.tsx              ← Shared header (server component)
+│   └── sidebar/                ← Sidebar components (see pattern below)
+├── hooks/                      ← Reusable custom hooks
+├── http/                       ← Server Actions that are NOT form-related (e.g.: sign-out)
 ├── lib/
 │   ├── supabase/
-│   │   ├── client.ts           ← Browser client — apenas auth.signOut()
-│   │   ├── server.ts           ← Server client (RSC + Actions) — respeita RLS
-│   │   ├── service.ts          ← Service client (secret key) — bypassa RLS
-│   │   └── proxy.ts            ← updateSession helper para o proxy
+│   │   ├── client.ts           ← Browser client — auth.signOut() only
+│   │   ├── server.ts           ← Server client (RSC + Actions) — respects RLS
+│   │   ├── service.ts          ← Service client (secret key) — bypasses RLS
+│   │   └── proxy.ts            ← updateSession helper for the proxy
 │   └── utils.ts                ← cn()
-└── proxy.ts                    ← Entry point Next.js 16 (era middleware.ts) — redirect logic
+└── proxy.ts                    ← Next.js 16 entry point (formerly middleware.ts) — redirect logic
 ```
 
-### Route Groups: `(public)` e `(private)`
+### Route Groups: `(public)` and `(private)`
 
-| Grupo | Rotas | Layout |
+| Group | Routes | Layout |
 |---|---|---|
-| `(public)` | sign-in, forgot-password, sign-up | Duas colunas: form + imagem decorativa |
-| `(private)` | dashboard, módulos autenticados | `SidebarProvider` + `Header` |
+| `(public)` | sign-in, forgot-password, sign-up | Two columns: form + decorative image |
+| `(private)` | dashboard, authenticated modules | `SidebarProvider` + `Header` |
 
-## Estrutura de Módulo (padrão para todos os apps)
+## Module Structure (standard for all apps)
 
 ```
 src/app/(private)/plans/
-├── page.tsx                    ← Server Component — listagem
+├── page.tsx                    ← Server Component — listing
 ├── new/
-│   └── page.tsx                ← Server Component — formulário de criação
+│   └── page.tsx                ← Server Component — creation form
 ├── [id]/
-│   ├── page.tsx                ← Server Component — detalhes
+│   ├── page.tsx                ← Server Component — details
 │   └── edit/
-│       └── page.tsx            ← Server Component — formulário de edição
+│       └── page.tsx            ← Server Component — edit form
 ├── actions.ts                  ← Server Actions (create, update, delete, toggle)
-├── queries.ts                  ← Funções de query ao Supabase (reutilizáveis)
-└── _components/                ← Client Components do módulo (prefixo _ = privado)
+├── queries.ts                  ← Supabase query functions (reusable)
+└── _components/                ← Client Components of the module (_ prefix = private)
     ├── plan-table.tsx
     ├── plan-form.tsx
     └── plan-status-badge.tsx
 ```
 
-## Nomenclatura
+## Naming
 
-| Item | Convenção | Exemplo |
+| Item | Convention | Example |
 |---|---|---|
 | Apps | kebab-case | `admin`, `console`, `store` |
 | Packages | kebab-case | `auth`, `database`, `transactional` |
-| Componentes | PascalCase | `ProposalCard.tsx` |
-| Server Actions | camelCase com verbo | `createTenant`, `updateProduct` |
-| Queries | camelCase com `get`/`list` | `getTenant`, `listProducts` |
-| Hooks | camelCase com `use` | `useTenant`, `useProposals` |
-| Tabelas DB | snake_case plural | `commission_snapshots`, `tenant_products` |
-| Colunas DB | snake_case | `tenant_id`, `created_at`, `bank_commission_pct` |
-| Enums DB | snake_case | `proposal_status`, `product_type` |
-| Migrations | `YYYYMMDDHHMMSS_descricao.sql` | `20260401120000_create_plans.sql` |
+| Components | PascalCase | `ProposalCard.tsx` |
+| Server Actions | camelCase with verb | `createTenant`, `updateProduct` |
+| Queries | camelCase with `get`/`list` | `getTenant`, `listProducts` |
+| Hooks | camelCase with `use` | `useTenant`, `useProposals` |
+| DB Tables | plural snake_case | `commission_snapshots`, `tenant_products` |
+| DB Columns | snake_case | `tenant_id`, `created_at`, `bank_commission_pct` |
+| DB Enums | snake_case | `proposal_status`, `product_type` |
+| Migrations | `YYYYMMDDHHMMSS_description.sql` | `20260401120000_create_plans.sql` |
 | Branches | `feat/`, `fix/`, `chore/` | `feat/admin-products` |
-| Commits | Conventional Commits com escopo | `feat(admin): adiciona CRUD de produtos` |
+| Commits | Conventional Commits with scope | `feat(admin): adds product CRUD` |
 
-### Idioma do código
+### Code Language
 
-**Todo código deve estar em inglês**: nomes de variáveis, propriedades de interfaces TypeScript, URL query params e nomes de funções.
+**All code must be in English**: variable names, TypeScript interface properties, URL query params, and function names.
 
-- URL query params: `from`, `to`, `product`, `stage`, `status` — nunca `de`, `ate`, `produto`, `estagio`
-- Propriedades TypeScript: `toReceive`, `received`, `abandoned`, `contracted`, `conversionRate`, `requestedVolume` — nunca `aReceber`, `recebidas`, `abandonaram`, `contrataram`, `taxaConversao`, `volumeSolicitado`
-- Exceção permitida: strings de UI exibidas ao usuário permanecem em português (ex: labels, textos de botão)
+- URL query params: `from`, `to`, `product`, `stage`, `status` — never `de`, `ate`, `produto`, `estagio`
+- TypeScript properties: `toReceive`, `received`, `abandoned`, `contracted`, `conversionRate`, `requestedVolume` — never `aReceber`, `recebidas`, `abandonaram`, `contrataram`, `taxaConversao`, `volumeSolicitado`
+- Allowed exception: UI strings shown to the user remain in Portuguese (e.g.: labels, button text)
 
-**Escopos válidos nos commits:**
+**Valid scopes in commits:**
 `admin` · `console` · `store` · `api` · `packages/auth` · `packages/database` · `packages/env` · `packages/transactional` · `packages/config` · `supabase`
 
 ## `actions.ts` vs `src/http/`
 
 | | `actions.ts` | `src/http/` |
 |---|---|---|
-| **Uso** | Server Actions de **formulários** | Server Actions **sem formulário** |
-| **Localização** | Co-localizado com o módulo (`plans/actions.ts`) | `src/http/<nome>.ts` (global no app) |
-| **Exemplos** | `createPlan`, `updateTenant`, `deletePlan` | `sign-out.ts`, `activate-tenant.ts` |
-| **Importado por** | `sign-in-form.tsx`, `plan-form.tsx` (via `useFormState`) | Componentes que disparam ações sem form |
+| **Use** | Server Actions for **forms** | Server Actions **without a form** |
+| **Location** | Co-located with the module (`plans/actions.ts`) | `src/http/<name>.ts` (global in the app) |
+| **Examples** | `createPlan`, `updateTenant`, `deletePlan` | `sign-out.ts`, `activate-tenant.ts` |
+| **Imported by** | `sign-in-form.tsx`, `plan-form.tsx` (via `useFormState`) | Components that trigger actions without a form |
 
-## Padrão de Server Action (formulários)
+## Server Action Pattern (forms)
 
 ```typescript
 // app/(private)/plans/actions.ts
@@ -132,7 +132,7 @@ export async function createPlan(formData: FormData) {
 }
 ```
 
-## Padrão de Query reutilizável
+## Reusable Query Pattern
 
 ```typescript
 // app/(app)/plans/queries.ts
@@ -149,12 +149,12 @@ export async function listPlans(onlyActive = false) {
 }
 ```
 
-## Padrão de Migration (Supabase)
+## Migration Pattern (Supabase)
 
 ```sql
 -- supabase/migrations/20260401120000_create_plans.sql
 
--- Tabela
+-- Table
 CREATE TABLE plans (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name           TEXT NOT NULL UNIQUE,
@@ -163,7 +163,7 @@ CREATE TABLE plans (
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- updated_at automático
+-- automatic updated_at
 CREATE TRIGGER set_updated_at_plans
   BEFORE UPDATE ON plans
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
@@ -183,11 +183,11 @@ CREATE POLICY "tenant_read_active" ON plans
   );
 ```
 
-> **Premissa:** autenticação anônima desabilitada no projeto. A condição `tenant_id IS NOT NULL` assume que qualquer JWT presente pertence a um usuário autenticado. Se autenticação anônima for habilitada, adicionar: `AND (auth.jwt() ->> 'role') = ANY(ARRAY['tenant_admin','tenant_operator'])`.
+> **Assumption:** anonymous authentication is disabled in the project. The condition `tenant_id IS NOT NULL` assumes that any JWT present belongs to an authenticated user. If anonymous authentication is enabled, add: `AND (auth.jwt() ->> 'role') = ANY(ARRAY['tenant_admin','tenant_operator'])`.
 
-## Variáveis de Ambiente por App
+## Environment Variables per App
 
-Cada app importa seu schema de `packages/env`:
+Each app imports its schema from `packages/env`:
 
 ```typescript
 // apps/admin/env.ts
@@ -199,29 +199,29 @@ import { createEnv } from '@vello/env/console'
 export const env = createEnv()
 ```
 
-Variáveis obrigatórias em todos os apps:
+Required variables in all apps:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SECRET_KEY=   # nunca expor no cliente
+SUPABASE_SECRET_KEY=   # never expose on the client
 ```
 
-## Tratamento de Erros
+## Error Handling
 
-- **Client Components:** `toast` (sonner) para feedback ao usuário
-- **Server Actions:** retornar `{ error: string | FieldErrors }` ou `{ success: true, data?: T }`
-- **Nunca expor stack traces ao usuário**
-- **Erros inesperados:** logar no servidor com contexto (`user_id`, `tenant_id`, `action`)
-- **Supabase errors:** tratar o campo `error.code` para mensagens amigáveis (ex: `23505` = duplicado)
+- **Client Components:** `toast` (sonner) for user feedback
+- **Server Actions:** return `{ error: string | FieldErrors }` or `{ success: true, data?: T }`
+- **Never expose stack traces to the user**
+- **Unexpected errors:** log on the server with context (`user_id`, `tenant_id`, `action`)
+- **Supabase errors:** handle the `error.code` field for friendly messages (e.g.: `23505` = duplicate)
 
-## Arquitetura: Fat Server, Thin Client
+## Architecture: Fat Server, Thin Client
 
-### Regra central
+### Core rule
 
-O browser **NUNCA** fala diretamente com o Supabase.
-Toda chamada ao banco é feita no servidor (Server Components, Server Actions, Route Handlers).
+The browser **NEVER** talks directly to Supabase.
+Every database call is made on the server (Server Components, Server Actions, Route Handlers).
 
-**✅ CORRETO — dados buscados no servidor:**
+**✅ CORRECT — data fetched on the server:**
 ```tsx
 // app/(app)/plans/page.tsx — Server Component
 import { createClient } from '@/lib/supabase/server'
@@ -233,138 +233,138 @@ export default async function PlansPage() {
 }
 ```
 
-**❌ ERRADO — dados buscados no cliente:**
+**❌ WRONG — data fetched on the client:**
 ```tsx
 'use client'
-import { createClient } from '@/lib/supabase/client' // NUNCA em páginas de dados
+import { createClient } from '@/lib/supabase/client' // NEVER on data pages
 
 export default function PlansPage() {
   const [plans, setPlans] = useState([])
   useEffect(() => {
-    createClient().from('plans').select('*').then(...) // PROIBIDO
+    createClient().from('plans').select('*').then(...) // FORBIDDEN
   }, [])
 }
 ```
 
-**✅ CORRETO — mutação via Server Action:**
+**✅ CORRECT — mutation via Server Action:**
 ```tsx
 // app/(app)/plans/actions.ts
 'use server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function createPlan(formData: FormData) {
-  const supabase = await createClient() // server client — não exposto
+  const supabase = await createClient() // server client — not exposed
   await supabase.from('plans').insert(...)
 }
 ```
 
-**❌ ERRADO — mutação via fetch do cliente:**
+**❌ WRONG — mutation via client-side fetch:**
 ```tsx
 'use client'
-// NUNCA chamar supabase.from() direto no client component para mutações
+// NEVER call supabase.from() directly in a client component for mutations
 ```
 
-### Quando `supabase/client.ts` pode ser usado
+### When `supabase/client.ts` may be used
 
-Apenas para estes casos específicos, sem acesso ao banco:
-- `supabase.auth.getUser()` — verificar sessão ativa no cliente
+Only for these specific cases, with no database access:
+- `supabase.auth.getUser()` — check active session on the client
 - `supabase.auth.signOut()` — logout
-- Subscriptions de Realtime (quando notificações em tempo real forem necessárias — documentar explicitamente)
+- Realtime subscriptions (when real-time notifications are needed — document explicitly)
 
-### Fluxo de dados obrigatório
+### Required data flow
 ```
-Browser                    Servidor (Next.js)           Supabase
+Browser                    Server (Next.js)             Supabase
   │                               │                         │
-  │── clica em "Salvar" ─────────▶│                         │
+  │── clicks "Save" ─────────────▶│                         │
   │                        Server Action                    │
   │                               │── INSERT/SELECT ───────▶│
-  │                               │◀── resultado ───────────│
-  │◀── redirect ou toast ─────────│                         │
+  │                               │◀── result ───────────────│
+  │◀── redirect or toast ─────────│                         │
 ```
 
-### Verificação antes de criar qualquer arquivo
+### Checks before creating any file
 
-Antes de escrever código que acessa dados, pergunte:
-1. Este arquivo tem `'use client'`? → NÃO pode importar `supabase/server` nem fazer queries
-2. Este arquivo é Server Component ou tem `'use server'`? → PODE fazer queries
-3. Preciso de dado no cliente? → receba via props do Server Component pai
+Before writing code that accesses data, ask:
+1. Does this file have `'use client'`? → It CANNOT import `supabase/server` or run queries
+2. Is this file a Server Component or does it have `'use server'`? → It CAN run queries
+3. Do I need data on the client? → Receive it via props from the parent Server Component
 
-## Separação Server / Client
+## Server / Client Separation
 
-| Arquivo | Diretiva | Acessa Supabase? |
+| File | Directive | Accesses Supabase? |
 |---|---|---|
-| `page.tsx` | nenhuma (Server Component por padrão) | ✅ Sim |
-| `layout.tsx` | nenhuma (Server Component por padrão) | ✅ Sim |
-| `queries.ts` | nenhuma (módulo servidor) | ✅ Sim |
-| `actions.ts` | `'use server'` | ✅ Sim |
-| `_components/*.tsx` | `'use client'` | ❌ Nunca |
-| `hooks/*.ts` | `'use client'` | ❌ Nunca |
+| `page.tsx` | none (Server Component by default) | ✅ Yes |
+| `layout.tsx` | none (Server Component by default) | ✅ Yes |
+| `queries.ts` | none (server module) | ✅ Yes |
+| `actions.ts` | `'use server'` | ✅ Yes |
+| `_components/*.tsx` | `'use client'` | ❌ Never |
+| `hooks/*.ts` | `'use client'` | ❌ Never |
 
-Dados chegam aos Client Components exclusivamente via props passadas pelo Server Component pai.
+Data reaches Client Components exclusively via props passed from the parent Server Component.
 
-## Nomenclatura de Components
+## Component Naming
 
 ```typescript
 // plans-table.tsx
-export function PlansTable() { ... }  // ← PascalCase no export
+export function PlansTable() { ... }  // ← PascalCase on export
 ```
 
-## Nomenclatura de Arquivos
+## File Naming
 
 ```text
 _components/plans-table.tsx <- kebab-case
 ```
-## Regra de UI: Sem Valores Arbitrários de Cor ou Dimensão
+## UI Rule: No Arbitrary Color or Dimension Values
 
-**Nunca usar valores hardcoded em classes Tailwind.** Todo valor de cor, tamanho ou dimensão deve referenciar um token do design system.
+**Never use hardcoded values in Tailwind classes.** Every color, size, or dimension value must reference a design system token.
 
-### ❌ Errado
+### ❌ Wrong
 
 ```tsx
-// Cores hardcoded
+// Hardcoded colors
 <div className="bg-[#F0F2F7] dark:bg-zinc-950">
 <div className="border-[#E4E7F0] dark:border-zinc-800">
 <span className="dark:bg-[#1E2D5A] dark:text-[#7B9EEE]">
 
-// Dimensões hardcoded
+// Hardcoded dimensions
 <header className="h-[52px]">
 <aside className="w-[220px]">
 
-// Tamanhos de fonte fora da escala
+// Font sizes outside the scale
 <span className="text-[10px]">
-<span className="text-[11px]">  // text-xs já é 11px
+<span className="text-[11px]">  // text-xs is already 11px
 
-// CSS variables sem mapeamento
+// CSS variables without mapping
 <aside className="w-[var(--sidebar-width)]">
 ```
 
-### ✅ Correto
+### ✅ Correct
 
 ```tsx
-// Tokens de cor do design system
+// Design system color tokens
 <div className="bg-page-bg">
 <div className="border-sidebar-border">
 <span className="bg-sidebar-accent text-sidebar-accent-foreground">
 
-// Tokens de dimensão do design system
+// Design system dimension tokens
 <header className="h-topbar">
 <aside className="w-sidebar">
 
-// Escala tipográfica definida
-<span className="text-2xs">   // 10px → definido em globals.css
-<span className="text-xs">    // 11px → padrão Tailwind
+// Defined typographic scale
+<span className="text-2xs">   // 10px → defined in globals.css
+<span className="text-xs">    // 11px → Tailwind default
 ```
 
-### Como adicionar um token
+### How to add a token
 
-Quando um valor arbitrário parecer necessário, **primeiro adicione um token** em `apps/[app]/app/globals.css`:
+When an arbitrary value seems necessary, **first add a token** in `apps/[app]/app/globals.css`:
 
 ```css
-/* 1. Defina a variável CSS (com o valor semântico) */
+/* 1. Define the CSS variable (with the semantic value) */
 :root  { --meu-token: oklch(...); }
 .dark  { --meu-token: oklch(...); }
 
-/* 2. Mapeie para utility Tailwind no @theme inline */
+/* 2. Map it to a Tailwind utility in @theme inline */
 @theme inline {
   --color-meu-token: var(--meu-token);   /* → bg-meu-token, text-meu-token */
   --width-meu-token: var(--meu-token);   /* → w-meu-token                   */
@@ -373,85 +373,85 @@ Quando um valor arbitrário parecer necessário, **primeiro adicione um token** 
 }
 ```
 
-### Tokens de layout disponíveis
+### Available layout tokens
 
-| Utility | Valor | Descrição |
+| Utility | Value | Description |
 |---|---|---|
-| `bg-page-bg` | `#F0F2F7` / zinc-950 | Fundo da página (atrás dos painéis) |
-| `bg-sidebar` | branco / zinc-900 | Fundo da sidebar e topbar |
-| `bg-card` | branco / zinc-900 | Fundo de cards e painéis |
-| `bg-sidebar-accent` | vello-subtle / `#1E2D5A` | Item ativo na sidebar |
-| `text-sidebar-accent-foreground` | vello-blue / `#7B9EEE` | Texto do item ativo na sidebar |
-| `border-sidebar-border` | `#E4E7F0` / zinc-800 | Bordas internas da sidebar |
-| `border-border` | `#E4E7F0` / zinc-800 | Bordas gerais |
-| `w-sidebar` | `220px` | Largura da sidebar |
-| `h-topbar` | `52px` | Altura da topbar |
-| `text-2xs` | `10px` | Badges e labels de suporte |
+| `bg-page-bg` | `#F0F2F7` / zinc-950 | Page background (behind panels) |
+| `bg-sidebar` | white / zinc-900 | Sidebar and topbar background |
+| `bg-card` | white / zinc-900 | Card and panel background |
+| `bg-sidebar-accent` | vello-subtle / `#1E2D5A` | Active item in the sidebar |
+| `text-sidebar-accent-foreground` | vello-blue / `#7B9EEE` | Text of the active sidebar item |
+| `border-sidebar-border` | `#E4E7F0` / zinc-800 | Internal sidebar borders |
+| `border-border` | `#E4E7F0` / zinc-800 | General borders |
+| `w-sidebar` | `220px` | Sidebar width |
+| `h-topbar` | `52px` | Topbar height |
+| `text-2xs` | `10px` | Badges and supporting labels |
 
-### Regra obrigatória: Tokens Semânticos (compatibilidade com temas de tenant)
+### Mandatory Rule: Semantic Tokens (compatibility with tenant themes)
 
-Os apps `console` e `store` suportam white-label — o tema visual é sobrescrito por tenant via CSS variables injetadas em `[data-tenant-theme="slug"]`. **Usar cores fixas (zinc-800, white, slate-500, etc.) quebra o tema do tenant.**
+The `console` and `store` apps support white-label — the visual theme is overridden per tenant via CSS variables injected in `[data-tenant-theme="slug"]`. **Using fixed colors (zinc-800, white, slate-500, etc.) breaks the tenant's theme.**
 
-**✅ Correto — tokens semânticos que respondem ao tema:**
+**✅ Correct — semantic tokens that respond to the theme:**
 ```tsx
-<h1 className="text-foreground">Título</h1>
-<p className="text-muted-foreground">Subtítulo</p>
+<h1 className="text-foreground">Title</h1>
+<p className="text-muted-foreground">Subtitle</p>
 <div className="bg-background border-border">...</div>
 <input className="bg-input border-input" />
-<button className="bg-primary text-primary-foreground">Ação</button>
+<button className="bg-primary text-primary-foreground">Action</button>
 ```
 
-**❌ Errado — cores hardcoded que ignoram o tema:**
+**❌ Wrong — hardcoded colors that ignore the theme:**
 ```tsx
-<h1 className="text-white">Título</h1>
-<p className="text-zinc-400">Subtítulo</p>
+<h1 className="text-white">Title</h1>
+<p className="text-zinc-400">Subtitle</p>
 <div className="bg-zinc-900 border-zinc-700">...</div>
 <input className="bg-zinc-800 border-zinc-700 text-white" />
 ```
 
-**Mapa de substituição rápida:**
+**Quick substitution map:**
 
-| Hardcoded | Token semântico |
+| Hardcoded | Semantic token |
 |---|---|
 | `text-white` / `text-black` | `text-foreground` |
 | `text-zinc-400` / `text-gray-500` | `text-muted-foreground` |
-| `text-zinc-300` | `text-foreground` (labels herdam do componente `FieldLabel`) |
-| `bg-zinc-800` / `bg-zinc-900` | `bg-background` ou `bg-card` |
+| `text-zinc-300` | `text-foreground` (labels inherit from the `FieldLabel` component) |
+| `bg-zinc-800` / `bg-zinc-900` | `bg-background` or `bg-card` |
 | `bg-white` | `bg-background` |
-| `border-zinc-700` / `border-zinc-800` | `border-border` ou `border-input` |
-| `bg-red-50 border-red-200` | Usar variant do componente (ex: `<Alert variant="destructive">`) |
+| `border-zinc-700` / `border-zinc-800` | `border-border` or `border-input` |
+| `bg-red-50 border-red-200` | Use the component variant (e.g.: `<Alert variant="destructive">`) |
 
-> **Regra:** se você está escrevendo uma classe Tailwind de cor e o nome contém um número (zinc-800, gray-500, red-50), está errado. Use o token semântico equivalente.
+> **Rule:** if you're writing a Tailwind color class and the name contains a number (zinc-800, gray-500, red-50), it's wrong. Use the equivalent semantic token.
 
-### Exceções permitidas
+### Allowed exceptions
 
-- `app/page.tsx` (boilerplate temporário do `create-next-app` — será substituído)
-- SVGs inline: atributo `stroke="white"` e similares (não são classes Tailwind)
-- Valores de opacidade em tokens existentes: `text-foreground/70` é permitido
+- `app/page.tsx` (temporary `create-next-app` boilerplate — will be replaced)
+- Inline SVGs: `stroke="white"` attribute and similar (not Tailwind classes)
+- Opacity values on existing tokens: `text-foreground/70` is allowed
 
-## Padrão de Sidebar (shadcn + server/client split)
+## Sidebar Pattern (shadcn + server/client split)
 
-A sidebar é composta usando os primitivos do shadcn `sidebar` com split obrigatório entre server e client components:
+The sidebar is composed using the shadcn `sidebar` primitives with a mandatory split between server and client components:
 
 ```
 src/components/sidebar/
-├── index.tsx          ← Server — monta estrutura (Header, Content, Footer)
-├── nav-main.tsx       ← Server — define grupos e itens de navegação
-├── nav-link.tsx       ← Client — detecta rota ativa via usePathname()
-├── nav-user.tsx       ← Server — wrapper do rodapé do usuário
-└── profile-button.tsx ← Client — dropdown menu com logout
+├── index.tsx          ← Server — assembles the structure (Header, Content, Footer)
+├── nav-main.tsx       ← Server — defines nav groups and items
+├── nav-link.tsx       ← Client — detects the active route via usePathname()
+├── nav-user.tsx       ← Server — user footer wrapper
+└── profile-button.tsx ← Client — dropdown menu with logout
 ```
 
-**Regra:** toda lógica de interação (active state, dropdowns, usePathname) fica nos componentes `*-link.tsx` e `*-button.tsx`. Os componentes server só estruturam e passam dados.
+**Rule:** all interaction logic (active state, dropdowns, usePathname) stays in the `*-link.tsx` and `*-button.tsx` components. Server components only structure and pass data.
 
-**Item ativo — classes padrão:**
+**Active item — standard classes:**
 ```tsx
 isActive
   ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
   : 'text-foreground/70 hover:bg-secondary hover:text-foreground'
 ```
 
-**Dimensões do sidebar** — sempre via `style` inline no `SidebarProvider`, nunca hardcoded:
+**Sidebar dimensions** — always via inline `style` on `SidebarProvider`, never hardcoded:
 ```tsx
 <SidebarProvider
   style={{
@@ -461,26 +461,26 @@ isActive
 >
 ```
 
-## Padrão de Metadata e Título de Página
+## Metadata and Page Title Pattern
 
-Toda página exporta `metadata` para compor o título com o template do root layout:
+Every page exports `metadata` to compose the title with the root layout's template:
 
 ```tsx
-// Root layout define o template
+// Root layout defines the template
 export const metadata: Metadata = {
   title: { template: '%s | Vello Admin', default: 'Vello Admin' },
 }
 
-// Cada page.tsx define seu título
+// Each page.tsx defines its own title
 export const metadata = { title: 'Tenants' }
-// Resultado: "Tenants | Vello Admin"
+// Result: "Tenants | Vello Admin"
 ```
 
-O `Header` compartilhado **não recebe título como prop** — use `metadata`.
+The shared `Header` **does not receive a title as a prop** — use `metadata`.
 
-## Sistema de Formulário (`Field`)
+## Form System (`Field`)
 
-Formulários **nunca** usam `<input>` avulso. Sempre o sistema `Field`:
+Forms **never** use a standalone `<input>`. Always use the `Field` system:
 
 ```tsx
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field'
@@ -488,46 +488,46 @@ import { Input } from '@/components/ui/input'
 
 <FieldGroup>
   <Field>
-    <FieldLabel htmlFor="email">E-mail</FieldLabel>
+    <FieldLabel htmlFor="email">Email</FieldLabel>
     <Input id="email" type="email" name="email" />
     <FieldError errors={formState.errors?.email} />
   </Field>
 </FieldGroup>
 ```
 
-**Componentes disponíveis:** `Field`, `FieldGroup`, `FieldLabel`, `FieldTitle`,
+**Available components:** `Field`, `FieldGroup`, `FieldLabel`, `FieldTitle`,
 `FieldDescription`, `FieldError`, `FieldContent`, `FieldSeparator`, `FieldSet`, `FieldLegend`.
 
-`Field` suporta `orientation`: `vertical` (padrão) | `horizontal` | `responsive`.
+`Field` supports `orientation`: `vertical` (default) | `horizontal` | `responsive`.
 
-## Hook `useFormState` (Server Actions)
+## `useFormState` Hook (Server Actions)
 
-Para forms que chamam Server Actions:
+For forms that call Server Actions:
 
 ```tsx
 'use client'
 import { useFormState } from '@/hooks/use-form-state'
 
 const [formState, handleSubmit, isPending] = useFormState(
-  minhaServerAction,
+  myServerAction,
   () => router.push('/success'),     // onSuccess
   (msg) => toast.error(msg),         // onError
 )
 ```
 
-**Contrato obrigatório do Server Action:**
+**Required Server Action contract:**
 ```ts
 return {
   success: boolean,
   message: string | null,
-  errors: Record<string, string[]> | null,  // chave = nome do campo
+  errors: Record<string, string[]> | null,  // key = field name
 }
 ```
 
-## Providers — Localização e Conteúdo
+## Providers — Location and Content
 
-`providers.tsx` fica em `src/app/` (co-localizado com `layout.tsx`), não em `lib/`.
-Sempre inclui `ThemeProvider` **e** `TooltipProvider` juntos:
+`providers.tsx` lives in `src/app/` (co-located with `layout.tsx`), not in `lib/`.
+Always includes `ThemeProvider` **and** `TooltipProvider` together:
 
 ```tsx
 // src/app/providers.tsx — 'use client'
@@ -540,146 +540,146 @@ export function Providers({ children }) {
 }
 ```
 
-## Padrão de RLS (Row Level Security)
+## RLS Pattern (Row Level Security)
 
-Toda tabela nova deve ter RLS habilitada. Há três categorias:
+Every new table must have RLS enabled. There are three categories:
 
-### Categoria A — Tabelas do backoffice (sem acesso de tenant)
+### Category A — Backoffice tables (no tenant access)
 
-Usada em: `backoffice_users`, `plans`, `products`, `financial_partners`
+Used in: `backoffice_users`, `plans`, `products`, `financial_partners`
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "backoffice_full_access" ON [tabela]
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 ```
 
-> Variação: quando apenas `super_admin` deve escrever, usar duas policies separadas:
-> - `backoffice_full_read` — FOR SELECT para todos os 4 roles
-> - `super_admin_write` — FOR ALL USING (...) WITH CHECK (...) apenas para `super_admin`
+> Variation: when only `super_admin` should write, use two separate policies:
+> - `backoffice_full_read` — FOR SELECT for all 4 roles
+> - `super_admin_write` — FOR ALL USING (...) WITH CHECK (...) for `super_admin` only
 >
-> Ver: `supabase/migrations/20260401140000_fix_backoffice_users_rls.sql`
+> See: `supabase/migrations/20260401140000_fix_backoffice_users_rls.sql`
 
-### Categoria B — Tabelas isoladas por tenant
+### Category B — Tables isolated per tenant
 
-Usada em: `tenant_products`, `tenant_branding`, `proposals`, `clients`
+Used in: `tenant_products`, `tenant_branding`, `proposals`, `clients`
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "backoffice_full_access" ON [tabela]
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
-CREATE POLICY "tenant_isolation" ON [tabela]
+CREATE POLICY "tenant_isolation" ON [table]
   FOR ALL USING (
     tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
   );
 ```
 
-> Toda tabela Categoria B deve ter `tenant_id UUID NOT NULL REFERENCES tenants(id)`.
+> Every Category B table must have `tenant_id UUID NOT NULL REFERENCES tenants(id)`.
 
-### Categoria C — Tabelas globais lidas por tenants
+### Category C — Global tables read by tenants
 
-Usada em: `plans`, `products` (quando tenants precisam ler registros ativos)
+Used in: `plans`, `products` (when tenants need to read active records)
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "backoffice_full_access" ON [tabela]
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
-CREATE POLICY "tenant_read_active" ON [tabela]
+CREATE POLICY "tenant_read_active" ON [table]
   FOR SELECT USING (
     is_active = true
     AND (auth.jwt() ->> 'tenant_id') IS NOT NULL
   );
 ```
 
-### Checklist ao criar uma nova tabela
+### Checklist when creating a new table
 
-- [ ] Determinar categoria (A, B ou C)
-- [ ] `ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY`
-- [ ] Aplicar as policies da categoria correspondente
-- [ ] Se Categoria B: garantir `tenant_id UUID NOT NULL REFERENCES tenants(id)`
+- [ ] Determine the category (A, B, or C)
+- [ ] `ALTER TABLE [table] ENABLE ROW LEVEL SECURITY`
+- [ ] Apply the policies for the corresponding category
+- [ ] If Category B: ensure `tenant_id UUID NOT NULL REFERENCES tenants(id)`
 
-### Naming de triggers
+### Trigger naming
 
-- `set_updated_at_<tabela>` — triggers de updated_at (sem prefixo)
-- `trg_<descricao>` — triggers de negócio (com prefixo `trg_`)
+- `set_updated_at_<table>` — updated_at triggers (no prefix)
+- `trg_<description>` — business triggers (with `trg_` prefix)
 
-## Padrão de Roles (DB ENUM ↔ `@vello/auth`)
+## Roles Pattern (DB ENUM ↔ `@vello/auth`)
 
-O PostgreSQL ENUM é a **fonte de verdade**. O pacote `@vello/auth` espelha os valores exatos.
+The PostgreSQL ENUM is the **source of truth**. The `@vello/auth` package mirrors the exact values.
 
-| PostgreSQL ENUM | Valores | TypeScript (`@vello/auth`) |
+| PostgreSQL ENUM | Values | TypeScript (`@vello/auth`) |
 |---|---|---|
 | `backoffice_role` | `super_admin`, `admin`, `financial`, `support` | `BackofficeRole` |
 | `tenant_role` | `tenant_admin`, `tenant_operator` | `TenantRole` |
-| `tenant_type` | `whitelabel`, `subscription` | *(apenas DB)* |
-| `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(apenas DB)* |
+| `tenant_type` | `whitelabel`, `subscription` | *(DB only)* |
+| `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(DB only)* |
 
-**Regra:** ao adicionar um role novo:
-1. `ALTER TYPE [enum_name] ADD VALUE 'novo_role'` na migration
-2. Atualizar `z.union([...z.literal('novo_role')])` em `packages/auth/src/roles/role.ts`
-3. Regenerar types: `pnpm db:types`
-4. Atualizar policies RLS que usam `ANY(ARRAY[...])` se necessário
+**Rule:** when adding a new role:
+1. `ALTER TYPE [enum_name] ADD VALUE 'new_role'` in the migration
+2. Update `z.union([...z.literal('new_role')])` in `packages/auth/src/roles/role.ts`
+3. Regenerate types: `pnpm db:types`
+4. Update RLS policies that use `ANY(ARRAY[...])` if necessary
 
-### Regra obrigatória: `@vello/auth` como fonte de RBAC nos apps
+### Mandatory Rule: `@vello/auth` as the RBAC source in the apps
 
-**Nunca inserir arrays de roles hardcoded nos apps** (`admin`, `console`, `store`). Sempre importar de `@vello/auth`:
+**Never insert hardcoded role arrays in the apps** (`admin`, `console`, `store`). Always import from `@vello/auth`:
 
 ```typescript
 import { hasTenantAccess, hasBackofficeAccess, getJwtClaims } from '@vello/auth'
 
-// ✅ Correto
+// ✅ Correct
 if (!hasTenantAccess(claims.user_role)) { ... }
 
-// ❌ Errado — hardcoded
+// ❌ Wrong — hardcoded
 if (!['tenant_admin', 'tenant_operator'].includes(role)) { ... }
 ```
 
-| Função | Uso |
+| Function | Use |
 |---|---|
-| `hasTenantAccess(role)` | Verifica se role é `tenant_admin` ou `tenant_operator` |
-| `hasBackofficeAccess(role)` | Verifica se role é qualquer role backoffice |
-| `isTenantRole(role)` | Alias de `hasTenantAccess` |
-| `isBackofficeRole(role)` | Alias de `hasBackofficeAccess` |
-| `getJwtClaims(user)` | Extrai e valida claims do JWT via Zod |
-| `jwtClaimsSchema` | Schema Zod das claims |
+| `hasTenantAccess(role)` | Checks if the role is `tenant_admin` or `tenant_operator` |
+| `hasBackofficeAccess(role)` | Checks if the role is any backoffice role |
+| `isTenantRole(role)` | Alias for `hasTenantAccess` |
+| `isBackofficeRole(role)` | Alias for `hasBackofficeAccess` |
+| `getJwtClaims(user)` | Extracts and validates JWT claims via Zod |
+| `jwtClaimsSchema` | Zod schema for the claims |
 
-> **Status de adoção:**
-> - `apps/console` — obrigatório desde o início (implementado nesta spec)
-> - `apps/admin` — pendente de auditoria para alinhar ao padrão
+> **Adoption status:**
+> - `apps/console` — mandatory from the start (implemented in this spec)
+> - `apps/admin` — pending audit to align with the pattern
 
 ---
 
-## Isolamento de Sessão
+## Session Isolation
 
-### Entre Apps (Admin × Console)
+### Between Apps (Admin × Console)
 
-Ambos os apps usam o mesmo projeto Supabase. Para evitar que sessões vazem entre apps em subdomínios do mesmo domínio pai (`.vellofinance.com.br`), cada app usa um `storageKey` distinto em **todos** os clientes Supabase:
+Both apps use the same Supabase project. To prevent sessions from leaking between apps on subdomains of the same parent domain (`.vellofinance.com.br`), each app uses a distinct `storageKey` on **all** Supabase clients:
 
 ```typescript
-// apps/admin — storageKey fixo (há apenas um "tenant": a própria Vello)
+// apps/admin — fixed storageKey (there is only one "tenant": Vello itself)
 createServerClient(url, key, {
   auth: { storageKey: 'vello-admin-auth' },
   cookies: { ... }
 })
 ```
 
-### Entre Tenants (Console)
+### Between Tenants (Console)
 
-No console, cada tenant tem seu próprio cookie de sessão. O `storageKey` é dinâmico e usa o `tenant_id` (UUID) — nunca o slug (que é público na URL e adivinhável):
+In the console, each tenant has its own session cookie. The `storageKey` is dynamic and uses the `tenant_id` (UUID) — never the slug (which is public in the URL and guessable):
 
 ```typescript
-// apps/console — storageKey dinâmico por tenant_id
+// apps/console — dynamic storageKey per tenant_id
 import { getStorageKey } from './storage-key'
 
 // storage-key.ts → `vello-console-auth-${tenantId}`
@@ -689,31 +689,31 @@ createServerClient(url, key, {
 })
 ```
 
-**Como o `tenantId` chega a cada camada:**
+**How `tenantId` reaches each layer:**
 
-| Arquivo | Fonte do `tenantId` |
+| File | Source of `tenantId` |
 |---|---|
-| `proxy.ts` (middleware) | `resolveTenant(host)` → passa `tenant.id` para `updateSession()` |
-| `lib/supabase/server.ts` | `headers().get('x-tenant-id')` — injetado pelo middleware |
-| `lib/supabase/client.ts` | `document.documentElement.dataset.tenantId` — injetado no `<html>` pelo root layout |
-| `lib/supabase/proxy.ts` | Recebe `tenantId` como parâmetro de `updateSession(request, tenantId)` |
+| `proxy.ts` (middleware) | `resolveTenant(host)` → passes `tenant.id` to `updateSession()` |
+| `lib/supabase/server.ts` | `headers().get('x-tenant-id')` — injected by the middleware |
+| `lib/supabase/client.ts` | `document.documentElement.dataset.tenantId` — injected into `<html>` by the root layout |
+| `lib/supabase/proxy.ts` | Receives `tenantId` as a parameter of `updateSession(request, tenantId)` |
 
-**Segurança (defesa em profundidade):**
-1. Cookie por tenant_id (UUID) — sessão do tenant A simplesmente não existe no contexto do tenant B
-2. Middleware valida `claims.tenant_id === tenant.id` — rejeita cross-tenant mesmo com cookie válido
-3. RLS no banco filtra por `(auth.jwt() ->> 'tenant_id')::uuid` — proteção na camada de dados
+**Security (defense in depth):**
+1. Cookie per tenant_id (UUID) — tenant A's session simply does not exist in tenant B's context
+2. Middleware validates `claims.tenant_id === tenant.id` — rejects cross-tenant access even with a valid cookie
+3. RLS in the database filters by `(auth.jwt() ->> 'tenant_id')::uuid` — protection at the data layer
 
-Além disso, o middleware de cada app valida o `user_role` do JWT via `@vello/auth`:
-- **Console:** rejeita roles de backoffice → signOut + redirect `/sign-in`
-- **Admin:** rejeita roles de tenant → signOut + redirect `/sign-in` *(pendente de implementação)*
+Additionally, each app's middleware validates the JWT's `user_role` via `@vello/auth`:
+- **Console:** rejects backoffice roles → signOut + redirect `/sign-in`
+- **Admin:** rejects tenant roles → signOut + redirect `/sign-in` *(pending implementation)*
 
-## Regras de Estruturação e Importação
+## Structuring and Import Rules
 
-### Um Componente por Arquivo
+### One Component per File
 
-É **errado** declarar múltiplos componentes React exportados no mesmo arquivo. A convenção estrita é: **um arquivo para cada componente**.
+It is **wrong** to declare multiple exported React components in the same file. The strict convention is: **one file per component**.
 
-**❌ Errado — múltiplos componentes no mesmo arquivo:**
+**❌ Wrong — multiple components in the same file:**
 ```tsx
 // _components/dashboard-cards.tsx
 export function CardA() { return <div /> }
@@ -729,7 +729,7 @@ export function DashboardCards() {
 }
 ```
 
-**✅ Correto — arquivos separados:**
+**✅ Correct — separate files:**
 ```tsx
 // _components/card-a.tsx
 export function CardA() { return <div /> }
@@ -751,21 +751,21 @@ export function DashboardCards() {
 }
 ```
 
-### Funções e Helpers
+### Functions and Helpers
 
-Ao ter funções ou lógicas utilitárias (helpers), crie um arquivo único para elas. Se uma função ou helper for utilizada em mais de um lugar, você deve extrai-la para um helper padrão/compartilhado (por exemplo, na pasta `src/lib/` ou um diretório `utils`).
+When you have utility functions or logic (helpers), create a single file for them. If a function or helper is used in more than one place, you must extract it into a shared/standard helper (for example, in the `src/lib/` folder or a `utils` directory).
 
-### Importações Absolutas (`@/`)
+### Absolute Imports (`@/`)
 
-**Nunca** utilize navegação de caminhos relativos voltando múltiplos diretórios (`../../../`) na importação de arquivos. Sempre use o atalho de importação absoluta do projeto `@/`.
+**Never** use relative path navigation going back multiple directories (`../../../`) when importing files. Always use the project's absolute import shortcut `@/`.
 
-**❌ Errado:**
+**❌ Wrong:**
 ```tsx
 import { Button } from '../../../../components/ui/button'
 import { cn } from '../../../lib/utils'
 ```
 
-**✅ Correto:**
+**✅ Correct:**
 ```tsx
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'

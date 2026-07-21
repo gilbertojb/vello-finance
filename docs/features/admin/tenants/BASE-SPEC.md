@@ -1,26 +1,26 @@
-# Spec de Base — Tenants
+# Base Spec — Tenants
 
 **App:** `apps/admin` — Vello Admin
-**Status:** `aprovado`
-**Escopo:** Fundação para todas as features de tenants — migrations, RLS, TanStack Query, padrão de roles
+**Status:** `approved`
+**Scope:** Foundation for all tenant features — migrations, RLS, TanStack Query, role pattern
 
 ---
 
-## O que este spec cobre
+## What this spec covers
 
-1. Migrations: `tenants`, `tenant_branding`, `tenant_products`, ajuste de `backoffice_users` RLS
-2. TanStack Query: setup com padrão Server Prefetch + Hydration
-3. Padrão de RLS: três categorias de tabela, documentadas e aplicadas
-4. Padrão de roles: DB ENUM como fonte de verdade, TypeScript espelha os valores
+1. Migrations: `tenants`, `tenant_branding`, `tenant_products`, adjustment of `backoffice_users` RLS
+2. TanStack Query: setup with the Server Prefetch + Hydration pattern
+3. RLS pattern: three table categories, documented and applied
+4. Role pattern: DB ENUM as the source of truth, TypeScript mirrors the values
 
-**Fora deste spec:**
-- Tabela `tenant_users` → criada junto ao console (`docs/superpowers/specs/2026-04-09-console-app-design.md`, Seção 6)
-- Ativação de tenant (F3) depende de `tenant_users` existir — ver pré-requisito na SPEC.md
-- UI de listagem, criação, detalhes, produtos → specs separados
+**Out of scope for this spec:**
+- `tenant_users` table → created alongside the console (`docs/superpowers/specs/2026-04-09-console-app-design.md`, Section 6)
+- Tenant activation (F3) depends on `tenant_users` existing → see prerequisite in SPEC.md
+- Listing, creation, details, products UI → separate specs
 
 ---
 
-## Seção 1 — Migrations
+## Section 1 — Migrations
 
 ### 1.1 `tenants`
 
@@ -56,7 +56,7 @@ CREATE TRIGGER set_updated_at_tenants
   BEFORE UPDATE ON tenants
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- RLS: Categoria A — tabela do backoffice (sem acesso de tenant)
+-- RLS: Category A — backoffice table (no tenant access)
 ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON tenants
@@ -86,7 +86,7 @@ CREATE TABLE tenant_branding (
   updated_at           TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Cria branding padrão automaticamente ao inserir tenant
+-- Automatically creates default branding when a tenant is inserted
 CREATE OR REPLACE FUNCTION create_default_branding()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -103,7 +103,7 @@ CREATE TRIGGER set_updated_at_tenant_branding
   BEFORE UPDATE ON tenant_branding
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- RLS: Categoria B — isolada por tenant
+-- RLS: Category B — isolated per tenant
 ALTER TABLE tenant_branding ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON tenant_branding
@@ -139,7 +139,7 @@ CREATE TRIGGER set_updated_at_tenant_products
   BEFORE UPDATE ON tenant_products
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- RLS: Categoria B — isolada por tenant
+-- RLS: Category B — isolated per tenant
 ALTER TABLE tenant_products ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_full_access" ON tenant_products
@@ -153,25 +153,25 @@ CREATE POLICY "tenant_isolation" ON tenant_products
   );
 ```
 
-### 1.4 Ajuste RLS `backoffice_users`
+### 1.4 `backoffice_users` RLS adjustment
 
-A policy atual (`backoffice_users_super_admin`) dá acesso total apenas ao `super_admin`.
-O padrão documentado exige separação entre leitura (todos os roles internos) e escrita (apenas `super_admin`).
+The current policy (`backoffice_users_super_admin`) grants full access only to `super_admin`.
+The documented pattern requires separating read access (all internal roles) from write access (`super_admin` only).
 
 ```sql
 -- supabase/migrations/YYYYMMDDHHMMSS_fix_backoffice_users_rls.sql
 
--- Remove policies antigas
+-- Remove old policies
 DROP POLICY IF EXISTS "backoffice_users_self_read" ON backoffice_users;
 DROP POLICY IF EXISTS "backoffice_users_super_admin" ON backoffice_users;
 
--- Todos os roles do backoffice podem ler (necessário para listagem de membros da equipe)
+-- All backoffice roles can read (needed for team member listing)
 CREATE POLICY "backoffice_full_read" ON backoffice_users
   FOR SELECT USING (
     (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
--- Apenas super_admin pode criar, editar e remover membros
+-- Only super_admin can create, edit, and remove members
 CREATE POLICY "super_admin_write" ON backoffice_users
   FOR ALL
   USING (
@@ -182,29 +182,29 @@ CREATE POLICY "super_admin_write" ON backoffice_users
   );
 ```
 
-> **Nota:** A policy `backoffice_users_self_read` (que permitia leitura pelo `auth.uid()`) foi removida intencionalmente. Usuários do backoffice são criados pelo `super_admin` via service client — nunca se auto-registram. Ao fazer login, o Auth Hook já injeta o `role` no JWT, portanto `backoffice_full_read` cobre todos os casos de leitura legítima.
+> **Note:** The `backoffice_users_self_read` policy (which allowed reads via `auth.uid()`) was intentionally removed. Backoffice users are created by `super_admin` via the service client — they never self-register. On login, the Auth Hook already injects the `role` into the JWT, so `backoffice_full_read` covers all legitimate read cases.
 
 ---
 
-## Seção 2 — TanStack Query Setup
+## Section 2 — TanStack Query Setup
 
-### Padrão: Server Prefetch + Hydration
+### Pattern: Server Prefetch + Hydration
 
-O browser nunca acessa o Supabase diretamente. O Server Component prefetch os dados,
-hidrata o cache do TanStack Query e o Client Component lê do cache.
+The browser never accesses Supabase directly. The Server Component prefetches the data,
+hydrates the TanStack Query cache, and the Client Component reads from the cache.
 
 ```
 page.tsx (Server Component)
   └── getQueryClient()
-  └── queryClient.prefetchQuery({ queryKey, queryFn })   ← Supabase no servidor
+  └── queryClient.prefetchQuery({ queryKey, queryFn })   ← Supabase on the server
   └── <HydrationBoundary state={dehydrate(queryClient)}>
         └── <TenantTable />                              ← Client Component
-              └── useSuspenseQuery(queryKey)             ← lê do cache, sem fetch no browser
+              └── useSuspenseQuery(queryKey)             ← reads from cache, no fetch in the browser
 ```
 
-### Arquivos
+### Files
 
-**`src/lib/query-client.ts`** — singleton server-side por request:
+**`src/lib/query-client.ts`** — server-side singleton per request:
 
 ```typescript
 import { QueryClient } from '@tanstack/react-query'
@@ -213,7 +213,7 @@ import { cache } from 'react'
 export const getQueryClient = cache(() => new QueryClient())
 ```
 
-**`src/lib/query-keys.ts`** — objeto centralizado de query keys:
+**`src/lib/query-keys.ts`** — centralized query keys object:
 
 ```typescript
 export const queryKeys = {
@@ -231,7 +231,7 @@ export const queryKeys = {
 } as const
 ```
 
-**`src/app/providers.tsx`** — adiciona `QueryClientProvider` e devtools:
+**`src/app/providers.tsx`** — adds `QueryClientProvider` and devtools:
 
 ```tsx
 'use client'
@@ -258,9 +258,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 ```
 
-### Dependências
+### Dependencies
 
-Adicionar em `apps/admin/package.json`:
+Add to `apps/admin/package.json`:
 
 ```json
 {
@@ -269,112 +269,112 @@ Adicionar em `apps/admin/package.json`:
 }
 ```
 
-Rodar `pnpm install` após adicionar.
+Run `pnpm install` after adding.
 
 ---
 
-## Seção 3 — Padrão de RLS
+## Section 3 — RLS Pattern
 
-### Três categorias
+### Three categories
 
-**Categoria A — Tabelas do backoffice** (sem acesso de tenant)
+**Category A — Backoffice tables** (no tenant access)
 
-Usada em: `backoffice_users`, `plans`, `products`, `financial_partners`
+Used in: `backoffice_users`, `plans`, `products`, `financial_partners`
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "backoffice_full_access" ON [tabela]
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 ```
 
-> Variação: quando `super_admin` deve ser o único a escrever, usar `backoffice_full_read` + `super_admin_write` separados (ver `backoffice_users`).
+> Variation: when only `super_admin` should be able to write, use separate `backoffice_full_read` + `super_admin_write` policies (see `backoffice_users`).
 
-**Categoria B — Tabelas isoladas por tenant**
+**Category B — Tables isolated per tenant**
 
-Usada em: `tenant_products`, `tenant_branding`, `proposals`, `clients`
+Used in: `tenant_products`, `tenant_branding`, `proposals`, `clients`
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
--- Backoffice lê e escreve tudo
-CREATE POLICY "backoffice_full_access" ON [tabela]
+-- Backoffice reads and writes everything
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
--- Tenant vê apenas seus próprios dados
-CREATE POLICY "tenant_isolation" ON [tabela]
+-- Tenant sees only its own data
+CREATE POLICY "tenant_isolation" ON [table]
   FOR ALL USING (
     tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
   );
 ```
 
-**Categoria C — Tabelas globais lidas por tenants**
+**Category C — Global tables read by tenants**
 
-Usada em: `plans`, `products` (quando tenants precisam ler)
+Used in: `plans`, `products` (when tenants need to read them)
 
 ```sql
-ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY;
+ALTER TABLE [table] ENABLE ROW LEVEL SECURITY;
 
--- Backoffice gerencia tudo
-CREATE POLICY "backoffice_full_access" ON [tabela]
+-- Backoffice manages everything
+CREATE POLICY "backoffice_full_access" ON [table]
   FOR ALL USING (
     (auth.jwt() ->> 'role') = ANY(ARRAY['super_admin','admin','financial','support'])
   );
 
--- Tenants leem apenas registros ativos
-CREATE POLICY "tenant_read_active" ON [tabela]
+-- Tenants read only active records
+CREATE POLICY "tenant_read_active" ON [table]
   FOR SELECT USING (
     is_active = true
     AND (auth.jwt() ->> 'tenant_id') IS NOT NULL
   );
 ```
 
-### Checklist ao criar uma nova tabela
+### Checklist when creating a new table
 
-- [ ] Determinar categoria (A, B ou C)
-- [ ] `ALTER TABLE [tabela] ENABLE ROW LEVEL SECURITY`
-- [ ] Aplicar as policies da categoria correspondente
-- [ ] Se Categoria B: garantir que a tabela tem `tenant_id UUID NOT NULL REFERENCES tenants(id)`
+- [ ] Determine category (A, B, or C)
+- [ ] `ALTER TABLE [table] ENABLE ROW LEVEL SECURITY`
+- [ ] Apply the policies for the corresponding category
+- [ ] If Category B: ensure the table has `tenant_id UUID NOT NULL REFERENCES tenants(id)`
 
 ---
 
-## Seção 4 — Padrão de Roles (DB ENUM ↔ `@vello/auth`)
+## Section 4 — Role Pattern (DB ENUM ↔ `@vello/auth`)
 
-### Regra
+### Rule
 
-O PostgreSQL ENUM é a **fonte de verdade**. O pacote `@vello/auth` espelha os valores exatos.
-Ao adicionar um novo role: criar migration com `ALTER TYPE` primeiro, depois atualizar `@vello/auth`.
+The PostgreSQL ENUM is the **source of truth**. The `@vello/auth` package mirrors the exact values.
+When adding a new role: create the migration with `ALTER TYPE` first, then update `@vello/auth`.
 
-### Mapeamento
+### Mapping
 
-| PostgreSQL ENUM | Valores | TypeScript (`@vello/auth`) |
+| PostgreSQL ENUM | Values | TypeScript (`@vello/auth`) |
 |---|---|---|
 | `backoffice_role` | `super_admin`, `admin`, `financial`, `support` | `BackofficeRole` |
 | `tenant_role` *(F3)* | `tenant_admin`, `tenant_operator` | `TenantRole` |
-| `tenant_type` | `whitelabel`, `subscription` | *(apenas DB — sem tipo no pacote)* |
-| `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(apenas DB — sem tipo no pacote)* |
+| `tenant_type` | `whitelabel`, `subscription` | *(DB only — no type in the package)* |
+| `tenant_status` | `pending`, `active`, `suspended`, `cancelled` | *(DB only — no type in the package)* |
 
-### Checklist ao adicionar role novo
+### Checklist when adding a new role
 
-- [ ] `ALTER TYPE [enum_name] ADD VALUE 'novo_role'` na migration
-- [ ] Atualizar `z.union([...z.literal('novo_role')])` em `packages/auth/src/vello-roles.ts`
-- [ ] Regenerar types: `pnpm db:types`
-- [ ] Atualizar policies RLS que usam `ANY(ARRAY[...])` se necessário
-
----
-
-## Pré-requisito
-
-A tabela `tenants` referencia `plans(id)`. A migration de `plans` deve ser aplicada **antes** das migrations deste spec.
-A migration de `plans` está definida no `docs/features/admin/plans/SPEC.md` e deve ser criada separadamente caso ainda não exista.
+- [ ] `ALTER TYPE [enum_name] ADD VALUE 'new_role'` in the migration
+- [ ] Update `z.union([...z.literal('new_role')])` in `packages/auth/src/vello-roles.ts`
+- [ ] Regenerate types: `pnpm db:types`
+- [ ] Update RLS policies that use `ANY(ARRAY[...])` if needed
 
 ---
 
-## Arquivos a Criar / Modificar
+## Prerequisite
+
+The `tenants` table references `plans(id)`. The `plans` migration must be applied **before** the migrations in this spec.
+The `plans` migration is defined in `docs/features/admin/plans/SPEC.md` and must be created separately if it doesn't already exist.
+
+---
+
+## Files to Create / Modify
 
 ```
 supabase/migrations/
@@ -384,25 +384,25 @@ supabase/migrations/
 └── YYYYMMDDHHMMSS_fix_backoffice_users_rls.sql
 
 apps/admin/
-├── package.json                          ← adicionar @tanstack/react-query + devtools
+├── package.json                          ← add @tanstack/react-query + devtools
 └── src/
     ├── app/
-    │   └── providers.tsx                 ← adicionar QueryClientProvider
+    │   └── providers.tsx                 ← add QueryClientProvider
     ├── lib/
-    │   ├── query-client.ts               ← CRIAR — getQueryClient() singleton
-    │   └── query-keys.ts                 ← CRIAR — objeto centralizado de query keys
+    │   ├── query-client.ts               ← CREATE — getQueryClient() singleton
+    │   └── query-keys.ts                 ← CREATE — centralized query keys object
 
 docs/architecture/
-└── conventions.md                        ← adicionar seções de RLS e roles
+└── conventions.md                        ← add RLS and roles sections
 ```
 
 ---
 
-## Critérios de Aceite
+## Acceptance Criteria
 
-- [ ] 4 migrations aplicadas sem erro via `supabase db push`
-- [ ] Types regenerados via `pnpm db:types` refletem as novas tabelas
-- [ ] `@tanstack/react-query` instalado e `QueryClientProvider` em `providers.tsx`
-- [ ] `getQueryClient()` e `queryKeys` disponíveis em `src/lib/`
-- [ ] `backoffice_users` com RLS ajustado (leitura para todos os roles, escrita apenas `super_admin`)
-- [ ] `docs/architecture/conventions.md` atualizado com padrão de RLS e roles
+- [ ] 4 migrations applied without error via `supabase db push`
+- [ ] Types regenerated via `pnpm db:types` reflect the new tables
+- [ ] `@tanstack/react-query` installed and `QueryClientProvider` in `providers.tsx`
+- [ ] `getQueryClient()` and `queryKeys` available in `src/lib/`
+- [ ] `backoffice_users` with adjusted RLS (read for all roles, write only for `super_admin`)
+- [ ] `docs/architecture/conventions.md` updated with the RLS and roles pattern

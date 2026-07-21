@@ -1,21 +1,21 @@
 # Design System — Vello Finance
 
-## Identidade Visual
+## Visual Identity
 
-Baseado no brand guide oficial da Vello Finance.
-Aplicado em: `apps/admin`, `apps/console`, `apps/store`.
+Based on the official Vello Finance brand guide.
+Applied in: `apps/admin`, `apps/console`, `apps/store`.
 
 ---
 
-## Tipografia
+## Typography
 
-**Fonte:** Geist (Vercel) — instalada via pacote `geist`, não via Google Fonts.
+**Font:** Geist (Vercel) — installed via the `geist` package, not via Google Fonts.
 
 ```bash
 pnpm add geist --filter=admin --filter=console --filter=store
 ```
 
-### Configuração no Next.js
+### Next.js Configuration
 
 ```typescript
 // apps/[admin|console|store]/app/layout.tsx
@@ -31,58 +31,58 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### Escala tipográfica
+### Type scale
 
-| Token | Tamanho | Peso | Uso |
+| Token | Size | Weight | Use |
 |---|---|---|---|
-| `text-xs` | 11px | 400 | Labels de tabela, badges |
-| `text-sm` | 12px | 400 | Texto de corpo, células de tabela |
-| `text-base` | 13px | 400 | Texto padrão de UI |
-| `text-md` | 14px | 500 | Títulos de seção, topbar |
-| `text-lg` | 16px | 500 | Headings de card |
-| `text-xl` | 20px | 600 | Valores de métricas |
-| `text-2xl` | 24px | 600 | Valores grandes de dashboard |
-| `text-display` | 32px+ | 600 | Títulos de página (raros no admin) |
+| `text-xs` | 11px | 400 | Table labels, badges |
+| `text-sm` | 12px | 400 | Body text, table cells |
+| `text-base` | 13px | 400 | Default UI text |
+| `text-md` | 14px | 500 | Section titles, topbar |
+| `text-lg` | 16px | 500 | Card headings |
+| `text-xl` | 20px | 600 | Metric values |
+| `text-2xl` | 24px | 600 | Large dashboard values |
+| `text-display` | 32px+ | 600 | Page titles (rare in admin) |
 
 ---
 
-## Paleta de Cores
+## Color Palette
 
-### Cores da Marca (brand guide)
+### Brand Colors (brand guide)
 
 ```typescript
 // packages/config/src/tokens.ts
 export const velloColors = {
-  // Primárias
+  // Primary
   blue: {
-    DEFAULT: '#3B5BBE',   // Azul principal Vello
-    light:   '#5C7EDB',   // Hover states, variações
+    DEFAULT: '#3B5BBE',   // Vello main blue
+    light:   '#5C7EDB',   // Hover states, variations
     dark:    '#2A4491',   // Active states, pressed
-    subtle:  '#EEF2FF',   // Backgrounds sutis (light mode)
+    subtle:  '#EEF2FF',   // Subtle backgrounds (light mode)
   },
-  navy: '#1E3A5F',        // Cor secundária escura
+  navy: '#1E3A5F',        // Dark secondary color
   sky:  '#7EC8E3',        // Accent / highlight
-  // Neutros
+  // Neutrals
   gray: {
-    bg:     '#F0F2F7',    // Background da página (light)
-    border: '#E4E7F0',    // Bordas (light)
+    bg:     '#F0F2F7',    // Page background (light)
+    border: '#E4E7F0',    // Borders (light)
   },
 }
 ```
 
-### Mapeamento para CSS Variables (shadcn)
+### Mapping to CSS Variables (shadcn)
 
-O shadcn usa CSS variables no padrão HSL. Mapeamento da paleta Vello:
+shadcn uses CSS variables in HSL format. Mapping of the Vello palette:
 
 ```
-Azul Vello #3B5BBE → hsl(228, 51%, 48%)
-Azul Light #5C7EDB → hsl(224, 62%, 61%)
-Azul Dark  #2A4491 → hsl(228, 54%, 37%)
+Vello Blue #3B5BBE → hsl(228, 51%, 48%)
+Light Blue #5C7EDB → hsl(224, 62%, 61%)
+Dark Blue  #2A4491 → hsl(228, 54%, 37%)
 Navy       #1E3A5F → hsl(214, 52%, 24%)
 Sky        #7EC8E3 → hsl(198, 63%, 69%)
 ```
 
-### Temas Light e Dark
+### Light and Dark Themes
 
 ```css
 /* apps/admin/app/globals.css */
@@ -105,7 +105,7 @@ Sky        #7EC8E3 → hsl(198, 63%, 69%)
   --popover:            0 0% 100%;
   --popover-foreground: 222 47% 11%;
 
-  --primary:            228 51% 48%;      /* Azul Vello */
+  --primary:            228 51% 48%;      /* Vello Blue */
   --primary-foreground: 0 0% 100%;
 
   --secondary:          220 14% 96%;
@@ -143,7 +143,7 @@ Sky        #7EC8E3 → hsl(198, 63%, 69%)
   --popover:            240 6% 10%;
   --popover-foreground: 0 0% 95%;
 
-  --primary:            224 62% 61%;      /* Azul mais claro no dark */
+  --primary:            224 62% 61%;      /* Lighter blue in dark mode */
   --primary-foreground: 0 0% 100%;
 
   --secondary:          240 4% 16%;       /* zinc-800 */
@@ -166,7 +166,7 @@ Sky        #7EC8E3 → hsl(198, 63%, 69%)
 
 ---
 
-## Configuração do Tailwind
+## Tailwind Configuration
 
 ```typescript
 // packages/config/tailwind.base.ts
@@ -181,7 +181,7 @@ export const tailwindBase: Partial<Config> = {
         mono: ['var(--font-geist-mono)', 'monospace'],
       },
       colors: {
-        // Cores da marca Vello (uso direto em classes)
+        // Vello brand colors (used directly in classes)
         vello: {
           blue:   '#3B5BBE',
           light:  '#5C7EDB',
@@ -190,7 +190,7 @@ export const tailwindBase: Partial<Config> = {
           sky:    '#7EC8E3',
           subtle: '#EEF2FF',
         },
-        // Alias para shadcn (CSS variables)
+        // Alias for shadcn (CSS variables)
         border:     'hsl(var(--border))',
         input:      'hsl(var(--input))',
         ring:       'hsl(var(--ring))',
@@ -250,12 +250,12 @@ export default config
 
 ---
 
-## Componentes Base (shadcn)
+## Base Components (shadcn)
 
-### Instalação por app
+### Installation per app
 
 ```bash
-# Instalar componentes usados no Admin (instalar conforme necessário)
+# Install components used in Admin (install as needed)
 cd apps/admin
 npx shadcn@latest add button
 npx shadcn@latest add input
@@ -271,30 +271,30 @@ npx shadcn@latest add avatar
 npx shadcn@latest add sonner
 ```
 
-### Componentes customizados (já presentes — não reinstalar via shadcn)
+### Custom components (already present — do not reinstall via shadcn)
 
-| Componente | Arquivo | Descrição |
+| Component | File | Description |
 |---|---|---|
-| `Badge` | `components/ui/badge.tsx` | Status badges com variantes cva |
-| `Toggle` | `components/ui/toggle.tsx` | Botão toggle acessível (Radix) |
-| `ToggleGroup` | `components/ui/toggle-group.tsx` | Grupo de toggles exclusivos |
-| `ButtonGroup` | `components/ui/button-group.tsx` | Agrupa botões relacionados |
+| `Badge` | `components/ui/badge.tsx` | Status badges with cva variants |
+| `Toggle` | `components/ui/toggle.tsx` | Accessible toggle button (Radix) |
+| `ToggleGroup` | `components/ui/toggle-group.tsx` | Group of exclusive toggles |
+| `ButtonGroup` | `components/ui/button-group.tsx` | Groups related buttons |
 
-### Customizações da marca aplicadas via CSS variables
+### Brand customizations applied via CSS variables
 
-Não editar os arquivos do shadcn em `components/ui/` diretamente.
-Customizações de cor são feitas via `globals.css` nos CSS variables mapeados acima.
+Do not edit shadcn files in `components/ui/` directly.
+Color customizations are made via `globals.css` in the CSS variables mapped above.
 
 ---
 
-## Status Badges — Padrão de Cores
+## Status Badges — Color Pattern
 
-| Status | Light bg | Light text | Dark bg | Dark text | Uso |
+| Status | Light bg | Light text | Dark bg | Dark text | Use |
 |---|---|---|---|---|---|
-| `active` | `#DCFCE7` | `#166534` | `#14532D` | `#86EFAC` | Tenant ativo, proposta paga |
-| `pending` | `#FEF9C3` | `#854D0E` | `#422006` | `#FDE047` | Aguardando ação |
-| `suspended` | `#FEE2E2` | `#991B1B` | `#450A0A` | `#FCA5A5` | Suspenso |
-| `cancelled` | `#F1F5F9` | `#64748B` | `#27272A` | `#71717A` | Cancelado |
-| `approved` | `#DCFCE7` | `#166534` | `#14532D` | `#86EFAC` | Proposta aprovada |
-| `rejected` | `#FEE2E2` | `#991B1B` | `#450A0A` | `#FCA5A5` | Proposta reprovada |
-| `info` | `#EEF2FF` | `#3B5BBE` | `#1E2D5A` | `#7B9EEE` | Informativo / neutro |
+| `active` | `#DCFCE7` | `#166534` | `#14532D` | `#86EFAC` | Active tenant, paid proposal |
+| `pending` | `#FEF9C3` | `#854D0E` | `#422006` | `#FDE047` | Awaiting action |
+| `suspended` | `#FEE2E2` | `#991B1B` | `#450A0A` | `#FCA5A5` | Suspended |
+| `cancelled` | `#F1F5F9` | `#64748B` | `#27272A` | `#71717A` | Cancelled |
+| `approved` | `#DCFCE7` | `#166534` | `#14532D` | `#86EFAC` | Approved proposal |
+| `rejected` | `#FEE2E2` | `#991B1B` | `#450A0A` | `#FCA5A5` | Rejected proposal |
+| `info` | `#EEF2FF` | `#3B5BBE` | `#1E2D5A` | `#7B9EEE` | Informational / neutral |

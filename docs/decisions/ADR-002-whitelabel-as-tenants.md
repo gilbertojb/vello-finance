@@ -1,41 +1,41 @@
-# ADR-002: White-Labels como Instâncias, não Repositórios
+# ADR-002: White-Labels as Instances, not Repositories
 
-**Data:** Abril 2026 · **Status:** Aceito
+**Date:** April 2026 · **Status:** Accepted
 
-## Contexto
+## Context
 
-A plataforma oferece white-label onde cada cliente tem domínio e identidade visual próprios.
-A abordagem inicial considerada era criar um repositório ou branch por cliente.
+The platform offers white-label where each client has their own domain and visual identity.
+The initial approach considered was creating a separate repository or branch per client.
 
-## Decisão
+## Decision
 
-White-labels são **dados no banco**, não código separado. Cada white-label é um tenant
-com `custom_domain` preenchido. O roteamento é feito pelo middleware do Next.js que lê
-o hostname e resolve o tenant_id correspondente. A Vercel gerencia os domínios customizados
-via API programática.
+White-labels are **data in the database**, not separate code. Each white-label is a tenant
+with `custom_domain` filled in. Routing is handled by Next.js middleware that reads
+the hostname and resolves the corresponding tenant_id. Vercel manages custom domains
+via a programmatic API.
 
 ```
-Novo white-label contratado
-  → INSERT em tenants (custom_domain preenchido)
-  → Cliente aponta CNAME no DNS
-  → Vercel API registra o domínio + SSL automático
-  → Store e Console respondem no novo domínio com identidade do tenant
+New white-label contracted
+  → INSERT into tenants (custom_domain filled in)
+  → Client points CNAME in DNS
+  → Vercel API registers the domain + automatic SSL
+  → Store and Console respond on the new domain with the tenant's identity
 ```
 
-Zero código novo. Zero deploy. Zero repositório novo.
+Zero new code. Zero deploy. Zero new repository.
 
-## Consequências
+## Consequences
 
-**Positivas:** onboarding de white-label operacional sem envolvimento do time de engenharia ·
-manutenção centralizada (bug fix em um lugar corrige todos os white-labels) ·
-escala linear sem complexidade operacional crescente.
+**Positive:** white-label onboarding operational without engineering team involvement ·
+centralized maintenance (a bug fix in one place fixes all white-labels) ·
+linear scaling without growing operational complexity.
 
-**Negativas:** customizações muito específicas de um white-label não podem ser feitas
-sem afetar todos (mitigado pelo sistema de configuração via banco: cores, logo, produtos, textos).
+**Negative:** highly specific customizations for a single white-label can't be made
+without affecting all of them (mitigated by the database-driven configuration system: colors, logo, products, texts).
 
-## Alternativas Descartadas
+## Alternatives Discarded
 
-**Repositório por cliente:** inviável — cada novo contrato exige trabalho de engenharia,
-migrations duplicadas e impossibilidade de atualizar todos os clientes simultaneamente.
+**Repository per client:** unfeasible — every new contract requires engineering work,
+duplicated migrations, and the impossibility of updating all clients simultaneously.
 
-**Branch por cliente:** mesmo problema, com conflitos de merge adicionais.
+**Branch per client:** same problem, with additional merge conflicts.

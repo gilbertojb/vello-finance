@@ -1,25 +1,25 @@
-# Spec — Contratação: FGTS (Antecipação Saque Aniversário)
+# Spec — Application: FGTS (Birthday Withdrawal Anticipation)
 
-**Data:** 2026-05-17
-**Slug da esteira:** `fgts`
-**Rota:** `/contratar/fgts`
-**Status:** Aprovado
+**Date:** 2026-05-17
+**Flow slug:** `fgts`
+**Route:** `/contratar/fgts`
+**Status:** Approved
 
 ---
 
-## Simulação
+## Simulation
 
-O FGTS **não tem simulação** — ao clicar no produto na tela de seleção de Pessoa Física, o cliente é redirecionado diretamente para o fluxo de contratação:
+FGTS **has no simulation** — when clicking the product on the Individual (Pessoa Física) selection screen, the customer is redirected directly to the application flow:
 
 ```
 /contratar/fgts?productId={uuid}
 ```
 
-O formulário de simulação em `/simulador/pessoa-fisica/fgts` pode ser mantido como estimativa opcional, mas a CTA primária vai direto para contratação.
+The simulation form at `/simulador/pessoa-fisica/fgts` can be kept as an optional estimate, but the primary CTA goes straight to the application.
 
 ---
 
-## Etapa 1 — Dados para Análise
+## Step 1 — Data for Analysis
 
 ### Steps
 
@@ -29,72 +29,72 @@ liberacao-saque → liberacao-bancos → verificar-margem → dados-bancarios �
 
 ---
 
-### Step 1: `liberacao-saque` — Liberação do Saque Aniversário
+### Step 1: `liberacao-saque` — Birthday Withdrawal Activation
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Já liberou o Saque Aniversário no app do FGTS? | select (Sim/Não) | Se Sim → habilitar "Prosseguir". Se Não → exibir vídeo explicativo + descrição de como fazer. Botão "Já realizei" → habilitar "Prosseguir" |
+| Have you already activated the Birthday Withdrawal in the FGTS app? | select (Yes/No) | If Yes → enable "Continue". If No → show explainer video + instructions on how to do it. "I already did it" button → enable "Continue" |
 
-> Nota: exibir instrução passo a passo de como ativar o Saque Aniversário no app Caixa FGTS.
+> Note: show step-by-step instructions on how to activate the Birthday Withdrawal in the Caixa FGTS app.
 
 ---
 
-### Step 2: `liberacao-bancos` — Autorização dos Bancos no FGTS
+### Step 2: `liberacao-bancos` — Bank Authorization on FGTS
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Já autorizou bancos no seu FGTS? | select (Sim/Não) | Se Sim → habilitar "Prosseguir". Se Não → exibir vídeo explicativo + instrução. Botão "Já realizei" → habilitar "Prosseguir" |
+| Have you already authorized banks on your FGTS? | select (Yes/No) | If Yes → enable "Continue". If No → show explainer video + instructions. "I already did it" button → enable "Continue" |
 
 ---
 
-### Step 3: `verificar-margem` — Dados para Consulta de Margem
+### Step 3: `verificar-margem` — Data for Margin Check
 
-> Headline: "Não se preocupe — a cada etapa concluída, sua proposta fica salva automaticamente."
+> Headline: "Don't worry — your application is automatically saved after each completed step."
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Nome completo | text | Pré-preenchido se veio da simulação, editável. Mínimo 2 palavras |
-| CPF | text | Obrigatório, validação automática |
-| RG | text | Obrigatório |
-| Data de nascimento | date | Bloquear se ≥ 70 anos |
-| E-mail | email | Obrigatório |
-| WhatsApp | tel | Pré-preenchido se veio da simulação. DDI +55 |
+| Full name | text | Pre-filled if coming from the simulation, editable. Minimum 2 words |
+| CPF | text | Required, automatic validation |
+| RG | text | Required |
+| Date of birth | date | Block if ≥ 70 years old |
+| Email | email | Required |
+| WhatsApp | tel | Pre-filled if coming from the simulation. Country code +55 |
 
 ---
 
-### Step 4: `dados-bancarios` — Dados Bancários
+### Step 4: `dados-bancarios` — Bank Details
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Banco | select | Lista de bancos cadastrados |
-| Agência | text | Apenas números |
-| Conta-corrente | text | Apenas números |
-| Chave PIX | text | Opcional |
-| Confirmação | checkbox | "Confirmo que esta conta está em meu nome." Obrigatório. |
+| Bank | select | List of registered banks |
+| Branch (Agência) | text | Numbers only |
+| Checking account | text | Numbers only |
+| PIX key | text | Optional |
+| Confirmation | checkbox | "I confirm this account is in my name." Required. |
 
-Erro: "A conta informada não corresponde ao titular do crédito. Utilize uma conta bancária em seu nome."
+Error: "The account provided does not match the credit holder. Use a bank account in your own name."
 
 ---
 
-### Step 5: `retorno` — Confirmação e Retorno
+### Step 5: `retorno` — Confirmation and Return
 
-Resumo da simulação (se veio da simulação):
-- Crédito estimado
-- Parcelas (informativas)
-- Juros (informativos)
+Simulation summary (if coming from the simulation):
+- Estimated credit
+- Installments (informational)
+- Interest (informational)
 
-Mensagem: *"Recebemos seus dados e já começamos a análise! Fique de olho no WhatsApp e no e-mail, em breve você recebe um retorno."*
+Message: *"We've received your information and have already started the analysis! Keep an eye on WhatsApp and email — you'll hear back from us soon."*
 
 `finalizeEtapa1` → status `proposta_criada`.
 
 ---
 
-## Etapa 2
+## Step 2
 
-O FGTS não possui Etapa 2 de documentos. Após aprovação pelo consultor, o cliente recebe o link diretamente para finalização.
+FGTS has no Step 2 for documents. After approval by the consultant, the customer receives the link directly to finalize.
 
-### Finalização
+### Finalization
 
-Página `/proposta/[proposalId]/finalizado`.
+Page `/proposta/[proposalId]/finalizado`.
 
-Mensagem: *"Obrigado pelo envio das informações e documentos! Em breve, você receberá o link para seguir com a contratação do crédito. Fique atento ao seu e-mail e WhatsApp, entraremos em contato por lá com os próximos passos!"*
+Message: *"Thank you for submitting your information and documents! You will soon receive the link to proceed with the credit application. Keep an eye on your email and WhatsApp — we'll reach out there with the next steps!"*

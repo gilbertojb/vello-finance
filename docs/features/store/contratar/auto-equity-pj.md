@@ -1,21 +1,21 @@
-# Spec — Contratação: Auto Equity Pessoa Jurídica (Crédito com Garantia de Veículo PJ)
+# Spec — Application: Auto Equity Legal Entity (Vehicle-Backed Credit PJ)
 
-**Data:** 2026-05-17
-**Slug da esteira:** `auto_equity_pj`
-**Rota:** `/contratar/auto-equity-pj`
-**Status:** Aprovado
-
----
-
-## Simulação
-
-Formulário existente em `/simulador/pessoa-juridica/veiculo-em-garantia`. Sem alterações.
-
-CTA: **"Quero contratar"** → `/contratar/auto-equity-pj?productId={uuid}&simulationId={uuid}`
+**Date:** 2026-05-17
+**Flow slug:** `auto_equity_pj`
+**Route:** `/contratar/auto-equity-pj`
+**Status:** Approved
 
 ---
 
-## Etapa 1 — Dados para Análise
+## Simulation
+
+Existing form at `/simulador/pessoa-juridica/veiculo-em-garantia`. No changes.
+
+CTA: **"I want to apply"** → `/contratar/auto-equity-pj?productId={uuid}&simulationId={uuid}`
+
+---
+
+## Step 1 — Data for Analysis
 
 ### Steps
 
@@ -25,64 +25,64 @@ operacao → dados-empresa → atividade-faturamento → dados-socios → retorn
 
 ---
 
-### Step 1: `operacao` — Informações sobre a Operação
+### Step 1: `operacao` — Information about the Transaction
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Tipo de veículo | select | Carro, Caminhão, Moto |
-| Veículo financiado? | select (Sim/Não) | Se Sim → **bloquear**: "No momento, não conseguimos seguir com essa operação porque o veículo informado ainda possui um financiamento ativo." |
-| Placa do veículo | text | Validação de formato de placa |
-| Ano de fabricação | select | Bloquear se > 15 anos: "Este veículo não atende aos requisitos mínimos de ano de fabricação." |
-| Motivo do crédito | select | Quitar dívidas pessoais, Quitar dívidas da empresa, Investir em negócio próprio, Reforma ou construção, Aquisição de outro imóvel, Projetos pessoais, Outros |
+| Vehicle type | select | Car, Truck, Motorcycle |
+| Vehicle financed? | select (Yes/No) | If Yes → **block**: "At this time, we can't proceed with this transaction because the vehicle provided still has an active financing agreement." |
+| Vehicle license plate | text | License plate format validation |
+| Manufacturing year | select | Block if > 15 years: "This vehicle does not meet the minimum manufacturing year requirements." |
+| Reason for credit | select | Pay off personal debts, Pay off company debts, Invest in own business, Renovation or construction, Purchase of another property, Personal projects, Other |
 
 ---
 
-### Step 2: `dados-empresa` — Dados da Empresa
+### Step 2: `dados-empresa` — Company Data
 
-> Headline: "Não se preocupe — a cada etapa concluída, sua proposta fica salva automaticamente."
+> Headline: "No worries — your application is saved automatically after each completed step."
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Razão Social | text | Letras e números |
-| CNPJ | text | Apenas números, validação automática |
-| Tempo de empresa | select | Menos de 3 anos → **bloquear**: "É necessário ter no mínimo 3 anos de empresa para esta linha de crédito.", Mais de 3 anos |
+| Legal name | text | Letters and numbers |
+| CNPJ (company tax ID) | text | Numbers only, automatic validation |
+| Company age | select | Less than 3 years → **block**: "A minimum of 3 years in business is required for this credit line.", More than 3 years |
 
 ---
 
-### Step 3: `atividade-faturamento` — Atividade e Faturamento
+### Step 3: `atividade-faturamento` — Business Activity and Revenue
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Atividade da empresa | text | Livre |
-| Faturamento mensal | currency | R$ automático |
+| Company activity | text | Free text |
+| Monthly revenue | currency | Auto-formatted currency (R$) |
 
 ---
 
-### Step 4: `dados-socios` — Dados dos Sócios
+### Step 4: `dados-socios` — Partner Data
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Quantidade de sócios | number | Exibir N blocos de campos |
+| Number of partners | number | Display N field blocks |
 
-Por sócio:
-- Nome completo (mínimo 2 palavras)
-- CPF (validação automática)
-- Data de nascimento (bloquear ≥ 70 anos)
-- E-mail
-- WhatsApp (DDI +55)
-- Estado civil: se Casado → mesmos dados pessoais do cônjuge
+Per partner:
+- Full name (minimum 2 words)
+- CPF (individual tax ID, automatic validation)
+- Date of birth (block if ≥ 70 years old)
+- Email
+- WhatsApp (country code +55)
+- Marital status: if Married → same personal data required for spouse
 
 ---
 
-### Step 5: `retorno` — Confirmação e Retorno
+### Step 5: `retorno` — Confirmation and Return
 
-Resumo da simulação. Mensagem: *"Tudo certo por aqui! Recebemos suas informações e já iniciamos a análise da sua proposta."*
+Simulation summary. Message: *"All set! We've received your information and have already started reviewing your application."*
 
 `finalizeEtapa1` → status `proposta_criada`.
 
 ---
 
-## Etapa 2 — Documentos e Dados Bancários
+## Step 2 — Documents and Banking Data
 
 ### Steps
 
@@ -94,48 +94,48 @@ dados-bancarios → documentos-empresa → documentos-pessoais-socios → docume
 
 ### Step 6: `dados-bancarios`
 
-Banco, Agência, Conta-corrente, Chave PIX, Checkbox titularidade.
+Bank, Branch, Checking account, PIX key, Account ownership checkbox.
 
 ---
 
 ### Step 7: `documentos-empresa`
 
 Checklist:
-- CNPJ
-- Contrato Social atualizado
-- Comprovante de endereço da empresa
-- Balanço Patrimonial do último ano
-- Balancete dos últimos 3 meses
-- DRE do último ano ou Simples Nacional
-- Relação dos últimos 12 faturamentos (com assinatura do contador)
-- Extrato bancário PJ (últimos 3 meses)
-- Fotos da empresa (fachada e interior, JPEG)
-- RG e CPF (frente e verso) dos sócios
+- CNPJ (company tax ID)
+- Updated Articles of Incorporation
+- Proof of company address
+- Balance sheet for the last year
+- Trial balance for the last 3 months
+- Income statement (DRE) for the last year or Simples Nacional tax filing
+- Statement of the last 12 months' revenue (signed by the accountant)
+- Company (PJ) bank statement (last 3 months)
+- Photos of the company (facade and interior, JPEG)
+- ID and CPF (front and back) for the partners
 
 ---
 
-### Step 8: `documentos-pessoais-socios` — Docs Pessoais dos Sócios
+### Step 8: `documentos-pessoais-socios` — Partners' Personal Documents
 
-Por sócio (e cônjuge, se aplicável):
-- RG e CPF (frente e verso)
-- Comprovante de estado civil
-- Comprovante de endereço (últimos 3 meses)
-- Declaração do IR com recibo de entrega
+Per partner (and spouse, if applicable):
+- ID and CPF (front and back)
+- Proof of marital status
+- Proof of address (last 3 months)
+- Income tax return with filing receipt
 
 ---
 
-### Step 9: `documentos-veiculo` — Documentos do Veículo
+### Step 9: `documentos-veiculo` — Vehicle Documents
 
 Checklist:
-- CRLV do veículo
-- Foto traseira (JPEG)
-- Foto da placa traseira (JPEG)
-- Foto do chassi (JPEG)
+- Vehicle registration certificate (CRLV)
+- Rear photo (JPEG)
+- Rear license plate photo (JPEG)
+- Chassis photo (JPEG)
 
-Botão "Finalizar Envio" → `finalizeEtapa2` → `/proposta/[proposalId]/finalizado`.
+"Submit" button → `finalizeEtapa2` → `/proposta/[proposalId]/finalizado`.
 
 ---
 
 ### Step 10: `finalizado`
 
-Mensagem: *"Recebemos seus documentos, obrigado! Agora, nossa equipe jurídica e os analistas de crédito estão cuidando da análise para seguir para a formalização do contrato."*
+Message: *"Thank you, we've received your documents! Our legal team and credit analysts are now reviewing everything before moving on to the contract stage."*

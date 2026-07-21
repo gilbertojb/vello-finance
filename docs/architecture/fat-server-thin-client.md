@@ -1,13 +1,13 @@
-# Arquitetura: Fat Server, Thin Client
+# Architecture: Fat Server, Thin Client
 
-## Regra central
+## Core Rule
 
-O browser NUNCA fala diretamente com o Supabase.
-Toda chamada ao banco é feita no servidor (Server Components, Server Actions, Route Handlers).
+The browser NEVER talks directly to Supabase.
+Every database call is made on the server (Server Components, Server Actions, Route Handlers).
 
-## Exemplos
+## Examples
 
-**✅ CORRETO — dados buscados no servidor:**
+**Correct — data fetched on the server:**
 ```tsx
 // app/(app)/plans/page.tsx — Server Component
 import { createClient } from '@/lib/supabase/server'
@@ -19,58 +19,58 @@ export default async function PlansPage() {
 }
 ```
 
-**❌ ERRADO — dados buscados no cliente:**
+**Wrong — data fetched on the client:**
 ```tsx
 'use client'
-import { createClient } from '@/lib/supabase/client' // NUNCA em páginas de dados
+import { createClient } from '@/lib/supabase/client' // NEVER on data pages
 
 export default function PlansPage() {
   const [plans, setPlans] = useState([])
   useEffect(() => {
-    createClient().from('plans').select('*').then(...) // PROIBIDO
+    createClient().from('plans').select('*').then(...) // FORBIDDEN
   }, [])
 }
 ```
 
-**✅ CORRETO — mutação via Server Action:**
+**Correct — mutation via Server Action:**
 ```tsx
 // app/(app)/plans/actions.ts
 'use server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function createPlan(formData: FormData) {
-  const supabase = await createClient() // server client — não exposto
+  const supabase = await createClient() // server client — not exposed
   await supabase.from('plans').insert(...)
 }
 ```
 
-**❌ ERRADO — mutação via fetch do cliente:**
+**Wrong — mutation via client fetch:**
 ```tsx
 'use client'
-// NUNCA chamar supabase.from() direto no client component para mutações
+// NEVER call supabase.from() directly in a client component for mutations
 ```
 
-## Quando `supabase/client.ts` pode ser usado
+## When `supabase/client.ts` can be used
 
-Apenas para estes casos específicos, sem acesso ao banco:
-- `supabase.auth.getUser()` — verificar sessão ativa no cliente
+Only for these specific cases, with no database access:
+- `supabase.auth.getUser()` — check active session on the client
 - `supabase.auth.signOut()` — logout
-- Subscriptions de Realtime (quando notificações em tempo real forem necessárias — documentar explicitamente)
+- Realtime subscriptions (when real-time notifications are needed — document explicitly)
 
-## Fluxo de dados obrigatório
+## Required data flow
 
 ```
-Browser                    Servidor (Next.js)           Supabase
+Browser                    Server (Next.js)             Supabase
   │                               │                         │
-  │── clica em "Salvar" ─────────▶│                         │
+  │── clicks "Save" ──────────────▶│                         │
   │                        Server Action                    │
   │                               │── INSERT/SELECT ───────▶│
-  │                               │◀── resultado ───────────│
-  │◀── redirect ou toast ─────────│                         │
+  │                               │◀── result ───────────────│
+  │◀── redirect or toast ─────────│                         │
 ```
 
-## Verificação antes de criar qualquer arquivo
+## Checklist before creating any file
 
-1. Este arquivo tem `'use client'`? → NÃO pode importar `supabase/server` nem fazer queries
-2. Este arquivo é Server Component ou tem `'use server'`? → PODE fazer queries
-3. Preciso de dado no cliente? → receba via props do Server Component pai
+1. Does this file have `'use client'`? → It CANNOT import `supabase/server` or run queries
+2. Is this file a Server Component or does it have `'use server'`? → It CAN run queries
+3. Do I need data on the client? → Receive it via props from the parent Server Component

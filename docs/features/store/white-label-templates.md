@@ -1,55 +1,55 @@
-# Spec: Sistema de Templates White-label — Vello Store
+# Spec: White-label Template System — Vello Store
 
-**Status:** Implementado (v1)
-**Escopo:** `apps/store`
+**Status:** Implemented (v1)
+**Scope:** `apps/store`
 **Migration:** `supabase/migrations/20260511000000_add_template_id_tenant_branding.sql`
 
 ---
 
-## 1. Contexto e objetivo
+## 1. Context and goal
 
-A Vello Store serve dois tipos de tenant (`tenants.type`):
+The Vello Store serves two tenant types (`tenants.type`):
 
-| Tipo | Customização permitida |
+| Type | Customization allowed |
 |---|---|
-| `subscription` | Logo + nome (via `logo_url` e `company_display_name` no banco) |
-| `whitelabel` | Home page 100% customizada via template de código |
+| `subscription` | Logo + name (via `logo_url` and `company_display_name` in the database) |
+| `whitelabel` | 100% custom home page via a code template |
 
-**Princípios:**
-- Assinantes usam sempre o template `default` — nunca configuram copy
-- White-labels recebem um template completo desenvolvido e deployado por um dev da Vello
-- O banco registra apenas qual template usar (`template_id`). Todo conteúdo e layout vivem no código
-- Do simulador em diante, todos os tenants compartilham o mesmo layout padrão — só as cores mudam via CSS variables
+**Principles:**
+- Subscription tenants always use the `default` template — they never configure copy
+- White-labels receive a full template developed and deployed by a Vello developer
+- The database only records which template to use (`template_id`). All content and layout live in code
+- From the simulator onward, all tenants share the same standard layout — only the colors change via CSS variables
 
 ---
 
-## 2. Separação de responsabilidades
+## 2. Separation of responsibilities
 
-| Área | Quem customiza | Como |
+| Area | Who customizes | How |
 |---|---|---|
-| Home (`/`) | Template | Componente completo por template, com header/footer próprios |
-| Simulador, Solicitar, Produto | Todos os tenants compartilham | CSS variables geradas das cores do template |
-| Cores (CSS vars) | Template (via `config.ts`) | `generateThemeCss(template.colors)` no `layout.tsx` raiz |
-| Logo / nome | DB (`tenant_branding`) | Passado como props para os componentes do template |
+| Home (`/`) | Template | Full component per template, with its own header/footer |
+| Simulator, Request, Product | Shared by all tenants | CSS variables generated from the template colors |
+| Colors (CSS vars) | Template (via `config.ts`) | `generateThemeCss(template.colors)` in the root `layout.tsx` |
+| Logo / name | DB (`tenant_branding`) | Passed as props to the template components |
 
 ---
 
-## 3. Arquitetura
+## 3. Architecture
 
-### 3.1 Estrutura de arquivos
+### 3.1 File structure
 
 ```
 apps/store/src/
 ├── app/
-│   ├── layout.tsx                  ← lê template_id, injeta CSS vars no <head>
+│   ├── layout.tsx                  ← reads template_id, injects CSS vars into <head>
 │   ├── (home)/
-│   │   └── page.tsx                ← dispatcher: resolve template → renderiza HomeComponent
+│   │   └── page.tsx                ← dispatcher: resolves template → renders HomeComponent
 │   └── (store)/
-│       ├── layout.tsx              ← layout padrão (StoreHeader + StoreFooter) para simulador e além
+│       ├── layout.tsx              ← standard layout (StoreHeader + StoreFooter) for simulator and beyond
 │       ├── _components/
-│       │   ├── store-header.tsx    ← header padrão (usado por assinantes e simulador/solicitar)
-│       │   ├── store-footer.tsx    ← footer padrão
-│       │   ├── product-card.tsx    ← card de produto (reutilizável pelos templates)
+│       │   ├── store-header.tsx    ← standard header (used by subscribers and simulator/request)
+│       │   ├── store-footer.tsx    ← standard footer
+│       │   ├── product-card.tsx    ← product card (reusable across templates)
 │       │   ├── produto-selector.tsx
 │       │   └── simulador-step-indicator.tsx
 │       ├── simulador/...
@@ -60,44 +60,44 @@ apps/store/src/
     ├── _types.ts                   ← TemplateConfig, TemplateHomeProps, TemplateHomeProduct
     ├── index.ts                    ← getTemplate(), getHomeComponent()
     │
-    ├── default/                    ← template Vello (assinantes + fallback)
+    ├── default/                    ← Vello template (subscribers + fallback)
     │   ├── config.ts               ← id + colors
-    │   ├── home.tsx                ← HomeComponent completo (header/footer/seções)
+    │   ├── home.tsx                ← full HomeComponent (header/footer/sections)
     │   └── _components/
     │       ├── hero-section.tsx
     │       ├── products-section.tsx
     │       ├── how-it-works.tsx
     │       └── cta-banner.tsx
     │
-    └── zp/                         ← white-label ZP Pay
+    └── zp/                         ← ZP Pay white-label
         ├── config.ts
         ├── home.tsx
         └── _components/
-            ├── header.tsx          ← header próprio (logo ZP + nav ZP)
-            ├── footer.tsx          ← footer próprio
+            ├── header.tsx          ← own header (ZP logo + ZP nav)
+            ├── footer.tsx          ← own footer
             ├── hero-section.tsx
             ├── products-section.tsx
             ├── how-it-works.tsx
             └── cta-banner.tsx
 ```
 
-### 3.2 Fluxo de resolução
+### 3.2 Resolution flow
 
 ```
 Request → middleware → x-tenant-id header
                             ↓
-                   layout.tsx (raiz)
+                   layout.tsx (root)
                    getTenantBranding(tenantId)
                    getTemplate(branding.template_id)
                    generateThemeCss(template.colors)
-                   → injeta <style> no <head> (sobrescreve globals.css)
+                   → injects <style> into <head> (overrides globals.css)
                             ↓
-                   (home)/page.tsx  (rota /)
+                   (home)/page.tsx  (route /)
                    getHomeComponent(branding.template_id)
-                   → renderiza HomeComponent com { displayName, logoUrl, products }
+                   → renders HomeComponent with { displayName, logoUrl, products }
 ```
 
-### 3.3 Tipos centrais
+### 3.3 Core types
 
 ```typescript
 // _types.ts
@@ -108,11 +108,11 @@ export type ColorTokens = {
   primary:    OklchColor
   background: OklchColor
   surface:    OklchColor
-  // foreground, card, secondary etc. são derivados por generateThemeCss()
+  // foreground, card, secondary, etc. are derived by generateThemeCss()
 }
 
 export type TemplateConfig = {
-  id:     string       // slug único: 'default', 'zp'
+  id:     string       // unique slug: 'default', 'zp'
   colors: ColorTokens
 }
 
@@ -144,33 +144,33 @@ export function getHomeComponent(templateId: string | null | undefined): Compone
 
 ---
 
-## 4. Sistema de cores
+## 4. Color system
 
-### 4.1 Tokens base e derivação
+### 4.1 Base tokens and derivation
 
-Cada template define 3 tokens em OKLCH. `generateThemeCss()` deriva automaticamente todos os outros:
+Each template defines 3 tokens in OKLCH. `generateThemeCss()` automatically derives all the others:
 
-| CSS Variable | Derivação |
+| CSS Variable | Derivation |
 |---|---|
-| `--primary` | `colors.primary` direto |
-| `--background` | `colors.background` direto |
-| `--surface` | `colors.surface` direto |
-| `--foreground` | contraste com background (claro ou escuro) |
-| `--primary-foreground` | contraste com primary |
-| `--surface-foreground` | contraste com surface |
+| `--primary` | `colors.primary` directly |
+| `--background` | `colors.background` directly |
+| `--surface` | `colors.surface` directly |
+| `--foreground` | contrast against background (light or dark) |
+| `--primary-foreground` | contrast against primary |
+| `--surface-foreground` | contrast against surface |
 | `--card` | background ± 0.04 L |
 | `--secondary` | background ± 0.08 L |
-| `--muted-foreground` | foreground com opacidade reduzida |
-| `--border` | primary / 0.12 opacidade |
+| `--muted-foreground` | foreground with reduced opacity |
+| `--border` | primary / 0.12 opacity |
 
-### 4.2 Cores por template
+### 4.2 Colors per template
 
 | Template | `primary` | `background` | `surface` |
 |---|---|---|---|
-| `default` (Vello) | `oklch(0.48 0.25 258)` — azul | `oklch(0.35 0.18 258)` — azul escuro | `oklch(0.42 0.17 258)` — azul médio |
-| `zp` (ZP Pay) | `oklch(0.83 0.10 85)` — âmbar | `oklch(0.13 0.015 45)` — marrom escuro | `oklch(0.97 0.01 85)` — off-white quente |
+| `default` (Vello) | `oklch(0.48 0.25 258)` — blue | `oklch(0.35 0.18 258)` — dark blue | `oklch(0.42 0.17 258)` — medium blue |
+| `zp` (ZP Pay) | `oklch(0.83 0.10 85)` — amber | `oklch(0.13 0.015 45)` — dark brown | `oklch(0.97 0.01 85)` — warm off-white |
 
-### 4.3 Injeção no layout
+### 4.3 Injection into the layout
 
 ```typescript
 // app/layout.tsx
@@ -178,15 +178,15 @@ const branding  = await getTenantBranding(tenantId)
 const template  = getTemplate(branding?.template_id)
 const themeCss  = generateThemeCss(template.colors)
 
-// injeta antes do CSS bundle → sobrescreve globals.css para todos os tenants
+// injects before the CSS bundle → overrides globals.css for all tenants
 <style dangerouslySetInnerHTML={{ __html: themeCss }} />
 ```
 
 ---
 
-## 5. Home page por template
+## 5. Home page per template
 
-A home (`/`) é um **componente React completo** por template — inclui header, footer e todas as seções. Não há layout compartilhado no route group `(home)`.
+The home page (`/`) is a **complete React component** per template — it includes header, footer, and all sections. There is no shared layout in the `(home)` route group.
 
 ### 5.1 Dispatcher
 
@@ -196,20 +196,20 @@ const HomeComponent = getHomeComponent(branding?.template_id)
 return <HomeComponent displayName={...} logoUrl={...} products={[...]} />
 ```
 
-### 5.2 Contrato do HomeComponent
+### 5.2 HomeComponent contract
 
-Cada template exporta uma função com a assinatura:
+Each template exports a function with the signature:
 ```typescript
 export function XyzHome({ displayName, logoUrl, products }: TemplateHomeProps): JSX.Element
 ```
 
-O componente é responsável por incluir seu próprio header e footer.
+The component is responsible for including its own header and footer.
 
 ---
 
-## 6. Rotas compartilhadas (simulador em diante)
+## 6. Shared routes (simulator onward)
 
-As rotas `/simulador/...`, `/solicitar/...`, `/produto/...` e `/confirmacao/...` usam o layout padrão definido em `(store)/layout.tsx`:
+The routes `/simulador/...`, `/solicitar/...`, `/produto/...`, and `/confirmacao/...` use the standard layout defined in `(store)/layout.tsx`:
 
 ```tsx
 <div className="flex min-h-svh flex-col">
@@ -219,62 +219,62 @@ As rotas `/simulador/...`, `/solicitar/...`, `/produto/...` e `/confirmacao/...`
 </div>
 ```
 
-Essas rotas **não** são customizadas por template — apenas as cores mudam via CSS variables.
+These routes are **not** customized per template — only the colors change via CSS variables.
 
 ---
 
-## 7. Banco de dados
+## 7. Database
 
-Única coluna nova em `tenant_branding`:
+Single new column in `tenant_branding`:
 
 ```sql
 ALTER TABLE tenant_branding
   ADD COLUMN IF NOT EXISTS template_id TEXT;
 
--- NULL = usa o template default da Vello
+-- NULL = uses Vello's default template
 ```
 
-**Ativação de white-label:**
+**White-label activation:**
 ```sql
 UPDATE tenant_branding
 SET template_id = 'zp'
-WHERE tenant_id = '<uuid-do-tenant>';
+WHERE tenant_id = '<tenant-uuid>';
 ```
 
-**Teste / rollback:**
+**Test / rollback:**
 ```sql
 UPDATE tenant_branding SET template_id = NULL WHERE tenant_id = '<uuid>';
 ```
 
 ---
 
-## 8. Workflow do dev para novo white-label
+## 8. Developer workflow for a new white-label
 
 ```
-1. Receber briefing: cores em hex, copy, logo em SVG/PNG, design das seções
-2. Criar apps/store/src/templates/<slug>/
-3. Converter cores para OKLCH → oklch.com
-4. Criar config.ts com id + colors
-5. Criar home.tsx com o HomeComponent completo
-6. Criar _components/ com header, footer e seções customizadas
-7. Registrar em templates/index.ts (configRegistry + homeRegistry)
-8. Deploy da store
+1. Receive briefing: colors in hex, copy, logo in SVG/PNG, section design
+2. Create apps/store/src/templates/<slug>/
+3. Convert colors to OKLCH → oklch.com
+4. Create config.ts with id + colors
+5. Create home.tsx with the full HomeComponent
+6. Create _components/ with custom header, footer, and sections
+7. Register in templates/index.ts (configRegistry + homeRegistry)
+8. Deploy the store
 9. UPDATE tenant_branding SET template_id = '<slug>' WHERE tenant_id = '...'
-10. Validar no domínio/subdomínio do tenant
+10. Validate on the tenant's domain/subdomain
 ```
 
-**Tempo estimado:**
-- Cores + copy (sem redesign): 4–8 horas
-- Redesign parcial (hero/header): 1–2 dias
-- Redesign completo: 3–5 dias
+**Estimated time:**
+- Colors + copy (no redesign): 4–8 hours
+- Partial redesign (hero/header): 1–2 days
+- Full redesign: 3–5 days
 
 ---
 
-## 9. Fora do escopo (v1)
+## 9. Out of scope (v1)
 
-- Customização de copy via banco (tudo vive no código do template)
-- Self-service por assinantes (v3+)
-- Upload de assets pelo cliente (via dev + deploy)
-- Integração de `base_color` para assinantes (v3+)
-- PDF de simulação
-- Fluxo "Fazer Simulação Gratuita" (definição pendente)
+- Copy customization via the database (everything lives in the template code)
+- Self-service for subscribers (v3+)
+- Asset upload by the client (via dev + deploy)
+- `base_color` integration for subscribers (v3+)
+- Simulation PDF
+- "Run a Free Simulation" flow (definition pending)

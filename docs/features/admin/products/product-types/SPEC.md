@@ -1,28 +1,28 @@
-# Feature Spec: Configuração de Pipeline por Tipo de Produto
+# Feature Spec: Pipeline Configuration by Product Type
 
-**Status:** ✅ **PRONTO PARA IMPLEMENTAÇÃO**  
-**Dependências:** product_types (já existe), tenants (SPEC.md file:423)  
+**Status:** ✅ **READY FOR IMPLEMENTATION**  
+**Dependencies:** product_types (already exists), tenants (SPEC.md file:423)  
 
 **App:** `apps/admin` — Vello Admin
-**Módulo:** Admin / Product Types
-**Terminologia UI:** "Etapas da Esteira"
+**Module:** Admin / Product Types
+**UI Terminology:** "Etapas da Esteira"
 **Status:** `ready-for-dev`
-**Prioridade:** Alta
+**Priority:** High
 
 
 ***
 
-## 🎯 **Objetivo**
-Permitir configuração **flexível de pipeline de propostas** por tipo de produto com **triggers para automações n8n**.
+## 🎯 **Objective**
+Enable **flexible proposal pipeline configuration** by product type with **triggers for n8n automations**.
 
 ```
 FGTS → [Proposta Iniciada → Ag. Docs → Aprovada] + triggers
-INSS → [Simulação → Análise → Contrato] + triggers diferentes
+INSS → [Simulação → Análise → Contrato] + different triggers
 ```
 
 ***
 
-## 🗄️ **MODELOS SUPABASE (Migrations)**
+## 🗄️ **SUPABASE MODELS (Migrations)**
 
 ### **Migration 001: product_types_pipeline.sql**
 ```sql
@@ -50,7 +50,7 @@ CREATE INDEX idx_proposal_stages_product_order
   ON proposal_stages(product_type_id, order_num);
 ```
 
-> **Nota:** Timeout foi movido para `stage_triggers` — configurado por trigger, não por etapa.
+> **Note:** Timeout was moved to `stage_triggers` — configured per trigger, not per stage.
 
 ### **Migration 003: stage_triggers.sql**
 ```sql
@@ -68,10 +68,10 @@ CREATE TABLE stage_triggers (
 CREATE INDEX idx_stage_triggers_stage_event ON stage_triggers(stage_id, event_type);
 ```
 
-> **Nota:** `timeout_unit` e `timeout_value` são relevantes apenas para triggers `on_timeout`.
-> Ficam em `stage_triggers` para permitir múltiplos timeouts com ações diferentes por etapa.
+> **Note:** `timeout_unit` and `timeout_value` are relevant only for `on_timeout` triggers.
+> They live in `stage_triggers` to allow multiple timeouts with different actions per stage.
 
-### **Migration 004: proposals_timeline.sql** (futuro)
+### **Migration 004: proposals_timeline.sql** (future)
 ```sql
 -- Preparar para timeline (implementar depois)
 ALTER TABLE proposals 
@@ -106,8 +106,8 @@ CREATE POLICY "backoffice_full_access" ON stage_triggers
   );
 ```
 
-> **Importante:** Usar sempre `auth.jwt() ->> 'user_role'` (nunca `current_setting()`).
-> O claim `user_role` é injetado no JWT pelo Auth Hook do Supabase.
+> **Important:** Always use `auth.jwt() ->> 'user_role'` (never `current_setting()`).
+> The `user_role` claim is injected into the JWT by the Supabase Auth Hook.
 
 ***
 
@@ -125,7 +125,7 @@ POST   /api/admin/stages/:stageId/triggers
 DELETE /api/admin/stages/:stageId/triggers/:triggerId
 ```
 
-### **Exemplo: Duplicate (etapas vazias)**
+### **Example: Duplicate (empty stages)**
 ```ts
 POST /api/admin/product-types/fgts-uuid/stages/batch-duplicate
 {
@@ -134,7 +134,7 @@ POST /api/admin/product-types/fgts-uuid/stages/batch-duplicate
 // Response: stages criadas sem triggers
 ```
 
-### **Exemplo: Reorder (dndkit)**
+### **Example: Reorder (dndkit)**
 ```ts
 PATCH /api/admin/product-types/fgts-uuid/stages/reorder
 {
@@ -144,34 +144,34 @@ PATCH /api/admin/product-types/fgts-uuid/stages/reorder
 
 ***
 
-## 🎨 **UI ADMIN (estrutura + componentes)**
+## 🎨 **ADMIN UI (structure + components)**
 
-### **Rota:** `/admin/product-types/[id]/pipeline`
+### **Route:** `/admin/product-types/[id]/pipeline`
 
 ```
-📋 Product Type: FGTS                  [✏️ Editar] [⏸️ Inativo]
+📋 Product Type: FGTS                  [✏️ Edit] [⏸️ Inactive]
 ──────────────────────────────────────────────
 
-🔄 Etapas do Pipeline (Arraste para reordenar)
+🔄 Pipeline Stages (Drag to reorder)
 
 ┌─────────────────────────────────────────┐
 │ 1️⃣ Proposta Iniciada                   │  ← dndkit Draggable
-│    ⏰ Timeout: 3 dias ▼                 │
+│    ⏰ Timeout: 3 days ▼                 │
 │    📡 Triggers:                         │
 │       ├─ on_enter: n8n.com/w/123 [✏️] [🗑️]
-│       └─ [+] Novo trigger               │
+│       └─ [+] New trigger                │
 │                                         │
 │ 2️⃣ Aguardando Documentos               │
-│    ⏰ Sem timeout                       │
-│    📡 Sem triggers                      │
+│    ⏰ No timeout                        │
+│    📡 No triggers                       │
 │                                         │
-│ [+] ➕ Nova Etapa                       │
+│ [+] ➕ New Stage                        │
 └─────────────────────────────────────────┘
 
-🔄 [Duplicar de: INSS ▼]    [💾 Salvar Tudo]
+🔄 [Duplicate from: INSS ▼]    [💾 Save All]
 ```
 
-### **Componentes (shadcn + dndkit):**
+### **Components (shadcn + dndkit):**
 ```
 ProductPipelinePage.tsx
 ├── ProductTypeHeader.tsx
@@ -197,36 +197,36 @@ const handleDragEnd = async (event: DragEndEvent) => {
 
 ***
 
-## ⚙️ **Validações & UX**
+## ⚙️ **Validations & UX**
 
-| **Campo** | **Validação** | **UX** |
+| **Field** | **Validation** | **UX** |
 |-----------|---------------|--------|
-| Nome Etapa | 1-100 chars | InputDebounced |
-| Order | Único por produto | Auto-increment |
+| Stage Name | 1-100 chars | InputDebounced |
+| Order | Unique per product | Auto-increment |
 | Timeout | minutes/hours/days + 1-99 | Select + NumberInput |
-| Webhook | URL válida | TestButton |
-| Payload | JSON válido | MonacoEditor (mini) |
+| Webhook | Valid URL | TestButton |
+| Payload | Valid JSON | MonacoEditor (mini) |
 
-**Timeout Options:** `Sem timeout`, `30 min`, `2h`, `1 dia`, `3 dias`, `7 dias`, `Custom`
+**Timeout Options:** `No timeout`, `30 min`, `2h`, `1 day`, `3 days`, `7 days`, `Custom`
 
 ***
 
-## 🔄 **Fluxo Completo**
+## 🔄 **Full Flow**
 
 ```
 1. Admin → Product Types → FGTS → Pipeline
-2. "Duplicar de INSS" → 3 etapas vazias criadas
-3. Drag&drop reordena: Docs → Iniciada → Aprovada
-4. Stage "Iniciada": timeout 3 dias + n8n trigger
-5. Salvar → Disponível para todos tenants
-6. Tenant ativa FGTS → propostas seguem pipeline
+2. "Duplicate from INSS" → 3 empty stages created
+3. Drag & drop reorders: Docs → Iniciada → Aprovada
+4. Stage "Iniciada": 3-day timeout + n8n trigger
+5. Save → Available to all tenants
+6. Tenant activates FGTS → proposals follow pipeline
 ```
 
 ***
 
-## 📱 **Integração n8n (futuro)**
+## 📱 **n8n Integration (future)**
 
-**Payload padrão enviado:**
+**Standard payload sent:**
 ```json
 {
   "event": "on_enter",
@@ -242,7 +242,7 @@ const handleDragEnd = async (event: DragEndEvent) => {
 
 ***
 
-## 🚀 **CHECKLIST IMPLEMENTAÇÃO**
+## 🚀 **IMPLEMENTATION CHECKLIST**
 
 ```
 ✅ [ ] Migrations (4 SQL files)
@@ -256,7 +256,7 @@ const handleDragEnd = async (event: DragEndEvent) => {
 ✅ [ ] Supabase Studio Validation
 ```
 
-### **Dependências instalar:**
+### **Dependencies to install:**
 ```bash
 pnpm add @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
 pnpm add @radix-ui/react-slot lucide-react

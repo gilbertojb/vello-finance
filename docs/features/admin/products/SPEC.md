@@ -1,85 +1,85 @@
-# Feature Spec — Produtos de Crédito
+# Feature Spec — Credit Products
 
 **App:** `apps/admin` — Vello Admin
-**Módulo:** Admin / Produtos
+**Module:** Admin / Products
 **Status:** `ready-for-dev`
-**Prioridade:** Alta
-**Depende de:** `financial_partners` cadastrados
+**Priority:** High
+**Depends on:** `financial_partners` registered
 
 ---
 
-## F0 — Instituições Financeiras · `/financial-partners`
+## F0 — Financial Partners · `/financial-partners`
 
-CRUD com campos: Nome · Tipo (`qi_tech`, `bancly`, `zip`, `other`) · URL da API · Chave de API (masked) · Webhook Secret (masked) · Ativo
+CRUD with fields: Name · Type (`qi_tech`, `bancly`, `zip`, `other`) · API URL · API Key (masked) · Webhook Secret (masked) · Active
 
-> Chave de API e Webhook Secret visíveis apenas para `super_admin`.
-
----
-
-## F1 — Listagem · `/products`
-
-Tabela: Nome · Tipo · Instituições Financeiras (lista) · Retenção Vello (por IF) · Disponível Tenant · Status · Ações
-
-Filtros: Tipo · Instituição Financeira · Status
+> API Key and Webhook Secret visible only to `super_admin`.
 
 ---
 
-## F2 — Criar · `/products/new`
+## F1 — Listing · `/products`
 
-**Seção 1 — Identificação**
+Table: Name · Type · Financial Partners (list) · Vello Retention (per partner) · Available to Tenant · Status · Actions
 
-| Campo | Obrigatório | Validação |
+Filters: Type · Financial Partner · Status
+
+---
+
+## F2 — Create · `/products/new`
+
+**Section 1 — Identification**
+
+| Field | Required | Validation |
 |---|---|---|
-| Nome | Sim | 3–100 chars |
-| Tipo | Sim | `fgts` / `consignado_publico` / `consignado_privado` / `home_equity` / `auto_equity` / `outros` |
-| Descrição Pública | Não | Máx 500 chars (rich text) |
-| Descrição Interna | Não | Rich text |
+| Name | Yes | 3–100 chars |
+| Type | Yes | `fgts` / `consignado_publico` / `consignado_privado` / `home_equity` / `auto_equity` / `outros` |
+| Public Description | No | Max 500 chars (rich text) |
+| Internal Description | No | Rich text |
 
-**Seção 2 — Parâmetros de Crédito**
+**Section 2 — Credit Parameters**
 
-Valor Mínimo/Máximo (R$) · Prazo Mínimo/Máximo (meses) · Taxa Mínima/Máxima ao Mês (%)
+Minimum/Maximum Amount (R$) · Minimum/Maximum Term (months) · Minimum/Maximum Monthly Rate (%)
 
-**Seção 3 — Instituições Financeiras**
+**Section 3 — Financial Partners**
 
-Lista de checkboxes com todas as IFs ativas. Para cada IF marcada, dois campos inline:
+List of checkboxes with all active financial partners. For each partner checked, two inline fields:
 
-| Campo | Obrigatório | Validação |
+| Field | Required | Validation |
 |---|---|---|
-| IF paga à Vello (%) | Sim (se IF marcada) | 0,001–100, até 3 casas decimais |
-| Retenção Vello (%) | Sim (se IF marcada) | ≤ IF paga à Vello, até 3 casas decimais |
+| Financial partner pays Vello (%) | Yes (if partner checked) | 0.001–100, up to 3 decimal places |
+| Vello Retention (%) | Yes (if partner checked) | ≤ Financial partner pays Vello, up to 3 decimal places |
 
-> A comissão disponível ao tenant = IF paga à Vello − Retenção Vello, e varia por IF.
+> The commission available to the tenant = Financial partner pays Vello − Vello Retention, and varies per partner.
 
-**Aceite:**
-- [ ] Campos de comissão aparecem apenas para IFs marcadas
-- [ ] Erro se Retenção Vello > IF paga à Vello em qualquer IF selecionada
-- [ ] Produto pode ser salvo sem nenhuma IF vinculada
-
----
-
-## F3 — Editar · `/products/[id]/edit`
-- Todos os campos editáveis, exceto Tipo (read-only)
-- IFs podem ser adicionadas ou removidas; comissões podem ser editadas por IF
-- Aviso: *"Alterações nos percentuais não afetam propostas já criadas (snapshots imutáveis)"*
+**Acceptance:**
+- [ ] Commission fields appear only for checked financial partners
+- [ ] Error if Vello Retention > Financial partner pays Vello for any selected partner
+- [ ] Product can be saved with no financial partner linked
 
 ---
 
-## F4 — Desativar / Reativar
-- Modal exibe quantos tenants têm o produto ativo
-- Desativar não remove automaticamente dos tenants existentes
+## F3 — Edit · `/products/[id]/edit`
+- All fields editable, except Type (read-only)
+- Financial partners can be added or removed; commissions can be edited per partner
+- Warning: *"Changes to percentages do not affect proposals already created (immutable snapshots)"*
 
 ---
 
-## F5 — Detalhes · `/products/[id]`
-- Dados completos
-- Tabela de IFs vinculadas com os respectivos percentuais de comissão
-- Lista de tenants com o produto habilitado (e comissões individuais de cada um)
+## F4 — Deactivate / Reactivate
+- Modal shows how many tenants have the product active
+- Deactivating does not automatically remove it from existing tenants
 
 ---
 
-## Componente Compartilhado: `<CommissionCascade />`
+## F5 — Details · `/products/[id]`
+- Complete data
+- Table of linked financial partners with their respective commission percentages
+- List of tenants with the product enabled (and each one's individual commissions)
 
-Utilizado na página de **detalhes do produto** (por IF) e no gerenciador de produtos do tenant. Não é mais exibido no formulário de criação/edição.
+---
+
+## Shared Component: `<CommissionCascade />`
+
+Used on the **product details** page (per financial partner) and in the tenant's product manager. No longer shown on the create/edit form.
 
 ```tsx
 // apps/admin/src/components/commissions/commission-cascade.tsx
@@ -93,7 +93,7 @@ type Props = {
 
 ---
 
-## Arquivos a Criar / Alterar
+## Files to Create / Modify
 
 ```
 apps/admin/src/app/(private)/
@@ -122,9 +122,9 @@ supabase/migrations/
 └── YYYYMMDDHHMMSS_alter_products_remove_commission_columns.sql
 ```
 
-## Restrições de Implementação
+## Implementation Constraints
 
-- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
-- `_components/product-table.tsx` é Client Component — recebe `products` via props, sem acesso ao banco
-- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
-- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components
+- `page.tsx` is a Server Component — fetches data directly from the Supabase server client
+- `_components/product-table.tsx` is a Client Component — receives `products` via props, with no database access
+- `actions.ts` uses `'use server'` — the sole mutation point, never exported to the client
+- `queries.ts` is imported only by Server Components and Actions — never by Client Components

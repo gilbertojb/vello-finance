@@ -1,35 +1,35 @@
-# Feature Spec — Gestão de Usuários do Backoffice
+# Feature Spec — Backoffice User Management
 
 **App:** `apps/admin` — Vello Admin
-**Módulo:** Admin / Usuários
-**Terminologia UI:** "Usuários" (banco de dados permanece `backoffice_users`)
+**Module:** Admin / Users
+**UI Terminology:** "Usuários" (database keeps `backoffice_users`)
 **Status:** `pending`
-**Prioridade:** Alta
+**Priority:** High
 
-## Status de Implementação
+## Implementation Status
 
-| Feature | Status | Notas |
+| Feature | Status | Notes |
 |---|---|---|
-| F1 — Listagem | ⏳ Pendente | — |
-| F2 — Cadastro | ⏳ Pendente | — |
-| F3 — Edição | ⏳ Pendente | — |
-| F4 — Desativar/Ativar | ⏳ Pendente | — |
-| F5 — Excluir | ⏳ Pendente | — |
+| F1 — Listing | Pending | — |
+| F2 — Registration | Pending | — |
+| F3 — Edit | Pending | — |
+| F4 — Deactivate/Activate | Pending | — |
+| F5 — Delete | Pending | — |
 
-## Decisões Técnicas
+## Technical Decisions
 
-- Email vem de `auth.users.email` (join) — não duplicado em `backoffice_users`
-- Senha definida pelo admin no cadastro (sem email de boas-vindas)
-- Na edição, campo "Gerar nova senha" é opcional — só atualiza se preenchido
-- Proteção anti-self (desativar/excluir) via CASL conditions, não RLS
-- Delete exclusivo de `super_admin` via CASL — RLS permite escrita para ambos (`super_admin`, `admin`)
-- Ação `deactivate` adicionada ao CASL `userSubject` para granularidade de permissão
+- Email comes from `auth.users.email` (join) — not duplicated in `backoffice_users`
+- Password set by the admin at registration (no welcome email)
+- On edit, the "Generate new password" field is optional — only updates if filled in
+- Anti-self protection (deactivate/delete) via CASL conditions, not RLS
+- Delete exclusive to `super_admin` via CASL — RLS allows writes for both (`super_admin`, `admin`)
+- `deactivate` action added to CASL's `userSubject` for permission granularity
 
 ---
 
-## Modelo de Dados
+## Data Model
 
-### Tabela `backoffice_users` (existente)
+### `backoffice_users` table (existing)
 
 ```sql
 CREATE TYPE backoffice_role AS ENUM ('super_admin', 'admin', 'financial', 'support');
@@ -44,16 +44,16 @@ CREATE TABLE backoffice_users (
 );
 ```
 
-### RLS atual
+### Current RLS
 
 ```sql
--- Todos os roles do backoffice podem ler
+-- All backoffice roles can read
 CREATE POLICY "backoffice_full_read" ON backoffice_users
   FOR SELECT USING (
     (auth.jwt() ->> 'user_role') = ANY(ARRAY['super_admin', 'admin', 'financial', 'support'])
   );
 
--- Apenas super_admin pode escrever (SERÁ ATUALIZADO)
+-- Only super_admin can write (WILL BE UPDATED)
 CREATE POLICY "super_admin_write" ON backoffice_users
   FOR ALL USING (
     (auth.jwt() ->> 'user_role') = 'super_admin'
@@ -62,9 +62,9 @@ CREATE POLICY "super_admin_write" ON backoffice_users
   );
 ```
 
-### RLS — nova migration
+### RLS — new migration
 
-Ajustar policy de escrita para incluir `admin`:
+Adjust the write policy to include `admin`:
 
 ```sql
 DROP POLICY "super_admin_write" ON backoffice_users;
@@ -79,27 +79,27 @@ CREATE POLICY "admin_write" ON backoffice_users
   );
 ```
 
-A restrição de delete exclusivo para `super_admin` e a proteção anti-self são enforced na application layer (Server Actions + CASL), não no RLS.
+The restriction of delete to `super_admin` only and the anti-self protection are enforced at the application layer (Server Actions + CASL), not in RLS.
 
 ---
 
-## Permissões
+## Permissions
 
-### Matriz de permissões
+### Permission matrix
 
-| Ação | super_admin | admin | financial / support |
+| Action | super_admin | admin | financial / support |
 |---|---|---|---|
-| Listar | sim | sim | sim |
-| Criar | sim | sim | — |
-| Editar | sim | sim | — |
-| Desativar/ativar | sim | sim | — |
-| Excluir permanentemente | sim | — | — |
-| Auto-desativar | — | — | — |
-| Auto-excluir | — | — | — |
+| List | yes | yes | yes |
+| Create | yes | yes | — |
+| Edit | yes | yes | — |
+| Deactivate/activate | yes | yes | — |
+| Permanently delete | yes | — | — |
+| Self-deactivate | — | — | — |
+| Self-delete | — | — | — |
 
 ### CASL (`packages/auth`)
 
-Adicionar `deactivate` ao `userSubject`:
+Add `deactivate` to `userSubject`:
 
 ```typescript
 // subjects/user.ts
@@ -119,7 +119,7 @@ export const userSubject = z.tuple([
 ])
 ```
 
-Atualizar permissões:
+Update permissions:
 
 ```typescript
 // permissions.ts
@@ -134,74 +134,74 @@ admin(user, { can, cannot }) {
   cannot('deactivate', 'User', { id: { $eq: user.id }})
 },
 financial(_user, { can }) {
-  // ... permissões existentes ...
+  // ... existing permissions ...
   can('get', 'User')
 },
 support(_user, { can }) {
-  // ... permissões existentes ...
+  // ... existing permissions ...
   can('get', 'User')
 },
 ```
 
-Verificação nas actions e na UI:
+Check in actions and in the UI:
 
 ```typescript
 import { userSchema } from '@vello/auth'
 
-// Parseia o registro do banco — injeta __typename: 'User' via .default()
+// Parses the database record — injects __typename: 'User' via .default()
 const targetUser = userSchema.parse(backofficeUser)
 
-// Permissão por role (sem condition) — passa string
+// Permission by role (no condition) — pass a string
 ability.can('create', 'User')
 
-// Permissão com condition anti-self — passa objeto parseado
-ability.can('delete', targetUser)      // false se self (super_admin) ou sempre (admin)
-ability.can('deactivate', targetUser)  // false se self
+// Permission with anti-self condition — pass the parsed object
+ability.can('delete', targetUser)      // false if self (super_admin) or always (admin)
+ability.can('deactivate', targetUser)  // false if self
 ```
 
 ---
 
-## Funcionalidades
+## Features
 
-### F1 — Listagem · `src/app/(private)/users/page.tsx`
+### F1 — Listing · `src/app/(private)/users/page.tsx`
 
-**Colunas da tabela:** Nome · Email · Role · Status · Ações
+**Table columns:** Name · Email · Role · Status · Actions
 
-**Ações por linha (visíveis conforme permissão CASL):**
-- Editar (`can('update', target)`)
-- Desativar/Ativar (`can('deactivate', target)` — escondido para self)
-- Excluir (`can('delete', target)` — super_admin apenas, escondido para self)
+**Row actions (visible according to CASL permission):**
+- Edit (`can('update', target)`)
+- Deactivate/Activate (`can('deactivate', target)` — hidden for self)
+- Delete (`can('delete', target)` — super_admin only, hidden for self)
 
-**Critérios de Aceite:**
-- [ ] Badge de role com cores semânticas
-- [ ] Badge de status: Ativo (verde) / Inativo (cinza)
-- [ ] Botão "Novo usuário" no header (visível se `can('create', 'User')`)
-- [ ] Modal de confirmação para desativar e excluir
+**Acceptance Criteria:**
+- [ ] Role badge with semantic colors
+- [ ] Status badge: Active (green) / Inactive (gray)
+- [ ] "New user" button in the header (visible if `can('create', 'User')`)
+- [ ] Confirmation modal for deactivate and delete
 
 ---
 
-### F2 — Cadastro · `src/app/(private)/users/new/page.tsx`
+### F2 — Registration · `src/app/(private)/users/new/page.tsx`
 
-Formulário simples (sem steps/abas):
+Simple form (no steps/tabs):
 
-| Campo | Tipo | Obrigatório | Validação |
+| Field | Type | Required | Validation |
 |---|---|---|---|
-| Email | input text | Sim | Formato email |
-| Nome completo | input text | Sim | 2–100 chars |
-| Role | select | Sim | super_admin, admin, financial, support |
-| Gerar senha | input text | Sim | Mínimo 8 caracteres |
+| Email | input text | Yes | Email format |
+| Full name | input text | Yes | 2–100 chars |
+| Role | select | Yes | super_admin, admin, financial, support |
+| Generate password | input text | Yes | Minimum 8 characters |
 
-**Fluxo (Server Action com `createServiceClient()`):**
+**Flow (Server Action with `createServiceClient()`):**
 
 ```typescript
-// 1. Cria usuário no Supabase Auth
+// 1. Create user in Supabase Auth
 const { data: authUser } = await serviceClient.auth.admin.createUser({
   email,
   password,
   email_confirm: true,
 })
 
-// 2. Insere em backoffice_users
+// 2. Insert into backoffice_users
 await supabase.from('backoffice_users').insert({
   id: authUser.user.id,
   role,
@@ -209,78 +209,78 @@ await supabase.from('backoffice_users').insert({
 })
 ```
 
-**Critérios de Aceite:**
-- [ ] Erro se email já existir (Supabase Auth retorna erro)
-- [ ] Redirect para `/users` após sucesso com toast
-- [ ] Apenas `super_admin` e `admin` acessam esta página
+**Acceptance Criteria:**
+- [ ] Error if the email already exists (Supabase Auth returns an error)
+- [ ] Redirect to `/users` after success with a toast
+- [ ] Only `super_admin` and `admin` can access this page
 
 ---
 
-### F3 — Edição · `src/app/(private)/users/[id]/edit/page.tsx`
+### F3 — Edit · `src/app/(private)/users/[id]/edit/page.tsx`
 
-| Campo | Tipo | Obrigatório | Detalhe |
+| Field | Type | Required | Detail |
 |---|---|---|---|
-| Email | input text | — | Readonly (não editável) |
-| Nome completo | input text | Sim | 2–100 chars |
-| Role | select | Sim | super_admin, admin, financial, support |
-| Ativo | toggle switch | Sim | Visível conforme permissão |
-| Gerar nova senha | input text | Não | Se preenchido, atualiza senha |
+| Email | input text | — | Readonly (not editable) |
+| Full name | input text | Yes | 2–100 chars |
+| Role | select | Yes | super_admin, admin, financial, support |
+| Active | toggle switch | Yes | Visible according to permission |
+| Generate new password | input text | No | If filled in, updates the password |
 
-**Fluxo:**
+**Flow:**
 
 ```typescript
-// 1. Update em backoffice_users
+// 1. Update in backoffice_users
 await supabase.from('backoffice_users')
   .update({ full_name, role, is_active })
   .eq('id', targetId)
 
-// 2. Se senha preenchida:
+// 2. If password filled in:
 await serviceClient.auth.admin.updateUserById(targetId, { password })
 ```
 
-**Critérios de Aceite:**
-- [ ] Email exibido mas não editável
-- [ ] Label do campo de senha: "Gerar nova senha" (diferente do create)
-- [ ] Toggle de ativo escondido para o próprio usuário (anti-self via CASL)
-- [ ] Toast de sucesso após salvar
+**Acceptance Criteria:**
+- [ ] Email shown but not editable
+- [ ] Password field label: "Generate new password" (different from create)
+- [ ] Active toggle hidden for the current user (anti-self via CASL)
+- [ ] Success toast after saving
 
 ---
 
-### F4 — Desativar / Ativar
+### F4 — Deactivate / Activate
 
-**Gatilho:** Botão na tabela (F1) ou toggle na edição (F3)
+**Trigger:** Button in the table (F1) or toggle in edit (F3)
 
-**Proteção anti-self:** `ability.can('deactivate', target)` retorna `false` quando `target.id === currentUser.id`
+**Anti-self protection:** `ability.can('deactivate', target)` returns `false` when `target.id === currentUser.id`
 
-**Critérios de Aceite:**
-- [ ] Modal de confirmação antes de desativar
-- [ ] Usuário desativado não consegue fazer login (auth hook verifica `is_active`)
-- [ ] Botão escondido na linha do próprio usuário
+**Acceptance Criteria:**
+- [ ] Confirmation modal before deactivating
+- [ ] Deactivated user cannot log in (auth hook checks `is_active`)
+- [ ] Button hidden on the current user's row
 
 ---
 
-### F5 — Excluir Permanentemente
+### F5 — Permanently Delete
 
-**Gatilho:** Botão na tabela (F1), visível apenas para `super_admin`
+**Trigger:** Button in the table (F1), visible only to `super_admin`
 
-**Fluxo:**
+**Flow:**
 
 ```typescript
-// 1. Delete de backoffice_users
+// 1. Delete from backoffice_users
 await supabase.from('backoffice_users').delete().eq('id', targetId)
 
-// 2. Delete do Supabase Auth
+// 2. Delete from Supabase Auth
 await serviceClient.auth.admin.deleteUser(targetId)
 ```
 
-**Critérios de Aceite:**
-- [ ] Modal de confirmação antes de excluir
-- [ ] Botão visível apenas para `super_admin` e escondido para self
-- [ ] Redirect para `/users` se excluiu da página de edição
+**Acceptance Criteria:**
+- [ ] Confirmation modal before deleting
+- [ ] Button visible only to `super_admin` and hidden for self
+- [ ] Redirect to `/users` if deleted from the edit page
 
 ---
 
-## Validação (Zod)
+## Validation (Zod)
 
 ```typescript
 const createUserSchema = z.object({
@@ -303,33 +303,33 @@ const updateUserSchema = z.object({
 
 ## Sidebar
 
-Adicionar item "Usuários" com ícone `Users` (lucide-react) no menu lateral.
+Add a "Users" item with the `Users` icon (lucide-react) to the side menu.
 
 ---
 
-## Arquivos a Criar
+## Files to Create
 
 ```
 apps/admin/src/app/(private)/users/
-├── page.tsx              ← listagem (Server Component)
-├── new/page.tsx          ← criação
-├── [id]/edit/page.tsx    ← edição
-├── queries.ts            ← queries reutilizáveis
+├── page.tsx              ← listing (Server Component)
+├── new/page.tsx          ← creation
+├── [id]/edit/page.tsx    ← edit
+├── queries.ts            ← reusable queries
 ├── actions.ts            ← server actions
 └── _components/
-    ├── user-table.tsx    ← tabela com badges + ações
-    └── user-form.tsx     ← formulário compartilhado (create/edit)
+    ├── user-table.tsx    ← table with badges + actions
+    └── user-form.tsx     ← shared form (create/edit)
 
 supabase/migrations/
-└── YYYYMMDD_update_backoffice_users_rls.sql  ← nova policy
+└── YYYYMMDD_update_backoffice_users_rls.sql  ← new policy
 ```
 
 ---
 
-## Fora do Escopo desta Feature
+## Out of Scope for This Feature
 
-- Perfil do próprio usuário (será feito via `profile-button.tsx`)
-- Upload de avatar
-- Histórico de ações / audit log
-- Autenticação MFA
-- Gestão de `tenant_users` pelo admin (feature separada)
+- Own user profile (will be done via `profile-button.tsx`)
+- Avatar upload
+- Action history / audit log
+- MFA authentication
+- Admin management of `tenant_users` (separate feature)

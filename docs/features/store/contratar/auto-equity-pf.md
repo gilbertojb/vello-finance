@@ -1,21 +1,21 @@
-# Spec — Contratação: Auto Equity Pessoa Física (Crédito com Garantia de Veículo PF)
+# Spec — Application: Auto Equity Individual (Credit Secured by Vehicle, PF)
 
-**Data:** 2026-05-17
-**Slug da esteira:** `auto_equity`
-**Rota:** `/contratar/auto-equity`
-**Status:** Aprovado
-
----
-
-## Simulação
-
-Formulário existente em `/simulador/pessoa-fisica/veiculo-em-garantia`. Sem alterações de campos.
-
-CTA: **"Quero contratar"** → `/contratar/auto-equity?productId={uuid}&simulationId={uuid}`
+**Date:** 2026-05-17
+**Flow slug:** `auto_equity`
+**Route:** `/contratar/auto-equity`
+**Status:** Approved
 
 ---
 
-## Etapa 1 — Dados para Análise
+## Simulation
+
+Existing form at `/simulador/pessoa-fisica/veiculo-em-garantia`. No field changes.
+
+CTA: **"I want to apply"** → `/contratar/auto-equity?productId={uuid}&simulationId={uuid}`
+
+---
+
+## Step 1 — Data for Analysis
 
 ### Steps
 
@@ -25,60 +25,60 @@ operacao → dados-pessoais → renda-ocupacao → retorno
 
 ---
 
-### Step 1: `operacao` — Informações sobre a Operação
+### Step 1: `operacao` — Operation Information
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Tipo de veículo | select | Carro, Caminhão, Moto |
-| Veículo financiado? | select (Sim/Não) | Se Sim → **bloquear**: "No momento, não conseguimos seguir com essa operação porque o veículo informado ainda possui um financiamento ativo. Para avançarmos, ele precisa estar totalmente quitado." |
-| Placa do veículo | text | Letras e números, validação de formato de placa (AAA-0000 ou AAA-0A00) |
-| Ano de fabricação | select | Selecionar ano. Bloquear se veículo tiver mais de 15 anos: "Este veículo não atende aos requisitos mínimos de ano de fabricação." |
-| Motivo do crédito | select | Quitar dívidas pessoais, Quitar dívidas da empresa, Investir em negócio próprio, Reforma ou construção, Aquisição de outro imóvel, Projetos pessoais, Outros |
+| Vehicle type | select | Car, Truck, Motorcycle |
+| Vehicle financed? | select (Yes/No) | If Yes → **block**: "At the moment, we can't proceed with this operation because the vehicle provided still has an active financing agreement. To move forward, it needs to be fully paid off." |
+| License plate | text | Letters and numbers, plate format validation (AAA-0000 or AAA-0A00) |
+| Manufacture year | select | Select year. Block if the vehicle is more than 15 years old: "This vehicle does not meet the minimum manufacture year requirements." |
+| Reason for credit | select | Pay off personal debts, Pay off business debts, Invest in own business, Renovation or construction, Purchase of another property, Personal projects, Other |
 
 ---
 
-### Step 2: `dados-pessoais` — Dados Pessoais
+### Step 2: `dados-pessoais` — Personal Data
 
-> Headline: "Não se preocupe — a cada etapa concluída, sua proposta fica salva automaticamente."
+> Headline: "Don't worry — your application is automatically saved after each completed step."
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Nome completo | text | Pré-preenchido da simulação, editável. Mínimo 2 palavras |
-| CPF | text | Obrigatório, validação automática |
-| Data de nascimento | date | Bloquear se ≥ 70 anos |
-| E-mail | email | Obrigatório |
-| WhatsApp | tel | Pré-preenchido, editável. DDI +55 fixo |
-| Nome da mãe | text | Obrigatório. Mínimo 2 palavras |
+| Full name | text | Pre-filled from the simulation, editable. Minimum 2 words |
+| CPF | text | Required, automatic validation |
+| Date of birth | date | Block if ≥ 70 years old |
+| Email | email | Required |
+| WhatsApp | tel | Pre-filled, editable. Fixed country code +55 |
+| Mother's name | text | Required. Minimum 2 words |
 
 ---
 
-### Step 3: `renda-ocupacao` — Renda e Ocupação
+### Step 3: `renda-ocupacao` — Income and Occupation
 
-| Campo | Tipo | Regra |
+| Field | Type | Rule |
 |---|---|---|
-| Tipo de ocupação | select | CLT, Autônomo, Empresário, Aposentado, Servidor Público |
-| Renda mensal | currency | R$ automático |
-| Tempo na ocupação | select | Menos de 1 ano, 1 a 3 anos, 3 a 5 anos, Mais de 5 anos |
+| Occupation type | select | Employee (CLT), Self-employed, Business owner, Retired, Public servant |
+| Monthly income | currency | Automatic R$ formatting |
+| Time in occupation | select | Less than 1 year, 1 to 3 years, 3 to 5 years, More than 5 years |
 
 ---
 
-### Step 4: `retorno` — Confirmação e Retorno
+### Step 4: `retorno` — Confirmation and Return
 
-Resumo da simulação:
-- Crédito solicitado
-- Parcelamento
-- Juros mensais
-- Valor da parcela
+Simulation summary:
+- Requested credit
+- Installment plan
+- Monthly interest
+- Installment amount
 
-Mensagem: *"Tudo certo por aqui! Recebemos suas informações e já iniciamos a análise da sua proposta. Em breve, você vai receber um retorno direto no WhatsApp e no seu e-mail — é só ficar de olho!"*
+Message: *"All set! We've received your information and have already started analyzing your application. You'll hear back from us soon directly on WhatsApp and email — just keep an eye out!"*
 
 `finalizeEtapa1` → status `proposta_criada`.
 
 ---
 
-## Etapa 2 — Documentos e Dados Bancários
+## Step 2 — Documents and Bank Details
 
-Acessada via `/proposta/[proposalId]/documentos`.
+Accessed via `/proposta/[proposalId]/documentos`.
 
 ### Steps
 
@@ -90,34 +90,34 @@ dados-bancarios → documentos-pessoais → documentos-veiculo → finalizado
 
 ### Step 5: `dados-bancarios`
 
-Banco (lista cadastrada), Agência, Conta-corrente, Chave PIX (opcional), Checkbox confirmação de titularidade.
+Bank (registered list), branch, checking account, PIX key (optional), account ownership confirmation checkbox.
 
-Erro: "A conta informada não corresponde ao titular do crédito. Utilize uma conta bancária em seu nome."
-
----
-
-### Step 6: `documentos-pessoais` — Documentos Pessoais
-
-Checklist:
-- RG e CPF (frente e verso)
-- CNH (frente e verso)
-- Comprovante de estado civil
-- Comprovante de endereço (últimos 3 meses)
+Error: "The account provided does not match the credit holder. Use a bank account in your own name."
 
 ---
 
-### Step 7: `documentos-veiculo` — Documentos do Veículo
+### Step 6: `documentos-pessoais` — Personal Documents
 
 Checklist:
-- CRLV do veículo
-- Foto traseira do veículo (JPEG)
-- Foto da placa traseira (JPEG)
-- Foto do chassi (JPEG)
+- ID (RG) and CPF (front and back)
+- Driver's license / CNH (front and back)
+- Proof of marital status
+- Proof of address (last 3 months)
 
-Botão "Finalizar Envio" → `finalizeEtapa2` → `/proposta/[proposalId]/finalizado`.
+---
+
+### Step 7: `documentos-veiculo` — Vehicle Documents
+
+Checklist:
+- Vehicle registration (CRLV)
+- Rear photo of the vehicle (JPEG)
+- Photo of the rear license plate (JPEG)
+- Photo of the chassis (JPEG)
+
+"Finish Submission" button → `finalizeEtapa2` → `/proposta/[proposalId]/finalizado`.
 
 ---
 
 ### Step 8: `finalizado`
 
-Mensagem: *"Recebemos seus documentos, obrigado por compartilhar com a gente! Agora, nossa equipe jurídica e os analistas de crédito estão cuidando da análise para que possamos seguir para a próxima etapa: a formalização do contrato. Fique atento ao seu e-mail e WhatsApp, em breve entraremos em contato com os próximos passos."*
+Message: *"We've received your documents, thank you for sharing them with us! Our legal team and credit analysts are now handling the review so we can move on to the next step: contract formalization. Keep an eye on your email and WhatsApp — we'll be in touch soon with the next steps."*

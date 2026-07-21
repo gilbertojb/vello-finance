@@ -1,49 +1,49 @@
-# Feature Spec — Gestão de Tenants
+# Feature Spec — Tenant Management
 
 **App:** `apps/admin` — Vello Admin
-**Módulo:** Admin / Tenants
-**Terminologia UI:** "Parceiros" (banco de dados permanece `tenants`)
+**Module:** Admin / Tenants
+**UI Terminology:** "Parceiros" (database keeps `tenants`)
 **Status:** `in-progress`
-**Prioridade:** Alta
+**Priority:** High
 
-## Status de Implementação
+## Implementation Status
 
-| Feature | Status | Notas |
+| Feature | Status | Notes |
 |---|---|---|
-| F1 — Listagem | ✅ Implementado | — |
-| F2 — Cadastro | ✅ Implementado | Form em cards; sem plan_id; tipo fixo em whitelabel; sem upload de arquivos |
-| F3 — Ativar | ⏳ Pendente | — |
-| F4 — Editar | ⏳ Pendente | — |
-| F5 — Produtos | ⏳ Pendente | — |
-| F6 — Suspender/Cancelar | ⏳ Pendente | — |
-| F7 — Detalhes | ⏳ Pendente | — |
+| F1 — Listing | ✅ Implemented | — |
+| F2 — Registration | ✅ Implemented | Form in cards; no plan_id; type fixed to whitelabel; no file upload |
+| F3 — Activate | ⏳ Pending | — |
+| F4 — Edit | ⏳ Pending | — |
+| F5 — Products | ⏳ Pending | — |
+| F6 — Suspend/Cancel | ⏳ Pending | — |
+| F7 — Details | ⏳ Pending | — |
 
-## Decisões Técnicas
+## Technical Decisions
 
-- `type` fixo em `whitelabel` no cadastro — sem campo no formulário por ora
-- `plan_id` tornado nullable via migration — associação de plano adiada para módulo de assinaturas
-- Formulário de cadastro em **cards** (não wizard 5 steps como planejado originalmente)
-- Upload de logo/favicon/imagem para Supabase Storage adiado — campos de URL texto por ora
-- `custom_domain` sempre visível no form (todos são white-label)
+- `type` fixed to `whitelabel` on registration — no form field for now
+- `plan_id` made nullable via migration — plan association deferred to the subscriptions module
+- Registration form in **cards** (not a 5-step wizard as originally planned)
+- Logo/favicon/image upload to Supabase Storage deferred — text URL fields for now
+- `custom_domain` always visible on the form (all are white-label)
 
 ---
 
-## Tipos de Tenant
+## Tenant Types
 
 | | White-Label | Subscription (SaaS) |
 |---|---|---|
-| Modelo comercial | Pagamento único (setup) + % comissões | Mensalidade recorrente + % comissões |
-| Identidade visual | Totalmente customizada | Identidade Vello padrão |
-| URL | Domínio próprio (`creditos.empresa.com.br`) | Subdomínio Vello (`slug.vellofinance.com.br`) |
-| Telas públicas | Logo, cores e imagem de fundo customizados | Layout Vello padrão |
-| Onboarding | Assistido pela equipe interna | Manual |
-| Customização do Console | Completa | Limitada (logo opcional) |
+| Business model | One-time payment (setup) + % commissions | Recurring monthly fee + % commissions |
+| Visual identity | Fully customized | Standard Vello identity |
+| URL | Own domain (`creditos.empresa.com.br`) | Vello subdomain (`slug.vellofinance.com.br`) |
+| Public screens | Custom logo, colors, and background image | Standard Vello layout |
+| Onboarding | Assisted by the internal team | Manual |
+| Console customization | Full | Limited (optional logo) |
 
 ---
 
-## Modelo de Dados
+## Data Model
 
-### Tabela `tenants`
+### `tenants` table
 
 ```sql
 CREATE TYPE tenant_type AS ENUM ('whitelabel', 'subscription');
@@ -59,7 +59,7 @@ CREATE TABLE tenants (
   email             TEXT NOT NULL,
   phone             TEXT,
   slug              TEXT NOT NULL UNIQUE,
-  custom_domain     TEXT UNIQUE,             -- apenas white-label
+  custom_domain     TEXT UNIQUE,             -- white-label only
   status            tenant_status NOT NULL DEFAULT 'pending',
   activated_at      TIMESTAMPTZ,
   suspended_at      TIMESTAMPTZ,
@@ -72,9 +72,9 @@ CREATE TABLE tenants (
 );
 ```
 
-### Tabela `tenant_branding`
+### `tenant_branding` table
 
-Armazena a identidade visual usada nas telas públicas do Console e Store.
+Stores the visual identity used on the public Console and Store screens.
 
 ```sql
 CREATE TABLE tenant_branding (
@@ -84,17 +84,17 @@ CREATE TABLE tenant_branding (
   favicon_url           TEXT,
   primary_color         TEXT NOT NULL DEFAULT '#3B5BBE',
   secondary_color       TEXT NOT NULL DEFAULT '#1E3A5F',
-  -- Telas públicas (sign-in, forgot-password, reset-password)
-  auth_bg_image_url     TEXT,              -- imagem painel direito
-  auth_bg_color         TEXT NOT NULL DEFAULT '#18181b',   -- fundo painel esquerdo
+  -- Public screens (sign-in, forgot-password, reset-password)
+  auth_bg_image_url     TEXT,              -- right panel image
+  auth_bg_color         TEXT NOT NULL DEFAULT '#18181b',   -- left panel background
   auth_theme            TEXT NOT NULL DEFAULT 'dark'
                         CHECK (auth_theme IN ('dark', 'light')),
-  company_display_name  TEXT,             -- nome exibido nas telas
+  company_display_name  TEXT,             -- name shown on the screens
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Cria branding padrão automaticamente ao criar tenant
+-- Automatically creates default branding when a tenant is created
 CREATE OR REPLACE FUNCTION create_default_branding()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -118,95 +118,95 @@ CREATE TRIGGER trg_set_updated_at_tenant_branding
 
 ---
 
-## Funcionalidades
+## Features
 
-### F1 — Listagem · `src/app/(private)/tenants/page.tsx`
+### F1 — Listing · `src/app/(private)/tenants/page.tsx`
 
-**Cards de resumo:** Tenants ativos · White-Labels · Subscriptions · Pendentes de ativação
+**Summary cards:** Active Tenants · White-Labels · Subscriptions · Pending Activation
 
-**Colunas da tabela:** Nome · CNPJ · Tipo · Plano · Status · Domínio · Criado em · Ações
+**Table columns:** Name · CNPJ · Type · Plan · Status · Domain · Created At · Actions
 
-**Filtros:** Tipo (Todos / White-Label / Subscription) · Status · Busca por nome, CNPJ, slug
+**Filters:** Type (All / White-Label / Subscription) · Status · Search by name, CNPJ, slug
 
-**Critérios de Aceite:**
-- [ ] Badge de tipo: `WL` (navy) para white-label, `SaaS` (blue) para subscription
-- [ ] Badge de status com cores semânticas (ver `docs/ui/design-system.md`)
-- [ ] Clique na linha → detalhes do tenant
+**Acceptance Criteria:**
+- [ ] Type badge: `WL` (navy) for white-label, `SaaS` (blue) for subscription
+- [ ] Status badge with semantic colors (see `docs/ui/design-system.md`)
+- [ ] Clicking the row → tenant details
 
 ---
 
-### F2 — Criar Tenant · `src/app/(private)/tenants/new/page.tsx`
+### F2 — Create Tenant · `src/app/(private)/tenants/new/page.tsx`
 
-Formulário em **5 steps** com stepper visual no topo:
+Form with **5 steps** and a visual stepper at the top:
 
-#### Step 1 — Tipo e Plano
+#### Step 1 — Type and Plan
 
-| Campo | Tipo | Obrigatório |
+| Field | Type | Required |
 |---|---|---|
-| Tipo | Radio cards | Sim |
-| Plano | Select | Sim |
+| Type | Radio cards | Yes |
+| Plan | Select | Yes |
 
-Radio cards com descrição de cada tipo:
-- **White-Label** — "Identidade visual própria, domínio customizado, setup único"
-- **Subscription** — "Identidade Vello, subdomínio padrão, mensalidade recorrente"
+Radio cards with a description of each type:
+- **White-Label** — "Own visual identity, custom domain, one-time setup"
+- **Subscription** — "Vello identity, standard subdomain, recurring monthly fee"
 
-Ao selecionar plano: card informativo com comissão padrão e features incluídas.
+When a plan is selected: informational card with the default commission and included features.
 
-#### Step 2 — Dados da Empresa
+#### Step 2 — Company Data
 
-| Campo | Obrigatório | Validação |
+| Field | Required | Validation |
 |---|---|---|
-| Nome Fantasia | Sim | 2–100 chars |
-| Razão Social | Sim | 2–150 chars |
-| CNPJ | Sim | Dígitos verificadores |
-| Email de Contato | Sim | Formato válido |
-| Telefone | Não | — |
+| Trade Name | Yes | 2–100 chars |
+| Legal Name | Yes | 2–150 chars |
+| CNPJ | Yes | Check digits |
+| Contact Email | Yes | Valid format |
+| Phone | No | — |
 
-#### Step 3 — Configuração da Loja
+#### Step 3 — Store Configuration
 
-| Campo | Obrigatório | Detalhe |
+| Field | Required | Detail |
 |---|---|---|
-| Slug | Sim | Auto-gerado do nome fantasia. Preview em tempo real: `[slug].vellofinance.com.br` |
-| Domínio Customizado | Só se White-Label | Ex: `creditos.empresa.com.br` |
+| Slug | Yes | Auto-generated from the trade name. Real-time preview: `[slug].vellofinance.com.br` |
+| Custom Domain | Only if White-Label | E.g.: `creditos.empresa.com.br` |
 
-**Critérios:**
-- [ ] Slug: lowercase, sem acentos, hífens no lugar de espaços
-- [ ] Verificação de slug único via debounce (query no banco)
-- [ ] Campo domínio visível apenas para White-Label
-- [ ] Instruções de DNS para domínio customizado exibidas após salvar
+**Criteria:**
+- [ ] Slug: lowercase, no accents, hyphens instead of spaces
+- [ ] Unique slug verification via debounce (database query)
+- [ ] Domain field visible only for White-Label
+- [ ] DNS instructions for custom domain shown after saving
 
-#### Step 4 — Identidade Visual (Branding)
+#### Step 4 — Visual Identity (Branding)
 
-**Campos comuns (ambos os tipos):**
+**Common fields (both types):**
 
-| Campo | Obrigatório | Detalhe |
+| Field | Required | Detail |
 |---|---|---|
-| Logo | Não | PNG, SVG, WebP. Máx 2MB |
-| Cor Primária | Sim | Color picker + hex. Default: `#3B5BBE` |
-| Cor Secundária | Sim | Color picker + hex. Default: `#1E3A5F` |
+| Logo | No | PNG, SVG, WebP. Max 2MB |
+| Primary Color | Yes | Color picker + hex. Default: `#3B5BBE` |
+| Secondary Color | Yes | Color picker + hex. Default: `#1E3A5F` |
 
-**Campos extras (apenas White-Label):**
+**Extra fields (White-Label only):**
 
-| Campo | Obrigatório | Detalhe |
+| Field | Required | Detail |
 |---|---|---|
-| Favicon | Não | PNG, ICO. Máx 512KB |
-| Tema das telas públicas | Sim | Dark / Light. Default: Dark |
-| Cor de fundo do painel de login | Sim | Color picker. Default dark: `#18181b` |
-| Imagem de fundo (painel direito) | Não | JPG/PNG/WebP. Máx 5MB. Proporção recomendada: 3:2 |
-| Nome de exibição | Não | Nome exibido nas telas públicas |
+| Favicon | No | PNG, ICO. Max 512KB |
+| Public screens theme | Yes | Dark / Light. Default: Dark |
+| Login panel background color | Yes | Color picker. Dark default: `#18181b` |
+| Background image (right panel) | No | JPG/PNG/WebP. Max 5MB. Recommended ratio: 3:2 |
+| Display name | No | Name shown on the public screens |
 
-**Preview em tempo real** da tela de sign-in do Console (componente `<TenantBrandingPreview />`):
+**Real-time preview** of the Console sign-in screen (`<TenantBrandingPreview />` component):
 
 ```
 ┌──────────────────────────────────────────┐
-│ Preview — Tela de Login                   │
+│ Preview — Sign-In Screen                  │
 ├─────────────────┬────────────────────────┤
 │  [auth_bg_color]│                        │
 │                 │  [auth_bg_image]       │
 │  [logo]         │                        │
-│                 │  (fallback: gradiente  │
-│  Acesse sua     │   primary→secondary)   │
-│  conta          │                        │
+│                 │  (fallback: gradient   │
+│  Access your    │   primary→secondary)   │
+│  account        │                        │
 │                 │                        │
 │  [email input]  │                        │
 │  [pass input]   │                        │
@@ -214,210 +214,210 @@ Ao selecionar plano: card informativo com comissão padrão e features incluída
 └─────────────────┴────────────────────────┘
 ```
 
-**Critérios:**
-- [ ] Upload salvo em `tenant-assets/[tenant_id]/logo` no Supabase Storage
-- [ ] Preview atualiza em tempo real ao mudar qualquer campo de branding
-- [ ] Color picker com input hex validado
-- [ ] Campos White-Label ocultos para Subscription
+**Criteria:**
+- [ ] Upload saved at `tenant-assets/[tenant_id]/logo` in Supabase Storage
+- [ ] Preview updates in real time when any branding field changes
+- [ ] Color picker with validated hex input
+- [ ] White-Label fields hidden for Subscription
 
-#### Step 5 — Dados Bancários (opcional)
+#### Step 5 — Bank Details (optional)
 
-Banco · Agência · Conta · Chave Pix — todos opcionais, preenchíveis depois.
+Bank · Branch · Account · Pix Key — all optional, can be filled in later.
 
-**Ao finalizar:**
-- [ ] Tenant criado com `status = 'pending'`
-- [ ] `tenant_branding` criado via trigger com os valores do step 4
-- [ ] Redirect para detalhes com banner de ação: *"Tenant criado. Adicione produtos e ative."*
+**On completion:**
+- [ ] Tenant created with `status = 'pending'`
+- [ ] `tenant_branding` created via trigger with the step 4 values
+- [ ] Redirect to details with an action banner: *"Tenant created. Add products and activate."*
 
 ---
 
-### F3 — Ativar Tenant
+### F3 — Activate Tenant
 
-**Gatilho:** Botão na página de detalhes quando `status = 'pending'`
+**Trigger:** Button on the details page when `status = 'pending'`
 
-**Validações antes de ativar:**
-- Ao menos 1 produto habilitado → **bloqueia** com mensagem
-- Logo enviada → warning (não bloqueia)
-- Dados bancários preenchidos → warning (não bloqueia)
+**Validations before activation:**
+- At least 1 enabled product → **blocks** with a message
+- Logo uploaded → warning (does not block)
+- Bank details filled in → warning (does not block)
 
-**Pré-requisito:** a tabela `tenant_users` deve existir antes de implementar esta action. A migration `20260409000000_create_tenant_users.sql` é criada junto ao `apps/console` (ver `docs/superpowers/specs/2026-04-09-console-app-design.md`).
+**Prerequisite:** the `tenant_users` table must exist before implementing this action. The `20260409000000_create_tenant_users.sql` migration is created alongside `apps/console` (see `docs/superpowers/specs/2026-04-09-console-app-design.md`).
 
-**Fluxo de ativação (Server Action com `createServiceClient()` de `@/lib/supabase/service`):**
+**Activation flow (Server Action with `createServiceClient()` from `@/lib/supabase/service`):**
 
 ```typescript
-// 1. Cria usuário no Supabase Auth
+// 1. Create user in Supabase Auth
 const supabase = createServiceClient()
 const { data: authUser } = await supabase.auth.admin.createUser({
   email: tenant.email,
   email_confirm: true,
 })
 
-// 2. Insere em tenant_users (tabela criada na migration do console)
+// 2. Insert into tenant_users (table created in the console migration)
 await supabase.from('tenant_users').insert({
   id: authUser.user.id,
   tenant_id: tenant.id,
   role: 'tenant_admin',
 })
 
-// 3. Envia magic link para o tenant definir senha
+// 3. Send magic link for the tenant to set a password
 await supabase.auth.admin.generateLink({
   type: 'magiclink',
   email: tenant.email,
 })
 
-// 4. Atualiza status
+// 4. Update status
 await supabase.from('tenants').update({
   status: 'active',
   activated_at: new Date().toISOString(),
 }).eq('id', tenant.id)
 
-// 5. Dispara TenantWelcomeEmail via Resend (packages/transactional)
+// 5. Trigger TenantWelcomeEmail via Resend (packages/transactional)
 ```
 
-**Critérios de Aceite:**
-- [ ] Modal de confirmação antes de ativar
-- [ ] Se white-label: exibe instruções de DNS após ativação
-- [ ] Link da loja exibido na página de detalhes após ativação
-- [ ] Email de boas-vindas enviado com magic link para definir senha
+**Acceptance Criteria:**
+- [ ] Confirmation modal before activating
+- [ ] If white-label: show DNS instructions after activation
+- [ ] Store link shown on the details page after activation
+- [ ] Welcome email sent with a magic link to set the password
 
 ---
 
-### F4 — Editar Tenant · `src/app/(private)/tenants/[id]/edit/page.tsx`
+### F4 — Edit Tenant · `src/app/(private)/tenants/[id]/edit/page.tsx`
 
-Mesmas seções do formulário de criação, organizadas em **abas** (não steps):
+Same sections as the creation form, organized into **tabs** (not steps):
 
-- **Aba 1:** Dados da Empresa
-- **Aba 2:** Loja (slug / domínio)
-- **Aba 3:** Identidade Visual
-- **Aba 4:** Dados Bancários
+- **Tab 1:** Company Data
+- **Tab 2:** Store (slug / domain)
+- **Tab 3:** Visual Identity
+- **Tab 4:** Bank Details
 
-**Campos read-only após criação:** CNPJ · Tipo (com tooltip explicativo)
+**Read-only fields after creation:** CNPJ · Type (with explanatory tooltip)
 
 ---
 
-### F5 — Gerenciar Produtos · `src/app/(private)/tenants/[id]/products/page.tsx`
+### F5 — Manage Products · `src/app/(private)/tenants/[id]/products/page.tsx`
 
-Para cada produto ativo da Vello:
+For each active Vello product:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│ FGTS — Saque Aniversário                  [Toggle]      │
+│ FGTS — Birthday Withdrawal                [Toggle]      │
 ├─────────────────────────────────────────────────────────┤
-│ Banco paga à Vello:      10,0000%                       │
-│ Vello retém:              5,0000%                       │
-│ Disponível ao tenant:     5,0000%                       │
+│ Bank pays Vello:          10.0000%                      │
+│ Vello retains:             5.0000%                       │
+│ Available to tenant:       5.0000%                       │
 │                                                         │
-│ Comissão do Tenant:  [___3,5000___] %                   │
-│ Spread Vello (auto):      1,5000%  ← calculado em tempo real
+│ Tenant Commission:  [___3.5000___] %                    │
+│ Vello Spread (auto):       1.5000%  ← calculated in real time
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Critérios:**
-- [ ] Comissão pré-preenchida com padrão do plano do tenant
-- [ ] Spread Vello calculado e exibido em tempo real
-- [ ] Erro se comissão > disponível ao tenant
-- [ ] Toggle off: `is_active = false` (registro mantido para histórico)
+**Criteria:**
+- [ ] Commission pre-filled with the tenant's plan default
+- [ ] Vello spread calculated and shown in real time
+- [ ] Error if commission > available to tenant
+- [ ] Toggle off: `is_active = false` (record kept for history)
 
 ---
 
-### F6 — Suspender / Cancelar / Reativar
+### F6 — Suspend / Cancel / Reactivate
 
-| Status atual | Ações disponíveis |
+| Current status | Available actions |
 |---|---|
-| `pending` | Ativar · Cancelar |
-| `active` | Suspender · Cancelar |
-| `suspended` | Reativar · Cancelar |
-| `cancelled` | — somente leitura |
+| `pending` | Activate · Cancel |
+| `active` | Suspend · Cancel |
+| `suspended` | Reactivate · Cancel |
+| `cancelled` | — read-only |
 
-**Suspensão:** proxy do Console bloqueia acesso · dados preservados · `suspended_at` preenchido
+**Suspension:** Console proxy blocks access · data preserved · `suspended_at` filled in
 
-**Cancelamento:** irreversível · modal exige digitar nome do tenant · soft delete via status
-
----
-
-### F7 — Detalhes do Tenant · `src/app/(private)/tenants/[id]/page.tsx`
-
-**Layout duas colunas:**
-
-Coluna esquerda (2/3) com tabs:
-- **Dados Cadastrais** — dados da empresa, slug, domínio
-- **Produtos** — produtos habilitados e comissões
-- **Financeiro** — métricas e extrato (placeholder)
-- **Identidade Visual** — preview do branding + link de edição
-
-Coluna direita (1/3):
-- Card de ações (ativar / suspender / editar)
-- Preview miniatura da tela de sign-in (white-label)
-- Métricas rápidas: propostas, volume, comissões geradas
+**Cancellation:** irreversible · modal requires typing the tenant name · soft delete via status
 
 ---
 
-## Customização das Telas Públicas — Console
+### F7 — Tenant Details · `src/app/(private)/tenants/[id]/page.tsx`
 
-### Fluxo de resolução do branding
+**Two-column layout:**
+
+Left column (2/3) with tabs:
+- **Registration Data** — company data, slug, domain
+- **Products** — enabled products and commissions
+- **Financial** — metrics and statement (placeholder)
+- **Visual Identity** — branding preview + edit link
+
+Right column (1/3):
+- Actions card (activate / suspend / edit)
+- Thumbnail preview of the sign-in screen (white-label)
+- Quick metrics: proposals, volume, commissions generated
+
+---
+
+## Public Screens Customization — Console
+
+### Branding resolution flow
 
 ```
 GET creditos.empresa.com.br/sign-in
   ↓
-proxy do Console (proxy.ts)
+Console proxy (proxy.ts)
   ↓
 SELECT * FROM tenants WHERE custom_domain = hostname
 SELECT * FROM tenant_branding WHERE tenant_id = tenant.id
   ↓
-Injeta headers:
+Injects headers:
   x-tenant-id: uuid
   x-tenant-branding: JSON.stringify(branding)
   ↓
-(public)/layout.tsx lê os headers
+(public)/layout.tsx reads the headers
   ↓
-Aplica CSS variables + renderiza layout com branding do tenant
+Applies CSS variables + renders layout with the tenant's branding
 ```
 
-### Layout das telas públicas — `apps/console/src/app/(public)/layout.tsx` (lê headers injetados por `proxy.ts`)
+### Public screens layout — `apps/console/src/app/(public)/layout.tsx` (reads headers injected by `proxy.ts`)
 
-Baseado no print do cliente white-label (split 40/60, dark theme):
+Based on the client's white-label screenshot (40/60 split, dark theme):
 
 ```
 ┌──────────────── 40% ────────────────┬─────────── 60% ────────────┐
 │ background: auth_bg_color           │                             │
 │                                     │  auth_bg_image_url          │
-│ [logo do tenant — topo esquerdo]    │  (object-cover)             │
+│ [tenant logo — top left]           │  (object-cover)             │
 │                                     │                             │
-│       [children — formulário]       │  Fallback se sem imagem:    │
-│       centralizado verticalmente    │  gradiente                  │
+│       [children — form]            │  Fallback if no image:      │
+│       vertically centered          │  gradient                  │
 │                                     │  primary_color →            │
 │                                     │  secondary_color            │
 │                                     │                             │
 └─────────────────────────────────────┴─────────────────────────────┘
 ```
 
-**CSS variables injetadas pelo layout:**
+**CSS variables injected by the layout:**
 ```css
 --tenant-primary:       primary_color
---tenant-primary-hover: primary_color com 10% mais escuro (calculado)
+--tenant-primary-hover: primary_color 10% darker (calculated)
 --tenant-bg:            auth_bg_color
---tenant-text:          calculado por contraste com auth_bg_color
+--tenant-text:          calculated by contrast with auth_bg_color
 ```
 
-**Telas públicas que usam este layout:**
-- `/sign-in` — formulário de login
-- `/forgot-password` — solicitar reset de senha
-- `/reset-password` — definir nova senha (magic link)
+**Public screens using this layout:**
+- `/sign-in` — login form
+- `/forgot-password` — request password reset
+- `/reset-password` — set new password (magic link)
 
-**Critérios de Aceite:**
-- [ ] Layout split 40/60 responsivo (em mobile: empilhado, imagem oculta)
-- [ ] Logo do tenant no topo esquerdo, fallback logo Vello
-- [ ] Botão usa `--tenant-primary` como background
-- [ ] Sem imagem: painel direito exibe gradiente `primary → secondary`
-- [ ] Tema dark/light baseado em `auth_theme` do branding
-- [ ] Subscription sem branding customizado: layout Vello padrão
+**Acceptance Criteria:**
+- [ ] Responsive 40/60 split layout (on mobile: stacked, image hidden)
+- [ ] Tenant logo at the top left, fallback to the Vello logo
+- [ ] Button uses `--tenant-primary` as background
+- [ ] No image: right panel shows a `primary → secondary` gradient
+- [ ] Dark/light theme based on `auth_theme` from the branding
+- [ ] Subscription without custom branding: standard Vello layout
 
 ---
 
 ## Supabase Storage
 
 ```
-Bucket: tenant-assets (acesso público via signed URLs)
+Bucket: tenant-assets (public access via signed URLs)
 
 tenant-assets/
 └── [tenant_id]/
@@ -426,9 +426,9 @@ tenant-assets/
     └── auth-bg       ← auth_bg_image_url
 ```
 
-**Server Action de upload:**
+**Upload Server Action:**
 ```typescript
-// Usar createServiceClient() de @/lib/supabase/service — não expor ao browser
+// Use createServiceClient() from @/lib/supabase/service — never expose to the browser
 const supabase = createServiceClient()
 const { data } = await supabase.storage
   .from('tenant-assets')
@@ -438,12 +438,12 @@ const { data: { publicUrl } } = supabase.storage
   .from('tenant-assets')
   .getPublicUrl(`${tenantId}/logo`)
 
-// Salvar publicUrl em tenant_branding.logo_url
+// Save publicUrl in tenant_branding.logo_url
 ```
 
 ---
 
-## Arquivos a Criar
+## Files to Create
 
 ```
 apps/admin/src/app/(private)/tenants/
@@ -462,11 +462,11 @@ apps/admin/src/app/(private)/tenants/
     ├── tenant-status-actions.tsx
     ├── tenant-form-steps.tsx
     ├── tenant-branding-form.tsx
-    ├── tenant-branding-preview.tsx   ← preview em tempo real da tela de sign-in
+    ├── tenant-branding-preview.tsx   ← real-time preview of the sign-in screen
     └── tenant-products-manager.tsx
 
 apps/console/src/app/(public)/
-├── layout.tsx                        ← split 40/60 com branding do tenant
+├── layout.tsx                        ← 40/60 split with the tenant's branding
 ├── sign-in/page.tsx
 ├── forgot-password/page.tsx
 └── reset-password/page.tsx
@@ -480,10 +480,10 @@ supabase/migrations/
 
 ---
 
-## Fora do Escopo desta Feature
+## Out of Scope for This Feature
 
-- Self-service de onboarding pelo próprio tenant
-- Cobrança automática de mensalidade
-- Provisionamento automático de subdomínio via Vercel API
-- Tenant editar seu próprio branding pelo Console
-- Múltiplos usuários por tenant (apenas 1 `tenant_admin` por ora)
+- Self-service onboarding by the tenant itself
+- Automatic monthly billing
+- Automatic subdomain provisioning via the Vercel API
+- Tenant editing its own branding through the Console
+- Multiple users per tenant (only 1 `tenant_admin` for now)

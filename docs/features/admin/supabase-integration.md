@@ -1,91 +1,91 @@
-# Spec — Integração com Supabase
+# Spec — Supabase Integration
 
-**App:** `apps/admin` (padrão replicado depois para `console` e `store`)
-**Status:** `implementado`
-**Prioridade:** Bloqueante — todos os módulos dependem desta integração
+**App:** `apps/admin` (pattern replicated later for `console` and `store`)
+**Status:** `implemented`
+**Priority:** Blocking — all modules depend on this integration
 
 ---
 
-## Visão Geral
+## Overview
 
-A integração segue o padrão oficial `@supabase/ssr` com quatro camadas:
+The integration follows the official `@supabase/ssr` pattern with four layers:
 
 ```
 Browser (Client Component)
-  └── lib/supabase/client.ts       ← createBrowserClient — apenas auth.signOut()
+  └── lib/supabase/client.ts       ← createBrowserClient — only auth.signOut()
 
-Servidor (Server Component / Action)
-  └── lib/supabase/server.ts       ← createServerClient — todas as queries de dados
-  └── lib/supabase/service.ts      ← createClient com secret key — bypassa RLS
+Server (Server Component / Action)
+  └── lib/supabase/server.ts       ← createServerClient — all data queries
+  └── lib/supabase/service.ts      ← createClient with secret key — bypasses RLS
 
-Proxy (Edge) — Next.js 16 renomeou Middleware para Proxy
-  └── proxy.ts                     ← lógica de rotas (redirects) — entry point do Next.js
-  └── lib/supabase/proxy.ts        ← updateSession: sessão Supabase + isAuthenticated
+Proxy (Edge) — Next.js 16 renamed Middleware to Proxy
+  └── proxy.ts                     ← route logic (redirects) — Next.js entry point
+  └── lib/supabase/proxy.ts        ← updateSession: Supabase session + isAuthenticated
 ```
 
-> **Next.js 16:** O arquivo de middleware passou a se chamar `proxy.ts` (era `middleware.ts`).
-> A função exportada deve ser `proxy` (ou default export). O `middleware.ts` não é mais usado.
+> **Next.js 16:** The middleware file is now called `proxy.ts` (it used to be `middleware.ts`).
+> The exported function must be `proxy` (or a default export). `middleware.ts` is no longer used.
 
-**Regra central (Fat Server):** queries de banco NUNCA no browser client.
-O browser client existe exclusivamente para `auth.signOut()`.
+**Core rule (Fat Server):** database queries NEVER on the browser client.
+The browser client exists exclusively for `auth.signOut()`.
 
 ---
 
-## Fase 1 — Setup do CLI e Projeto
+## Phase 1 — CLI and Project Setup
 
-### 1.1 Instalar e linkar o Supabase CLI
+### 1.1 Install and link the Supabase CLI
 
 ```bash
-# Na raiz do monorepo
+# At the monorepo root
 brew install supabase/tap/supabase   # macOS
-# ou: npm install -g supabase
+# or: npm install -g supabase
 
 supabase login
 supabase link --project-ref SEU_PROJECT_REF
 ```
 
-> O `PROJECT_REF` está na URL do dashboard: `supabase.com/dashboard/project/[PROJECT_REF]`
+> The `PROJECT_REF` is in the dashboard URL: `supabase.com/dashboard/project/[PROJECT_REF]`
 
-### 1.2 Inicializar estrutura local
+### 1.2 Initialize local structure
 
 ```bash
-# Na raiz do monorepo (se ainda não existir supabase/)
+# At the monorepo root (if supabase/ doesn't exist yet)
 supabase init
 ```
 
-Resultado esperado:
+Expected result:
 ```
 supabase/
 ├── config.toml
-└── migrations/    ← vazio por enquanto
+└── migrations/    ← empty for now
 ```
 
-### 1.3 Verificar conexão
+### 1.3 Verify connection
 
 ```bash
 supabase status
 ```
 
-Deve retornar o projeto linkado com `API URL` e `anon key`.
+Should return the linked project with `API URL` and `anon key`.
 
 ---
 
-## Fase 2 — Variáveis de Ambiente
+## Phase 2 — Environment Variables
 
-### 2.1 Criar `.env.local` na raiz do monorepo
+### 2.1 Create `.env.local` at the monorepo root
 
 ```bash
 # .env.local
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_SUPABASE_URL=https://[PROJECT_REF].supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...   # publishable key
-SUPABASE_SECRET_KEY=sb_secret_...                         # secret key — NUNCA expor no cliente
+SUPABASE_SECRET_KEY=sb_secret_...                         # secret key — NEVER expose on the client
 RESEND_API_KEY=re_...
 ```
 
-> As keys estão em: Supabase Dashboard → Project Settings → API
+> The keys are at: Supabase Dashboard → Project Settings → API
 
-### 2.2 Criar `.env.example` (commitado no git)
+### 2.2 Create `.env.example` (committed to git)
 
 ```bash
 # .env.example
@@ -95,15 +95,15 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SECRET_KEY=
 ```
 
-### 2.3 Garantir que `.env.local` está no `.gitignore`
+### 2.3 Make sure `.env.local` is in `.gitignore`
 
 ```bash
-# .gitignore (raiz do monorepo — já deve existir)
+# .gitignore (monorepo root — should already exist)
 .env.local
 .env*.local
 ```
 
-### 2.4 Expandir `packages/env` com schema do admin
+### 2.4 Expand `packages/env` with the admin schema
 
 ```typescript
 // packages/env/src/admin.ts
@@ -133,9 +133,9 @@ export const env = createEnv({
 
 ---
 
-## Fase 3 — Clients do Supabase
+## Phase 3 — Supabase Clients
 
-### 3.1 Instalar dependências
+### 3.1 Install dependencies
 
 ```bash
 pnpm add @supabase/ssr @supabase/supabase-js --filter=admin
@@ -156,8 +156,8 @@ export function createClient() {
 }
 ```
 
-> Uso permitido: APENAS em Client Components para `auth.getUser()` e `auth.signOut()`.
-> NUNCA usar `supabase.from()` aqui.
+> Allowed use: ONLY in Client Components for `auth.getUser()` and `auth.signOut()`.
+> NEVER use `supabase.from()` here.
 
 ### 3.3 Server Client — `apps/admin/src/lib/supabase/server.ts`
 
@@ -184,7 +184,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             })
           } catch {
-            // Server Component — cookies só podem ser escritos em Actions/Route Handlers
+            // Server Component — cookies can only be written in Actions/Route Handlers
           }
         },
       },
@@ -200,9 +200,9 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@vello/database'
 import { env } from '@vello/env/admin'
 
-// Client com permissão total — bypassa RLS
-// Usar APENAS em Server Actions e Edge Functions que precisam de acesso irrestrito
-// Ex: criar usuário ao ativar tenant, operações de admin que não têm tenant_id
+// Client with full permissions — bypasses RLS
+// Use ONLY in Server Actions and Edge Functions that need unrestricted access
+// E.g.: creating a user when activating a tenant, admin operations without a tenant_id
 export function createServiceClient() {
   return createSupabaseClient<Database>(
     env.NEXT_PUBLIC_SUPABASE_URL,
@@ -211,25 +211,25 @@ export function createServiceClient() {
 }
 ```
 
-> **Atenção:** este client bypassa RLS completamente.
-> Usar somente quando explicitamente necessário (ex: provisionar tenant, criar usuário admin).
+> **Warning:** this client bypasses RLS completely.
+> Use only when explicitly necessary (e.g.: provisioning a tenant, creating an admin user).
 
 ---
 
-## Fase 4 — Proxy (Middleware no Next.js 16)
+## Phase 4 — Proxy (Middleware in Next.js 16)
 
-No Next.js 16, o arquivo de middleware se chama `proxy.ts`. A lógica de sessão Supabase
-fica isolada em `lib/supabase/proxy.ts`; o `src/proxy.ts` contém apenas as regras de redirect.
+In Next.js 16, the middleware file is called `proxy.ts`. The Supabase session logic
+is isolated in `lib/supabase/proxy.ts`; `src/proxy.ts` contains only the redirect rules.
 
 ### `apps/admin/src/lib/supabase/proxy.ts`
 
-Cria o cliente Supabase, atualiza cookies e retorna `isAuthenticated`:
+Creates the Supabase client, updates cookies, and returns `isAuthenticated`:
 
 ```typescript
 export async function updateSession(
   request: NextRequest,
 ): Promise<{ response: NextResponse; isAuthenticated: boolean }> {
-  // createServerClient + getUser() — não adicionar código entre os dois
+  // createServerClient + getUser() — don't add code between the two
   const { data } = await supabase.auth.getUser()
   return { response: supabaseResponse, isAuthenticated: !!data?.user }
 }
@@ -237,7 +237,7 @@ export async function updateSession(
 
 ### `apps/admin/src/proxy.ts`
 
-Entry point do Next.js 16. Delega a sessão para `updateSession` e aplica redirects:
+Next.js 16 entry point. Delegates the session to `updateSession` and applies redirects:
 
 ```typescript
 import { updateSession } from '@/lib/supabase/proxy'
@@ -251,8 +251,8 @@ const publicRoutesPatterns = [
 export async function proxy(request: NextRequest) {
   const { response, isAuthenticated } = await updateSession(request)
 
-  // Não autenticado em rota protegida → /sign-in
-  // Autenticado em rota com whenAuthenticated: 'redirect' → /
+  // Not authenticated on a protected route → /sign-in
+  // Authenticated on a route with whenAuthenticated: 'redirect' → /
   return response
 }
 
@@ -263,31 +263,31 @@ export const config = {
 
 ---
 
-## Fase 5 — Auth com Custom Claims JWT (RBAC)
+## Phase 5 — Auth with Custom JWT Claims (RBAC)
 
-### Conceito
+### Concept
 
-O Supabase Auth gera JWTs padrão. Para adicionar `role` e `tenant_id` ao token,
-usamos um **Auth Hook** do tipo `custom_access_token` que executa uma Edge Function
-antes de emitir o JWT.
+Supabase Auth generates standard JWTs. To add `role` and `tenant_id` to the token,
+we use an **Auth Hook** of type `custom_access_token` that runs an Edge Function
+before the JWT is issued.
 
 ```
-Login do usuário
+User login
       ↓
-Supabase Auth valida credenciais
+Supabase Auth validates credentials
       ↓
 Hook: custom_access_token (PostgreSQL Function)
       ↓
-Busca role e tenant_id na tabela backoffice_users
+Looks up role and tenant_id in the backoffice_users table
       ↓
-Injeta no JWT: { user_role: 'super_admin', tenant_id: null }
+Injects into the JWT: { user_role: 'super_admin', tenant_id: null }
       ↓
-JWT retornado ao cliente com claims customizados
+JWT returned to the client with custom claims
       ↓
-RLS policies leem (auth.jwt() ->> 'user_role') e (auth.jwt() ->> 'tenant_id')
+RLS policies read (auth.jwt() ->> 'user_role') and (auth.jwt() ->> 'tenant_id')
 ```
 
-### 5.1 Migration — Tabela `backoffice_users`
+### 5.1 Migration — `backoffice_users` Table
 
 ```sql
 -- supabase/migrations/20260401000001_create_backoffice_users.sql
@@ -312,7 +312,7 @@ CREATE TRIGGER set_updated_at_backoffice_users
   BEFORE UPDATE ON backoffice_users
   FOR EACH ROW EXECUTE FUNCTION moddatetime(updated_at);
 
--- RLS: apenas super_admin gerencia usuários do backoffice
+-- RLS: only super_admin manages backoffice users
 ALTER TABLE backoffice_users ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "backoffice_users_self_read" ON backoffice_users
@@ -326,12 +326,12 @@ CREATE POLICY "backoffice_users_super_admin" ON backoffice_users
 
 ### 5.2 PostgreSQL Function — Custom Access Token Hook
 
-Em vez de Edge Function, utilizamos uma PostgreSQL function para manter o isolamento e maior segurança (por não expor tráfego HTTP para manipulação de token).
+Instead of an Edge Function, we use a PostgreSQL function to keep isolation and greater security (by not exposing HTTP traffic for token manipulation).
 
-Ela é definida via SQL e recebe privilégios restritos:
+It is defined via SQL and receives restricted privileges:
 
 ```sql
--- migration que cria a função
+-- migration that creates the function
 CREATE OR REPLACE FUNCTION public.custom_access_token_hook(event jsonb)
 RETURNS jsonb
 LANGUAGE plpgsql
@@ -345,7 +345,7 @@ AS $$
   BEGIN
     claims := event->'claims';
 
-    -- Tenta buscar como usuário do backoffice
+    -- Try to look up as a backoffice user
     SELECT role, is_active INTO backoffice_user
     FROM public.backoffice_users
     WHERE id = (event->>'user_id')::uuid;
@@ -354,7 +354,7 @@ AS $$
       claims := jsonb_set(claims, '{user_role}', to_jsonb(backoffice_user.role));
       claims := jsonb_set(claims, '{tenant_id}', 'null'::jsonb);
     ELSE
-      -- Tenta buscar como usuário de tenant
+      -- Try to look up as a tenant user
       SELECT role, tenant_id, is_active INTO tenant_user
       FROM public.tenant_users
       WHERE id = (event->>'user_id')::uuid;
@@ -365,34 +365,34 @@ AS $$
       END IF;
     END IF;
 
-    -- Atualiza o objeto claims no evento original
+    -- Update the claims object in the original event
     event := jsonb_set(event, '{claims}', claims);
     
     RETURN event;
   END;
 $$;
 
--- Revoga acesso público e garante ao auth admin
+-- Revoke public access and grant it to the auth admin
 REVOKE ALL PRIVILEGES ON FUNCTION public.custom_access_token_hook(jsonb) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.custom_access_token_hook(jsonb) TO supabase_auth_admin;
 ```
 
-### 5.3 Configurar o Hook no Dashboard
+### 5.3 Configure the Hook in the Dashboard
 
 ```
 Supabase Dashboard
   → Authentication
   → Hooks
   → Add hook: "Custom Access Token"
-  → Tipo: PostgreSQL
+  → Type: PostgreSQL
   → Schema: public
   → Function: custom_access_token_hook
-  → Salvar
+  → Save
 ```
 
-> Este passo é feito **manualmente no dashboard** (não há CLI para isso ainda).
+> This step is done **manually in the dashboard** (there is no CLI for this yet).
 
-### 5.4 Tipos do JWT em `packages/auth`
+### 5.4 JWT Types in `packages/auth`
 
 ```typescript
 // packages/auth/src/types.ts
@@ -406,7 +406,7 @@ export interface JwtClaims {
   tenant_id: string | null
 }
 
-// Helper: extrai claims do usuário autenticado (server-side)
+// Helper: extracts claims from the authenticated user (server-side)
 export function getJwtClaims(
   user: { app_metadata?: Record<string, unknown> } | null,
 ): JwtClaims | null {
@@ -417,7 +417,7 @@ export function getJwtClaims(
   return { user_role, tenant_id: tenant_id ?? null }
 }
 
-// Helpers de verificação de permissão
+// Permission-check helpers
 export function isBackoffice(claims: JwtClaims | null): boolean {
   if (!claims) return false
   return ['super_admin', 'admin', 'financial', 'support'].includes(claims.user_role)
@@ -438,15 +438,15 @@ export function hasRole(
 
 ---
 
-## Fase 6 — Seed: Primeiro Usuário Admin
+## Phase 6 — Seed: First Admin User
 
 ```sql
 -- supabase/seed.sql
 
--- 1. Criar usuário no Supabase Auth via função auxiliar
--- (executar via Supabase Dashboard → SQL Editor, ou via script)
+-- 1. Create the user in Supabase Auth via a helper function
+-- (run via Supabase Dashboard → SQL Editor, or via a script)
 
--- Inserir o perfil após criar o usuário manualmente no Dashboard → Auth → Users
+-- Insert the profile after manually creating the user in Dashboard → Auth → Users
 INSERT INTO backoffice_users (id, role, full_name)
 VALUES (
   'UUID_DO_USUARIO_CRIADO_NO_DASHBOARD',
@@ -455,19 +455,19 @@ VALUES (
 );
 ```
 
-> O usuário é criado primeiro em: Dashboard → Authentication → Users → Add User.
-> Depois o `id` gerado é usado no INSERT acima.
+> The user is created first at: Dashboard → Authentication → Users → Add User.
+> Then the generated `id` is used in the INSERT above.
 
 ---
 
-## Fase 7 — Types do Banco
+## Phase 7 — Database Types
 
-### 7.1 Criar placeholder em `packages/database`
+### 7.1 Create a placeholder in `packages/database`
 
 ```typescript
 // packages/database/src/types.ts
-// Gerado automaticamente pelo Supabase CLI — não editar manualmente
-// Regenerar com: pnpm db:types
+// Automatically generated by the Supabase CLI — do not edit manually
+// Regenerate with: pnpm db:types
 
 export type Database = {
   public: {
@@ -479,7 +479,7 @@ export type Database = {
 }
 ```
 
-### 7.2 Script no turbo.json
+### 7.2 Script in turbo.json
 
 ```json
 // packages/database/package.json
@@ -492,7 +492,7 @@ export type Database = {
 ```
 
 ```json
-// turbo.json — adicionar task
+// turbo.json — add task
 {
   "tasks": {
     "db:types": {
@@ -503,7 +503,7 @@ export type Database = {
 ```
 
 ```json
-// package.json raiz — adicionar script
+// root package.json — add script
 {
   "scripts": {
     "db:types": "turbo db:types"
@@ -513,24 +513,24 @@ export type Database = {
 
 ---
 
-## Fase 8 — Página de Sign-In
+## Phase 8 — Sign-In Page
 
-> Preserva o padrão existente do projeto: rota `(public)/sign-in`, hook `useFormState`
-> customizado, componentes `Field/FieldError/FieldGroup/FieldLabel` próprios.
-> Apenas a camada de transporte muda: de `ky` + cookie manual para Supabase Auth.
+> Preserves the project's existing pattern: `(public)/sign-in` route, custom
+> `useFormState` hook, the project's own `Field/FieldError/FieldGroup/FieldLabel` components.
+> Only the transport layer changes: from `ky` + manual cookie to Supabase Auth.
 
-### Estrutura de arquivos
+### File structure
 
 ```
 apps/admin/src/app/(public)/sign-in/
-├── page.tsx           ← sem alteração
-├── sign-in-form.tsx   ← sem alteração
-└── actions.ts         ← APENAS ESTE ARQUIVO MUDA
+├── page.tsx           ← no change
+├── sign-in-form.tsx   ← no change
+└── actions.ts         ← ONLY THIS FILE CHANGES
 ```
 
 ---
 
-### `page.tsx` — sem alteração
+### `page.tsx` — no change
 
 ```tsx
 import { SignInForm } from './sign-in-form'
@@ -546,10 +546,10 @@ export default function SignInPage() {
 
 ---
 
-### `sign-in-form.tsx` — sem alteração
+### `sign-in-form.tsx` — no change
 
-O componente permanece exatamente como está. Ele não conhece o mecanismo de auth —
-apenas consome a action via `useFormState` e renderiza erros.
+The component remains exactly as it is. It has no knowledge of the auth mechanism —
+it only consumes the action via `useFormState` and renders errors.
 
 ```tsx
 'use client'
@@ -646,11 +646,11 @@ export function SignInForm({ ...props }: React.ComponentProps<'form'>) {
 
 ---
 
-### `actions.ts` — substituição completa
+### `actions.ts` — full replacement
 
-- Use `createClient()` do Supabase server
-- O Supabase gerencia a sessão via cookies automaticamente (via `@supabase/ssr`)
-- Mantém o shape de retorno `{ success, message, errors }` que o `useFormState` espera
+- Use `createClient()` from the Supabase server
+- Supabase manages the session via cookies automatically (via `@supabase/ssr`)
+- Keeps the `{ success, message, errors }` return shape that `useFormState` expects
 
 ```typescript
 'use server'
@@ -679,7 +679,7 @@ export async function signInWithEmailAndPassword(data: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    // Não expor detalhes técnicos do Supabase ao usuário
+    // Don't expose technical Supabase details to the user
     return {
       success: false,
       message: 'E-mail ou senha incorretos.',
@@ -687,36 +687,36 @@ export async function signInWithEmailAndPassword(data: FormData) {
     }
   }
 
-  // Supabase @supabase/ssr gerencia os cookies de sessão automaticamente.
-  // Não é necessário setar cookie manualmente.
+  // Supabase @supabase/ssr manages session cookies automatically.
+  // No need to set a cookie manually.
   return { success: true, message: null, errors: null }
 }
 ```
 
-> **Por que não há `redirect()` na action?**
-> O `useFormState` do seu hook detecta `success: true` e executa o callback
-> `() => router.push('/')` no cliente. O redirect acontece no lado do cliente,
-> não na Server Action — isso é o comportamento correto para o padrão que você usa.
+> **Why isn't there a `redirect()` in the action?**
+> Your `useFormState` hook detects `success: true` and runs the callback
+> `() => router.push('/')` on the client. The redirect happens client-side,
+> not in the Server Action — this is the correct behavior for the pattern you use.
 
 ---
 
-### Atualizar proxy — rota correta
+### Update proxy — correct route
 
-O proxy precisa apontar para `/sign-in`:
+The proxy needs to point to `/sign-in`:
 
 ```typescript
 // apps/admin/src/proxy.ts
 
 const isAuthRoute = request.nextUrl.pathname.startsWith('/sign-in')
 
-// Redireciona para sign-in se não autenticado
+// Redirect to sign-in if not authenticated
 if (!user && isProtectedRoute) {
   const url = request.nextUrl.clone()
   url.pathname = '/sign-in'
   return NextResponse.redirect(url)
 }
 
-// Redireciona para dashboard se já autenticado
+// Redirect to dashboard if already authenticated
 if (user && isAuthRoute) {
   const url = request.nextUrl.clone()
   url.pathname = '/'
@@ -726,37 +726,37 @@ if (user && isAuthRoute) {
 
 ---
 
-## Ordem de Execução para o Claude Code
+## Execution Order for Claude Code
 
 ```
-Fase 1  → supabase link
-Fase 2  → .env.local + packages/env/src/admin.ts
-Fase 3  → src/lib/supabase/client.ts + server.ts + service.ts
-Fase 4  → src/proxy.ts (rota: /sign-in, redirect: /)
-Fase 5  → migration backoffice_users + hook PostgreSQL + configurar hook no dashboard
-Fase 6  → seed (manual no dashboard)
-Fase 7  → packages/database placeholder + pnpm db:types
-Fase 8  → actions.ts de sign-in (substituir ky por Supabase) + sign-out-button.tsx
+Phase 1  → supabase link
+Phase 2  → .env.local + packages/env/src/admin.ts
+Phase 3  → src/lib/supabase/client.ts + server.ts + service.ts
+Phase 4  → src/proxy.ts (route: /sign-in, redirect: /)
+Phase 5  → backoffice_users migration + PostgreSQL hook + configure hook in the dashboard
+Phase 6  → seed (manual in the dashboard)
+Phase 7  → packages/database placeholder + pnpm db:types
+Phase 8  → sign-in actions.ts (replace ky with Supabase) + sign-out-button.tsx
 ```
 
-> `page.tsx` e `sign-in-form.tsx` não precisam de alteração — preservar como estão.
+> `page.tsx` and `sign-in-form.tsx` need no changes — keep them as they are.
 
 ---
 
-## Critérios de Conclusão
+## Completion Criteria
 
-- [x] `supabase status` retorna projeto linkado
-- [x] `.env.local` preenchido, `.env.example` commitado
-- [x] `packages/env/src/admin.ts` validando as variáveis (publishable/secret key)
-- [x] `src/lib/supabase/client.ts`, `server.ts` e `service.ts` criados
-- [x] proxy.ts redirecionando para `/sign-in` sem auth, para `/` com auth
-- [x] middleware.ts re-exporta proxy e config
-- [x] Migration `backoffice_users` aplicada: `supabase db push`
-- [x] PostgreSQL Function `custom_access_token_hook` deployada via migrations
-- [ ] Hook "Custom Access Token" configurado no Dashboard (Authentication → Hooks)
-- [ ] Usuário super_admin criado via dashboard + INSERT em `backoffice_users`
-- [ ] Login funciona: `success: true` → `router.push('/')` via `useFormState`
-- [ ] JWT do usuário contém `user_role: 'super_admin'` e `tenant_id: null`
-- [x] `pnpm db:types` gera os types em `packages/database/src/types.ts`
-- [ ] Acesso direto a `/` sem login redireciona para `/sign-in`
-- [x] Erros de auth retornam `{ success: false, message, errors: null }` — sem detalhes técnicos
+- [x] `supabase status` returns the linked project
+- [x] `.env.local` filled in, `.env.example` committed
+- [x] `packages/env/src/admin.ts` validating the variables (publishable/secret key)
+- [x] `src/lib/supabase/client.ts`, `server.ts`, and `service.ts` created
+- [x] proxy.ts redirecting to `/sign-in` without auth, to `/` with auth
+- [x] middleware.ts re-exports proxy and config
+- [x] `backoffice_users` migration applied: `supabase db push`
+- [x] `custom_access_token_hook` PostgreSQL Function deployed via migrations
+- [ ] "Custom Access Token" hook configured in the Dashboard (Authentication → Hooks)
+- [ ] super_admin user created via dashboard + INSERT into `backoffice_users`
+- [ ] Login works: `success: true` → `router.push('/')` via `useFormState`
+- [ ] User's JWT contains `user_role: 'super_admin'` and `tenant_id: null`
+- [x] `pnpm db:types` generates the types in `packages/database/src/types.ts`
+- [ ] Direct access to `/` without login redirects to `/sign-in`
+- [x] Auth errors return `{ success: false, message, errors: null }` — no technical details

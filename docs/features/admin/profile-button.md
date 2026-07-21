@@ -1,16 +1,16 @@
-# Feature Spec — Profile Button: Dados do Usuário e Sign-Out
+# Feature Spec — Profile Button: User Data and Sign-Out
 
 **App:** `apps/admin` — Vello Admin
-**Componente:** `src/components/sidebar/profile-button.tsx`
-**Status:** `implementado`
-**Prioridade:** Alta — dados hardcoded em produção
+**Component:** `src/components/sidebar/profile-button.tsx`
+**Status:** `implemented`
+**Priority:** High — hardcoded data in production
 
 ---
 
-## Situação Anterior
+## Previous Situation
 
-`profile-button.tsx` exibia nome, email e iniciais **hardcoded**.
-O botão "Sair" não executava nenhuma ação.
+`profile-button.tsx` displayed **hardcoded** name, email, and initials.
+The "Sair" button did not perform any action.
 
 ```tsx
 // ❌ Estado anterior — dados fixos, sem sign-out
@@ -22,15 +22,15 @@ O botão "Sair" não executava nenhuma ação.
 
 ---
 
-## Objetivo
+## Objective
 
-1. Exibir nome completo e e-mail do usuário autenticado
-2. Exibir iniciais geradas a partir do nome no `Avatar`
-3. Sign-out funcional via Server Action
+1. Display the authenticated user's full name and email
+2. Display initials generated from the name in the `Avatar`
+3. Functional sign-out via Server Action
 
 ---
 
-## Fluxo de Dados
+## Data Flow
 
 ```
 nav-user.tsx (Server Component)
@@ -46,23 +46,23 @@ nav-user.tsx (Server Component)
   └── chama signOut() (Server Action) ao clicar em "Sair"
 ```
 
-**Regra Fat Server:** `ProfileButton` recebe dados via props — nunca importa nem chama Supabase diretamente.
+**Fat Server Rule:** `ProfileButton` receives data via props — it never imports or calls Supabase directly.
 
 ---
 
-## Dados a Exibir
+## Data to Display
 
-| Campo | Fonte | Exibição |
+| Field | Source | Display |
 |---|---|---|
-| Nome completo | `backoffice_users.full_name` | Trigger + dropdown header |
-| E-mail | `auth.users.email` | Abaixo do nome |
-| Iniciais | função local `initials()` — 2 primeiras palavras do nome | `AvatarFallback` |
+| Full name | `backoffice_users.full_name` | Trigger + dropdown header |
+| Email | `auth.users.email` | Below the name |
+| Initials | local `initials()` function — first 2 words of the name | `AvatarFallback` |
 
 ---
 
-## Implementação
+## Implementation
 
-### `nav-user.tsx` — busca os dados (Server Component)
+### `nav-user.tsx` — fetches the data (Server Component)
 
 ```tsx
 // src/components/sidebar/nav-user.tsx
@@ -99,10 +99,10 @@ export async function NavUser() {
 
 ---
 
-### `sign-out.ts` — Server Action de sign-out
+### `sign-out.ts` — sign-out Server Action
 
-`actions.ts` é reservado para Server Actions de formulários.
-Operações de sessão ficam em `src/http/`:
+`actions.ts` is reserved for form Server Actions.
+Session operations live in `src/http/`:
 
 ```typescript
 // src/http/sign-out.ts
@@ -120,7 +120,7 @@ export async function signOut() {
 
 ---
 
-### `profile-button.tsx` — recebe props e chama a action (Client Component)
+### `profile-button.tsx` — receives props and calls the action (Client Component)
 
 ```tsx
 // src/components/sidebar/profile-button.tsx
@@ -219,7 +219,7 @@ export function ProfileButton({ user }: ProfileButtonProps) {
 
 ---
 
-## Arquivos Modificados / Criados
+## Files Modified / Created
 
 ```
 apps/admin/src/
@@ -233,14 +233,14 @@ apps/admin/src/
 
 ---
 
-## Critérios de Aceite
+## Acceptance Criteria
 
-- [x] Nome e e-mail do usuário autenticado exibidos (não hardcoded)
-- [x] Iniciais geradas dinamicamente via função local `initials()` a partir do `full_name`
-- [x] Clicar em "Sair" chama `signOut()` e redireciona para `/sign-in`
-- [x] Botão "Sair" exibe "Saindo..." e fica desabilitado durante a transição
-- [x] Se `full_name` for nulo, fallback para `'Usuário'`
-- [x] Sem acesso ao Supabase em `profile-button.tsx` — apenas props
+- [x] Authenticated user's name and email displayed (not hardcoded)
+- [x] Initials generated dynamically via the local `initials()` function from `full_name`
+- [x] Clicking "Sair" calls `signOut()` and redirects to `/sign-in`
+- [x] "Sair" button shows "Saindo..." and is disabled during the transition
+- [x] If `full_name` is null, falls back to `'Usuário'`
+- [x] No Supabase access in `profile-button.tsx` — props only
 
 ---
 
@@ -248,7 +248,7 @@ apps/admin/src/
 
 ## Theme Switcher
 
-O `ProfileButton` integra o componente `ThemeSwitcher` para alternar entre light/dark mode.
+`ProfileButton` integrates the `ThemeSwitcher` component to toggle between light/dark mode.
 
 ```tsx
 // src/components/sidebar/theme-switcher.tsx (Client Component)
@@ -256,13 +256,13 @@ O `ProfileButton` integra o componente `ThemeSwitcher` para alternar entre light
 <ThemeSwitcher />
 ```
 
-O `ThemeSwitcher` usa `next-themes` para persistir a preferência do usuário.
+`ThemeSwitcher` uses `next-themes` to persist the user's preference.
 
 ---
 
-## Fora do Escopo
+## Out of Scope
 
-- Badge de role no dropdown
-- Edição de perfil do usuário
-- Upload de avatar (foto de perfil)
-- Troca de senha pelo sidebar
+- Role badge in the dropdown
+- User profile editing
+- Avatar upload (profile photo)
+- Password change from the sidebar

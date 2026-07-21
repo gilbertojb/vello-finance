@@ -1,36 +1,36 @@
-# Feature Spec — Snapshots de Comissão
+# Feature Spec — Commission Snapshots
 
-**App:** Transversal (trigger no banco, exibição em `apps/admin` e `apps/console`)
-**Módulo:** Admin / Comissões
+**App:** Cross-cutting (database trigger, displayed in `apps/admin` and `apps/console`)
+**Module:** Admin / Commissions
 **Status:** `ready-for-dev`
 
 ---
 
-## Regra de Negócio
+## Business Rule
 
-Percentuais mudam ao longo do tempo. O snapshot captura os valores vigentes no momento
-exato da criação de cada proposta. É **append-only** — nunca atualizar ou deletar.
+Percentages change over time. The snapshot captures the values in effect at the exact
+moment each proposal is created. It is **append-only** — never update or delete.
 
-A comissão da IF é definida por par **produto + instituição financeira** (`product_financial_partners`).
-Uma proposta deve referenciar a IF específica utilizada para que o trigger capture os percentuais corretos.
+The financial partner's commission is defined per **product + financial partner** pair (`product_financial_partners`).
+A proposal must reference the specific financial partner used so the trigger captures the correct percentages.
 
-### Exemplo com empréstimo de R$ 10.000
+### Example with a R$ 10,000 loan
 
-| Parte | % | Valor |
+| Part | % | Amount |
 |---|---|---|
-| IF paga à Vello | 10,0000% | R$ 1.000,00 |
-| Vello retém | 5,0000% | R$ 500,00 |
-| Tenant recebe | 3,5000% | R$ 350,00 |
-| Vello spread | 1,5000% | R$ 150,00 |
-| **Total Vello** | **6,5000%** | **R$ 650,00** |
-| **Total Tenant** | **3,5000%** | **R$ 350,00** |
+| Financial partner pays Vello | 10.0000% | R$ 1,000.00 |
+| Vello retains | 5.0000% | R$ 500.00 |
+| Tenant receives | 3.5000% | R$ 350.00 |
+| Vello spread | 1.5000% | R$ 150.00 |
+| **Vello Total** | **6.5000%** | **R$ 650.00** |
+| **Tenant Total** | **3.5000%** | **R$ 350.00** |
 
 ---
 
-## F1 — Captura Automática (trigger)
+## F1 — Automatic Capture (trigger)
 
-**Quando:** INSERT em `proposals`
-**Como:** trigger PostgreSQL AFTER INSERT com SECURITY DEFINER
+**When:** INSERT on `proposals`
+**How:** PostgreSQL AFTER INSERT trigger with SECURITY DEFINER
 
 ```sql
 CREATE OR REPLACE FUNCTION capture_commission_snapshot()
@@ -79,17 +79,17 @@ CREATE TRIGGER trg_capture_commission_snapshot
   FOR EACH ROW EXECUTE FUNCTION capture_commission_snapshot();
 ```
 
-**Aceite:**
-- [ ] Snapshot criado para toda nova proposta
-- [ ] Proposta rejeitada se IF não estiver vinculada ao produto
-- [ ] Proposta rejeitada se produto não habilitado para o tenant
-- [ ] Snapshot preservado após alterações futuras em `product_financial_partners` ou `tenant_products`
+**Acceptance:**
+- [ ] Snapshot created for every new proposal
+- [ ] Proposal rejected if the financial partner is not linked to the product
+- [ ] Proposal rejected if the product is not enabled for the tenant
+- [ ] Snapshot preserved after future changes to `product_financial_partners` or `tenant_products`
 
 ---
 
-## F2 — Cálculo em R$ (quando proposta aprovada)
+## F2 — Calculation in R$ (when proposal is approved)
 
-Server Action disparada ao mudar status para `approved`:
+Server Action triggered when status changes to `approved`:
 
 ```typescript
 // Pseudo-código
@@ -104,40 +104,40 @@ await updateSnapshot(snap.id, {
 })
 ```
 
-**Aceite:**
-- [ ] Cálculo apenas quando `status → 'approved'`
-- [ ] Idempotente: não recalcula se `loan_amount` já preenchido
+**Acceptance:**
+- [ ] Calculation only happens when `status → 'approved'`
+- [ ] Idempotent: does not recalculate if `loan_amount` is already filled in
 
 ---
 
-## F3 — Exibição na Proposta
+## F3 — Display on the Proposal
 
-Componente `<CommissionSnapshotPanel />` exibido na aba "Comissões" de qualquer proposta:
+`<CommissionSnapshotPanel />` component displayed on the "Commissions" tab of any proposal:
 
 ```
-Comissões desta Proposta
-(Valores fixados em 01/04/2026)
+Commissions for This Proposal
+(Values fixed on 01/04/2026)
 
-Valor do Empréstimo:          R$ 10.000,00
+Loan Amount:                  R$ 10,000.00
 
-IF paga à Vello:     10,0000%   R$  1.000,00
-Vello retém:          5,0000%   R$    500,00
+Financial partner pays Vello: 10.0000%   R$  1,000.00
+Vello retains:                 5.0000%   R$    500.00
 ─────────────────────────────────────────────
-Tenant recebe:        3,5000%   R$    350,00
-Spread Vello:         1,5000%   R$    150,00
+Tenant receives:               3.5000%   R$    350.00
+Vello Spread:                  1.5000%   R$    150.00
 ─────────────────────────────────────────────
-Total Vello Finance:  6,5000%   R$    650,00
+Vello Finance Total:           6.5000%   R$    650.00
 ```
 
-Nota de rodapé: *"Percentuais fixados em [data]. Alterações posteriores não afetam esta proposta."*
+Footnote: *"Percentages fixed on [date]. Later changes do not affect this proposal."*
 
-**Aceite:**
-- [ ] Sempre exibe percentuais do snapshot (nunca os valores atuais)
-- [ ] Valores em R$ exibidos apenas se proposta aprovada
+**Acceptance:**
+- [ ] Always displays the snapshot percentages (never the current values)
+- [ ] R$ amounts shown only if the proposal is approved
 
 ---
 
-## Proteções de Integridade
+## Integrity Protections
 
 ```sql
 -- Bloqueia UPDATE
@@ -151,7 +151,7 @@ CREATE POLICY "snapshots_immutable_no_delete" ON commission_snapshots
 
 ---
 
-## Arquivos a Criar
+## Files to Create
 
 ```
 apps/admin/src/components/commissions/
@@ -162,9 +162,9 @@ supabase/migrations/
 └── YYYYMMDDHHMMSS_create_commission_trigger.sql
 ```
 
-## Restrições de Implementação
+## Implementation Constraints
 
-- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
-- `_components/commission-snapshot-panel.tsx` é Client Component — recebe `snapshot` via props, sem acesso ao banco
-- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
-- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components
+- `page.tsx` is a Server Component — fetches data directly from the Supabase server client
+- `_components/commission-snapshot-panel.tsx` is a Client Component — receives `snapshot` via props, with no database access
+- `actions.ts` uses `'use server'` — the sole mutation point, never exported to the client
+- `queries.ts` is imported only by Server Components and Actions — never by Client Components

@@ -1,82 +1,82 @@
-# Feature Spec — Planos de Assinatura
+# Feature Spec — Subscription Plans
 
 **App:** `apps/admin` — Vello Admin
-**Módulo:** Admin / Planos
+**Module:** Admin / Plans
 **Status:** `ready-for-dev`
-**Prioridade:** Alta — base para cadastro de tenants
+**Priority:** High — foundation for tenant registration
 
 ---
 
-## Contexto
+## Context
 
-Planos definem o modelo comercial de cada tenant. A cobrança não é automatizada —
-os planos orientam o onboarding manual e determinam o percentual de comissão padrão do tenant.
+Plans define the commercial model for each tenant. Billing is not automated —
+plans guide manual onboarding and determine the tenant's default commission percentage.
 
-Tipos de plano:
-- **SaaS:** mensalidade recorrente + % sobre comissões
-- **White-Label:** taxa única de setup + % sobre comissões (sem mensalidade)
-
----
-
-## Funcionalidades
-
-### F1 — Listagem · `/plans`
-- Tabela: Nome · Tipo · Mensalidade · Taxa de Setup · Comissão do Tenant · Status · Ações
-- Filtros: Tipo · Status
-- Botão "Novo Plano"
-
-**Aceite:**
-- [ ] Mensalidade exibe "—" para White-Label
-- [ ] Badge de status: verde (ativo) / cinza (inativo)
-- [ ] Inativos aparecem com opacidade reduzida
+Plan types:
+- **SaaS:** recurring monthly fee + % on commissions
+- **White-Label:** one-time setup fee + % on commissions (no monthly fee)
 
 ---
 
-### F2 — Criar · `/plans/new`
+## Features
 
-| Campo | Tipo | Obrigatório | Validação |
+### F1 — Listing · `/plans`
+- Table: Name · Type · Monthly Fee · Setup Fee · Tenant Commission · Status · Actions
+- Filters: Type · Status
+- "New Plan" button
+
+**Acceptance:**
+- [ ] Monthly Fee shows "—" for White-Label
+- [ ] Status badge: green (active) / gray (inactive)
+- [ ] Inactive plans appear with reduced opacity
+
+---
+
+### F2 — Create · `/plans/new`
+
+| Field | Type | Required | Validation |
 |---|---|---|---|
-| Nome | Text | Sim | 3–100 chars, único |
-| Tipo | Select | Sim | `signature` / `white_label` |
-| Mensalidade (R$) | Number | Se SaaS | > 0 |
-| Taxa de Setup (R$) | Number | Não | >= 0, default 0 |
-| Comissão do Tenant (%) | Number | Sim | 0,0001–100, 4 decimais |
-| Máx. Produtos | Number | Não | >= 1, vazio = ilimitado |
-| Features | Tags | Não | Texto livre |
-| Ativo | Toggle | — | Default: true |
+| Name | Text | Yes | 3–100 chars, unique |
+| Type | Select | Yes | `signature` / `white_label` |
+| Monthly Fee (R$) | Number | If SaaS | > 0 |
+| Setup Fee (R$) | Number | No | >= 0, default 0 |
+| Tenant Commission (%) | Number | Yes | 0.0001–100, 4 decimals |
+| Max. Products | Number | No | >= 1, empty = unlimited |
+| Features | Tags | No | Free text |
+| Active | Toggle | — | Default: true |
 
-**Aceite:**
-- [ ] Campo Mensalidade desabilitado quando Tipo = White-Label
-- [ ] Ao salvar: redirect para listagem com toast de sucesso
-- [ ] Nome duplicado: erro inline no campo
-
----
-
-### F3 — Editar · `/plans/[id]/edit`
-- Formulário idêntico ao de criação, pré-preenchido
-- Campo **Tipo** é read-only após criação (tooltip explicativo)
-- Aviso no topo: *"Alterações não afetam comissões de propostas já registradas"*
+**Acceptance:**
+- [ ] Monthly Fee field disabled when Type = White-Label
+- [ ] On save: redirect to listing with success toast
+- [ ] Duplicate name: inline error on the field
 
 ---
 
-### F4 — Desativar / Reativar
-- Modal de confirmação antes de desativar
-- Plano inativo: não aparece no select ao cadastrar novos tenants
-- Tenants existentes com o plano não são afetados
-
-**Aceite:**
-- [ ] Modal exibe: *"Este plano não estará disponível para novos tenants. Tenants existentes não são afetados."*
+### F3 — Edit · `/plans/[id]/edit`
+- Form identical to the create form, pre-filled
+- **Type** field is read-only after creation (explanatory tooltip)
+- Warning at the top: *"Changes do not affect commissions on proposals already recorded"*
 
 ---
 
-### F5 — Detalhes · `/plans/[id]`
-- Todos os dados do plano
-- Lista de tenants que usam o plano (nome, status, data de ativação)
-- Contador de tenants ativos no plano
+### F4 — Deactivate / Reactivate
+- Confirmation modal before deactivating
+- Inactive plan: does not appear in the select when registering new tenants
+- Existing tenants on the plan are not affected
+
+**Acceptance:**
+- [ ] Modal displays: *"This plan will not be available for new tenants. Existing tenants are not affected."*
 
 ---
 
-## Arquivos a Criar
+### F5 — Details · `/plans/[id]`
+- All plan data
+- List of tenants using the plan (name, status, activation date)
+- Counter of active tenants on the plan
+
+---
+
+## Files to Create
 
 ```
 apps/admin/src/app/(private)/plans/
@@ -96,9 +96,9 @@ supabase/migrations/
 └── 20260401120000_create_plans.sql
 ```
 
-## Restrições de implementação
+## Implementation Constraints
 
-- `page.tsx` é Server Component — busca dados diretamente no Supabase server client
-- `_components/plans-table.tsx` é Client Component — recebe `plans` via props, sem acesso ao banco
-- `actions.ts` usa `'use server'` — único ponto de mutação, nunca exportar para o cliente
-- `queries.ts` é importado apenas por Server Components e Actions — nunca por Client Components
+- `page.tsx` is a Server Component — fetches data directly from the Supabase server client
+- `_components/plans-table.tsx` is a Client Component — receives `plans` via props, with no database access
+- `actions.ts` uses `'use server'` — the sole mutation point, never exported to the client
+- `queries.ts` is imported only by Server Components and Actions — never by Client Components

@@ -1,45 +1,45 @@
-# Sistema de Templates da Store
+# Store Template System
 
-O aplicativo `store` (Vello Store) possui um sistema de templates dinâmico e extensível projetado para suportar múltiplos *tenants* com aparências e fluxos completamente diferentes (White-label), sem precisar duplicar a aplicação.
+The `store` application (Vello Store) has a dynamic and extensible template system designed to support multiple *tenants* with completely different looks and flows (White-label), without needing to duplicate the application.
 
-O sistema baseia-se em um padrão de **Registry Pattern** aliado a injeção de dependências e customização de variáveis CSS via o layout principal.
+The system is based on a **Registry Pattern** combined with dependency injection and CSS variable customization via the main layout.
 
-## Como Funciona (Visão Geral)
+## How It Works (Overview)
 
-1. **Resolução do Tenant:** Quando uma requisição chega à `store`, o `middleware.ts` identifica o tenant pelo host (subdomínio ou domínio customizado).
-2. **Identificação do Template:** Os dados do tenant carregados do Supabase (tabela `tenant_branding`) informam qual `template_id` deve ser utilizado (ex: `default`, `zp`, etc).
-3. **Registry:** O sistema consome o `template_id` e busca os arquivos de configuração de cor (`config.ts`) e o componente raiz (`home.tsx`) correspondentes no diretório `apps/store/src/templates/`.
-4. **Renderização:** A página `app/(home)/page.tsx` renderiza o componente retornado, repassando propriedades padronizadas (produtos, logo, nome do tenant). O `layout.tsx` injeta as cores (OKLCH) definidas no `config.ts` do template como variáveis CSS.
+1. **Tenant Resolution:** When a request reaches `store`, `middleware.ts` identifies the tenant by host (subdomain or custom domain).
+2. **Template Identification:** The tenant data loaded from Supabase (`tenant_branding` table) informs which `template_id` should be used (e.g.: `default`, `zp`, etc.).
+3. **Registry:** The system consumes the `template_id` and looks up the color configuration files (`config.ts`) and the corresponding root component (`home.tsx`) in the `apps/store/src/templates/` directory.
+4. **Rendering:** The `app/(home)/page.tsx` page renders the returned component, passing standardized properties (products, logo, tenant name). The `layout.tsx` injects the colors (OKLCH) defined in the template's `config.ts` as CSS variables.
 
 ---
 
-## Estrutura de Pastas e Arquivos
+## Folder and File Structure
 
-O sistema de templates fica centralizado na pasta `apps/store/src/templates/`:
+The template system is centralized in the `apps/store/src/templates/` folder:
 
 ```
 apps/store/src/templates/
-├── _types.ts                   ← Tipagens centrais obrigatórias
-├── index.ts                    ← Registry de templates (onde todos são registrados)
-├── default/                    ← Template 1 (Ex: Default)
-│   ├── config.ts               ← Configuração de cores (Oklch) e ID
-│   ├── home.tsx                ← Componente raiz da home
-│   └── _components/            ← Subcomponentes isolados deste template
-└── zp/                         ← Template 2 (Ex: ZP)
+├── _types.ts                   ← Core required typings
+├── index.ts                    ← Template registry (where all templates are registered)
+├── default/                    ← Template 1 (e.g.: Default)
+│   ├── config.ts               ← Color configuration (Oklch) and ID
+│   ├── home.tsx                ← Root home component
+│   └── _components/            ← Subcomponents isolated to this template
+└── zp/                         ← Template 2 (e.g.: ZP)
     ├── config.ts
     ├── home.tsx
     └── _components/
 ```
 
 ### 1. `_types.ts`
-Define os contratos obrigatórios que todo template deve respeitar. 
+Defines the mandatory contracts every template must follow.
 
-- `TemplateConfig`: Interface que dita a estrutura de cores do tenant.
-- `TemplateHomeProps`: Propriedades injetadas pelo servidor na página principal (nome do display, URL da logo, produtos disponíveis do tenant).
-- `TemplateHomeProduct`: Formato padronizado de um produto a ser exibido na vitrine.
+- `TemplateConfig`: Interface that dictates the tenant's color structure.
+- `TemplateHomeProps`: Properties injected by the server on the main page (display name, logo URL, tenant's available products).
+- `TemplateHomeProduct`: Standardized format of a product to be displayed in the storefront.
 
-### 2. `index.ts` (O Registry)
-Este arquivo age como um dicionário. Sempre que um novo template é criado, ele deve ser adicionado explicitamente nos mapas `configRegistry` e `homeRegistry`.
+### 2. `index.ts` (The Registry)
+This file acts as a dictionary. Whenever a new template is created, it must be explicitly added to the `configRegistry` and `homeRegistry` maps.
 
 ```tsx
 import { defaultTemplate } from './default/config'
@@ -58,16 +58,16 @@ const homeRegistry: Record<string, ComponentType<TemplateHomeProps>> = {
 }
 ```
 
-A exportação de funções como `getTemplate(id)` e `getHomeComponent(id)` garante que sempre haverá um *fallback* (geralmente caindo para `default`) caso um `template_id` inválido seja solicitado pelo banco.
+Exporting functions like `getTemplate(id)` and `getHomeComponent(id)` ensures there is always a *fallback* (usually defaulting to `default`) in case an invalid `template_id` is requested from the database.
 
 ---
 
-## Anatomia de um Template
+## Anatomy of a Template
 
-Para um novo visual existir, ele precisa de apenas dois arquivos públicos dentro de uma pasta:
+For a new visual to exist, it only needs two public files inside a folder:
 
-### O Arquivo `config.ts`
-Define os tokens base da paleta daquele template específico no espaço de cor **OKLCH**, para compatibilidade perfeita com o Tailwind CSS (v4+).
+### The `config.ts` File
+Defines the base palette tokens for that specific template in the **OKLCH** color space, for perfect compatibility with Tailwind CSS (v4+).
 
 ```typescript
 // apps/store/src/templates/meu-template/config.ts
@@ -83,8 +83,8 @@ export const meuTemplateConfig: TemplateConfig = {
 }
 ```
 
-### O Arquivo `home.tsx`
-É o Server Component que dita a estrutura e experiência da página. Ele obrigatoriamente recebe `TemplateHomeProps`. A grande vantagem desta abordagem é que um template pode ser uma simples listagem de cartões, enquanto outro template pode ser uma Landing Page super interativa, complexa e com seções completamente diferentes.
+### The `home.tsx` File
+This is the Server Component that dictates the structure and experience of the page. It must receive `TemplateHomeProps`. The big advantage of this approach is that one template can be a simple listing of cards, while another template can be a super interactive, complex Landing Page with completely different sections.
 
 ```tsx
 // apps/store/src/templates/meu-template/home.tsx
@@ -101,7 +101,7 @@ export function MeuTemplateHome({
     <div>
       <StoreHeader logoUrl={logoUrl} displayName={displayName} />
       <MinhaHeroSection products={products} />
-      {/* Restante da UI exclusiva deste template */}
+      {/* Rest of this template's exclusive UI */}
     </div>
   )
 }
@@ -109,29 +109,29 @@ export function MeuTemplateHome({
 
 ---
 
-## Criando um Novo Template (Passo a Passo)
+## Creating a New Template (Step by Step)
 
-1. **Crie o diretório:** `apps/store/src/templates/novo-tema/`.
-2. **Crie os subcomponentes:** Adicione componentes específicos na sub-pasta `_components`. É encorajado que cada template tenha seus próprios componentes (Hero, Listagem, CTA) para que a alteração em um template não quebre os outros. O reuso deve se limitar aos componentes primitivos do shadcn (`@/components/ui`).
-3. **Crie os arquivos obrigatórios:** Crie o `config.ts` e `home.tsx` dentro da raiz do diretório do novo tema.
-4. **Respeite o Contrato:** O `home.tsx` deve exportar um componente padrão React que aceite `TemplateHomeProps`.
-5. **Registre o Template:** Edite o arquivo `apps/store/src/templates/index.ts` e importe sua `config` e seu componente `home`. Adicione-os aos objetos `configRegistry` e `homeRegistry` mapeando para um novo ID (ex: `'novo-tema'`).
-6. **Teste no Banco:** Atribua o `template_id = 'novo-tema'` ao tenant correspondente no banco de dados para ver a página renderizando a nova estrutura.
+1. **Create the directory:** `apps/store/src/templates/novo-tema/`.
+2. **Create the subcomponents:** Add specific components in the `_components` subfolder. Each template is encouraged to have its own components (Hero, Listing, CTA) so that a change in one template doesn't break the others. Reuse should be limited to shadcn's primitive components (`@/components/ui`).
+3. **Create the required files:** Create `config.ts` and `home.tsx` at the root of the new theme's directory.
+4. **Follow the Contract:** `home.tsx` must export a default React component that accepts `TemplateHomeProps`.
+5. **Register the Template:** Edit the `apps/store/src/templates/index.ts` file and import your `config` and your `home` component. Add them to the `configRegistry` and `homeRegistry` objects, mapping to a new ID (e.g.: `'novo-tema'`).
+6. **Test on the Database:** Assign `template_id = 'novo-tema'` to the corresponding tenant in the database to see the page render the new structure.
 
-## Sobrescrição de Componentes Globais
+## Overriding Global Components
 
-Por convenção arquitetural, não utilizamos herança de componentes (ou seja, `Template B` importando componentes específicos de `Template A`).
-Se a estrutura de um componente for muito parecida:
-1. Prefira **duplicar** o componente para a pasta `_components` do seu novo template para manter os templates completamente desacoplados.
-2. Elementos que *precisam* ser globalmente consistentes (como `StoreHeader` ou `StoreFooter`) moram em `apps/store/src/app/(store)/_components/`. Estes sim podem ser importados por qualquer template, uma vez que recebem props genéricas como `logoUrl`.
+By architectural convention, we do not use component inheritance (i.e., `Template B` importing components specific to `Template A`).
+If a component's structure is very similar:
+1. Prefer **duplicating** the component into your new template's `_components` folder to keep templates fully decoupled.
+2. Elements that *need* to be globally consistent (like `StoreHeader` or `StoreFooter`) live in `apps/store/src/app/(store)/_components/`. These can be imported by any template, since they receive generic props like `logoUrl`.
 
-## Injeção de Tema (CSS)
+## Theme Injection (CSS)
 
-Toda cor referenciada em um template (`bg-primary`, `text-surface`, `bg-background`) usa classes utilitárias do Tailwind.
-No Next.js (em `layout.tsx`), as propriedades OKLCH retornadas pelo `config.ts` do template são traduzidas para variáveis CSS inline aplicadas ao elemento HTML, sobrescrevendo assim o tema do projeto em tempo de execução para aquele acesso específico.
+Every color referenced in a template (`bg-primary`, `text-surface`, `bg-background`) uses Tailwind utility classes.
+In Next.js (in `layout.tsx`), the OKLCH properties returned by the template's `config.ts` are translated into inline CSS variables applied to the HTML element, thereby overriding the project's theme at runtime for that specific request.
 
 ```html
-<!-- Exemplo de como o CSS é injetado dinamicamente para o template atual -->
+<!-- Example of how CSS is dynamically injected for the current template -->
 <html style="
   --color-primary: oklch(0.48 0.25 258);
   --color-background: oklch(0.98 0.01 200);

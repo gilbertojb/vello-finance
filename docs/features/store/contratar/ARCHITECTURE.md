@@ -1,60 +1,60 @@
-# Arquitetura — Fluxo de Contratação (`/contratar/`)
+# Architecture — Contracting Flow (`/contratar/`)
 
-**Data:** 2026-05-17
+**Date:** 2026-05-17
 **App:** `apps/store`
-**Status:** Aprovado
+**Status:** Approved
 
 ---
 
-## Visão Geral
+## Overview
 
-O fluxo de contratação é um wizard multi-step que persiste dados no Supabase a cada etapa. Cada produto tem um fluxo específico, mas compartilham a mesma infraestrutura de rotas, banco de dados e componentes.
+The contracting flow is a multi-step wizard that persists data to Supabase at each step. Each product has a specific flow, but they share the same route infrastructure, database, and components.
 
-O fluxo divide-se em:
-- **Etapa 1:** coleta de dados do cliente (pública, sem autenticação)
-- **Etapa 2:** envio de dados bancários e documentos (acessada via link após pré-aprovação pelo consultor)
+The flow is divided into:
+- **Step 1:** client data collection (public, no authentication)
+- **Step 2:** submission of bank details and documents (accessed via link after pre-approval by the consultant)
 
 ---
 
-## Vínculo com Produtos
+## Link to Products
 
-O vínculo com o cadastro de produtos usa **`product_type_slug`** — o slug da esteira (ex: `home_equity`, `auto_equity`) — para determinar qual fluxo renderizar.
+The link to the product registry uses **`product_type_slug`** — the pipeline slug (e.g. `home_equity`, `auto_equity`) — to determine which flow to render.
 
-O `product_id` (UUID) é passado como parâmetro inicial e armazenado na proposta para referenciar o produto específico do tenant.
+The `product_id` (UUID) is passed as an initial parameter and stored on the proposal to reference the tenant's specific product.
 
 ```
 /contratar/[productTypeSlug]?productId={uuid}&simulationId={uuid}
 ```
 
-Exemplos de slug por produto:
-| Produto | `product_type_slug` |
+Slug examples per product:
+| Product | `product_type_slug` |
 |---|---|
-| CGI Pessoa Física | `home_equity` |
-| CGI Pessoa Jurídica | `home_equity_pj` |
-| Auto Equity PF | `auto_equity` |
-| Auto Equity PJ | `auto_equity_pj` |
+| CGI Individual | `home_equity` |
+| CGI Business | `home_equity_pj` |
+| Auto Equity Individual | `auto_equity` |
+| Auto Equity Business | `auto_equity_pj` |
 | FGTS | `fgts` |
-| Capital de Giro | `capital_giro` |
-| Antecipação de Recebíveis | `antecipacao_recebiveis` |
-| Financiamento Imóvel | `financiamento_imovel` |
-| Financiamento Veículo | `financiamento_veiculo` |
-| Consignado CLT | `consignado_privado` |
+| Working Capital | `capital_giro` |
+| Receivables Advance | `antecipacao_recebiveis` |
+| Property Financing | `financiamento_imovel` |
+| Vehicle Financing | `financiamento_veiculo` |
+| Payroll Loan (CLT) | `consignado_privado` |
 
 ---
 
-## Roteamento
+## Routing
 
 ```
 /contratar/[productTypeSlug]?step={stepSlug}&proposalId={uuid}&productId={uuid}&simulationId={uuid}
 ```
 
-- **`productTypeSlug`**: identifica qual wizard renderizar
-- **`step`**: etapa atual do wizard (nome amigável, ex: `operacao`, `dados-pessoais`)
-- **`proposalId`**: criado no backend ao salvar o primeiro step; ausente no step inicial
-- **`productId`**: UUID do produto no tenant (passado da tela de resultado do simulador)
-- **`simulationId`**: opcional, referência à simulação que originou a proposta
+- **`productTypeSlug`**: identifies which wizard to render
+- **`step`**: current wizard step (friendly name, e.g. `operacao`, `dados-pessoais`)
+- **`proposalId`**: created on the backend when the first step is saved; absent on the initial step
+- **`productId`**: UUID of the tenant's product (passed from the simulator result screen)
+- **`simulationId`**: optional, reference to the simulation that originated the proposal
 
-Para a Etapa 2 (acessada via link externo):
+For Step 2 (accessed via external link):
 ```
 /proposta/[proposalId]/documentos?step={stepSlug}
 /proposta/[proposalId]/finalizado
@@ -62,9 +62,9 @@ Para a Etapa 2 (acessada via link externo):
 
 ---
 
-## Banco de Dados
+## Database
 
-### Tabela `proposals`
+### `proposals` Table
 
 ```sql
 CREATE TABLE proposals (
@@ -75,26 +75,26 @@ CREATE TABLE proposals (
   simulation_id      UUID REFERENCES simulations(id),
   status             TEXT NOT NULL DEFAULT 'nova_proposta'
     CHECK (status IN (
-      'nova_proposta',       -- cliente iniciou mas não concluiu Etapa 1
-      'proposta_criada',     -- cliente concluiu Etapa 1
-      'pre_aprovada',        -- consultor pré-aprovou
-      'necessita_detalhes',  -- consultor solicitou mais informações
-      'reprovada',           -- proposta reprovada
-      'aprovada'             -- proposta aprovada
+      'nova_proposta',       -- client started but did not complete Step 1
+      'proposta_criada',     -- client completed Step 1
+      'pre_aprovada',        -- pre-approved by the consultant
+      'necessita_detalhes',  -- consultant requested more information
+      'reprovada',           -- proposal rejected
+      'aprovada'             -- proposal approved
     )),
-  current_step       TEXT NOT NULL DEFAULT 'operacao',  -- slug do step atual
-  -- dados pré-preenchidos da simulação (editáveis)
+  current_step       TEXT NOT NULL DEFAULT 'operacao',  -- current step slug
+  -- data pre-filled from the simulation (editable)
   client_name        TEXT,
   client_phone       TEXT,
-  -- todos os dados coletados no wizard, organizados por step
+  -- all data collected in the wizard, organized by step
   form_data          JSONB NOT NULL DEFAULT '{}',
-  -- Etapa 2: status de documentos enviados
+  -- Step 2: submitted documents status
   documents_submitted BOOLEAN DEFAULT FALSE,
   created_at         TIMESTAMPTZ DEFAULT NOW(),
   updated_at         TIMESTAMPTZ DEFAULT NOW()
 );
 
--- RLS: tenant_id isolado, sem autenticação do cliente (acesso via service role em Server Actions)
+-- RLS: isolated by tenant_id, no client authentication (accessed via service role in Server Actions)
 ALTER TABLE proposals ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "proposals_tenant_isolation"
@@ -102,14 +102,14 @@ CREATE POLICY "proposals_tenant_isolation"
   USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 ```
 
-### Tabela `proposal_documents`
+### `proposal_documents` Table
 
 ```sql
 CREATE TABLE proposal_documents (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   proposal_id   UUID NOT NULL REFERENCES proposals(id) ON DELETE CASCADE,
   document_type TEXT NOT NULL,   -- 'rg_cpf_frente', 'crlv', 'ir', etc.
-  storage_path  TEXT NOT NULL,   -- caminho no Supabase Storage
+  storage_path  TEXT NOT NULL,   -- path in Supabase Storage
   file_name     TEXT,
   created_at    TIMESTAMPTZ DEFAULT NOW()
 );
@@ -128,23 +128,23 @@ CREATE POLICY "proposal_documents_tenant_isolation"
 ### Storage Bucket
 
 ```
-Bucket: proposal-documents (privado)
+Bucket: proposal-documents (private)
 Path: {tenant_id}/{proposal_id}/{document_type}/{filename}
 ```
 
 ---
 
-## Arquitetura da Página
+## Page Architecture
 
-### Padrão Fat Server / Thin Client
+### Fat Server / Thin Client Pattern
 
 ```
 apps/store/src/app/(store)/contratar/
 └── [productTypeSlug]/
-    ├── page.tsx                 ← Server Component: lê step e proposalId, renderiza step correto
+    ├── page.tsx                 ← Server Component: reads step and proposalId, renders the correct step
     └── _components/
         ├── wizard-container.tsx ← Client Component: step indicator, layout
-        ├── steps/               ← Um Client Component por step
+        ├── steps/               ← One Client Component per step
         │   ├── operacao-step.tsx
         │   ├── dados-pessoais-step.tsx
         │   ├── endereco-step.tsx
@@ -157,22 +157,22 @@ apps/store/src/app/(store)/contratar/
         │   ├── retorno-step.tsx
         │   └── bloqueio-step.tsx
         └── shared/
-            ├── address-form.tsx      ← CEP lookup reutilizável
-            ├── document-upload.tsx   ← Upload com checklist
-            └── socio-fields.tsx      ← Campos de sócio dinâmicos
+            ├── address-form.tsx      ← reusable postal-code (CEP) lookup
+            ├── document-upload.tsx   ← upload with checklist
+            └── socio-fields.tsx      ← dynamic partner/shareholder fields
 
 apps/store/src/app/(store)/proposta/
 └── [proposalId]/
     ├── documentos/
-    │   └── page.tsx             ← Etapa 2: dados bancários + documentos
+    │   └── page.tsx             ← Step 2: bank details + documents
     └── finalizado/
-        └── page.tsx             ← Página de conclusão
+        └── page.tsx             ← Completion page
 
 apps/store/src/app/(store)/simulador/
-└── actions.ts                   ← EXISTENTE: adicionar createProposal
+└── actions.ts                   ← EXISTING: add createProposal
 ```
 
-### `page.tsx` — lógica de renderização
+### `page.tsx` — rendering logic
 
 ```tsx
 // apps/store/src/app/(store)/contratar/[productTypeSlug]/page.tsx
@@ -182,14 +182,14 @@ export default async function ContratarPage({ params, searchParams }) {
   const { productTypeSlug } = params
   const { step = 'operacao', proposalId, productId, simulationId } = searchParams
 
-  // Busca produto pelo productId (valida que pertence ao tenant)
+  // Look up product by productId (validates it belongs to the tenant)
   const product = await getTenantProduct(productId)
   if (!product) redirect('/simulador')
 
-  // Se proposalId, busca proposta (pre-fills form_data)
+  // If proposalId is present, fetch the proposal (pre-fills form_data)
   const proposal = proposalId ? await getProposal(proposalId) : null
 
-  // Renderiza wizard correto baseado no productTypeSlug
+  // Renders the correct wizard based on productTypeSlug
   return (
     <WizardContainer
       productTypeSlug={productTypeSlug}
@@ -208,68 +208,68 @@ export default async function ContratarPage({ params, searchParams }) {
 ```typescript
 // apps/store/src/app/(store)/contratar/actions.ts
 
-// Cria proposta no primeiro step
+// Creates the proposal on the first step
 export async function createProposal(input: CreateProposalInput): Promise<ProposalResult>
 
-// Avança step: salva form_data do step atual, atualiza current_step
+// Advances the step: saves form_data for the current step, updates current_step
 export async function saveStep(proposalId: string, stepSlug: string, data: Record<string, unknown>): Promise<StepResult>
 
-// Finaliza Etapa 1: muda status para 'proposta_criada'
+// Finalizes Step 1: changes status to 'proposta_criada'
 export async function finalizeEtapa1(proposalId: string): Promise<void>
 
-// Salva documento: faz upload para Storage e insere em proposal_documents
+// Saves a document: uploads to Storage and inserts into proposal_documents
 export async function uploadDocument(proposalId: string, documentType: string, file: File): Promise<DocumentResult>
 
-// Finaliza Etapa 2: muda documents_submitted = true
+// Finalizes Step 2: sets documents_submitted = true
 export async function finalizeEtapa2(proposalId: string): Promise<void>
 ```
 
 ---
 
-## Componente de Upload de Documentos
+## Document Upload Component
 
 ```
 DocumentUploadChecklist
-├── DocumentItem (por documento)
-│   ├── Label + descrição (ex: "RG e CPF frente e verso")
-│   ├── Botão de upload (PDF ou JPEG)
-│   ├── Preview do arquivo enviado
-│   ├── Status: pendente / enviado ✓ / erro
-│   └── Exemplos de como deve ser o arquivo (tooltip/modal)
-└── Botão "Finalizar Envio" (habilitado somente após todos enviados)
+├── DocumentItem (per document)
+│   ├── Label + description (e.g. "ID and CPF front and back")
+│   ├── Upload button (PDF or JPEG)
+│   ├── Preview of the uploaded file
+│   ├── Status: pending / uploaded ✓ / error
+│   └── Examples of how the file should look (tooltip/modal)
+└── "Finish Submission" button (enabled only after all documents are uploaded)
 ```
 
 ---
 
-## CEP Lookup
+## Postal Code (CEP) Lookup
 
-API já existente em `/api/cep/[cep]`. Componente `AddressForm` faz fetch ao detectar 8 dígitos no campo CEP e preenche rua, bairro, cidade, estado automaticamente, permitindo edição.
+API already exists at `/api/cep/[cep]`. The `AddressForm` component fetches when it detects 8 digits in the CEP field and auto-fills street, neighborhood, city, and state, allowing edits.
 
 ---
 
 ## Step Indicator
 
-Barra de progresso com numeração das etapas. Exibe apenas as etapas da Etapa 1. Na Etapa 2, exibe apenas etapas de documentos.
+Progress bar with step numbering. Shows only the Step 1 steps. In Step 2, shows only the document steps.
 
 ---
 
-## Regras de Negócio Globais
+## Global Business Rules
 
-- Na Etapa 1, se o cliente parar em qualquer página: status `nova_proposta`
-- Após concluir Etapa 1: status `proposta_criada`
-- Dados da simulação são pré-preenchidos mas editáveis
-- Todos os campos obrigatórios: não avança sem resposta
-- Documentos: formatos aceitos PDF e JPEG, pré-visualização, checklist interativo
-- Campos de valor monetário: R$ automático, apenas números
-- Nome completo: mínimo 2 palavras
-- WhatsApp: DDI Brasil fixo (+55), DDD + número
-- Data de nascimento: bloquear se idade > 70 anos
-- Matrícula: apenas números
+- In Step 1, if the client stops on any page: status `nova_proposta`
+- After completing Step 1: status `proposta_criada`
+- Simulation data is pre-filled but editable
+- All required fields: cannot advance without a response
+- Documents: accepted formats PDF and JPEG, preview, interactive checklist
+- Monetary value fields: automatic R$ formatting, numbers only
+- Full name: minimum 2 words
+- WhatsApp: fixed Brazil country code (+55), area code + number
+- Date of birth: block if age > 70 years
+- Registration number: numbers only
 
 ---
 
-## Campos Pré-preenchidos da Simulação
+## Fields Pre-filled from the Simulation
 
-Os seguintes campos são pré-preenchidos a partir da simulação e editáveis:
-- `client_name` → Nome completo
+The following fields are pre-filled from the simulation and are editable:
+- `client_name` → Full name
 - `client_phone` → WhatsApp

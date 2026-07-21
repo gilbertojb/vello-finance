@@ -1,11 +1,11 @@
-# Feature Spec — Layout do Vello Admin
+# Feature Spec — Vello Admin Layout
 
 **App:** `apps/admin`
-**Status:** `implementado`
+**Status:** `implemented`
 
 ---
 
-## Estrutura Visual
+## Visual Structure
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -25,36 +25,36 @@
 
 ---
 
-## Estrutura de Arquivos (implementada)
+## File Structure (implemented)
 
 ```
 apps/admin/src/
 ├── app/
-│   ├── layout.tsx                    ← Root layout (fonte + html/body + Providers)
+│   ├── layout.tsx                    ← Root layout (font + html/body + Providers)
 │   ├── providers.tsx                 ← ThemeProvider + TooltipProvider ('use client')
-│   ├── globals.css                   ← CSS variables + shadcn base + tokens Vello
+│   ├── globals.css                   ← CSS variables + shadcn base + Vello tokens
 │   ├── (public)/
-│   │   ├── layout.tsx                ← Layout duas colunas (form + decorativo)
+│   │   ├── layout.tsx                ← Two-column layout (form + decorative)
 │   │   └── sign-in/
 │   │       ├── page.tsx
-│   │       └── sign-in-form.tsx      ← Formulário de login ('use client')
+│   │       └── sign-in-form.tsx      ← Sign-in form ('use client')
 │   └── (private)/
-│       ├── layout.tsx                ← SidebarProvider + Sidebar + Header + conteúdo
+│       ├── layout.tsx                ← SidebarProvider + Sidebar + Header + content
 │       └── (dashboard)/
 │           └── page.tsx              ← Dashboard placeholder
 ├── assets/
-│   └── logo.svg                      ← Logo Vello (SVG)
+│   └── logo.svg                      ← Vello logo (SVG)
 ├── components/
-│   ├── ui/                           ← shadcn (gerado — não editar)
-│   ├── header.tsx                    ← Header compartilhado com SidebarTrigger
+│   ├── ui/                           ← shadcn (generated — do not edit)
+│   ├── header.tsx                    ← Shared header with SidebarTrigger
 │   └── sidebar/
-│       ├── index.tsx                 ← Sidebar composta (server component)
-│       ├── nav-main.tsx              ← Grupos de navegação (server component)
-│       ├── nav-link.tsx              ← Link com estado ativo ('use client')
-│       ├── nav-user.tsx              ← Wrapper do rodapé do usuário (server component)
-│       └── profile-button.tsx        ← Dropdown do perfil ('use client')
+│       ├── index.tsx                 ← Composed sidebar (server component)
+│       ├── nav-main.tsx              ← Navigation groups (server component)
+│       ├── nav-link.tsx              ← Link with active state ('use client')
+│       ├── nav-user.tsx              ← User footer wrapper (server component)
+│       └── profile-button.tsx        ← Profile dropdown ('use client')
 ├── hooks/
-│   └── use-form-state.ts             ← Hook para Server Actions com estado de form
+│   └── use-form-state.ts             ← Hook for Server Actions with form state
 └── lib/
     └── utils.ts                      ← cn()
 ```
@@ -63,10 +63,10 @@ apps/admin/src/
 
 ## Route Groups
 
-| Grupo | Uso | Layout |
+| Group | Use | Layout |
 |---|---|---|
-| `(public)` | Rotas sem autenticação — login, forgot-password | Duas colunas: form + decorativo |
-| `(private)` | Rotas autenticadas — dashboard, módulos | SidebarProvider + Header |
+| `(public)` | Unauthenticated routes — login, forgot-password | Two columns: form + decorative |
+| `(private)` | Authenticated routes — dashboard, modules | SidebarProvider + Header |
 
 ---
 
@@ -87,7 +87,7 @@ export const metadata: Metadata = {
 }
 ```
 
-> Cada `page.tsx` exporta `export const metadata = { title: 'NomeDaPágina' }` para preencher o template.
+> Each `page.tsx` exports `export const metadata = { title: 'PageName' }` to fill in the template.
 
 ---
 
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
 
 ```tsx
 // src/app/providers.tsx — 'use client'
-// Inclui ThemeProvider E TooltipProvider
+// Includes ThemeProvider AND TooltipProvider
 export function Providers({ children }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
@@ -105,13 +105,13 @@ export function Providers({ children }) {
 }
 ```
 
-> `providers.tsx` fica em `src/app/` (co-localizado com `layout.tsx`), não em `src/lib/`.
+> `providers.tsx` lives in `src/app/` (co-located with `layout.tsx`), not in `src/lib/`.
 
 ---
 
-## Layout Privado (`(private)/layout.tsx`)
+## Private Layout (`(private)/layout.tsx`)
 
-Usa o componente shadcn `SidebarProvider`. Dimensões sobrescritas via `style` inline:
+Uses the shadcn `SidebarProvider` component. Dimensions overridden via inline `style`:
 
 ```tsx
 <SidebarProvider
@@ -134,20 +134,20 @@ Usa o componente shadcn `SidebarProvider`. Dimensões sobrescritas via `style` i
 </SidebarProvider>
 ```
 
-**Importantes:**
-- Dimensões do sidebar sempre via `style` no `SidebarProvider` — não hardcoded no CSS
-- `@container/main` habilita container queries nos módulos filhos
-- `SidebarInset` tem `border border-border` para separação visual
+**Important:**
+- Sidebar dimensions are always set via `style` on `SidebarProvider` — never hardcoded in CSS
+- `@container/main` enables container queries in child modules
+- `SidebarInset` has `border border-border` for visual separation
 
 ---
 
-## Layout Público (`(public)/layout.tsx`)
+## Public Layout (`(public)/layout.tsx`)
 
-Duas colunas: formulário à esquerda, imagem decorativa à direita (oculta em mobile):
+Two columns: form on the left, decorative image on the right (hidden on mobile):
 
 ```tsx
 <div className="grid min-h-svh lg:grid-cols-3">
-  {/* Coluna 1 (1/3): Logo + conteúdo */}
+  {/* Column 1 (1/3): Logo + content */}
   <div className="flex flex-col gap-4 p-6 md:p-10">
     <Image src={logo} alt="Vello" ... />
     <div className="flex flex-1 items-center justify-center">
@@ -155,7 +155,7 @@ Duas colunas: formulário à esquerda, imagem decorativa à direita (oculta em m
     </div>
   </div>
 
-  {/* Coluna 2 (2/3): Decorativo — hidden em mobile */}
+  {/* Column 2 (2/3): Decorative — hidden on mobile */}
   <div className="bg-muted relative hidden lg:block col-span-2">
     <div className="bg-[url('/img/pattern.png')] bg-contain absolute inset-0 ..." />
   </div>
@@ -164,28 +164,28 @@ Duas colunas: formulário à esquerda, imagem decorativa à direita (oculta em m
 
 ---
 
-## Componente Sidebar
+## Sidebar Component
 
-Composta por partes shadcn + componentes próprios. Split server/client obrigatório:
+Composed of shadcn parts + custom components. Server/client split is mandatory:
 
-| Arquivo | Tipo | Responsabilidade |
+| File | Type | Responsibility |
 |---|---|---|
-| `sidebar/index.tsx` | Server | Monta estrutura: Header, Content, Footer |
-| `sidebar/nav-main.tsx` | Server | Define grupos e itens de navegação |
-| `sidebar/nav-link.tsx` | Client | Detecta rota ativa via `usePathname()` |
-| `sidebar/nav-user.tsx` | Server | Wrapper do rodapé |
-| `sidebar/profile-button.tsx` | Client | Dropdown menu com opção de logout |
+| `sidebar/index.tsx` | Server | Assembles structure: Header, Content, Footer |
+| `sidebar/nav-main.tsx` | Server | Defines navigation groups and items |
+| `sidebar/nav-link.tsx` | Client | Detects active route via `usePathname()` |
+| `sidebar/nav-user.tsx` | Server | Footer wrapper |
+| `sidebar/profile-button.tsx` | Client | Dropdown menu with logout option |
 
-**Logo e badge:**
+**Logo and badge:**
 ```tsx
 <Image src={logo} alt="Vello" height={24} loading="eager" />
 <div className="bg-primary/10 rounded-full px-4 py-0.5 text-primary uppercase text-xs font-medium">
   Admin
 </div>
 ```
-> Usar `bg-primary/10 text-primary` para o badge — não cores hardcoded.
+> Use `bg-primary/10 text-primary` for the badge — not hardcoded colors.
 
-**Item ativo (`nav-link.tsx`):**
+**Active item (`nav-link.tsx`):**
 ```tsx
 isActive
   ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
@@ -194,10 +194,10 @@ isActive
 
 ---
 
-## Header Compartilhado
+## Shared Header
 
-O `Header` em `(private)/layout.tsx` é **compartilhado entre todas as rotas autenticadas**.
-Títulos de página são definidos via `export const metadata` em cada `page.tsx` — não como props do Header.
+The `Header` in `(private)/layout.tsx` is **shared across all authenticated routes**.
+Page titles are set via `export const metadata` in each `page.tsx` — not as Header props.
 
 ```tsx
 // src/components/header.tsx — server component
@@ -207,7 +207,7 @@ export function Header() {
       <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="my-2 data-[orientation=vertical]:h-4" />
-        {/* Ações adicionais da página entram aqui via slot no futuro */}
+        {/* Additional page actions go here via a slot in the future */}
       </div>
     </header>
   )
@@ -216,32 +216,32 @@ export function Header() {
 
 ---
 
-## Sistema de Formulário (`Field`)
+## Form System (`Field`)
 
-Formulários usam o sistema de componentes `Field`, não inputs avulsos:
+Forms use the `Field` component system, not standalone inputs:
 
 ```tsx
-// Padrão correto
+// Correct pattern
 <FieldGroup>
   <Field>
-    <FieldLabel htmlFor="email">E-mail</FieldLabel>
+    <FieldLabel htmlFor="email">Email</FieldLabel>
     <Input id="email" type="email" name="email" />
     <FieldError errors={formState.errors?.email} />
   </Field>
 </FieldGroup>
 
-// Componentes disponíveis em src/components/ui/field.tsx:
+// Components available in src/components/ui/field.tsx:
 // Field, FieldGroup, FieldLabel, FieldTitle, FieldDescription,
 // FieldError, FieldContent, FieldSeparator, FieldSet, FieldLegend
 ```
 
-`Field` suporta `orientation`: `vertical` (padrão), `horizontal`, `responsive`.
+`Field` supports `orientation`: `vertical` (default), `horizontal`, `responsive`.
 
 ---
 
-## Hook `useFormState`
+## `useFormState` Hook
 
-Para integração com Server Actions:
+For integration with Server Actions:
 
 ```tsx
 'use client'
@@ -263,22 +263,22 @@ export function MyForm() {
 }
 ```
 
-**Contrato do Server Action:**
+**Server Action contract:**
 ```ts
 interface ActionState {
   success: boolean
   message: string | null
-  errors: Record<string, string[]> | null  // chave = nome do campo
+  errors: Record<string, string[]> | null  // key = field name
   data?: Record<string, unknown>
 }
 ```
 
 ---
 
-## Padrão de Página
+## Page Pattern
 
 ```tsx
-// src/app/(private)/[módulo]/page.tsx
+// src/app/(private)/[module]/page.tsx
 export const metadata = { title: 'Tenants' }  // → "Tenants | Vello Admin"
 
 export default async function TenantsPage() {
@@ -286,15 +286,15 @@ export default async function TenantsPage() {
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4">
-      {/* Cabeçalho da página com ações */}
+      {/* Page header with actions */}
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-semibold">Tenants</h1>
-        <Button size="sm" asChild><Link href="/tenants/new">Novo Tenant</Link></Button>
+        <Button size="sm" asChild><Link href="/tenants/new">New Tenant</Link></Button>
       </div>
 
-      {/* Conteúdo principal */}
+      {/* Main content */}
       <div className="bg-card rounded-lg border">
-        {/* Tabela, lista, etc. */}
+        {/* Table, list, etc. */}
       </div>
     </main>
   )
@@ -303,14 +303,14 @@ export default async function TenantsPage() {
 
 ---
 
-## Critérios de Conclusão
+## Completion Criteria
 
-- [x] Root layout com Geist + `suppressHydrationWarning`
-- [x] `globals.css` com tokens Vello (light e dark)
-- [x] Sidebar shadcn com navegação completa e item ativo correto
-- [x] Header compartilhado com `SidebarTrigger`
-- [x] Toggle dark/light sem flash
-- [x] Layout público (`(public)`) — duas colunas com formulário de login
-- [x] Dashboard placeholder em `(private)/(dashboard)/page.tsx`
-- [x] Sistema `Field` para formulários
-- [x] Hook `useFormState` para Server Actions
+- [x] Root layout with Geist + `suppressHydrationWarning`
+- [x] `globals.css` with Vello tokens (light and dark)
+- [x] shadcn sidebar with full navigation and correct active item
+- [x] Shared header with `SidebarTrigger`
+- [x] Dark/light toggle without flash
+- [x] Public layout (`(public)`) — two columns with sign-in form
+- [x] Dashboard placeholder in `(private)/(dashboard)/page.tsx`
+- [x] `Field` system for forms
+- [x] `useFormState` hook for Server Actions
